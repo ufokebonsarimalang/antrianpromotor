@@ -76,7 +76,7 @@
 
         .label-giliran { font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
         .nama-giliran-aktif { font-size: 26px; font-weight: 800; color: #1e3a8a; margin: 0; }
-        .info-timer { font-size: 11px; color: #d97706; margin-top: 8px; font-weight: 600; line-height: 1.4; }
+        .info-timer { font-size: 11px; color: #0284c7; margin-top: 8px; font-weight: 600; line-height: 1.4; }
 
         .input-group { text-align: left; margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
@@ -142,10 +142,10 @@
         <div class="card-utama">
             <div class="label-giliran">Giliran Melayani Saat Ini</div>
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
-            <div class="info-timer">⚡ Urutan 1 & 2 dapat mengambil customer.<br>(Auto-skip Urutan 1 jika > 3 menit)</div>
+            <div class="info-timer">📍 Sistem Keamanan GPS Aktif di Pintu Masuk Toko.</div>
         </div>
 
-        <!-- AREA LOGIN / IDENTITAS AKUN HP INI -->
+        <!-- AREA LOGIN / AKUN -->
         <div id="panel-login" style="display: none;">
             <div class="input-group">
                 <label>Pilih Akun Nama Anda</label>
@@ -156,7 +156,7 @@
             <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan Akun di HP Ini</button>
         </div>
 
-        <!-- AREA AKUN AKTIF (JIKA SUDAH LOGIN) -->
+        <!-- PANEL UTAMA -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <div>
@@ -166,18 +166,18 @@
                 <button type="button" class="btn-logout" onclick="gantiAkun()">Ganti Akun</button>
             </div>
 
-            <!-- TOMBOL DAFTAR / CHECK-IN -->
+            <!-- TOMBOL CHECK-IN -->
             <button type="button" class="btn-success" onclick="daftarMasukAntri()">
                 Masuk Shift / Ikut Antri
             </button>
 
-            <!-- TOMBOL DAPAT CUSTOMER -->
-            <button type="button" class="btn-primary" onclick="ambilGiliranSaya()">
+            <!-- TOMBOL DAPAT CUSTOMER (DENGAN GPS) -->
+            <button type="button" class="btn-primary" onclick="cekLokasiDanAmbil()">
                 Saya Dapat Customer (Next)
             </button>
         </div>
 
-        <!-- DAFTAR URUTAN ANTRIAN AKTIF -->
+        <!-- DAFTAR ANTRIAN -->
         <div class="list-box">
             <h4>📋 Urutan Antrian Hari Ini</h4>
             <ul id="item-antrian-list">
@@ -199,6 +199,13 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+
+        // ==========================================
+        // PENGATURAN TITIK KOORDINAT TOKO & RADIUS (Meter)
+        // ==========================================
+        const TOKO_LAT = -7.983900; // Contoh Latitude toko (Ganti dengan koordinat asli toko Anda)
+        const TOKO_LON = 112.621400; // Contoh Longitude toko (Ganti dengan koordinat asli toko Anda)
+        const MAX_RADIUS_METER = 25; // Batas radius ketat (25 meter dari pintu masuk)
 
         window.onload = function() {
             cekAkunTersimpan();
@@ -322,21 +329,62 @@
             });
         }
 
-        function ambilGiliranSaya() {
+        // FUNGSI CEK GPS SEBELUM KLAIM CUSTOMER
+        function cekLokasiDanAmbil() {
             const namaSales = getAkunAktif();
             if(!namaSales) {
                 tampilkanModal("Perhatian", "Akun belum terdeteksi. Silakan login ulang.");
                 return;
             }
 
-            tampilkanModal("Konfirmasi Pelayanan", `Apakah benar Anda (${namaSales}) mendapat customer walk-in sekarang?`, 'confirm', function() {
-                fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
-                .then(res => res.json())
-                .then(res => {
-                    tampilkanModal("Status Antrian", res.pesan);
-                    muatDataAntrian(); 
-                });
-            });
+            if (!navigator.geolocation) {
+                tampilkanModal("Error", "Browser HP Anda tidak mendukung fitur GPS.");
+                return;
+            }
+
+            tampilkanModal("Memeriksa GPS...", "Mendeteksi posisi perangkat Anda di area toko, mohon tunggu sebentar...");
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    tutupModal();
+                    const userLat = position.coords.latitude;
+                    const userLon = position.coords.longitude;
+
+                    // Hitung jarak (dalam meter)
+                    const jarakMeter = hitungJarakMeter(userLat, userLon, TOKO_LAT, TOKO_LON);
+
+                    if (jarakMeter > MAX_RADIUS_METER) {
+                        tampilkanModal("Akses Ditolak ❌", `Anda terdeteksi berada di luar area toko (Jarak ± ${Math.round(jarakMeter)} meter). Anda harus berada dekat pintu masuk (${MAX_RADIUS_METER} meter) untuk mengambil giliran!`);
+                    } else {
+                        // Jika dalam radius, lanjutkan proses klaim customer
+                        tampilkanModal("Konfirmasi Pelayanan", `Apakah benar (${namaSales}) mendapat customer walk-in sekarang?`, 'confirm', function() {
+                            fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
+                            .then(res => res.json())
+                            .then(res => {
+                                tampilkanModal("Status Antrian", res.pesan);
+                                muatDataAntrian(); 
+                            });
+                        });
+                    }
+                },
+                function(error) {
+                    tutupModal();
+                    tampilkanModal("GPS Gagal", "Pastikan izin lokasi/GPS di HP Anda sudah diaktifkan (Allow Location).");
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        // Rumus matematika untuk menghitung jarak dua koordinat GPS dalam satuan meter
+        function hitungJarakMeter(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Radius bumi dalam meter
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; 
         }
     </script>
 </body>
