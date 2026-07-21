@@ -257,18 +257,24 @@
         }
 
         function hitungMundurLokal() {
+            const labelTimer = document.getElementById('label-timer-mundur');
+            
             if (!waktuTerakhirStandbyGlobal) {
-                document.getElementById('label-timer-mundur').style.display = 'none';
+                labelTimer.style.display = 'none';
                 return;
             }
 
+            // Ubah format waktu dari server/sheet menjadi milidetik dengan aman
             const waktuLokalServer = new Date(waktuTerakhirStandbyGlobal).getTime();
+            if (isNaN(waktuLokalServer)) {
+                labelTimer.style.display = 'none';
+                return;
+            }
+
             const sekarang = new Date().getTime();
             const selisihMs = sekarang - waktuLokalServer;
             const batasMs = BATAS_MENIT * 60 * 1000;
             const sisaMs = batasMs - selisihMs;
-
-            const labelTimer = document.getElementById('label-timer-mundur');
 
             if (sisaMs > 0) {
                 const totalDetik = Math.floor(sisaMs / 1000);
@@ -284,7 +290,6 @@
                 labelTimer.innerText = `🚨 Waktu Habis! Urutan bergeser otomatis.`;
             }
         }
-
         // --- SISTEM SPV / WASIT ---
         function bukaFormLoginSPV() {
             const modal = document.getElementById('custom-modal');
