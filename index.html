@@ -138,7 +138,7 @@
 
     <div class="container">
         <h2>🎫 Antrian Walk-In</h2>
-        <p class="sub-title">Sistem Antrian Promotor UFO Kebonsari</p>
+        <p class="sub-title">Sistem Giliran Promotor UFO Kebonsari</p>
 
         <!-- KOTAK UTAMA -->
         <div class="card-utama">
@@ -209,7 +209,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         let waktuTerakhirStandbyGlobal = null;
-        const BATAS_MENIT = 1;
+        const BATAS_MENIT = 10;
         let sudahMunculPopUpPeringatan = false; 
 
         window.onload = function() {
@@ -350,6 +350,12 @@
                     let data = res.data;
                     let listHtml = "";
                     let salesUtama = "Belum ada antrian";
+
+                    if(res.waktuStandbyPertama) {
+                        waktuTerakhirStandbyGlobal = res.waktuStandbyPertama;
+                    } else {
+                        waktuTerakhirStandbyGlobal = null;
+                    }
 
                     if(data.length > 0) {
                         data.forEach((item, index) => {
