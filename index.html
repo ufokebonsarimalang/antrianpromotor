@@ -146,7 +146,7 @@
         <div class="card-utama">
             <div class="label-giliran">Giliran Melayani Saat Ini</div>
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
-            <div class="info-timer">⚡ Urutan 1 wajib konfirmasi PIN Standby tiap 10 menit.</div>
+            <div class="info-timer">⚡ Urutan 1 wajib dikonfirmasi hadir oleh rekan di urutan bawahnya tiap 10 menit.</div>
             <span id="label-timer-mundur" class="timer-mundur" style="display: none;">Waktu tersisa: --:--</span>
         </div>
 
@@ -177,8 +177,8 @@
             </button>
 
             <!-- TOMBOL KONFIRMASI KEHADIRAN -->
-            <button type="button" class="btn-warning" onclick="promptPinStandby()">
-                👋 Saya Standby di Tempat (Urutan 1)
+            <button type="button" class="btn-warning" onclick="promptPersetujuanRekan()">
+                👋 Saya Standby (Minta Validasi Rekan)
             </button>
 
             <!-- TOMBOL DAPAT CUSTOMER -->
@@ -211,6 +211,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         let waktuTerakhirStandbyGlobal = null;
+        let daftarAntrianGlobal = [];
         const BATAS_MENIT = 10;
         let sudahMunculPopUpPeringatan = false; 
 
@@ -295,40 +296,63 @@
                         sudahMunculPopUpPeringatan = true;
                         tampilkanModal(
                             "🚨 PERINGATAN WAKTU HABIS!", 
-                            `Halo (${akunSaya}), waktu standby Anda di Urutan 1 sudah melebihi 10 menit!\n\nSegera masukkan PIN Harian toko untuk konfirmasi kehadiran atau Anda akan otomatis digeser ke antrian paling bawah.`
+                            `Halo (${akunSaya}), waktu standby Anda sudah melebihi 10 menit!\n\nMinta rekan di urutan bawah untuk segera menyetujui kehadiran Anda atau Anda akan otomatis digeser ke bawah.`
                         );
                     }
                 }
             }
         }
 
-        function promptPinStandby() {
+        function promptPersetujuanRekan() {
             const namaSales = getAkunAktif();
             if(!namaSales) {
                 tampilkanModal("Perhatian", "Akun perangkat belum terdaftar.");
                 return;
             }
 
+            const salesUtama = document.getElementById('nama-aktif').innerText;
+            if (namaSales !== salesUtama) {
+                tampilkanModal("Perhatian", "Tombol konfirmasi ini hanya bisa ditekan oleh promotor yang sedang berada di Urutan 1.");
+                return;
+            }
+
+            // Ambil daftar rekan di bawahnya (mulai dari index 1 / urutan ke-2 ke bawah)
+            let opsiRekan = '<option value="">-- Pilih Rekan yang Menyaksikan --</option>';
+            for (let i = 1; i < daftarAntrianGlobal.length; i++) {
+                opsiRekan += `<option value="${daftarAntrianGlobal[i].nama}">${daftarAntrianGlobal[i].nama} (Urutan ${i + 1})</option>`;
+            }
+
+            if (daftarAntrianGlobal.length < 2) {
+                tampilkanModal("Perhatian", "Belum ada rekan lain dalam antrian di bawah Anda untuk memberikan persetujuan.");
+                return;
+            }
+
             const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').innerText = "Masukkan PIN Harian Toko";
+            document.getElementById('modal-title').innerText = "Validasi Kehadiran oleh Rekan";
             document.getElementById('modal-desc').innerHTML = `
-                Halo <b>${namaSales}</b>, masukkan PIN Harian yang tertera di area depan toko untuk mengonfirmasi kehadiran Anda:
+                Pilih nama rekan sejawat (urutan bawah) yang saat ini melihat dan mendampingi Anda di toko untuk menyetujui kehadiran:
                 <br><br>
-                <input type="text" id="input-pin-harian" placeholder="Masukkan PIN..." style="text-align:center; font-size:18px; font-weight:bold; letter-spacing:2px;">
+                <select id="pilih-rekan-validator" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+                    ${opsiRekan}
+                </select>
             `;
             
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-success" onclick="kirimKonfirmasiHadir('${namaSales}')">Kirim PIN</button>
+                <button type="button" class="btn-success" onclick="kirimKonfirmasiRekan('${namaSales}')">Setujui & Reset Timer</button>
             `;
             modal.classList.add('active');
         }
 
-        function kirimKonfirmasiHadir(namaSales) {
-            const pinVal = document.getElementById('input-pin-harian').value;
+        function kirimKonfirmasiRekan(namaSales) {
+            const namaPenyetuju = document.getElementById('pilih-rekan-validator').value;
+            if(!namaPenyetuju) {
+                alert("Silakan pilih rekan validator terlebih dahulu!");
+                return;
+            }
             tutupModal();
 
-            fetch(`${SCRIPT_URL}?aksi=konfirmasiStandby&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pinVal)}`)
+            fetch(`${SCRIPT_URL}?aksi=konfirmasiStandby&namaSales=${encodeURIComponent(namaSales)}&penyetuju=${encodeURIComponent(namaPenyetuju)}`)
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Status Kehadiran", res.pesan);
@@ -383,7 +407,7 @@
             .then(res => res.json())
             .then(res => {
                 if(res.status === "sukses") {
-                    let data = res.data;
+                    daftarAntrianGlobal = res.data; // Simpan untuk referensi validasi rekan
                     let listHtml = "";
                     let salesUtama = "Belum ada antrian";
                     const akunSaya = getAkunAktif();
@@ -395,8 +419,8 @@
                         waktuTerakhirStandbyGlobal = null;
                     }
 
-                    if(data.length > 0) {
-                        data.forEach((item, index) => {
+                    if(daftarAntrianGlobal.length > 0) {
+                        daftarAntrianGlobal.forEach((item, index) => {
                             if(index === 0) {
                                 salesUtama = item.nama;
                             }
@@ -433,7 +457,6 @@
                 return;
             }
 
-            // Kunci tombol seketika saat ditekan untuk mencegah dobel klik saat delay
             const btnMasuk = document.getElementById('btn-masuk-antri');
             btnMasuk.disabled = true;
             btnMasuk.innerText = "Memproses...";
