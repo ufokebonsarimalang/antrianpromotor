@@ -210,7 +210,7 @@
 
         let waktuTerakhirStandbyGlobal = null;
         const BATAS_MENIT = 10;
-        let sudahMunculPopUpPeringatan = false; // Penjaga agar pop-up tidak spam terus-menerus
+        let sudahMunculPopUpPeringatan = false; 
 
         window.onload = function() {
             cekAkunTersimpan();
@@ -252,7 +252,7 @@
 
         function triggerGetar() {
             if ("vibrate" in navigator) {
-                navigator.vibrate([600, 200, 600, 200, 600]); // Getar lebih panjang
+                navigator.vibrate([600, 200, 600, 200, 600]);
             }
         }
 
@@ -273,7 +273,7 @@
             const salesUtama = document.getElementById('nama-aktif').innerText;
 
             if (sisaMs > 0) {
-                sudahMunculPop-UpPeringatan = false; // Reset jika waktu kembali normal
+                sudahMunculPopUpPeringatan = false;
                 const totalDetik = Math.floor(sisaMs / 1000);
                 const menit = Math.floor(totalDetik / 60);
                 const detik = totalDetik % 60;
@@ -282,16 +282,13 @@
                 labelTimer.style.color = menit < 2 ? 'var(--danger)' : '#d97706';
                 labelTimer.innerText = `⚠️ Batas Waktu Standby: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
             } else {
-                // Waktu 10 menit sudah lewat / habis!
                 labelTimer.style.display = 'block';
                 labelTimer.style.color = 'var(--danger)';
                 labelTimer.innerText = `🚨 Waktu Habis! Siap-siap digeser sistem.`;
 
-                // Jika HP ini dipegang oleh Urutan 1 yang telat
                 if (akunSaya && akunSaya === salesUtama) {
                     triggerGetar();
 
-                    // Munculkan POP-UP peringatan otomatis SEKALI saja saat waktu habis
                     if (!sudahMunculPopUpPeringatan) {
                         sudahMunculPopUpPeringatan = true;
                         tampilkanModal(
@@ -306,7 +303,7 @@
         function tampilkanModal(judul, pesan, tipe = 'alert', callbackOk = null) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judul;
-            document.getElementById('modal-desc').innerText = pesan.replace(/\n/g, '<br>'); // Support baris baru
+            document.getElementById('modal-desc').innerHTML = pesan.replace(/\n/g, '<br>');
             
             const actionsContainer = document.getElementById('modal-actions');
             
