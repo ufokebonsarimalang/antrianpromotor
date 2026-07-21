@@ -63,8 +63,7 @@
         }
         .user-badge div span { font-size: 11px; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700; }
         .user-badge div strong { font-size: 15px; color: var(--primary); }
-        .btn-logout { background: #fee2e2; color: #dc2626; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
-        .btn-logout:hover { background: #fecaca; }
+        .device-lock-info { font-size: 10px; color: var(--danger); font-weight: 600; margin-top: 2px; }
 
         .card-utama {
             background: #eff6ff;
@@ -144,28 +143,28 @@
         <div class="card-utama">
             <div class="label-giliran">Giliran Melayani Saat Ini</div>
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
-            <div class="info-timer">⚡ Urutan 1 wajib klik tombol Standby tiap 10 menit agar tidak otomatis digeser ke bawah.</div>
+            <div class="info-timer">🔒 Perangkat ini terkunci permanen untuk 1 akun demi keamanan sistem.</div>
         </div>
 
-        <!-- AREA LOGIN -->
+        <!-- AREA LOGIN PERTAMA KALI -->
         <div id="panel-login" style="display: none;">
             <div class="input-group">
-                <label>Pilih Akun Nama Anda</label>
+                <label>Pilih Nama Anda (Kunci Perangkat)</label>
                 <select id="pilih-sales">
                     <option value="">-- Memuat Daftar Nama --</option>
                 </select>
             </div>
-            <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan Akun di HP Ini</button>
+            <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
         <!-- PANEL MENU UTAMA -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <div>
-                    <span>Akun Terhubung:</span>
+                    <span>Akun Perangkat Ini:</span>
                     <strong id="label-user-aktif">-</strong>
+                    <span class="device-lock-info">Terikat Permanen di HP Ini</span>
                 </div>
-                <button type="button" class="btn-logout" onclick="gantiAkun()">Ganti Akun</button>
             </div>
 
             <!-- TOMBOL CHECK-IN -->
@@ -214,7 +213,7 @@
         };
 
         function cekAkunTersimpan() {
-            const savedUser = localStorage.getItem('ufo_sales_account');
+            const savedUser = localStorage.getItem('ufo_sales_permanent_device');
             if (savedUser) {
                 document.getElementById('panel-login').style.display = 'none';
                 document.getElementById('panel-menu-utama').style.display = 'block';
@@ -232,20 +231,16 @@
                 tampilkanModal("Perhatian", "Silakan pilih nama Anda terlebih dahulu!");
                 return;
             }
-            localStorage.setItem('ufo_sales_account', namaPilih);
-            cekAkunTersimpan();
-            tampilkanModal("Berhasil", `Akun berhasil diatur sebagai: ${namaPilih}`);
-        }
-
-        function gantiAkun() {
-            tampilkanModal("Ganti Akun", "Apakah Anda yakin ingin mengganti akun di perangkat ini?", 'confirm', function() {
-                localStorage.removeItem('ufo_sales_account');
+            
+            tampilkanModal("Konfirmasi Kunci Perangkat", `Apakah Anda yakin ingin mengunci HP ini atas nama (${namaPilih})? Nama tidak bisa diubah kembali setelah disimpan.`, 'confirm', function() {
+                localStorage.setItem('ufo_sales_permanent_device', namaPilih);
                 cekAkunTersimpan();
+                tampilkanModal("Berhasil", `HP ini kini resmi terikat untuk akun: ${namaPilih}`);
             });
         }
 
         function getAkunAktif() {
-            return localStorage.getItem('ufo_sales_account') || "";
+            return localStorage.getItem('ufo_sales_permanent_device') || "";
         }
 
         function tampilkanModal(judul, pesan, tipe = 'alert', callbackOk = null) {
@@ -317,7 +312,7 @@
         function daftarMasukAntri() {
             const namaSales = getAkunAktif();
             if(!namaSales) {
-                tampilkanModal("Perhatian", "Akun belum terdeteksi.");
+                tampilkanModal("Perhatian", "Akun perangkat belum terdaftar.");
                 return;
             }
 
@@ -332,7 +327,7 @@
         function konfirmasiHadir() {
             const namaSales = getAkunAktif();
             if(!namaSales) {
-                tampilkanModal("Perhatian", "Akun belum terdeteksi.");
+                tampilkanModal("Perhatian", "Akun perangkat belum terdaftar.");
                 return;
             }
 
@@ -347,7 +342,7 @@
         function ambilGiliranSaya() {
             const namaSales = getAkunAktif();
             if(!namaSales) {
-                tampilkanModal("Perhatian", "Akun belum terdeteksi. Silakan login ulang.");
+                tampilkanModal("Perhatian", "Akun perangkat belum terdaftar.");
                 return;
             }
 
