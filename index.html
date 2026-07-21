@@ -81,7 +81,7 @@
         .input-group { text-align: left; margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
 
-        select { 
+        select, input[type="text"] { 
             width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
             background: #ffffff; font-size: 14px;
         }
@@ -95,6 +95,8 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-warning { background: #f59e0b; color: white; }
+        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
+        
         .btn-primary:hover { background: var(--primary-hover); }
         .btn-success:hover { background: var(--success-hover); }
         .btn-warning:hover { background: #d97706; }
@@ -144,7 +146,7 @@
         <div class="card-utama">
             <div class="label-giliran">Giliran Melayani Saat Ini</div>
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
-            <div class="info-timer">⚡ Urutan 1 wajib klik tombol Standby tiap 5 menit.</div>
+            <div class="info-timer">⚡ Urutan 1 wajib konfirmasi PIN Standby tiap 10 menit.</div>
             <span id="label-timer-mundur" class="timer-mundur" style="display: none;">Waktu tersisa: --:--</span>
         </div>
 
@@ -169,13 +171,13 @@
                 </div>
             </div>
 
-            <!-- TOMBOL CHECK-IN -->
-            <button type="button" class="btn-success" onclick="daftarMasukAntri()">
-               Daftar Antrian
+            <!-- TOMBOL CHECK-IN (Diberi id agar bisa dikontrol aktif/mati) -->
+            <button type="button" id="btn-masuk-antri" class="btn-success" onclick="daftarMasukAntri()">
+                Masuk Shift / Ikut Antri
             </button>
 
             <!-- TOMBOL KONFIRMASI KEHADIRAN -->
-            <button type="button" class="btn-warning" onclick="konfirmasiHadir()">
+            <button type="button" class="btn-warning" onclick="promptPinStandby()">
                 👋 Saya Standby di Tempat (Urutan 1)
             </button>
 
@@ -209,7 +211,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         let waktuTerakhirStandbyGlobal = null;
-        const BATAS_MENIT =5;
+        const BATAS_MENIT = 10;
         let sudahMunculPopUpPeringatan = false; 
 
         window.onload = function() {
@@ -293,11 +295,45 @@
                         sudahMunculPopUpPeringatan = true;
                         tampilkanModal(
                             "🚨 PERINGATAN WAKTU HABIS!", 
-                            `Halo (${akunSaya}), waktu standby Anda di Urutan 1 sudah melebihi 10 menit!\n\nSegera tekan tombol 'Saya Standby di Tempat' atau Anda akan otomatis digeser ke antrian paling bawah oleh sistem.`
+                            `Halo (${akunSaya}), waktu standby Anda di Urutan 1 sudah melebihi 10 menit!\n\nSegera masukkan PIN Harian toko untuk konfirmasi kehadiran atau Anda akan otomatis digeser ke antrian paling bawah.`
                         );
                     }
                 }
             }
+        }
+
+        function promptPinStandby() {
+            const namaSales = getAkunAktif();
+            if(!namaSales) {
+                tampilkanModal("Perhatian", "Akun perangkat belum terdaftar.");
+                return;
+            }
+
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = "Masukkan PIN Harian Toko";
+            document.getElementById('modal-desc').innerHTML = `
+                Halo <b>${namaSales}</b>, masukkan PIN Harian yang tertera di area depan toko untuk mengonfirmasi kehadiran Anda:
+                <br><br>
+                <input type="text" id="input-pin-harian" placeholder="Masukkan PIN..." style="text-align:center; font-size:18px; font-weight:bold; letter-spacing:2px;">
+            `;
+            
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-success" onclick="kirimKonfirmasiHadir('${namaSales}')">Kirim PIN</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function kirimKonfirmasiHadir(namaSales) {
+            const pinVal = document.getElementById('input-pin-harian').value;
+            tutupModal();
+
+            fetch(`${SCRIPT_URL}?aksi=konfirmasiStandby&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pinVal)}`)
+            .then(res => res.json())
+            .then(res => {
+                tampilkanModal("Status Kehadiran", res.pesan);
+                muatDataAntrian();
+            });
         }
 
         function tampilkanModal(judul, pesan, tipe = 'alert', callbackOk = null) {
@@ -350,6 +386,8 @@
                     let data = res.data;
                     let listHtml = "";
                     let salesUtama = "Belum ada antrian";
+                    const akunSaya = getAkunAktif();
+                    let sudahTerdaftar = false;
 
                     if(res.waktuStandbyPertama) {
                         waktuTerakhirStandbyGlobal = res.waktuStandbyPertama;
@@ -362,10 +400,26 @@
                             if(index === 0) {
                                 salesUtama = item.nama;
                             }
+                            // Cek apakah akun di HP ini sudah ada di dalam daftar antrian
+                            if(item.nama === akunSaya) {
+                                sudahTerdaftar = true;
+                            }
                             listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
                         });
                     } else {
                         listHtml = "<li><span>Belum ada promotor yang check-in</span></li>";
+                    }
+
+                    // ATUR TOMBOL MASUK ANTRI BERDASARKAN STATUS
+                    const btnMasuk = document.getElementById('btn-masuk-antri');
+                    if(sudahTerdaftar) {
+                        btnMasuk.innerText = "Anda Sudah Masuk Antrian";
+                        btnMasuk.className = "btn-success btn-disabled";
+                        btnMasuk.disabled = true;
+                    } else {
+                        btnMasuk.innerText = "Masuk Shift / Ikut Antri";
+                        btnMasuk.className = "btn-success";
+                        btnMasuk.disabled = false;
                     }
 
                     document.getElementById('nama-aktif').innerText = salesUtama;
@@ -385,21 +439,6 @@
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan);
-                muatDataAntrian();
-            });
-        }
-
-        function konfirmasiHadir() {
-            const namaSales = getAkunAktif();
-            if(!namaSales) {
-                tampilkanModal("Perhatian", "Akun perangkat belum terdaftar.");
-                return;
-            }
-
-            fetch(`${SCRIPT_URL}?aksi=konfirmasiStandby&namaSales=${encodeURIComponent(namaSales)}`)
-            .then(res => res.json())
-            .then(res => {
-                tampilkanModal("Status Kehadiran", res.pesan);
                 muatDataAntrian();
             });
         }
