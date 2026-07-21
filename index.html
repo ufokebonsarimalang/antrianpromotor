@@ -579,6 +579,58 @@
                 });
             });
         }
+        function aksiUtamaCustomer() {
+            const namaSales = getAkunAktif();
+            if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
+
+            const btnCustomer = document.getElementById('btn-utama-customer');
+
+            if (statusSayaGlobal === "standby") {
+                // Pastikan tombol tidak disabled (artinya dia memang urutan 1)
+                if (btnCustomer.disabled) {
+                    return tampilkanModal("Perhatian", "Anda belum berada di Urutan Nomor 1. Harap tunggu giliran Anda!");
+                }
+
+                if(btnCustomer) {
+                    btnCustomer.disabled = true;
+                    btnCustomer.style.opacity = "0.6";
+                }
+
+                tampilkanModalKonfirmasi("Konfirmasi", `Apakah benar (${namaSales}) sudah membawa customer?`, function() {
+                    fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        tampilkanModal("Status Antrian", res.pesan);
+                        muatDataAntrian();
+                    });
+                }, function() {
+                    if(btnCustomer) {
+                        btnCustomer.disabled = false;
+                        btnCustomer.style.opacity = "1";
+                    }
+                });
+
+            } else if (statusSayaGlobal === "membawa_customer") {
+                if(btnCustomer) {
+                    btnCustomer.disabled = true;
+                    btnCustomer.style.opacity = "0.6";
+                }
+
+                tampilkanModalKonfirmasi("Konfirmasi Selesai", `Apakah pelayanan sudah selesai dan ingin masuk kembali ke antrean paling bawah?`, function() {
+                    fetch(`${SCRIPT_URL}?aksi=selesaiPelayanan&namaSales=${encodeURIComponent(namaSales)}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        tampilkanModal("Status Antrian", res.pesan);
+                        muatDataAntrian();
+                    });
+                }, function() {
+                    if(btnCustomer) {
+                        btnCustomer.disabled = false;
+                        btnCustomer.style.opacity = "1";
+                    }
+                });
+            }
+        }
     </script>
 </body>
 </html>
