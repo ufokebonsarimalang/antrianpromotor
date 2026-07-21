@@ -380,7 +380,7 @@
             });
         }
 
-       function muatDataAntrian() {
+      function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
@@ -390,7 +390,7 @@
                     let salesUtama = "Belum ada antrian";
                     const akunSaya = getAkunAktif();
                     
-                    let statusSaya = "belum_ada"; // belum_ada, standby, atau membawa_customer
+                    let statusSaya = "belum_ada"; 
                     waktuTerakhirStandbyGlobal = res.waktuStandbyPertama || null;
 
                     if(daftarAntrianGlobal.length > 0) {
@@ -406,34 +406,36 @@
                         listHtml = "<li><span>Belum ada promotor aktif</span></li>";
                     }
 
-                    // Ambil elemen tombol
+                    // Ambil elemen tombol dengan aman (jika ada)
                     const btnMasuk = document.getElementById('btn-masuk-antri');
                     const btnCustomer = document.getElementById('btn-ambil-customer');
                     const btnSelesai = document.getElementById('btn-selesai-pelayanan');
 
-                    // Atur tombol berdasarkan posisi/status promotor saat ini di antrean
-                    if (statusSaya === "standby") {
-                        btnMasuk.innerText = "Anda Sudah Di Antrian";
-                        btnMasuk.className = "btn-success btn-disabled";
-                        btnMasuk.disabled = true;
+                    // Atur tombol berdasarkan status promotor
+                    if (btnMasuk) {
+                        if (statusSaya === "standby") {
+                            btnMasuk.innerText = "Anda Sudah Di Antrian";
+                            btnMasuk.className = "btn-success btn-disabled";
+                            btnMasuk.disabled = true;
+                        } else if (statusSaya === "membawa_customer") {
+                            btnMasuk.innerText = "Sedang Melayani Customer";
+                            btnMasuk.className = "btn-success btn-disabled";
+                            btnMasuk.disabled = true;
+                        } else {
+                            btnMasuk.innerText = "Masuk Shift / Ikut Antri";
+                            btnMasuk.className = "btn-success";
+                            btnMasuk.disabled = false;
+                        }
+                    }
 
-                        btnCustomer.style.display = "block";
-                        btnSelesai.style.display = "none";
-                    } else if (statusSaya === "membawa_customer") {
-                        btnMasuk.innerText = "Sedang Melayani Customer";
-                        btnMasuk.className = "btn-success btn-disabled";
-                        btnMasuk.disabled = true;
-
-                        btnCustomer.style.display = "none";
-                        btnSelesai.style.display = "block"; // Munculkan tombol selesai
-                    } else {
-                        // Belum masuk antrean sama sekali
-                        btnMasuk.innerText = "Masuk Shift / Ikut Antri";
-                        btnMasuk.className = "btn-success";
-                        btnMasuk.disabled = false;
-
-                        btnCustomer.style.display = "block";
-                        btnSelesai.style.display = "none";
+                    if (btnCustomer && btnSelesai) {
+                        if (statusSaya === "membawa_customer") {
+                            btnCustomer.style.display = "none";
+                            btnSelesai.style.display = "block";
+                        } else {
+                            btnCustomer.style.display = "block";
+                            btnSelesai.style.display = "none";
+                        }
                     }
 
                     document.getElementById('nama-aktif').innerText = salesUtama;
@@ -441,7 +443,6 @@
                 }
             });
         }
-
         function daftarMasukAntri() {
             const namaSales = getAkunAktif();
             if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
