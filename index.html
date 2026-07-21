@@ -19,7 +19,7 @@
             --border: #e2e8f0;
         }
 
-        *, body, button, select {
+        *, body, button, select, input {
             font-family: 'Inter', sans-serif !important;
             box-sizing: border-box;
         }
@@ -59,11 +59,12 @@
 
         .label-giliran { font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
         .nama-giliran-aktif { font-size: 26px; font-weight: 800; color: #1e3a8a; margin: 0; }
+        .info-timer { font-size: 11px; color: #d97706; margin-top: 8px; font-weight: 600; }
 
         .input-group { text-align: left; margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
 
-        select { 
+        select, input { 
             width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
             background: #ffffff; font-size: 14px;
         }
@@ -98,9 +99,10 @@
         <div class="card-utama">
             <div class="label-giliran">Giliran Melayani Saat Ini</div>
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
+            <div class="info-timer">⚡ Auto-skip jika > 3 menit tidak direspons</div>
         </div>
 
-      <!-- FORM PILIH NAMA -->
+        <!-- FORM PILIH NAMA -->
         <div class="input-group">
             <label>Pilih Nama Anda</label>
             <select id="pilih-sales">
@@ -139,10 +141,9 @@
         window.onload = function() {
             muatMasterSales();
             muatDataAntrian();
-            setInterval(muatDataAntrian, 5000); // Auto refresh antrian tiap 5 detik
+            setInterval(muatDataAntrian, 5000); // Auto refresh tiap 5 detik (sekaligus mengecek timer otomatis di server)
         };
 
-        // Mengambil master 20 sales untuk pilihan dropdown
         function muatMasterSales() {
             fetch(`${SCRIPT_URL}?aksi=getMasterSales`)
             .then(res => res.json())
@@ -157,7 +158,6 @@
             });
         }
 
-        // Mengambil daftar antrian aktif yang sedang bertugas
         function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
@@ -182,39 +182,6 @@
             });
         }
 
-        // Fungsi saat sales klik "Masuk Shift / Ikut Antri"
-        function daftarMasukAntri() {
-            const namaSales = document.getElementById('pilih-sales').value;
-            if(!namaSales) {
-                alert("Silakan pilih nama Anda terlebih dahulu!");
-                return;
-            }
-
-            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
-            .then(res => res.json())
-            .then(res => {
-                alert(res.pesan);
-                muatDataAntrian();
-            });
-        }
-
-        // Fungsi saat sales dapat customer
-        function ambilGiliranSaya() {
-            const namaSales = document.getElementById('pilih-sales').value;
-            if(!namaSales) {
-                alert("Silakan pilih nama Anda terlebih dahulu!");
-                return;
-            }
-
-            if(!confirm(`Konfirmasi: ${namaSales} mendapat customer walk-in sekarang?`)) return;
-
-            fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
-            .then(res => res.json())
-            .then(res => {
-                alert(res.pesan);
-                muatDataAntrian(); 
-            });
-        }
         function daftarMasukAntri() {
             const namaSales = document.getElementById('pilih-sales').value;
             const pinSales = document.getElementById('pin-shift').value;
@@ -229,6 +196,23 @@
             .then(res => {
                 alert(res.pesan);
                 muatDataAntrian();
+            });
+        }
+
+        function ambilGiliranSaya() {
+            const namaSales = document.getElementById('pilih-sales').value;
+            if(!namaSales) {
+                alert("Silakan pilih nama Anda terlebih dahulu!");
+                return;
+            }
+
+            if(!confirm(`Konfirmasi: ${namaSales} mendapat customer walk-in sekarang?`)) return;
+
+            fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
+            .then(res => res.json())
+            .then(res => {
+                alert(res.pesan);
+                muatDataAntrian(); 
             });
         }
     </script>
