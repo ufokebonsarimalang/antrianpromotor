@@ -87,6 +87,65 @@
         .list-box h4 { margin: 0 0 10px 0; font-size: 13px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
         #item-antrian-list { list-style: none; padding: 0; margin: 0; font-size: 13px; max-height: 150px; overflow-y: auto; }
         #item-antrian-list li { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between; }
+
+        /* KUSTOM MODAL / POP-UP */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-box {
+            background: #ffffff;
+            width: 90%;
+            max-width: 340px;
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transform: scale(0.9);
+            transition: transform 0.25s ease;
+        }
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+        .modal-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-actions button {
+            margin-top: 0;
+            flex: 1;
+            padding: 12px;
+            font-size: 12px;
+        }
+        .btn-cancel {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .btn-cancel:hover { background: #cbd5e1; }
     </style>
 </head>
 <body>
@@ -135,14 +194,55 @@
         </div>
     </div>
 
+    <!-- ELEMEN KUSTOM MODAL / POP-UP -->
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modal-title" class="modal-title">Pemberitahuan</div>
+            <div id="modal-desc" class="modal-desc">Isi pesan di sini...</div>
+            <div id="modal-actions" class="modal-actions">
+                <button type="button" id="modal-btn-ok" class="btn-primary" onclick="tutupModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         window.onload = function() {
             muatMasterSales();
             muatDataAntrian();
-            setInterval(muatDataAntrian, 5000); // Auto refresh tiap 5 detik (sekaligus mengecek timer otomatis di server)
+            setInterval(muatDataAntrian, 5000); 
         };
+
+        // Fungsi Menampilkan Pop-up Kustom Pengganti Alert/Confirm
+        function tampilkanModal(judul, pesan, tipe = 'alert', callbackOk = null) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerText = pesan;
+            
+            const actionsContainer = document.getElementById('modal-actions');
+            
+            if (tipe === 'confirm') {
+                actionsContainer.innerHTML = `
+                    <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                    <button type="button" id="modal-btn-confirm" class="btn-primary">Ya, Lanjutkan</button>
+                `;
+                document.getElementById('modal-btn-confirm').onclick = function() {
+                    tutupModal();
+                    if (callbackOk) callbackOk();
+                };
+            } else {
+                actionsContainer.innerHTML = `
+                    <button type="button" class="btn-primary" onclick="tutupModal()">OK</button>
+                `;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function tutupModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+        }
 
         function muatMasterSales() {
             fetch(`${SCRIPT_URL}?aksi=getMasterSales`)
@@ -187,14 +287,14 @@
             const pinSales = document.getElementById('pin-shift').value;
             
             if(!namaSales || !pinSales) {
-                alert("Silakan pilih nama dan masukkan PIN Shift terlebih dahulu!");
+                tampilkanModal("Perhatian", "Silakan pilih nama dan masukkan PIN Shift terlebih dahulu!");
                 return;
             }
 
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pinSales)}`)
             .then(res => res.json())
             .then(res => {
-                alert(res.pesan);
+                tampilkanModal("Informasi Shift", res.pesan);
                 muatDataAntrian();
             });
         }
@@ -202,17 +302,18 @@
         function ambilGiliranSaya() {
             const namaSales = document.getElementById('pilih-sales').value;
             if(!namaSales) {
-                alert("Silakan pilih nama Anda terlebih dahulu!");
+                tampilkanModal("Perhatian", "Silakan pilih nama Anda terlebih dahulu di menu pilihan!");
                 return;
             }
 
-            if(!confirm(`Konfirmasi: ${namaSales} mendapat customer walk-in sekarang?`)) return;
-
-            fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
-            .then(res => res.json())
-            .then(res => {
-                alert(res.pesan);
-                muatDataAntrian(); 
+            // Menggunakan modal kustom tipe konfirmasi
+            tampilkanModal("Konfirmasi Pelayanan", `Apakah benar ${namaSales} mendapat customer walk-in sekarang?`, 'confirm', function() {
+                fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
+                .then(res => res.json())
+                .then(res => {
+                    tampilkanModal("Status Antrian", res.pesan);
+                    muatDataAntrian(); 
+                });
             });
         }
     </script>
