@@ -76,6 +76,7 @@
         .label-giliran { font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
         .nama-giliran-aktif { font-size: 26px; font-weight: 800; color: #1e3a8a; margin: 0; }
         .info-timer { font-size: 11px; color: #d97706; margin-top: 8px; font-weight: 600; line-height: 1.4; }
+        .timer-mundur { font-size: 13px; font-weight: 700; color: var(--danger); margin-top: 4px; display: block; }
 
         .input-group { text-align: left; margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
@@ -143,7 +144,8 @@
         <div class="card-utama">
             <div class="label-giliran">Giliran Melayani Saat Ini</div>
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
-            <div class="info-timer">🔒 Perangkat ini terkunci permanen untuk 1 akun demi keamanan sistem.</div>
+            <div class="info-timer">⚡ Urutan 1 wajib klik tombol Standby tiap 10 menit.</div>
+            <span id="label-timer-mundur" class="timer-mundur" style="display: none;">Waktu tersisa: --:--</span>
         </div>
 
         <!-- AREA LOGIN PERTAMA KALI -->
@@ -206,10 +208,14 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
+        let waktuTerakhirStandbyGlobal = null;
+        const BATAS_MENIT = 10;
+
         window.onload = function() {
             cekAkunTersimpan();
             muatDataAntrian();
             setInterval(muatDataAntrian, 5000); 
+            setInterval(hitungMundurLokal, 1000); // Hitung mundur setiap detik
         };
 
         function cekAkunTersimpan() {
@@ -241,6 +247,51 @@
 
         function getAkunAktif() {
             return localStorage.getItem('ufo_sales_permanent_device') || "";
+        }
+
+        function triggerGetar() {
+            // Cek apakah browser HP mendukung fitur getar
+            if ("vibrate" in navigator) {
+                // Pola getar: Bergetar 500ms, jeda 200ms, bergetar 500ms
+                navigator.vibrate([500, 200, 500]);
+            }
+        }
+
+        function hitungMundurLokal() {
+            if (!waktuTerakhirStandbyGlobal) {
+                document.getElementById('label-timer-mundur').style.display = 'none';
+                return;
+            }
+
+            const waktuLokalServer = new Date(waktuTerakhirStandbyGlobal).getTime();
+            const sekarang = new Date().getTime();
+            const selisihMs = sekarang - waktuLokalServer;
+            const batasMs = BATAS_MENIT * 60 * 1000;
+            const sisaMs = batasMs - selisihMs;
+
+            const labelTimer = document.getElementById('label-timer-mundur');
+            const akunSaya = getAkunAktif();
+            const salesUtama = document.getElementById('nama-aktif').innerText;
+
+            if (sisaMs > 0) {
+                const totalDetik = Math.floor(sisaMs / 1000);
+                const menit = Math.floor(totalDetik / 60);
+                const detik = totalDetik % 60;
+                
+                labelTimer.style.display = 'block';
+                labelTimer.style.color = menit < 2 ? 'var(--danger)' : '#d97706';
+                labelTimer.innerText = `⚠️ Batas Waktu Standby: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+            } else {
+                // Waktu 10 menit sudah lewat / habis!
+                labelTimer.style.display = 'block';
+                labelTimer.style.color = 'var(--danger)';
+                labelTimer.innerText = `🚨 Waktu Habis! Siap-siap digeser sistem.`;
+
+                // Jika HP ini dipegang oleh Urutan 1 yang telat, getarkan HP-nya secara berulang
+                if (akunSaya && akunSaya === salesUtama) {
+                    triggerGetar();
+                }
+            }
         }
 
         function tampilkanModal(judul, pesan, tipe = 'alert', callbackOk = null) {
@@ -296,7 +347,9 @@
 
                     if(data.length > 0) {
                         data.forEach((item, index) => {
-                            if(index === 0) salesUtama = item.nama;
+                            if(index === 0) {
+                                salesUtama = item.nama;
+                            }
                             listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
                         });
                     } else {
