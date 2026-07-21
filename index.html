@@ -12,6 +12,7 @@
             --primary-hover: #1558b0;
             --success: #10b981;
             --success-hover: #059669;
+            --danger: #ef4444;
             --background: #f1f5f9;
             --card-bg: #ffffff;
             --text-main: #1e293b;
@@ -47,7 +48,24 @@
         }
 
         h2 { margin: 0 0 5px 0; font-size: 20px; font-weight: 800; }
-        .sub-title { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; font-weight: 500; }
+        .sub-title { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; font-weight: 500; }
+
+        /* PANEL LOGIN AKUN */
+        .user-badge {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: left;
+        }
+        .user-badge div span { font-size: 11px; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700; }
+        .user-badge div strong { font-size: 15px; color: var(--primary); }
+        .btn-logout { background: #fee2e2; color: #dc2626; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .btn-logout:hover { background: #fecaca; }
 
         .card-utama {
             background: #eff6ff;
@@ -85,8 +103,8 @@
             border-radius: 12px; padding: 15px; margin-top: 20px;
         }
         .list-box h4 { margin: 0 0 10px 0; font-size: 13px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
-        #item-antrian-list { list-style: none; padding: 0; margin: 0; font-size: 13px; max-height: 150px; overflow-y: auto; }
-        #item-antrian-list li { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between; }
+        #item-antrian-list { list-style: none; padding: 0; margin: 0; font-size: 13px; max-height: 160px; overflow-y: auto; }
+        #item-antrian-list li { padding: 8px 0; border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
 
         /* MODAL KUSTOM */
         .modal-overlay {
@@ -101,24 +119,13 @@
             visibility: hidden;
             transition: all 0.25s ease;
         }
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-box {
-            background: #ffffff;
-            width: 90%;
-            max-width: 340px;
-            padding: 24px;
-            border-radius: 16px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            transform: scale(0.9);
-            transition: transform 0.25s ease;
+            background: #ffffff; width: 90%; max-width: 340px; padding: 24px;
+            border-radius: 16px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transform: scale(0.9); transition: transform 0.25s ease;
         }
-        .modal-overlay.active .modal-box {
-            transform: scale(1);
-        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
         .modal-title { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
         .modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
         .modal-actions { display: flex; gap: 10px; }
@@ -140,33 +147,47 @@
             <div class="info-timer">⚡ Urutan 1 & 2 dapat mengambil customer.<br>(Auto-skip Urutan 1 jika > 3 menit)</div>
         </div>
 
-        <!-- FORM PILIH NAMA -->
-        <div class="input-group">
-            <label>Pilih Nama Anda</label>
-            <select id="pilih-sales">
-                <option value="">-- Pilih Nama Anda --</option>
-            </select>
+        <!-- AREA LOGIN / IDENTITAS AKUN HP INI -->
+        <div id="panel-login" style="display: none;">
+            <div class="input-group">
+                <label>Pilih Akun Nama Anda</label>
+                <select id="pilih-sales">
+                    <option value="">-- Memuat Daftar Nama --</option>
+                </select>
+            </div>
+            <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan Akun di HP Ini</button>
         </div>
 
-        <!-- INPUT PIN HARIAN -->
-        <div class="input-group">
-            <label>PIN Shift Toko</label>
-            <input type="password" id="pin-shift" placeholder="Masukkan PIN dari Admin">
+        <!-- AREA AKUN AKTIF (JIKA SUDAH LOGIN) -->
+        <div id="panel-menu-utama" style="display: none;">
+            <div class="user-badge">
+                <div>
+                    <span>Akun Terhubung:</span>
+                    <strong id="label-user-aktif">-</strong>
+                </div>
+                <button type="button" class="btn-logout" onclick="gantiAkun()">Ganti Akun</button>
+            </div>
+
+            <!-- INPUT PIN HARIAN -->
+            <div class="input-group">
+                <label>PIN Shift Toko</label>
+                <input type="password" id="pin-shift" placeholder="Masukkan PIN dari Admin">
+            </div>
+
+            <!-- TOMBOL DAFTAR / CHECK-IN -->
+            <button type="button" class="btn-success" onclick="daftarMasukAntri()">
+                Masuk Shift / Ikut Antri
+            </button>
+
+            <!-- TOMBOL DAPAT CUSTOMER -->
+            <button type="button" class="btn-primary" onclick="ambilGiliranSaya()">
+                Saya Dapat Customer (Next)
+            </button>
         </div>
 
-        <!-- TOMBOL DAFTAR / CHECK-IN -->
-        <button type="button" class="btn-success" onclick="daftarMasukAntri()">
-            Masuk Shift / Ikut Antri
-        </button>
-
-        <!-- TOMBOL DAPAT CUSTOMER -->
-        <button type="button" class="btn-primary" onclick="ambilGiliranSaya()">
-            Saya Dapat Customer (Next)
-        </button>
-
-        <!-- DAFTAR URUTAN ANTRIAN AKTIF -->
+        <!-- DAFTAR URUTAN ANTRIAN AKTIF (TERLIHAT SEMUA) -->
         <div class="list-box">
-            <h4>📋 Urutan Antrian Hari Ini</h4>
+            <h4>📋 Urutan Antrian Hari Ini (Transparan)</h4>
             <ul id="item-antrian-list">
                 <li><span>Memuat data...</span></li>
             </ul>
@@ -188,10 +209,46 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         window.onload = function() {
-            muatMasterSales();
+            cekAkunTersimpan();
             muatDataAntrian();
             setInterval(muatDataAntrian, 5000); 
         };
+
+        // Cek apakah HP ini sudah diset akun atas nama siapa
+        function cekAkunTersimpan() {
+            const savedUser = localStorage.getItem('ufo_sales_account');
+            if (savedUser) {
+                document.getElementById('panel-login').style.display = 'none';
+                document.getElementById('panel-menu-utama').style.display = 'block';
+                document.getElementById('label-user-aktif').innerText = savedUser;
+            } else {
+                document.getElementById('panel-login').style.display = 'block';
+                document.getElementById('panel-menu-utama').style.display = 'none';
+                muatMasterSales();
+            }
+        }
+
+        function simpanAkunHP() {
+            const namaPilih = document.getElementById('pilih-sales').value;
+            if(!namaPilih) {
+                tampilkanModal("Perhatian", "Silakan pilih nama Anda terlebih dahulu!");
+                return;
+            }
+            localStorage.setItem('ufo_sales_account', namaPilih);
+            cekAkunTersimpan();
+            tampilkanModal("Berhasil", `Akun berhasil diatur sebagai: ${namaPilih}`);
+        }
+
+        function gantiAkun() {
+            tampilkanModal("Ganti Akun", "Apakah Anda yakin ingin mengganti akun di perangkat ini?", 'confirm', function() {
+                localStorage.removeItem('ufo_sales_account');
+                cekAkunTersimpan();
+            });
+        }
+
+        function getAkunAktif() {
+            return localStorage.getItem('ufo_sales_account') || "";
+        }
 
         function tampilkanModal(judul, pesan, tipe = 'alert', callbackOk = null) {
             const modal = document.getElementById('custom-modal');
@@ -214,7 +271,6 @@
                     <button type="button" class="btn-primary" onclick="tutupModal()">OK</button>
                 `;
             }
-            
             modal.classList.add('active');
         }
 
@@ -261,11 +317,11 @@
         }
 
         function daftarMasukAntri() {
-            const namaSales = document.getElementById('pilih-sales').value;
+            const namaSales = getAkunAktif();
             const pinSales = document.getElementById('pin-shift').value;
             
             if(!namaSales || !pinSales) {
-                tampilkanModal("Perhatian", "Silakan pilih nama dan masukkan PIN Shift terlebih dahulu!");
+                tampilkanModal("Perhatian", "Silakan masukkan PIN Shift toko terlebih dahulu!");
                 return;
             }
 
@@ -278,13 +334,13 @@
         }
 
         function ambilGiliranSaya() {
-            const namaSales = document.getElementById('pilih-sales').value;
+            const namaSales = getAkunAktif();
             if(!namaSales) {
-                tampilkanModal("Perhatian", "Silakan pilih nama Anda terlebih dahulu di menu pilihan!");
+                tampilkanModal("Perhatian", "Akun belum terdeteksi. Silakan login ulang.");
                 return;
             }
 
-            tampilkanModal("Konfirmasi Pelayanan", `Apakah benar ${namaSales} mendapat customer walk-in sekarang?`, 'confirm', function() {
+            tampilkanModal("Konfirmasi Pelayanan", `Apakah benar Anda (${namaSales}) mendapat customer walk-in sekarang?`, 'confirm', function() {
                 fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
                 .then(res => res.json())
                 .then(res => {
