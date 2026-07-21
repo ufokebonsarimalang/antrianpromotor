@@ -218,31 +218,36 @@
             setInterval(muatDataAntrian, 5000);
         };
 
-        function muatDataAntrian() {
-            // Menggunakan metode GET untuk menghindari blokir CORS
-            fetch(`${SCRIPT_URL}?aksi=getAntrian`)
-            .then(res => res.json())
-            .then(res => {
-                if(res.status === "sukses") {
-                    let data = res.data;
-                    let listHtml = "";
-                    let salesUtama = "Belum ada";
+      function muatDataAntrian() {
+            // Menggunakan teknik JSONP via tag script dinamis untuk bypass total masalah CORS di Apps Script
+            const oldScript = document.getElementById('jsonp-script');
+            if (oldScript) oldScript.remove();
 
-                    data.forEach((item, index) => {
-                        if(index === 0) {
-                            salesUtama = item.nama;
-                        }
-                        listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
-                    });
-
-                    document.getElementById('nama-aktif').innerText = salesUtama;
-                    document.getElementById('item-antrian-list').innerHTML = listHtml;
-                }
-            })
-            .catch(err => console.error("Gagal sinkronisasi antrian:", err));
+            const script = document.createElement('script');
+            script.id = 'jsonp-script';
+            script.src = `${SCRIPT_URL}?aksi=getAntrian&callback=callbackAntrian`;
+            document.body.appendChild(script);
         }
 
-        function ambilGiliranSaya() {
+        // Fungsi penerima data otomatis dari Google Apps Script
+        function callbackAntrian(res) {
+            if(res && res.status === "sukses") {
+                let data = res.data;
+                let listHtml = "";
+                let salesUtama = "Belum ada";
+
+                data.forEach((item, index) => {
+                    if(index === 0) {
+                        salesUtama = item.nama;
+                    }
+                    listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
+                });
+
+                document.getElementById('nama-aktif').innerText = salesUtama;
+                document.getElementById('item-antrian-list').innerHTML = listHtml;
+            }
+        }
+       function ambilGiliranSaya() {
             const namaSales = document.getElementById('pilih-sales').value;
             if(!namaSales) {
                 alert("Silakan pilih nama Anda terlebih dahulu pada daftar pilihan!");
@@ -251,36 +256,14 @@
 
             if(!confirm(`Konfirmasi: ${namaSales} mendapat customer walk-in sekarang?`)) return;
 
-            // Menggunakan metode GET dengan parameter URL
-            fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
-            .then(res => res.json())
-            .then(res => {
-                alert(res.pesan);
-                muatDataAntrian(); 
+            // Menggunakan mode no-cors untuk pengiriman data aksi
+            fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, {
+                method: 'GET',
+                mode: 'no-cors'
             })
-            .catch(err => {
-                alert("Gagal terhubung ke server.");
-                console.error(err);
-            });
-        }
-
-        function ambilGiliranSaya() {
-            const namaSales = document.getElementById('pilih-sales').value;
-            if(!namaSales) {
-                alert("Silakan pilih nama Anda terlebih dahulu pada daftar pilihan!");
-                return;
-            }
-
-            if(!confirm(`Konfirmasi: ${namaSales} mendapat customer walk-in sekarang?`)) return;
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ aksi: "ambilAntrian", namaSales: namaSales })
-            })
-            .then(res => res.json())
-            .then(res => {
-                alert(res.pesan);
-                muatDataAntrian(); // Refresh langsung
+            .then(() => {
+                alert("Giliran berhasil diproses!");
+                setTimeout(muatDataAntrian, 1000); // Refresh data setelah 1 detik
             })
             .catch(err => {
                 alert("Gagal terhubung ke server.");
