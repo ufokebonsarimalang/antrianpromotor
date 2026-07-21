@@ -165,7 +165,7 @@
             <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
-        <!-- MENU UTAMA PROMOTOR -->
+      <!-- MENU UTAMA PROMOTOR -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <div>
@@ -176,7 +176,12 @@
             </div>
 
             <button type="button" id="btn-masuk-antri" class="btn-success" onclick="daftarMasukAntri()">Masuk Shift / Ikut Antri</button>
-            <button type="button" class="btn-primary" onclick="ambilGiliranSaya()">Saya Membawa Customer (Next)</button>
+            
+            <!-- Tombol 1: Saat dapat customer -->
+            <button type="button" class="btn-primary" onclick="ambilGiliranSaya()">Saya Membawa Customer</button>
+            
+            <!-- Tombol 2: Saat pelayanan kelar -->
+            <button type="button" class="btn-warning" onclick="prosesSelesaiPelayanan()">Selesai Pelayanan (Antri Bawah)</button>
             
             <!-- TOMBOL AKSES SPV -->
             <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV (Wasit)</button>
@@ -433,6 +438,19 @@
 
             tampilkanModalKonfirmasi("Konfirmasi Layanan", `Apakah benar (${namaSales}) sedang membawa/melayani customer walk-in?`, function() {
                 fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
+                .then(res => res.json())
+                .then(res => {
+                    tampilkanModal("Status Antrian", res.pesan);
+                    muatDataAntrian(); 
+                });
+            });
+        }
+        function prosesSelesaiPelayanan() {
+            const namaSales = getAkunAktif();
+            if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
+
+            tampilkanModalKonfirmasi("Konfirmasi Selesai", `Apakah Anda sudah selesai melayani customer dan ingin masuk ke antrean paling bawah?`, function() {
+                fetch(`${SCRIPT_URL}?aksi=selesaiPelayanan&namaSales=${encodeURIComponent(namaSales)}`)
                 .then(res => res.json())
                 .then(res => {
                     tampilkanModal("Status Antrian", res.pesan);
