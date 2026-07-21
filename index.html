@@ -165,7 +165,7 @@
             <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
-      <!-- MENU UTAMA PROMOTOR -->
+        <!-- MENU UTAMA PROMOTOR -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <div>
@@ -220,6 +220,7 @@
 
         let waktuTerakhirStandbyGlobal = null;
         let daftarAntrianGlobal = [];
+        let statusSayaGlobal = "belum_ada"; // Dideklarasikan cukup 1 kali di sini
         const BATAS_MENIT = 10;
 
         window.onload = function() {
@@ -267,7 +268,6 @@
                 return;
             }
 
-            // Ubah format waktu dari server/sheet menjadi milidetik dengan aman
             const waktuLokalServer = new Date(waktuTerakhirStandbyGlobal).getTime();
             if (isNaN(waktuLokalServer)) {
                 labelTimer.style.display = 'none';
@@ -293,6 +293,7 @@
                 labelTimer.innerText = `🚨 Waktu Habis! Urutan bergeser otomatis.`;
             }
         }
+
         // --- SISTEM SPV / WASIT ---
         function bukaFormLoginSPV() {
             const modal = document.getElementById('custom-modal');
@@ -378,10 +379,6 @@
             });
         }
 
-    let statusSayaGlobal = "belum_ada"; // Menyimpan status terkini promotor
-
-       let statusSayaGlobal = "belum_ada"; // Menyimpan status terkini promotor
-
         function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
@@ -401,7 +398,6 @@
                         daftarAntrianGlobal.forEach((item, index) => {
                             if(index === 0) {
                                 salesUtama = item.nama;
-                                // Cek apakah saya berada di urutan pertama dan statusnya Standby
                                 if(item.nama === akunSaya && item.status === "Standby") {
                                     apakahSayaUrutanPertama = true;
                                 }
@@ -417,22 +413,17 @@
                         listHtml = "<li><span>Belum ada promotor aktif</span></li>";
                     }
 
-                    // Ambil elemen 2 tombol utama
                     const btnAntri = document.getElementById('btn-utama-antri');
                     const btnCustomer = document.getElementById('btn-utama-customer');
 
-                    // ATUR TAMPILAN BERDASARKAN STATUS & POSISI PROMOTOR
                     if (statusSayaGlobal === "standby") {
-                        // Tombol 1: Berubah jadi informasi status & dimatikan
                         btnAntri.innerText = "Anda Sudah Di Antrian";
                         btnAntri.className = "btn-success btn-disabled";
                         btnAntri.disabled = true;
 
-                        // Tombol 2: Muncul
                         btnCustomer.style.display = "block";
                         btnCustomer.innerText = "Sudah Membawa Customer";
 
-                        // KUNCI TOMBOL JIKA BELUM URUTAN PERTAMA
                         if (apakahSayaUrutanPertama) {
                             btnCustomer.className = "btn-primary";
                             btnCustomer.disabled = false;
@@ -446,12 +437,10 @@
                         }
 
                     } else if (statusSayaGlobal === "membawa_customer") {
-                        // Tombol 1: Tetap terkunci
                         btnAntri.innerText = "Sedang Melayani Customer";
                         btnAntri.className = "btn-success btn-disabled";
                         btnAntri.disabled = true;
 
-                        // Tombol 2: Berubah fungsi jadi "Selesai Pelayanan (Antri Bawah)", aktif normal karena dia memang sedang melayani
                         btnCustomer.style.display = "block";
                         btnCustomer.innerText = "Selesai Pelayanan (Antri Bawah)";
                         btnCustomer.className = "btn-warning";
@@ -460,12 +449,10 @@
                         btnCustomer.style.cursor = "pointer";
 
                     } else {
-                        // Belum masuk antrean sama sekali
                         btnAntri.innerText = "Masuk Shift / Ikut Antri";
                         btnAntri.className = "btn-success";
                         btnAntri.disabled = false;
 
-                        // Tombol 2: Disembunyikan dulu selama belum antri
                         btnCustomer.style.display = "none";
                     }
 
@@ -483,102 +470,12 @@
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
             .then(res => res.json())
             .then(res => {
-                tampilkanModal("Status Antrian", res.pesan);
-                muatDataAntrian();
-            });
-        }
-
-        // Fungsi Tombol 2: Berubah tugas tergantung status (Ambil Customer / Selesai Pelayanan)
-        function aksiUtamaCustomer() {
-            const namaSales = getAkunAktif();
-            if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
-
-            const btnCustomer = document.getElementById('btn-utama-customer');
-
-            if (statusSayaGlobal === "standby") {
-                // Kondisi: Sedang Standby -> Mau ambil customer
-                // Langsung disable agar tidak bisa diklik dobel
-                if(btnCustomer) {
-                    btnCustomer.disabled = true;
-                    btnCustomer.style.opacity = "0.6";
-                }
-
-                tampilkanModalKonfirmasi("Konfirmasi", `Apakah benar (${namaSales}) sudah membawa customer?`, function() {
-                    fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
-                    .then(res => res.json())
-                    .then(res => {
-                        tampilkanModal("Status Antrian", res.pesan);
-                        muatDataAntrian();
-                    });
-                }, function() {
-                    // Jika dibatalkan, aktifkan lagi tombolnya
-                    if(btnCustomer) {
-                        btnCustomer.disabled = false;
-                        btnCustomer.style.opacity = "1";
-                    }
-                });
-
-            } else if (statusSayaGlobal === "membawa_customer") {
-                // Kondisi: Sedang Membawa Customer -> Mau selesaikan pelayanan & turun ke antrean bawah
-                if(btnCustomer) {
-                    btnCustomer.disabled = true;
-                    btnCustomer.style.opacity = "0.6";
-                }
-
-                tampilkanModalKonfirmasi("Konfirmasi Selesai", `Apakah pelayanan sudah selesai dan ingin masuk kembali ke antrean paling bawah?`, function() {
-                    fetch(`${SCRIPT_URL}?aksi=selesaiPelayanan&namaSales=${encodeURIComponent(namaSales)}`)
-                    .then(res => res.json())
-                    .then(res => {
-                        tampilkanModal("Status Antrian", res.pesan);
-                        muatDataAntrian();
-                    });
-                }, function() {
-                    // Jika dibatalkan, aktifkan lagi tombolnya
-                    if(btnCustomer) {
-                        btnCustomer.disabled = false;
-                        btnCustomer.style.opacity = "1";
-                    }
-                });
-            }
-        }
-        function daftarMasukAntri() {
-            const namaSales = getAkunAktif();
-            if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
-
-            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
-            .then(res => res.json())
-            .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan);
                 muatDataAntrian();
             });
         }
 
-        function ambilGiliranSaya() {
-            const namaSales = getAkunAktif();
-            if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
-
-            tampilkanModalKonfirmasi("Konfirmasi Layanan", `Apakah benar (${namaSales}) sedang membawa/melayani customer walk-in?`, function() {
-                fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
-                .then(res => res.json())
-                .then(res => {
-                    tampilkanModal("Status Antrian", res.pesan);
-                    muatDataAntrian(); 
-                });
-            });
-        }
-        function prosesSelesaiPelayanan() {
-            const namaSales = getAkunAktif();
-            if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
-
-            tampilkanModalKonfirmasi("Konfirmasi Selesai", `Apakah Anda sudah selesai melayani customer dan ingin masuk ke antrean paling bawah?`, function() {
-                fetch(`${SCRIPT_URL}?aksi=selesaiPelayanan&namaSales=${encodeURIComponent(namaSales)}`)
-                .then(res => res.json())
-                .then(res => {
-                    tampilkanModal("Status Antrian", res.pesan);
-                    muatDataAntrian(); 
-                });
-            });
-        }
+        // Fungsi Tombol 2: Dinamis (Ambil Customer / Selesai Pelayanan)
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
             if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
@@ -586,7 +483,6 @@
             const btnCustomer = document.getElementById('btn-utama-customer');
 
             if (statusSayaGlobal === "standby") {
-                // Pastikan tombol tidak disabled (artinya dia memang urutan 1)
                 if (btnCustomer.disabled) {
                     return tampilkanModal("Perhatian", "Anda belum berada di Urutan Nomor 1. Harap tunggu giliran Anda!");
                 }
