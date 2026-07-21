@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Antrian Walk-In Sales - UFO Kebonsari</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -24,119 +24,121 @@
         *, body, button, select, input {
             font-family: 'Inter', sans-serif !important;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body { 
             background: var(--background); 
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 12px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
 
         .container { 
             width: 100%;
-            max-width: 420px; 
+            max-width: 440px; 
             background: var(--card-bg); 
-            padding: 24px; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1.5px solid rgba(0, 0, 0, 0.15);
+            padding: 18px 14px; 
+            border-radius: 14px; 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border);
             text-align: center;
+            margin-top: 10px;
         }
 
-        h2 { margin: 0 0 5px 0; font-size: 20px; font-weight: 800; }
-        .sub-title { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; font-weight: 500; }
+        h2 { margin: 0 0 2px 0; font-size: 18px; font-weight: 800; }
+        .sub-title { color: var(--text-muted); font-size: 12px; margin-bottom: 16px; font-weight: 500; }
 
         .user-badge {
             background: #f8fafc;
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 15px;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             text-align: left;
         }
-        .user-badge div span { font-size: 11px; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700; }
-        .user-badge div strong { font-size: 15px; color: var(--primary); }
-        .device-lock-info { font-size: 10px; color: var(--danger); font-weight: 600; margin-top: 2px; }
+        .user-badge div span { font-size: 10px; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700; }
+        .user-badge div strong { font-size: 14px; color: var(--primary); word-break: break-all; }
+        .device-lock-info { font-size: 9px; color: var(--danger); font-weight: 600; margin-top: 2px; }
 
         .card-utama {
             background: #eff6ff;
-            border: 2px dashed #bfdbfe;
-            border-radius: 14px;
-            padding: 18px;
-            margin-bottom: 15px;
+            border: 1.5px dashed #bfdbfe;
+            border-radius: 12px;
+            padding: 14px 12px;
+            margin-bottom: 12px;
         }
 
-        .label-giliran { font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
-        .nama-giliran-aktif { font-size: 24px; font-weight: 800; color: #1e3a8a; margin: 0; }
-        .info-timer { font-size: 11px; color: #d97706; margin-top: 6px; font-weight: 600; }
-        .timer-mundur { font-size: 13px; font-weight: 700; color: var(--danger); margin-top: 4px; display: block; }
+        .label-giliran { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+        .nama-giliran-aktif { font-size: 22px; font-weight: 800; color: #1e3a8a; margin: 0; word-break: break-word; }
+        .info-timer { font-size: 11px; color: #d97706; margin-top: 4px; font-weight: 600; }
+        .timer-mundur { font-size: 12px; font-weight: 700; color: var(--danger); margin-top: 3px; display: block; }
 
-        .input-group { text-align: left; margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
+        .input-group { text-align: left; margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: #475569; text-transform: uppercase; }
 
         select, input[type="text"], input[type="password"] { 
-            width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
-            background: #ffffff; font-size: 14px;
+            width: 100%; padding: 11px 12px; border-radius: 9px; border: 1px solid var(--border);
+            background: #ffffff; font-size: 13px; color: var(--text-main);
         }
 
         button { 
-            width: 100%; padding: 13px; margin-top: 10px; border-radius: 10px; 
-            font-size: 13px; font-weight: 700; cursor: pointer; border: none;
-            text-transform: uppercase; letter-spacing: 0.5px;
+            width: 100%; padding: 12px; margin-top: 8px; border-radius: 9px; 
+            font-size: 12px; font-weight: 700; cursor: pointer; border: none;
+            text-transform: uppercase; letter-spacing: 0.3px;
         }
 
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-warning { background: #f59e0b; color: white; }
-        .btn-spv { background: var(--spv-color); color: white; margin-top: 15px; }
+        .btn-spv { background: var(--spv-color); color: white; margin-top: 12px; }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
         
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-success:hover { background: var(--success-hover); }
-        .btn-spv:hover { background: #7c3aed; }
+        .btn-primary:active { background: var(--primary-hover); }
+        .btn-success:active { background: var(--success-hover); }
+        .btn-spv:active { background: #7c3aed; }
 
         /* Panel SPV Khusus */
         .panel-spv-box {
             background: #f5f3ff;
-            border: 2px solid #c4b5fd;
-            border-radius: 14px;
-            padding: 16px;
-            margin-top: 15px;
+            border: 1.5px solid #c4b5fd;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
             text-align: left;
         }
-        .panel-spv-box h3 { margin: 0 0 10px 0; font-size: 14px; color: #6d28d9; border-bottom: 1px solid #ddd6fe; padding-bottom: 6px; }
+        .panel-spv-box h3 { margin: 0 0 6px 0; font-size: 13px; color: #6d28d9; border-bottom: 1px solid #ddd6fe; padding-bottom: 4px; }
 
         .list-box {
             text-align: left; background: #f8fafc; border: 1px solid var(--border);
-            border-radius: 12px; padding: 15px; margin-top: 15px;
+            border-radius: 10px; padding: 12px; margin-top: 12px;
         }
-        .list-box h4 { margin: 0 0 10px 0; font-size: 13px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
-        #item-antrian-list { list-style: none; padding: 0; margin: 0; font-size: 13px; max-height: 150px; overflow-y: auto; }
-        #item-antrian-list li { padding: 8px 0; border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .list-box h4 { margin: 0 0 8px 0; font-size: 12px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+        #item-antrian-list { list-style: none; padding: 0; margin: 0; font-size: 12px; max-height: 140px; overflow-y: auto; }
+        #item-antrian-list li { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
 
         /* Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.6); display: flex; justify-content: center; align-items: center;
-            z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.25s ease;
+            z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.20s ease; padding: 15px;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-box {
-            background: #ffffff; width: 90%; max-width: 340px; padding: 24px;
-            border-radius: 16px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            background: #ffffff; width: 100%; max-width: 310px; padding: 20px 16px;
+            border-radius: 14px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
-        .modal-title { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
-        .modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
-        .modal-actions { display: flex; gap: 10px; }
-        .modal-actions button { margin-top: 0; flex: 1; padding: 12px; font-size: 12px; }
+        .modal-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
+        .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4; }
+        .modal-actions { display: flex; gap: 8px; }
+        .modal-actions button { margin-top: 0; flex: 1; padding: 10px; font-size: 11px; }
         .btn-cancel { background: #e2e8f0; color: #475569; }
     </style>
 </head>
@@ -173,21 +175,21 @@
                 </div>
             </div>
 
-            <button type="button" id="btn-masuk-antri" class="btn-success" onclick="daftarMasukAntri()">Masuk Antrian</button>
+            <button type="button" id="btn-masuk-antri" class="btn-success" onclick="daftarMasukAntri()">Masuk Shift / Ikut Antri</button>
             <button type="button" class="btn-primary" onclick="ambilGiliranSaya()">Saya Membawa Customer (Next)</button>
             
             <!-- TOMBOL AKSES SPV -->
-            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV</button>
+            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV (Wasit)</button>
         </div>
 
-        <!-- PANEL KONTROL SPV (MUNCUL SETELAH INPUT PIN) -->
+        <!-- PANEL KONTROL SPV -->
         <div id="panel-kontrol-spv" class="panel-spv-box" style="display: none;">
-            <h3>👑 Panel Kontrol SPV</h3>
-            <p style="font-size: 11px; color: #6b21a8; margin-top:0;">Anda login sebagai SPV.</p>
+            <h3>👑 Panel Kontrol SPV (Wasit)</h3>
+            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Anda login sebagai Wasit/SPV.</p>
             
-            <button type="button" class="btn-warning" style="margin-top:5px; font-size:12px; padding:10px;" onclick="spvAksi('spvTambahTimer')">⏱️ Tambah Waktu Standby Urutan 1</button>
-            <button type="button" class="btn-danger" style="margin-top:5px; font-size:12px; padding:10px;" onclick="spvAksi('spvGeserCustomer')">👥 Paksa Geser Urutan 1 (Lupa Tombol)</button>
-            <button type="button" class="btn-cancel" style="margin-top:8px; font-size:11px; padding:8px;" onclick="logoutSPV()">Keluar Mode SPV</button>
+            <button type="button" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvTambahTimer')">⏱️ Tambah Waktu Standby Urutan 1</button>
+            <button type="button" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvGeserCustomer')">👥 Paksa Geser Urutan 1 (Lupa Tombol)</button>
+            <button type="button" class="btn-cancel" style="margin-top:6px; font-size:10px; padding:7px;" onclick="logoutSPV()">Keluar Mode SPV</button>
         </div>
 
         <!-- DAFTAR ANTRIAN -->
@@ -289,11 +291,11 @@
             document.getElementById('modal-title').innerText = "🔐 Verifikasi SPV";
             document.getElementById('modal-desc').innerHTML = `
                 Masukkan PIN SPV untuk membuka panel wasit:<br><br>
-                <input type="password" id="input-pin-spv" placeholder="Masukkan PIN (Contoh: 1234)" style="text-align:center; font-size:16px; letter-spacing:3px;">
+                <input type="password" id="input-pin-spv" placeholder="Masukkan PIN" style="text-align:center; font-size:16px; letter-spacing:3px;">
             `;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-spv" onclick="prosesLoginSPV()">Masuk</button>
+                <button type="button" class="btn-spv" onclick="prosesLoginSPV()">Masuk Wasit</button>
             `;
             modal.classList.add('active');
         }
@@ -319,7 +321,7 @@
         }
 
         function spvAksi(aksiName) {
-            const pin = "1234"; // PIN tersembunyi untuk eksekusi cepat dari panel SPV yang sudah terbuka
+            const pin = "1234"; 
             fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}`)
             .then(res => res.json())
             .then(res => {
@@ -379,8 +381,7 @@
                     const akunSaya = getAkunAktif();
                     let sudahTerdaftar = false;
 
-                    waktuTerlastKeyGlobal = res.waktuStandbyPertama || null;
-                    waktuTerakhirStandbyGlobal = res.waktuStandbyPertama;
+                    waktuTerakhirStandbyGlobal = res.waktuStandbyPertama || null;
 
                     if(daftarAntrianGlobal.length > 0) {
                         daftarAntrianGlobal.forEach((item, index) => {
