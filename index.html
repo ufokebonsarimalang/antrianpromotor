@@ -50,7 +50,6 @@
         h2 { margin: 0 0 5px 0; font-size: 20px; font-weight: 800; }
         .sub-title { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; font-weight: 500; }
 
-        /* PANEL LOGIN AKUN */
         .user-badge {
             background: #f8fafc;
             border: 1px solid var(--border);
@@ -82,7 +81,7 @@
         .input-group { text-align: left; margin-bottom: 15px; }
         .input-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
 
-        select, input { 
+        select { 
             width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
             background: #ffffff; font-size: 14px;
         }
@@ -106,7 +105,6 @@
         #item-antrian-list { list-style: none; padding: 0; margin: 0; font-size: 13px; max-height: 160px; overflow-y: auto; }
         #item-antrian-list li { padding: 8px 0; border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
 
-        /* MODAL KUSTOM */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -168,12 +166,6 @@
                 <button type="button" class="btn-logout" onclick="gantiAkun()">Ganti Akun</button>
             </div>
 
-            <!-- INPUT PIN HARIAN -->
-            <div class="input-group">
-                <label>PIN Shift Toko</label>
-                <input type="password" id="pin-shift" placeholder="Masukkan PIN dari Admin">
-            </div>
-
             <!-- TOMBOL DAFTAR / CHECK-IN -->
             <button type="button" class="btn-success" onclick="daftarMasukAntri()">
                 Masuk Shift / Ikut Antri
@@ -185,9 +177,9 @@
             </button>
         </div>
 
-        <!-- DAFTAR URUTAN ANTRIAN AKTIF (TERLIHAT SEMUA) -->
+        <!-- DAFTAR URUTAN ANTRIAN AKTIF -->
         <div class="list-box">
-            <h4>📋 Urutan Antrian Hari Ini (Transparan)</h4>
+            <h4>📋 Urutan Antrian Hari Ini</h4>
             <ul id="item-antrian-list">
                 <li><span>Memuat data...</span></li>
             </ul>
@@ -214,7 +206,6 @@
             setInterval(muatDataAntrian, 5000); 
         };
 
-        // Cek apakah HP ini sudah diset akun atas nama siapa
         function cekAkunTersimpan() {
             const savedUser = localStorage.getItem('ufo_sales_account');
             if (savedUser) {
@@ -318,14 +309,12 @@
 
         function daftarMasukAntri() {
             const namaSales = getAkunAktif();
-            const pinSales = document.getElementById('pin-shift').value;
-            
-            if(!namaSales || !pinSales) {
-                tampilkanModal("Perhatian", "Silakan masukkan PIN Shift toko terlebih dahulu!");
+            if(!namaSales) {
+                tampilkanModal("Perhatian", "Akun belum terdeteksi.");
                 return;
             }
 
-            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pinSales)}`)
+            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan);
