@@ -380,6 +380,8 @@
 
     let statusSayaGlobal = "belum_ada"; // Menyimpan status terkini promotor
 
+       let statusSayaGlobal = "belum_ada"; // Menyimpan status terkini promotor
+
         function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
@@ -393,9 +395,18 @@
                     statusSayaGlobal = "belum_ada"; 
                     waktuTerakhirStandbyGlobal = res.waktuStandbyPertama || null;
 
+                    let apakahSayaUrutanPertama = false;
+
                     if(daftarAntrianGlobal.length > 0) {
                         daftarAntrianGlobal.forEach((item, index) => {
-                            if(index === 0) salesUtama = item.nama;
+                            if(index === 0) {
+                                salesUtama = item.nama;
+                                // Cek apakah saya berada di urutan pertama dan statusnya Standby
+                                if(item.nama === akunSaya && item.status === "Standby") {
+                                    apakahSayaUrutanPertama = true;
+                                }
+                            }
+                            
                             if(item.nama === akunSaya) {
                                 if(item.status === "Standby") statusSayaGlobal = "standby";
                                 else statusSayaGlobal = "membawa_customer";
@@ -410,18 +421,29 @@
                     const btnAntri = document.getElementById('btn-utama-antri');
                     const btnCustomer = document.getElementById('btn-utama-customer');
 
-                    // ATUR TAMPILAN BERDASARKAN STATUS PROMOTOR
+                    // ATUR TAMPILAN BERDASARKAN STATUS & POSISI PROMOTOR
                     if (statusSayaGlobal === "standby") {
                         // Tombol 1: Berubah jadi informasi status & dimatikan
                         btnAntri.innerText = "Anda Sudah Di Antrian";
                         btnAntri.className = "btn-success btn-disabled";
                         btnAntri.disabled = true;
 
-                        // Tombol 2: Muncul teks "Sudah Membawa Customer", aktif normal
+                        // Tombol 2: Muncul
                         btnCustomer.style.display = "block";
                         btnCustomer.innerText = "Sudah Membawa Customer";
-                        btnCustomer.className = "btn-primary";
-                        btnCustomer.disabled = false;
+
+                        // KUNCI TOMBOL JIKA BELUM URUTAN PERTAMA
+                        if (apakahSayaUrutanPertama) {
+                            btnCustomer.className = "btn-primary";
+                            btnCustomer.disabled = false;
+                            btnCustomer.style.opacity = "1";
+                            btnCustomer.style.cursor = "pointer";
+                        } else {
+                            btnCustomer.className = "btn-primary btn-disabled";
+                            btnCustomer.disabled = true;
+                            btnCustomer.style.opacity = "0.5";
+                            btnCustomer.style.cursor = "not-allowed";
+                        }
 
                     } else if (statusSayaGlobal === "membawa_customer") {
                         // Tombol 1: Tetap terkunci
@@ -429,11 +451,13 @@
                         btnAntri.className = "btn-success btn-disabled";
                         btnAntri.disabled = true;
 
-                        // Tombol 2: Berubah fungsi jadi "Selesai Pelayanan (Antri Bawah)", aktif normal
+                        // Tombol 2: Berubah fungsi jadi "Selesai Pelayanan (Antri Bawah)", aktif normal karena dia memang sedang melayani
                         btnCustomer.style.display = "block";
                         btnCustomer.innerText = "Selesai Pelayanan (Antri Bawah)";
                         btnCustomer.className = "btn-warning";
                         btnCustomer.disabled = false;
+                        btnCustomer.style.opacity = "1";
+                        btnCustomer.style.cursor = "pointer";
 
                     } else {
                         // Belum masuk antrean sama sekali
