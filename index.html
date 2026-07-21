@@ -380,7 +380,7 @@
             });
         }
 
-        function muatDataAntrian() {
+       function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
@@ -389,29 +389,51 @@
                     let listHtml = "";
                     let salesUtama = "Belum ada antrian";
                     const akunSaya = getAkunAktif();
-                    let sudahTerdaftar = false;
-
+                    
+                    let statusSaya = "belum_ada"; // belum_ada, standby, atau membawa_customer
                     waktuTerakhirStandbyGlobal = res.waktuStandbyPertama || null;
 
                     if(daftarAntrianGlobal.length > 0) {
                         daftarAntrianGlobal.forEach((item, index) => {
                             if(index === 0) salesUtama = item.nama;
-                            if(item.nama === akunSaya) sudahTerdaftar = true;
+                            if(item.nama === akunSaya) {
+                                if(item.status === "Standby") statusSaya = "standby";
+                                else statusSaya = "membawa_customer";
+                            }
                             listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
                         });
                     } else {
                         listHtml = "<li><span>Belum ada promotor aktif</span></li>";
                     }
 
+                    // Ambil elemen tombol
                     const btnMasuk = document.getElementById('btn-masuk-antri');
-                    if(sudahTerdaftar) {
+                    const btnCustomer = document.getElementById('btn-ambil-customer');
+                    const btnSelesai = document.getElementById('btn-selesai-pelayanan');
+
+                    // Atur tombol berdasarkan posisi/status promotor saat ini di antrean
+                    if (statusSaya === "standby") {
                         btnMasuk.innerText = "Anda Sudah Di Antrian";
                         btnMasuk.className = "btn-success btn-disabled";
                         btnMasuk.disabled = true;
+
+                        btnCustomer.style.display = "block";
+                        btnSelesai.style.display = "none";
+                    } else if (statusSaya === "membawa_customer") {
+                        btnMasuk.innerText = "Sedang Melayani Customer";
+                        btnMasuk.className = "btn-success btn-disabled";
+                        btnMasuk.disabled = true;
+
+                        btnCustomer.style.display = "none";
+                        btnSelesai.style.display = "block"; // Munculkan tombol selesai
                     } else {
+                        // Belum masuk antrean sama sekali
                         btnMasuk.innerText = "Masuk Shift / Ikut Antri";
                         btnMasuk.className = "btn-success";
                         btnMasuk.disabled = false;
+
+                        btnCustomer.style.display = "block";
+                        btnSelesai.style.display = "none";
                     }
 
                     document.getElementById('nama-aktif').innerText = salesUtama;
