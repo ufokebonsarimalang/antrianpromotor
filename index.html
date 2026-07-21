@@ -403,15 +403,16 @@
                                 }
                             }
                             
-                            if(item.nama === akunSaya) {
-                                if(item.status === "Standby") statusSayaGlobal = "standby";
-                                else statusSayaGlobal = "membawa_customer";
+                           if(item.nama === akunSaya) {
+                                if(item.status === "Standby") {
+                                    statusSayaGlobal = "standby";
+                                } else if(item.status === "Membawa Customer" || item.status === "Sudah Membawa Customer") {
+                                    statusSayaGlobal = "membawa_customer";
+                                } else {
+                                    // Jika statusnya "Mangkir / Waktu Habis" atau lainnya, anggap belum masuk antrian aktif
+                                    statusSayaGlobal = "belum_ada"; 
+                                }
                             }
-                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
-                        });
-                    } else {
-                        listHtml = "<li><span>Belum ada promotor aktif</span></li>";
-                    }
 
                     const btnAntri = document.getElementById('btn-utama-antri');
                     const btnCustomer = document.getElementById('btn-utama-customer');
