@@ -211,21 +211,16 @@
     </div>
 
     <script>
-        // Ganti dengan URL Deployment Google Apps Script Anda
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
-        // Jalankan otomatis saat halaman dibuka
         window.onload = function() {
             muatDataAntrian();
-            // Refresh otomatis setiap 5 detik agar real-time antar HP sales
             setInterval(muatDataAntrian, 5000);
         };
 
         function muatDataAntrian() {
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ aksi: "getAntrian" })
-            })
+            // Menggunakan metode GET untuk menghindari blokir CORS
+            fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
                 if(res.status === "sukses") {
@@ -234,7 +229,6 @@
                     let salesUtama = "Belum ada";
 
                     data.forEach((item, index) => {
-                        // Sales urutan pertama / teratas yang jadi giliran utama
                         if(index === 0) {
                             salesUtama = item.nama;
                         }
@@ -246,6 +240,28 @@
                 }
             })
             .catch(err => console.error("Gagal sinkronisasi antrian:", err));
+        }
+
+        function ambilGiliranSaya() {
+            const namaSales = document.getElementById('pilih-sales').value;
+            if(!namaSales) {
+                alert("Silakan pilih nama Anda terlebih dahulu pada daftar pilihan!");
+                return;
+            }
+
+            if(!confirm(`Konfirmasi: ${namaSales} mendapat customer walk-in sekarang?`)) return;
+
+            // Menggunakan metode GET dengan parameter URL
+            fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
+            .then(res => res.json())
+            .then(res => {
+                alert(res.pesan);
+                muatDataAntrian(); 
+            })
+            .catch(err => {
+                alert("Gagal terhubung ke server.");
+                console.error(err);
+            });
         }
 
         function ambilGiliranSaya() {
