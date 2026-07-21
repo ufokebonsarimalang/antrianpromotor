@@ -171,7 +171,7 @@
                 </div>
             </div>
 
-            <!-- TOMBOL CHECK-IN (Diberi id agar bisa dikontrol aktif/mati) -->
+            <!-- TOMBOL CHECK-IN -->
             <button type="button" id="btn-masuk-antri" class="btn-success" onclick="daftarMasukAntri()">
                 Masuk Shift / Ikut Antri
             </button>
@@ -400,7 +400,6 @@
                             if(index === 0) {
                                 salesUtama = item.nama;
                             }
-                            // Cek apakah akun di HP ini sudah ada di dalam daftar antrian
                             if(item.nama === akunSaya) {
                                 sudahTerdaftar = true;
                             }
@@ -410,7 +409,6 @@
                         listHtml = "<li><span>Belum ada promotor yang check-in</span></li>";
                     }
 
-                    // ATUR TOMBOL MASUK ANTRI BERDASARKAN STATUS
                     const btnMasuk = document.getElementById('btn-masuk-antri');
                     if(sudahTerdaftar) {
                         btnMasuk.innerText = "Anda Sudah Masuk Antrian";
@@ -435,10 +433,19 @@
                 return;
             }
 
+            // Kunci tombol seketika saat ditekan untuk mencegah dobel klik saat delay
+            const btnMasuk = document.getElementById('btn-masuk-antri');
+            btnMasuk.disabled = true;
+            btnMasuk.innerText = "Memproses...";
+
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan);
+                muatDataAntrian();
+            })
+            .catch(err => {
+                tampilkanModal("Kesalahan", "Gagal terhubung ke server. Silakan coba lagi.");
                 muatDataAntrian();
             });
         }
