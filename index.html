@@ -100,12 +100,18 @@
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
         </div>
 
-        <!-- FORM PILIH NAMA -->
+      <!-- FORM PILIH NAMA -->
         <div class="input-group">
             <label>Pilih Nama Anda</label>
             <select id="pilih-sales">
-                <option value="">-- Memuat Data Master --</option>
+                <option value="">-- Pilih Nama Anda --</option>
             </select>
+        </div>
+
+        <!-- INPUT PIN HARIAN -->
+        <div class="input-group">
+            <label>PIN Shift Toko</label>
+            <input type="password" id="pin-shift" placeholder="Masukkan PIN dari Admin">
         </div>
 
         <!-- TOMBOL DAFTAR / CHECK-IN -->
@@ -207,6 +213,22 @@
             .then(res => {
                 alert(res.pesan);
                 muatDataAntrian(); 
+            });
+        }
+        function daftarMasukAntri() {
+            const namaSales = document.getElementById('pilih-sales').value;
+            const pinSales = document.getElementById('pin-shift').value;
+            
+            if(!namaSales || !pinSales) {
+                alert("Silakan pilih nama dan masukkan PIN Shift terlebih dahulu!");
+                return;
+            }
+
+            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pinSales)}`)
+            .then(res => res.json())
+            .then(res => {
+                alert(res.pesan);
+                muatDataAntrian();
             });
         }
     </script>
