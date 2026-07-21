@@ -210,12 +210,13 @@
 
         let waktuTerakhirStandbyGlobal = null;
         const BATAS_MENIT = 10;
+        let sudahMunculPopUpPeringatan = false; // Penjaga agar pop-up tidak spam terus-menerus
 
         window.onload = function() {
             cekAkunTersimpan();
             muatDataAntrian();
             setInterval(muatDataAntrian, 5000); 
-            setInterval(hitungMundurLokal, 1000); // Hitung mundur setiap detik
+            setInterval(hitungMundurLokal, 1000); 
         };
 
         function cekAkunTersimpan() {
@@ -250,10 +251,8 @@
         }
 
         function triggerGetar() {
-            // Cek apakah browser HP mendukung fitur getar
             if ("vibrate" in navigator) {
-                // Pola getar: Bergetar 500ms, jeda 200ms, bergetar 500ms
-                navigator.vibrate([500, 200, 500]);
+                navigator.vibrate([600, 200, 600, 200, 600]); // Getar lebih panjang
             }
         }
 
@@ -274,6 +273,7 @@
             const salesUtama = document.getElementById('nama-aktif').innerText;
 
             if (sisaMs > 0) {
+                sudahMunculPop-UpPeringatan = false; // Reset jika waktu kembali normal
                 const totalDetik = Math.floor(sisaMs / 1000);
                 const menit = Math.floor(totalDetik / 60);
                 const detik = totalDetik % 60;
@@ -287,9 +287,18 @@
                 labelTimer.style.color = 'var(--danger)';
                 labelTimer.innerText = `🚨 Waktu Habis! Siap-siap digeser sistem.`;
 
-                // Jika HP ini dipegang oleh Urutan 1 yang telat, getarkan HP-nya secara berulang
+                // Jika HP ini dipegang oleh Urutan 1 yang telat
                 if (akunSaya && akunSaya === salesUtama) {
                     triggerGetar();
+
+                    // Munculkan POP-UP peringatan otomatis SEKALI saja saat waktu habis
+                    if (!sudahMunculPopUpPeringatan) {
+                        sudahMunculPopUpPeringatan = true;
+                        tampilkanModal(
+                            "🚨 PERINGATAN WAKTU HABIS!", 
+                            `Halo (${akunSaya}), waktu standby Anda di Urutan 1 sudah melebihi 10 menit!\n\nSegera tekan tombol 'Saya Standby di Tempat' atau Anda akan otomatis digeser ke antrian paling bawah oleh sistem.`
+                        );
+                    }
                 }
             }
         }
@@ -297,7 +306,7 @@
         function tampilkanModal(judul, pesan, tipe = 'alert', callbackOk = null) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judul;
-            document.getElementById('modal-desc').innerText = pesan;
+            document.getElementById('modal-desc').innerText = pesan.replace(/\n/g, '<br>'); // Support baris baru
             
             const actionsContainer = document.getElementById('modal-actions');
             
