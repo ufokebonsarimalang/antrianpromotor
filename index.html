@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Antrian Walk-In Sales - UFO Kebonsari</title>
-    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -20,8 +19,8 @@
             --border: #e2e8f0;
         }
 
-        *, body, button, input {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        *, body, button, select {
+            font-family: 'Inter', sans-serif !important;
             box-sizing: border-box;
         }
 
@@ -47,19 +46,8 @@
             text-align: center;
         }
 
-        h2 {
-            margin: 0 0 5px 0;
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text-main);
-        }
-
-        .sub-title {
-            color: var(--text-muted);
-            font-size: 13px;
-            margin-bottom: 24px;
-            font-weight: 500;
-        }
+        h2 { margin: 0 0 5px 0; font-size: 20px; font-weight: 800; }
+        .sub-title { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; font-weight: 500; }
 
         .card-utama {
             background: #eff6ff;
@@ -69,115 +57,42 @@
             margin-bottom: 20px;
         }
 
-        .label-giliran {
-            font-size: 12px;
-            text-transform: uppercase;
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
+        .label-giliran { font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+        .nama-giliran-aktif { font-size: 26px; font-weight: 800; color: #1e3a8a; margin: 0; }
 
-        .nama-giliran-aktif {
-            font-size: 26px;
-            font-weight: 800;
-            color: #1e3a8a;
-            margin: 0;
-        }
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
 
-        .input-group {
-            text-align: left;
-            margin-bottom: 15px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #475569;
-            text-transform: uppercase;
-        }
-
-        select, input { 
-            width: 100%; 
-            padding: 12px 14px; 
-            border-radius: 10px; 
-            border: 1px solid var(--border);
-            background: #ffffff;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        select:focus, input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(25, 103, 210, 0.1);
+        select { 
+            width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
+            background: #ffffff; font-size: 14px;
         }
 
         button { 
-            width: 100%; 
-            padding: 14px; 
-            margin-top: 10px;
-            border-radius: 10px; 
-            font-size: 13px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            border: none;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            width: 100%; padding: 14px; margin-top: 10px; border-radius: 10px; 
+            font-size: 13px; font-weight: 700; cursor: pointer; border: none;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 10px rgba(25, 103, 210, 0.25);
-        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
         .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success:hover { background: var(--success-hover); }
 
         .list-box {
-            text-align: left;
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 20px;
+            text-align: left; background: #f8fafc; border: 1px solid var(--border);
+            border-radius: 12px; padding: 15px; margin-top: 20px;
         }
-
-        .list-box h4 {
-            margin: 0 0 10px 0;
-            font-size: 13px;
-            color: var(--text-main);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 6px;
-        }
-
-        #item-antrian-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            font-size: 13px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        #item-antrian-list li {
-            padding: 6px 0;
-            border-bottom: 1px dashed #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-        }
-        #item-antrian-list li:last-child {
-            border-bottom: none;
-        }
+        .list-box h4 { margin: 0 0 10px 0; font-size: 13px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+        #item-antrian-list { list-style: none; padding: 0; margin: 0; font-size: 13px; max-height: 150px; overflow-y: auto; }
+        #item-antrian-list li { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2>🎫 Antrian Walk-In</h2>
-        <p class="sub-title">Sistem Giliran Promotor Toko UFO Kebonsari</p>
+        <p class="sub-title">Sistem Giliran Promotor UFO Kebonsari</p>
 
         <!-- KOTAK UTAMA -->
         <div class="card-utama">
@@ -185,21 +100,27 @@
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
         </div>
 
-        <!-- FORM PILIH NAMA PROMOTOR -->
+        <!-- FORM PILIH NAMA -->
         <div class="input-group">
-            <label>Pilih Nama Anda (Promotor)</label>
+            <label>Pilih Nama Anda</label>
             <select id="pilih-sales">
-                <option value="">-- Memuat Nama Promotor --</option>
+                <option value="">-- Memuat Data Master --</option>
             </select>
         </div>
 
+        <!-- TOMBOL DAFTAR / CHECK-IN -->
+        <button type="button" class="btn-success" onclick="daftarMasukAntri()">
+            Masuk Shift / Ikut Antri
+        </button>
+
+        <!-- TOMBOL DAPAT CUSTOMER -->
         <button type="button" class="btn-primary" onclick="ambilGiliranSaya()">
             Saya Dapat Customer (Next)
         </button>
 
-        <!-- DAFTAR URUTAN ANTRIAN -->
+        <!-- DAFTAR URUTAN ANTRIAN AKTIF -->
         <div class="list-box">
-            <h4>📋 Urutan Antrian Berikutnya</h4>
+            <h4>📋 Urutan Antrian Hari Ini</h4>
             <ul id="item-antrian-list">
                 <li><span>Memuat data...</span></li>
             </ul>
@@ -210,10 +131,27 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         window.onload = function() {
+            muatMasterSales();
             muatDataAntrian();
-            setInterval(muatDataAntrian, 5000); // Auto refresh tiap 5 detik
+            setInterval(muatDataAntrian, 5000); // Auto refresh antrian tiap 5 detik
         };
 
+        // Mengambil master 20 sales untuk pilihan dropdown
+        function muatMasterSales() {
+            fetch(`${SCRIPT_URL}?aksi=getMasterSales`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses") {
+                    let dropdownHtml = '<option value="">-- Pilih Nama Anda --</option>';
+                    res.data.forEach(nama => {
+                        dropdownHtml += `<option value="${nama}">${nama}</option>`;
+                    });
+                    document.getElementById('pilih-sales').innerHTML = dropdownHtml;
+                }
+            });
+        }
+
+        // Mengambil daftar antrian aktif yang sedang bertugas
         function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
@@ -221,39 +159,44 @@
                 if(res.status === "sukses") {
                     let data = res.data;
                     let listHtml = "";
-                    let salesUtama = "Belum ada";
-                    let dropdownHtml = '<option value="">-- Pilih Nama Promotor --</option>';
+                    let salesUtama = "Belum ada antrian";
 
-                    data.forEach((item, index) => {
-                        if(index === 0) {
-                            salesUtama = item.nama;
-                        }
-                        listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
-                        dropdownHtml += `<option value="${item.nama}">${item.nama}</option>`;
-                    });
+                    if(data.length > 0) {
+                        data.forEach((item, index) => {
+                            if(index === 0) salesUtama = item.nama;
+                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
+                        });
+                    } else {
+                        listHtml = "<li><span>Belum ada promotor yang check-in</span></li>";
+                    }
 
                     document.getElementById('nama-aktif').innerText = salesUtama;
                     document.getElementById('item-antrian-list').innerHTML = listHtml;
-                    
-                    const selectEl = document.getElementById('pilih-sales');
-                    let currentSelected = selectEl.value;
-                    selectEl.innerHTML = dropdownHtml;
-                    if(currentSelected) selectEl.value = currentSelected;
-                } else {
-                    document.getElementById('nama-aktif').innerText = "Gagal memuat";
-                    console.error("Pesan dari Server:", res.pesan);
                 }
-            })
-            .catch(err => {
-                console.error("Gagal koneksi fetch:", err);
-                document.getElementById('nama-aktif').innerText = "Koneksi Gagal";
             });
         }
 
+        // Fungsi saat sales klik "Masuk Shift / Ikut Antri"
+        function daftarMasukAntri() {
+            const namaSales = document.getElementById('pilih-sales').value;
+            if(!namaSales) {
+                alert("Silakan pilih nama Anda terlebih dahulu!");
+                return;
+            }
+
+            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
+            .then(res => res.json())
+            .then(res => {
+                alert(res.pesan);
+                muatDataAntrian();
+            });
+        }
+
+        // Fungsi saat sales dapat customer
         function ambilGiliranSaya() {
             const namaSales = document.getElementById('pilih-sales').value;
             if(!namaSales) {
-                alert("Silakan pilih nama Anda terlebih dahulu pada daftar pilihan!");
+                alert("Silakan pilih nama Anda terlebih dahulu!");
                 return;
             }
 
@@ -264,10 +207,6 @@
             .then(res => {
                 alert(res.pesan);
                 muatDataAntrian(); 
-            })
-            .catch(err => {
-                alert("Gagal terhubung ke server.");
-                console.error(err);
             });
         }
     </script>
