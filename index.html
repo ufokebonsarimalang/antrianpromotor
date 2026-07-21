@@ -179,13 +179,13 @@
         <h2>🎫 Antrian Walk-In</h2>
         <p class="sub-title">Sistem Giliran Promotor Toko UFO Kebonsari</p>
 
-        <!-- KOTAK UTAMA SIAPA YANG DAPAT GILIRAN -->
+        <!-- KOTAK UTAMA -->
         <div class="card-utama">
             <div class="label-giliran">Giliran Melayani Saat Ini</div>
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
         </div>
 
-        <!-- FORM PILIH NAMA PROMOTOR (OTOMATIS DARI SHEET) -->
+        <!-- FORM PILIH NAMA PROMOTOR -->
         <div class="input-group">
             <label>Pilih Nama Anda (Promotor)</label>
             <select id="pilih-sales">
@@ -215,40 +215,39 @@
         };
 
         function muatDataAntrian() {
-            const oldScript = document.getElementById('jsonp-script-get');
-            if (oldScript) oldScript.remove();
+            fetch(`${SCRIPT_URL}?aksi=getAntrian`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses") {
+                    let data = res.data;
+                    let listHtml = "";
+                    let salesUtama = "Belum ada";
+                    let dropdownHtml = '<option value="">-- Pilih Nama Promotor --</option>';
 
-            const script = document.createElement('script');
-            script.id = 'jsonp-script-get';
-            script.src = `${SCRIPT_URL}?aksi=getAntrian&callback=callbackAntrian`;
-            document.body.appendChild(script);
-        }
+                    data.forEach((item, index) => {
+                        if(index === 0) {
+                            salesUtama = item.nama;
+                        }
+                        listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
+                        dropdownHtml += `<option value="${item.nama}">${item.nama}</option>`;
+                    });
 
-        // Fungsi penerima data list antrian dan pengisi dropdown otomatis
-        function callbackAntrian(res) {
-            if(res && res.status === "sukses") {
-                let data = res.data;
-                let listHtml = "";
-                let salesUtama = "Belum ada";
-                let dropdownHtml = '<option value="">-- Pilih Nama Promotor --</option>';
-
-                data.forEach((item, index) => {
-                    if(index === 0) {
-                        salesUtama = item.nama;
-                    }
-                    listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
-                    dropdownHtml += `<option value="${item.nama}">${item.nama}</option>`;
-                });
-
-                document.getElementById('nama-aktif').innerText = salesUtama;
-                document.getElementById('item-antrian-list').innerHTML = listHtml;
-                
-                // Update pilihan dropdown secara dinamis sesuai Google Sheets
-                const selectEl = document.getElementById('pilih-sales');
-                let currentSelected = selectEl.value;
-                selectEl.innerHTML = dropdownHtml;
-                if(currentSelected) selectEl.value = currentSelected;
-            }
+                    document.getElementById('nama-aktif').innerText = salesUtama;
+                    document.getElementById('item-antrian-list').innerHTML = listHtml;
+                    
+                    const selectEl = document.getElementById('pilih-sales');
+                    let currentSelected = selectEl.value;
+                    selectEl.innerHTML = dropdownHtml;
+                    if(currentSelected) selectEl.value = currentSelected;
+                } else {
+                    document.getElementById('nama-aktif').innerText = "Gagal memuat";
+                    console.error("Pesan dari Server:", res.pesan);
+                }
+            })
+            .catch(err => {
+                console.error("Gagal koneksi fetch:", err);
+                document.getElementById('nama-aktif').innerText = "Koneksi Gagal";
+            });
         }
 
         function ambilGiliranSaya() {
@@ -260,22 +259,16 @@
 
             if(!confirm(`Konfirmasi: ${namaSales} mendapat customer walk-in sekarang?`)) return;
 
-            const oldScript = document.getElementById('jsonp-script-action');
-            if (oldScript) oldScript.remove();
-
-            const script = document.createElement('script');
-            script.id = 'jsonp-script-action';
-            script.src = `${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}&callback=callbackAksi`;
-            document.body.appendChild(script);
-        }
-
-        function callbackAksi(res) {
-            if(res) {
+            fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
+            .then(res => res.json())
+            .then(res => {
                 alert(res.pesan);
-                muatDataAntrian(); // Refresh data antrian langsung
-            } else {
-                alert("Gagal memproses giliran.");
-            }
+                muatDataAntrian(); 
+            })
+            .catch(err => {
+                alert("Gagal terhubung ke server.");
+                console.error(err);
+            });
         }
     </script>
 </body>
