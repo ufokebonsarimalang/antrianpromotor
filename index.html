@@ -173,17 +173,17 @@
                 </div>
             </div>
 
-            <button type="button" id="btn-masuk-antri" class="btn-success" onclick="daftarMasukAntri()">Masuk Shift / Ikut Antri</button>
+            <button type="button" id="btn-masuk-antri" class="btn-success" onclick="daftarMasukAntri()">Masuk Antrian</button>
             <button type="button" class="btn-primary" onclick="ambilGiliranSaya()">Saya Membawa Customer (Next)</button>
             
             <!-- TOMBOL AKSES SPV -->
-            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV (Wasit)</button>
+            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV</button>
         </div>
 
         <!-- PANEL KONTROL SPV (MUNCUL SETELAH INPUT PIN) -->
         <div id="panel-kontrol-spv" class="panel-spv-box" style="display: none;">
-            <h3>👑 Panel Kontrol SPV (Wasit)</h3>
-            <p style="font-size: 11px; color: #6b21a8; margin-top:0;">Anda login sebagai Wasit/SPV.</p>
+            <h3>👑 Panel Kontrol SPV</h3>
+            <p style="font-size: 11px; color: #6b21a8; margin-top:0;">Anda login sebagai SPV.</p>
             
             <button type="button" class="btn-warning" style="margin-top:5px; font-size:12px; padding:10px;" onclick="spvAksi('spvTambahTimer')">⏱️ Tambah Waktu Standby Urutan 1</button>
             <button type="button" class="btn-danger" style="margin-top:5px; font-size:12px; padding:10px;" onclick="spvAksi('spvGeserCustomer')">👥 Paksa Geser Urutan 1 (Lupa Tombol)</button>
@@ -211,7 +211,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "GANTI_DENGAN_URL_DEPLOY_GOOGLE_APPS_SCRIPT_ANDA";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         let waktuTerakhirStandbyGlobal = null;
         let daftarAntrianGlobal = [];
