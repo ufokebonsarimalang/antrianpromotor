@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antrian Walk-In Sales - UFO Kebonsari</title>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #1967d2;
+            --primary-hover: #1558b0;
+            --success: #10b981;
+            --success-hover: #059669;
+            --background: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        *, body, button, input {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            box-sizing: border-box;
+        }
+
+        body { 
+            background: var(--background); 
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container { 
+            width: 100%;
+            max-width: 420px; 
+            background: var(--card-bg); 
+            padding: 30px 24px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1.5px solid rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        h2 {
+            margin: 0 0 5px 0;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .sub-title {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .card-utama {
+            background: #eff6ff;
+            border: 2px dashed #bfdbfe;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .label-giliran {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .nama-giliran-aktif {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1e3a8a;
+            margin: 0;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #475569;
+            text-transform: uppercase;
+        }
+
+        select, input { 
+            width: 100%; 
+            padding: 12px 14px; 
+            border-radius: 10px; 
+            border: 1px solid var(--border);
+            background: #ffffff;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(25, 103, 210, 0.1);
+        }
+
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            margin-top: 10px;
+            border-radius: 10px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            border: none;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(25, 103, 210, 0.25);
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        .list-box {
+            text-align: left;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .list-box h4 {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+
+        #item-antrian-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 13px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        #item-antrian-list li {
+            padding: 6px 0;
+            border-bottom: 1px dashed #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+        }
+        #item-antrian-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🎫 Antrian Walk-In</h2>
+        <p class="sub-title">Sistem Giliran Sales Toko UFO Kebonsari</p>
+
+        <!-- KOTAK UTAMA SIAPA YANG DAPAT GILIRAN -->
+        <div class="card-utama">
+            <div class="label-giliran">Giliran Melayani Saat Ini</div>
+            <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
+        </div>
+
+        <!-- FORM PILIH NAMA SALES UNTUK KLAIM -->
+        <div class="input-group">
+            <label>Pilih Nama Anda (Sales)</label>
+            <select id="pilih-sales">
+                <option value="">-- Pilih Nama Sales --</option>
+                <!-- Nama sales bisa ditarik otomatis dari Apps Script atau ditulis manual -->
+                <option value="Sales 1">Sales 1</option>
+                <option value="Sales 2">Sales 2</option>
+                <option value="Sales 3">Sales 3</option>
+            </select>
+        </div>
+
+        <button type="button" class="btn-primary" onclick="ambilGiliranSaya()">
+            Saya Dapat Customer (Next)
+        </button>
+
+        <!-- DAFTAR URUTAN ANTRIAN -->
+        <div class="list-box">
+            <h4>📋 Urutan Antrian Berikutnya</h4>
+            <ul id="item-antrian-list">
+                <li><span>Memuat data...</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Ganti dengan URL Deployment Google Apps Script Anda
+        const SCRIPT_URL = "MASUKKAN_URL_DEPLOYMENT_APPS_SCRIPT_ANDA_DI_SINI";
+
+        // Jalankan otomatis saat halaman dibuka
+        window.onload = function() {
+            muatDataAntrian();
+            // Refresh otomatis setiap 5 detik agar real-time antar HP sales
+            setInterval(muatDataAntrian, 5000);
+        };
+
+        function muatDataAntrian() {
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ aksi: "getAntrian" })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses") {
+                    let data = res.data;
+                    let listHtml = "";
+                    let salesUtama = "Belum ada";
+
+                    data.forEach((item, index) => {
+                        // Sales urutan pertama / teratas yang jadi giliran utama
+                        if(index === 0) {
+                            salesUtama = item.nama;
+                        }
+                        listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
+                    });
+
+                    document.getElementById('nama-aktif').innerText = salesUtama;
+                    document.getElementById('item-antrian-list').innerHTML = listHtml;
+                }
+            })
+            .catch(err => console.error("Gagal sinkronisasi antrian:", err));
+        }
+
+        function ambilGiliranSaya() {
+            const namaSales = document.getElementById('pilih-sales').value;
+            if(!namaSales) {
+                alert("Silakan pilih nama Anda terlebih dahulu pada daftar pilihan!");
+                return;
+            }
+
+            if(!confirm(`Konfirmasi: ${namaSales} mendapat customer walk-in sekarang?`)) return;
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ aksi: "ambilAntrian", namaSales: namaSales })
+            })
+            .then(res => res.json())
+            .then(res => {
+                alert(res.pesan);
+                muatDataAntrian(); // Refresh langsung
+            })
+            .catch(err => {
+                alert("Gagal terhubung ke server.");
+                console.error(err);
+            });
+        }
+    </script>
+</body>
+</html>
