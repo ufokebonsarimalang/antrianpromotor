@@ -177,7 +177,7 @@
 
     <div class="container">
         <h2>🎫 Antrian Walk-In</h2>
-        <p class="sub-title">Sistem Giliran Sales Toko UFO Kebonsari</p>
+        <p class="sub-title">Sistem Giliran Promotor Toko UFO Kebonsari</p>
 
         <!-- KOTAK UTAMA SIAPA YANG DAPAT GILIRAN -->
         <div class="card-utama">
@@ -185,15 +185,11 @@
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
         </div>
 
-        <!-- FORM PILIH NAMA SALES UNTUK KLAIM -->
+        <!-- FORM PILIH NAMA PROMOTOR (OTOMATIS DARI SHEET) -->
         <div class="input-group">
-            <label>Pilih Nama Anda (Sales)</label>
+            <label>Pilih Nama Anda (Promotor)</label>
             <select id="pilih-sales">
-                <option value="">-- Pilih Nama Sales --</option>
-                <!-- Nama sales bisa ditarik otomatis dari Apps Script atau ditulis manual -->
-                <option value="Sales 1">Sales 1</option>
-                <option value="Sales 2">Sales 2</option>
-                <option value="Sales 3">Sales 3</option>
+                <option value="">-- Memuat Nama Promotor --</option>
             </select>
         </div>
 
@@ -210,8 +206,7 @@
         </div>
     </div>
 
- 
-       <script>
+    <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         window.onload = function() {
@@ -229,22 +224,30 @@
             document.body.appendChild(script);
         }
 
-        // Fungsi penerima data list antrian
+        // Fungsi penerima data list antrian dan pengisi dropdown otomatis
         function callbackAntrian(res) {
             if(res && res.status === "sukses") {
                 let data = res.data;
                 let listHtml = "";
                 let salesUtama = "Belum ada";
+                let dropdownHtml = '<option value="">-- Pilih Nama Promotor --</option>';
 
                 data.forEach((item, index) => {
                     if(index === 0) {
                         salesUtama = item.nama;
                     }
                     listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
+                    dropdownHtml += `<option value="${item.nama}">${item.nama}</option>`;
                 });
 
                 document.getElementById('nama-aktif').innerText = salesUtama;
                 document.getElementById('item-antrian-list').innerHTML = listHtml;
+                
+                // Update pilihan dropdown secara dinamis sesuai Google Sheets
+                const selectEl = document.getElementById('pilih-sales');
+                let currentSelected = selectEl.value;
+                selectEl.innerHTML = dropdownHtml;
+                if(currentSelected) selectEl.value = currentSelected;
             }
         }
 
@@ -257,7 +260,6 @@
 
             if(!confirm(`Konfirmasi: ${namaSales} mendapat customer walk-in sekarang?`)) return;
 
-            // Menggunakan teknik JSONP juga untuk aksi ambil antrian agar sukses mengeksekusi Sheets
             const oldScript = document.getElementById('jsonp-script-action');
             if (oldScript) oldScript.remove();
 
@@ -267,7 +269,6 @@
             document.body.appendChild(script);
         }
 
-        // Fungsi penerima hasil setelah tombol ambil giliran ditekan
         function callbackAksi(res) {
             if(res) {
                 alert(res.pesan);
