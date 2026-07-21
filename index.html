@@ -210,26 +210,26 @@
         </div>
     </div>
 
-    <script>
-       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+ 
+       <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         window.onload = function() {
             muatDataAntrian();
-            setInterval(muatDataAntrian, 5000);
+            setInterval(muatDataAntrian, 5000); // Auto refresh tiap 5 detik
         };
 
-      function muatDataAntrian() {
-            // Menggunakan teknik JSONP via tag script dinamis untuk bypass total masalah CORS di Apps Script
-            const oldScript = document.getElementById('jsonp-script');
+        function muatDataAntrian() {
+            const oldScript = document.getElementById('jsonp-script-get');
             if (oldScript) oldScript.remove();
 
             const script = document.createElement('script');
-            script.id = 'jsonp-script';
+            script.id = 'jsonp-script-get';
             script.src = `${SCRIPT_URL}?aksi=getAntrian&callback=callbackAntrian`;
             document.body.appendChild(script);
         }
 
-        // Fungsi penerima data otomatis dari Google Apps Script
+        // Fungsi penerima data list antrian
         function callbackAntrian(res) {
             if(res && res.status === "sukses") {
                 let data = res.data;
@@ -247,7 +247,8 @@
                 document.getElementById('item-antrian-list').innerHTML = listHtml;
             }
         }
-       function ambilGiliranSaya() {
+
+        function ambilGiliranSaya() {
             const namaSales = document.getElementById('pilih-sales').value;
             if(!namaSales) {
                 alert("Silakan pilih nama Anda terlebih dahulu pada daftar pilihan!");
@@ -256,19 +257,24 @@
 
             if(!confirm(`Konfirmasi: ${namaSales} mendapat customer walk-in sekarang?`)) return;
 
-            // Menggunakan mode no-cors untuk pengiriman data aksi
-            fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, {
-                method: 'GET',
-                mode: 'no-cors'
-            })
-            .then(() => {
-                alert("Giliran berhasil diproses!");
-                setTimeout(muatDataAntrian, 1000); // Refresh data setelah 1 detik
-            })
-            .catch(err => {
-                alert("Gagal terhubung ke server.");
-                console.error(err);
-            });
+            // Menggunakan teknik JSONP juga untuk aksi ambil antrian agar sukses mengeksekusi Sheets
+            const oldScript = document.getElementById('jsonp-script-action');
+            if (oldScript) oldScript.remove();
+
+            const script = document.createElement('script');
+            script.id = 'jsonp-script-action';
+            script.src = `${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}&callback=callbackAksi`;
+            document.body.appendChild(script);
+        }
+
+        // Fungsi penerima hasil setelah tombol ambil giliran ditekan
+        function callbackAksi(res) {
+            if(res) {
+                alert(res.pesan);
+                muatDataAntrian(); // Refresh data antrian langsung
+            } else {
+                alert("Gagal memproses giliran.");
+            }
         }
     </script>
 </body>
