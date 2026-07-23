@@ -216,15 +216,35 @@
             setInterval(hitungMundurLokal, 1000); 
         };
 
-        function getDeviceId() {
-            let devId = localStorage.getItem('ufo_device_perm_id');
-            if (!devId) {
-                devId = 'DEV-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-                localStorage.setItem('ufo_device_perm_id', devId);
-            }
-            return devId;
-        }
+       function getDeviceId() {
+    // 1. Cek dulu apakah ada di LocalStorage
+    let devId = localStorage.getItem('ufo_device_perm_id');
+    
+    // 2. Jika LocalStorage terhapus (Clear Cache), racik ulang ID berbasis Hardware HP
+    if (!devId) {
+        const info = window.navigator.userAgent + window.navigator.hardwareConcurrency + screen.width + screen.height;
+        
+        // Membaca Canvas GPU Fingerprint
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = "top";
+        ctx.font = "14px 'Arial'";
+        ctx.fillText("UFO-Kebonsari-Device", 2, 15);
+        const canvasData = canvas.toDataURL();
 
+        let hash = 0;
+        const str = info + canvasData;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash |= 0;
+        }
+        
+        devId = "DEV-HW-" + Math.abs(hash);
+        localStorage.setItem('ufo_device_perm_id', devId);
+    }
+    return devId;
+}
         function cekAkunKeServer() {
             const deviceId = getDeviceId();
             
