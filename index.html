@@ -396,40 +396,35 @@
             tampilkanModal("Keluar", "Mode SPV ditutup.");
         }
 
-      function spvAksi(aksiName, namaSales = "") {
-    // Meminta SPV memasukkan PIN secara langsung saat tombol diklik (aman dari intipan kode HTML)
+     function spvAksi(aksiName, namaSales = "") {
+    // 1. Meminta SPV memasukkan PIN secara langsung
     const pin = prompt("Masukkan PIN SPV:");
     
     if (!pin) {
         return; // Batal jika PIN tidak diisi / dibatalkan
     }
 
-    // Tampilkan loading atau proses
-    Swal.fire({
-        title: 'Memproses...',
-        allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
-    });
-
-    // Kirim request ke Google Apps Script
-    let url = WEB_APP_URL + "?aksi=" + aksiName + "&pin=" + pin;
+    // 2. Gunakan SCRIPT_URL yang sesuai dengan file HTML Anda
+    let url = SCRIPT_URL + "?aksi=" + aksiName + "&pin=" + encodeURIComponent(pin);
     if (namaSales) {
         url += "&namaSales=" + encodeURIComponent(namaSales);
     }
 
+    // 3. Tampilkan modal loading sederhana menggunakan fungsi bawaan Anda
+    tampilkanModal("Memproses", "Mohon tunggu sebentar...");
+
+    // 4. Kirim request ke Google Apps Script
     fetch(url)
         .then(response => response.json())
         .then(result => {
+            tampilkanModal("Status SPV", result.pesan);
             if (result.status === "sukses") {
-                Swal.fire("Berhasil!", result.pesan, "success").then(() => {
-                    location.reload(); // Refresh halaman untuk memperbarui data
-                });
-            } else {
-                Swal.fire("Gagal!", result.pesan, "error");
+                // Refresh data setelah sukses
+                muatDataAntrian();
             }
         })
         .catch(error => {
-            Swal.fire("Error!", "Terjadi kesalahan koneksi.", "error");
+            tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
             console.error(error);
         });
 }
