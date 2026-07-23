@@ -169,12 +169,12 @@
             <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Masuk Shift / Ikut Antri</button>
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none;">Sudah Membawa Customer</button>
             
-            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV (Wasit)</button>
+            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV</button>
         </div>
 
         <div id="panel-kontrol-spv" class="panel-spv-box" style="display: none;">
-            <h3>👑 Panel Kontrol SPV (Wasit)</h3>
-            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Anda login sebagai Wasit/SPV.</p>
+            <h3>👑 Panel Kontrol SPV</h3>
+            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Anda login sebagai SPV.</p>
             
             <button type="button" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvTambahTimer')">⏱️ Tambah Waktu Standby Urutan 1</button>
             <button type="button" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvSelesaikannya')">✅ Paksa Selesai Promotor (Lupa Klik)</button>
@@ -214,29 +214,58 @@
             setInterval(hitungMundurLokal, 1000); 
         };
 
-        function cekAkunTersimpan() {
-            const savedUser = localStorage.getItem('ufo_sales_permanent_device');
-            if (savedUser) {
-                document.getElementById('panel-login').style.display = 'none';
-                document.getElementById('panel-menu-utama').style.display = 'block';
-                document.getElementById('label-user-aktif').innerText = savedUser;
-            } else {
-                document.getElementById('panel-login').style.display = 'block';
-                document.getElementById('panel-menu-utama').style.display = 'none';
-                muatMasterSales();
+        // MEMBUAT / MENGAMBIL DEVICE ID UNIK YANG PERMANEN DI HARDWARE/BROWSER
+        function getDeviceId() {
+            let devId = localStorage.getItem('ufo_device_unique_id');
+            if (!devId) {
+                devId = 'DEV-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+                localStorage.setItem('ufo_device_unique_id', devId);
             }
+            return devId;
+        }
+
+        // CEK KUNCI PERANGKAT LANGSUNG KE SERVER (GOOGLE SHEETS)
+        function cekAkunTersimpan() {
+            const deviceId = getDeviceId();
+            
+            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === "terkunci") {
+                    localStorage.setItem('ufo_sales_permanent_device', res.nama);
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = res.nama;
+                } else {
+                    localStorage.removeItem('ufo_sales_permanent_device');
+                    document.getElementById('panel-login').style.display = 'block';
+                    document.getElementById('panel-menu-utama').style.display = 'none';
+                    muatMasterSales();
+                }
+            });
         }
 
         function simpanAkunHP() {
             const namaPilih = document.getElementById('pilih-sales').value;
+            const deviceId = getDeviceId();
+            
             if(!namaPilih) {
                 tampilkanModal("Perhatian", "Silakan pilih nama Anda terlebih dahulu!");
                 return;
             }
-            tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih})? Tidak dapat diubah setelah disimpan.`, function() {
-                localStorage.setItem('ufo_sales_permanent_device', namaPilih);
-                cekAkunTersimpan();
-                tampilkanModal("Berhasil", `HP ini resmi terikat untuk akun: ${namaPilih}`);
+
+            tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih}) secara permanen?`, function() {
+                fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}`)
+                .then(res => res.json())
+                .then(res => {
+                    if(res.status === "sukses") {
+                        cekAkunTersimpan();
+                        muatDataAntrian();
+                        tampilkanModal("Berhasil", `HP ini resmi terikat untuk akun: ${namaPilih}`);
+                    } else {
+                        tampilkanModal("Gagal Mengunci", res.pesan);
+                    }
+                });
             });
         }
 
@@ -281,12 +310,12 @@
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = "🔐 Verifikasi SPV";
             document.getElementById('modal-desc').innerHTML = `
-                Masukkan PIN SPV untuk membuka panel wasit:<br><br>
+                Masukkan PIN SPV untuk membuka panel kontrol:<br><br>
                 <input type="password" id="input-pin-spv" placeholder="Masukkan PIN" style="text-align:center; font-size:16px; letter-spacing:3px;">
             `;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-spv" onclick="prosesLoginSPV()">Masuk Wasit</button>
+                <button type="button" class="btn-spv" onclick="prosesLoginSPV()">Masuk SPV</button>
             `;
             modal.classList.add('active');
         }
@@ -299,7 +328,7 @@
                 tutupModal();
                 if(res.status === "sukses") {
                     document.getElementById('panel-kontrol-spv').style.display = 'block';
-                    tampilkanModal("Berhasil", "Mode SPV Aktif! Anda memegang kendali wasit.");
+                    tampilkanModal("Berhasil", "Mode SPV Aktif!");
                 } else {
                     tampilkanModal("Gagal", res.pesan);
                 }
@@ -316,7 +345,7 @@
             fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}`)
             .then(res => res.json())
             .then(res => {
-                tampilkanModal("Status Wasit SPV", res.pesan);
+                tampilkanModal("Status SPV", res.pesan);
                 muatDataAntrian();
             });
         }
@@ -364,7 +393,7 @@
             });
         }
 
-       function muatDataAntrian() {
+        function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
@@ -374,7 +403,6 @@
                     let salesUtama = "Belum ada antrian";
                     const akunSaya = getAkunAktif();
                     
-                    // Reset status awal
                     statusSayaGlobal = "belum_ada"; 
                     waktuTerakhirStandbyGlobal = res.waktuStandbyPertama || null;
 
@@ -389,7 +417,6 @@
                                 }
                             }
                             
-                            // CEK STATUS AKUN PRIBADI SECARA LANGSUNG DARI DATA SERVER
                             if(item.nama === akunSaya) {
                                 if(item.status === "Standby") {
                                     statusSayaGlobal = "standby";
@@ -407,7 +434,6 @@
                     const btnAntri = document.getElementById('btn-utama-antri');
                     const btnCustomer = document.getElementById('btn-utama-customer');
 
-                    // RENDER TOMBOL BERDASARKAN STATUS TERBARU
                     if (statusSayaGlobal === "standby") {
                         btnAntri.innerText = "Anda Sudah Di Antrian";
                         btnAntri.className = "btn-success btn-disabled";
@@ -441,7 +467,6 @@
                         btnCustomer.style.cursor = "pointer";
 
                     } else {
-                        // Jika belum ada di list, pastikan tombol daftar aktif dan tombol customer disembunyikan
                         btnAntri.innerText = "Masuk Shift / Ikut Antri";
                         btnAntri.className = "btn-success";
                         btnAntri.disabled = false;
@@ -454,20 +479,8 @@
                 }
             });
         }
-        function simpanAkunHP() {
-            const namaPilih = document.getElementById('pilih-sales').value;
-            if(!namaPilih) {
-                tampilkanModal("Perhatian", "Silakan pilih nama Anda terlebih dahulu!");
-                return;
-            }
-            tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih})? Tidak dapat diubah setelah disimpan.`, function() {
-                localStorage.setItem('ufo_sales_permanent_device', namaPilih);
-                cekAkunTersimpan();
-                muatDataAntrian(); // <--- Tambahkan ini agar langsung sinkron
-                tampilkanModal("Berhasil", `HP ini resmi terikat untuk akun: ${namaPilih}`);
-            });
-        }
-     function aksiUtamaAntri() {
+
+        function aksiUtamaAntri() {
             const namaSales = getAkunAktif();
             if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
 
@@ -475,7 +488,9 @@
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan);
-                muatDataAntrian(); // <--- Pastikan baris penyegaran data ini ada di sini!
+                // Langsung perbarui status lokal agar 1 klik langsung merubah tombol
+                statusSayaGlobal = "standby";
+                muatDataAntrian();
             });
         }
 
