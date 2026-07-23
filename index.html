@@ -51,7 +51,20 @@
         }
 
         h2 { margin: 0 0 2px 0; font-size: 18px; font-weight: 800; }
-        .sub-title { color: var(--text-muted); font-size: 12px; margin-bottom: 16px; font-weight: 500; }
+        .sub-title { color: var(--text-muted); font-size: 12px; margin-bottom: 12px; font-weight: 500; }
+
+        .status-badge-sistem {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+        .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
         .user-badge {
             background: #f8fafc;
@@ -100,32 +113,26 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-warning { background: #f59e0b; color: white; }
+        .btn-danger { background: var(--danger); color: white; }
         .btn-spv { background: var(--spv-color); color: white; margin-top: 12px; }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
         
         .spinner {
-            width: 12px;
-            height: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #ffffff;
-            animation: spin 0.8s linear infinite;
-            display: inline-block;
+            width: 12px; height: 12px; border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .panel-spv-box {
-            background: #f5f3ff;
-            border: 1.5px solid #c4b5fd;
-            border-radius: 12px;
-            padding: 12px 10px;
-            margin-top: 12px;
-            text-align: left;
+            background: #f5f3ff; border: 1.5px solid #c4b5fd; border-radius: 12px;
+            padding: 12px 10px; margin-top: 12px; text-align: left;
         }
         .panel-spv-box h3 { margin: 0 0 4px 0; font-size: 13px; color: #6d28d9; border-bottom: 1px solid #ddd6fe; padding-bottom: 4px; }
+
+        .spv-start-stop-container {
+            display: flex; gap: 6px; margin-bottom: 10px; margin-top: 6px;
+        }
+        .spv-start-stop-container button { margin-top: 0; flex: 1; padding: 10px 4px; font-size: 10px; }
 
         .list-box {
             text-align: left; background: #f8fafc; border: 1px solid var(--border);
@@ -157,6 +164,11 @@
     <div class="container">
         <h2>Antrian Walk-In</h2>
         <p class="sub-title">Sistem Giliran Promotor UFO Kebonsari</p>
+
+        <!-- INDIKATOR STATUS SISTEM ANTRIAN -->
+        <div id="badge-status-sistem" class="status-badge-sistem status-open">
+            STATUS ANTRIAN: OPEN
+        </div>
 
         <div class="card-utama">
             <div class="label-giliran">Giliran Melayani Saat Ini</div>
@@ -196,9 +208,15 @@
             <h3>Panel Kontrol SPV</h3>
             <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Akses Kontrol Penuh SPV</p>
             
+            <!-- KONTROL START / STOP SISTEM -->
+            <div class="spv-start-stop-container">
+                <button type="button" class="btn-success" onclick="bukaModalToggleSistem('BUKA')">▶ START ANTRIAN</button>
+                <button type="button" class="btn-danger" onclick="bukaModalToggleSistem('TUTUP')">⏹ STOP ANTRIAN</button>
+            </div>
+
             <button type="button" class="btn-warning" onclick="bukaModalFormSPV('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">Tambah Waktu Standby Urutan 1</button>
             <button type="button" class="btn-primary" onclick="bukaModalFormSPV('spvAmbilAntrianBebas', 'Aktifkan Customer Janjian', true)">Aktifkan Customer Janjian</button>
-            <button type="button" class="btn-primary" style="background: #0284c7;" onclick="bukaModalFormSPV('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Membawa Customer</button>
+            <button type="button" class="btn-primary" style="background: #0284c7;" onclick="bukaModalFormSPV('spvAmbilAntrianBebas', 'Paksa Ubah: Membawa Customer', true)">Paksa Ubah: Membawa Customer</button>
             <button type="button" class="btn-danger" onclick="bukaModalFormSPV('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
             <button type="button" class="btn-success" onclick="bukaModalFormSPV('spvDaftarAntri', 'Masukkan Promotor ke Antrian', true)">Masukkan Promotor ke Antrian</button>
             <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPV('spvKeluarkanAntrian', 'Keluarkan Promotor dari Antrian', true)">Keluarkan Promotor dari Antrian</button>
@@ -215,7 +233,7 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP (HTML MODERN) -->
+    <!-- MODAL POPUP -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
@@ -233,6 +251,7 @@
         let daftarAntrianGlobal = [];
         let masterSalesGlobal = [];
         let statusSayaGlobal = "belum_ada"; 
+        let statusSistemGlobal = "BUKA"; // "BUKA" atau "TUTUP"
         const BATAS_MENIT = 10;
 
         window.onload = function() {
@@ -388,6 +407,43 @@
             tampilkanModal("Keluar", "Mode SPV ditutup.");
         }
 
+        function bukaModalToggleSistem(targetStatus) {
+            const modal = document.getElementById('custom-modal');
+            const judul = targetStatus === 'BUKA' ? 'Mulai Sistem Antrian' : 'Hentikan Sistem Antrian';
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerHTML = `
+                Anda akan mengubah status antrian menjadi: <b>${targetStatus}</b><br><br>
+                Masukkan PIN SPV:<br><br>
+                <input type="password" id="spv-toggle-pin" placeholder="PIN SPV" style="text-align:center; font-size:15px; letter-spacing:2px;">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" id="btn-modal-toggle-spv" class="btn-primary" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function eksekusiToggleSistem(targetStatus) {
+            const pin = document.getElementById('spv-toggle-pin').value;
+            if(!pin) return alert("Silakan masukkan PIN SPV!");
+
+            const btn = document.getElementById('btn-modal-toggle-spv');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+            fetch(`${SCRIPT_URL}?aksi=spvSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}`)
+            .then(res => res.json())
+            .then(res => {
+                tutupModal();
+                tampilkanModal("Status Sistem", res.pesan);
+                muatDataAntrian();
+            }).catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = "Proses";
+                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
+            });
+        }
+
         function buatDropdownSales(idSelect) {
             let options = '<option value="">-- Pilih Promotor --</option>';
             masterSalesGlobal.forEach(n => {
@@ -396,7 +452,6 @@
             return `<select id="${idSelect}">${options}</select>`;
         }
 
-        /* FUNGSI MODAL FORM UTAMA SPV (TAMPILAN MODERN TANPA PROMPT JADUL) */
         function bukaModalFormSPV(aksiName, judulAksi, butuhPilihPromotor = true) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judulAksi;
@@ -419,23 +474,16 @@
             let namaSales = "";
             if (butuhPilihPromotor) {
                 namaSales = document.getElementById('spv-select-sales').value;
-                if (!namaSales) {
-                    alert("Silakan pilih promotor terlebih dahulu!");
-                    return;
-                }
+                if (!namaSales) return alert("Silakan pilih promotor terlebih dahulu!");
             }
 
             const pin = document.getElementById('spv-input-pin').value;
-            if (!pin) {
-                alert("Silakan masukkan PIN SPV Anda!");
-                return;
-            }
+            if (!pin) return alert("Silakan masukkan PIN SPV Anda!");
 
             const btn = document.getElementById('btn-modal-eksekusi');
             btn.disabled = true;
             btn.innerHTML = `<span class="spinner"></span> Memproses...`;
 
-            // Kirim parameter namaSales dan namaPromotor sekaligus agar cocok dengan backend Apps Script
             let url = `${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&namaPromotor=${encodeURIComponent(namaSales)}`;
 
             fetch(url)
@@ -443,7 +491,7 @@
             .then(res => {
                 tutupModal();
                 tampilkanModal("Status SPV", res.pesan);
-                muatDataAntrian(); // Refresh otomatis
+                muatDataAntrian();
             })
             .catch(() => {
                 btn.disabled = false;
@@ -503,6 +551,18 @@
             .then(res => {
                 if(res.status === "sukses") {
                     daftarAntrianGlobal = res.data || [];
+                    statusSistemGlobal = res.statusAntrian || "BUKA"; // Membaca status BUKA/TUTUP dari server
+                    
+                    // Update tampilan badge status sistem
+                    const badge = document.getElementById('badge-status-sistem');
+                    if (statusSistemGlobal === "BUKA") {
+                        badge.innerText = "STATUS ANTRIAN: OPEN (BERJALAN)";
+                        badge.className = "status-badge-sistem status-open";
+                    } else {
+                        badge.innerText = "STATUS ANTRIAN: CLOSED (DITUTUP SPV)";
+                        badge.className = "status-badge-sistem status-closed";
+                    }
+
                     let listHtml = "";
                     let salesUtama = "Belum ada antrian";
                     const akunSaya = getAkunAktif();
@@ -547,7 +607,14 @@
                     const btnAntri = document.getElementById('btn-utama-antri');
                     const btnCustomer = document.getElementById('btn-utama-customer');
 
-                    if (statusSayaGlobal === "standby") {
+                    // Proteksi jika antrian sedang DITUTUP oleh SPV
+                    if (statusSistemGlobal === "TUTUP" && statusSayaGlobal !== "standby" && statusSayaGlobal !== "membawa_customer") {
+                        btnAntri.innerText = "Antrian Ditutup Oleh SPV";
+                        btnAntri.className = "btn-danger btn-disabled";
+                        btnAntri.disabled = true;
+                        btnCustomer.style.display = "none";
+                    } 
+                    else if (statusSayaGlobal === "standby") {
                         btnAntri.innerText = "Anda Sudah Di Antrian";
                         btnAntri.className = "btn-success btn-disabled";
                         btnAntri.disabled = true;
@@ -594,6 +661,10 @@
         }
 
         function aksiUtamaAntri() {
+            if (statusSistemGlobal === "TUTUP") {
+                return tampilkanModal("Antrian Ditutup", "Sistem antrian saat ini sedang ditutup oleh SPV.");
+            }
+
             const namaSales = getAkunAktif();
             const btn = document.getElementById('btn-utama-antri');
             if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
