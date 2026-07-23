@@ -82,6 +82,7 @@
         .btn-success { background: var(--success); color: white; }
         .btn-warning { background: var(--warning); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        .btn-cancel { background: #e2e8f0; color: var(--text-main); }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
 
         .user-badge {
@@ -224,7 +225,8 @@
                     document.getElementById('panel-login').style.display = 'block';
                     document.getElementById('panel-menu-utama').style.display = 'none';
                 }
-            });
+            })
+            .catch(err => console.error("Gagal mengecek akun:", err));
         }
 
         function simpanAkunHP() {
@@ -382,65 +384,7 @@
                 muatDataAntrian();
             });
         }
-function ambilAntrian(namaSales) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("AntrianWalkIn");
-  var data = sheet.getDataRange().getValues();
-  
-  var rowIndex = -1;
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][0] === namaSales) {
-      rowIndex = i + 1;
-      break;
-    }
-  }
-  
-  if (rowIndex === -1) return { status: "gagal", pesan: "Nama Anda tidak ditemukan di antrian." };
-  
-  // Ubah status jadi Membawa Customer
-  sheet.getRange(rowIndex, 2).setValue("Membawa Customer");
-  
-  // Jika yang membawa customer adalah Urutan #1, reset timer standby untuk orang urutan #2 yang naik ke #1
-  if (rowIndex === 2 && sheet.getLastRow() > 2) {
-    sheet.getRange(3, 3).setValue(new Date()); 
-  }
-  
-  return { status: "sukses", pesan: "Status berhasil diubah menjadi Membawa Customer. Selamat melayani!" };
-}
 
-function selesaiMelayani(namaSales) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("AntrianWalkIn");
-  var logSheet = ss.getSheetByName("LogMelayani") || ss.insertSheet("LogMelayani");
-  
-  if (logSheet.getLastRow() === 0) {
-    logSheet.appendRow(["Nama Promotor", "Waktu Selesai"]);
-  }
-  
-  var data = sheet.getDataRange().getValues();
-  var rowIndex = -1;
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][0] === namaSales) {
-      rowIndex = i + 1;
-      break;
-    }
-  }
-  
-  if (rowIndex === -1) return { status: "gagal", pesan: "Data promotor tidak ditemukan dalam antrian." };
-  
-  // Catat ke log sheet bahwa promotor sudah selesai melayani
-  logSheet.appendRow([namaSales, new Date()]);
-  
-  // Hapus dari daftar antrian aktif
-  sheet.deleteRow(rowIndex);
-  
-  // Jika orang paling atas dihapus, pastikan timer orang di bawahnya ter-reset
-  if (sheet.getLastRow() > 1) {
-    sheet.getRange(2, 3).setValue(new Date());
-  }
-  
-  return { status: "sukses", pesan: "Selesai melayani! Anda sekarang bisa mendaftar antrian baru." };
-}
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
             if(!namaSales) return;
