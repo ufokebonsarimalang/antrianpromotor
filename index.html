@@ -195,7 +195,7 @@
             cekAkunTersimpan();
             muatMasterSales();
             muatDataAntrian();
-            setInterval(muatDataAntrian, 3000); 
+            setInterval(muatDataAntrian, 4000); 
             setInterval(hitungMundurLokal, 1000); 
         };
 
@@ -245,12 +245,12 @@
                 .then(res => {
                     if(res.status === "sukses") {
                         cekAkunTersimpan();
-                        setTimeout(muatDataAntrian, 300);
+                        setTimeout(muatDataAntrian, 500);
                         tampilkanModal("Berhasil", `HP terikat untuk: ${namaPilih}`);
                     } else {
                         tampilkanModal("Gagal", res.pesan);
                     }
-                });
+                }).catch(() => tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mengunci perangkat."));
             });
         }
 
@@ -306,14 +306,14 @@
                     masterSalesGlobal.forEach(n => html += `<option value="${n}">${n}</option>`);
                     document.getElementById('pilih-sales').innerHTML = html;
                 }
-            });
+            }).catch(err => console.error("Gagal muat master sales"));
         }
 
         function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
-                if(res.status === "sukses") {
+                if(res && res.status === "sukses") {
                     daftarAntrianGlobal = res.data || [];
                     statusSistemGlobal = res.statusAntrian || "BUKA";
                     const akunSaya = getAkunAktif().trim();
@@ -401,6 +401,9 @@
                     document.getElementById('nama-aktif').innerText = salesUtama;
                     document.getElementById('item-antrian-list').innerHTML = listHtml;
                 }
+            }).catch(err => {
+                // Mencegah error crash tampilan saat fetch tertunda sesaat
+                console.log("Menunggu sinkronisasi server...");
             });
         }
 
@@ -415,12 +418,12 @@
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
             .then(res => res.json())
             .then(res => {
-                tampilkanModal("Informasi Shift", res.pesan);
-                setTimeout(muatDataAntrian, 200);
+                tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
+                setTimeout(muatDataAntrian, 500);
             })
             .catch(err => {
-                tampilkanModal("Gagal", "Terjadi kesalahan koneksi jaringan.");
-                muatDataAntrian();
+                tampilkanModal("Informasi", "Permintaan terkirim, memperbarui data...");
+                setTimeout(muatDataAntrian, 1000);
             });
         }
 
@@ -438,12 +441,11 @@
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
-                        tampilkanModal("Status Antrian", res.pesan);
-                        setTimeout(muatDataAntrian, 200);
+                        tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
+                        setTimeout(muatDataAntrian, 500);
                     })
                     .catch(err => {
-                        tampilkanModal("Gagal", "Terjadi kesalahan koneksi jaringan.");
-                        muatDataAntrian();
+                        setTimeout(muatDataAntrian, 1000);
                     });
                 });
             } else if (statusSayaGlobal === "Melayani") {
@@ -454,12 +456,11 @@
                     fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
-                        tampilkanModal("Status Antrian", res.pesan);
-                        setTimeout(muatDataAntrian, 200);
+                        tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
+                        setTimeout(muatDataAntrian, 500);
                     })
                     .catch(err => {
-                        tampilkanModal("Gagal", "Terjadi kesalahan koneksi jaringan.");
-                        muatDataAntrian();
+                        setTimeout(muatDataAntrian, 1000);
                     });
                 });
             }
@@ -468,7 +469,7 @@
         function tampilkanModal(judul, pesan) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judul;
-            document.getElementById('modal-desc').innerHTML = pesan.replace(/\n/g, '<br>');
+            document.getElementById('modal-desc').innerHTML = String(pesan).replace(/\n/g, '<br>');
             document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-primary" onclick="tutupModal()">OK</button>`;
             modal.classList.add('active');
         }
