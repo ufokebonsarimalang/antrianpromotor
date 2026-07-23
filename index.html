@@ -160,7 +160,7 @@
                 <label>Pilih Nama Anda (Kunci Perangkat)</label>
                 <select id="pilih-sales"><option value="">-- Memuat Data --</option></select>
             </div>
-            <button type="button" id="btn-simpan- hp" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
+            <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
         <!-- MENU PROMOTOR -->
@@ -263,18 +263,20 @@
                 fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}`)
                 .then(res => res.json())
                 .then(res => {
-                    btnSimpan.disabled = false;
-                    btnSimpan.innerHTML = textAsli;
-                    if(res.status === "sukses") {
-                        localStorage.setItem('ufo_sales_permanent_device', namaPilih);
-                        document.getElementById('panel-login').style.display = 'none';
-                        document.getElementById('panel-menu-utama').style.display = 'block';
-                        document.getElementById('label-user-aktif').innerText = namaPilih;
-                        muatDataAntrian();
-                        tampilkanModal("Berhasil", `HP terikat untuk: ${namaPilih}`);
-                    } else {
-                        tampilkanModal("Gagal", res.pesan);
-                    }
+                    setTimeout(() => {
+                        btnSimpan.disabled = false;
+                        btnSimpan.innerHTML = textAsli;
+                        if(res.status === "sukses") {
+                            localStorage.setItem('ufo_sales_permanent_device', namaPilih);
+                            document.getElementById('panel-login').style.display = 'none';
+                            document.getElementById('panel-menu-utama').style.display = 'block';
+                            document.getElementById('label-user-aktif').innerText = namaPilih;
+                            muatDataAntrian();
+                            tampilkanModal("Berhasil", `HP terikat untuk: ${namaPilih}`);
+                        } else {
+                            tampilkanModal("Gagal", res.pesan);
+                        }
+                    }, 400);
                 }).catch(() => {
                     btnSimpan.disabled = false;
                     btnSimpan.innerHTML = textAsli;
@@ -384,6 +386,13 @@
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
 
+            // Jika tombol sedang memproses (spinner aktif), jangan ubah teksnya secara otomatis lewat renderUIRental sementara waktu
+            if (btnAntri.dataset.loading === "true" || btnCustomer.dataset.loading === "true") {
+                document.getElementById('nama-aktif').innerText = salesUtama;
+                document.getElementById('item-antrian-list').innerHTML = listHtml;
+                return;
+            }
+
             if (statusSayaGlobal === "Melayani") {
                 btnAntri.innerText = "Sedang Melayani Customer";
                 btnAntri.className = "btn-warning btn-disabled";
@@ -422,6 +431,13 @@
         }
 
         function muatDataAntrian() {
+            // Jangan timpa tampilan tombol jika sedang loading spinner
+            const btnAntri = document.getElementById('btn-utama-antri');
+            const btnCustomer = document.getElementById('btn-utama-customer');
+            if ((btnAntri && btnAntri.dataset.loading === "true") || (btnCustomer && btnCustomer.dataset.loading === "true")) {
+                return;
+            }
+
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
@@ -440,6 +456,7 @@
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
             
             const btnAntri = document.getElementById('btn-utama-antri');
+            btnAntri.dataset.loading = "true";
             btnAntri.disabled = true;
             btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
 
@@ -454,11 +471,17 @@
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
             .then(res => res.json())
             .then(res => {
-                tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
-                muatDataAntrian();
+                setTimeout(() => {
+                    btnAntri.dataset.loading = "false";
+                    tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
+                    muatDataAntrian();
+                }, 500);
             })
             .catch(err => {
-                muatDataAntrian();
+                setTimeout(() => {
+                    btnAntri.dataset.loading = "false";
+                    muatDataAntrian();
+                }, 500);
             });
         }
 
@@ -470,6 +493,7 @@
 
             if (statusSayaGlobal === "Standby") {
                 tampilkanModalKonfirmasi("Konfirmasi", `Sudah membawa customer?`, function() {
+                    btnCustomer.dataset.loading = "true";
                     btnCustomer.disabled = true;
                     btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
                     
@@ -480,15 +504,22 @@
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
-                        tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
-                        muatDataAntrian();
+                        setTimeout(() => {
+                            btnCustomer.dataset.loading = "false";
+                            tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
+                            muatDataAntrian();
+                        }, 500);
                     })
                     .catch(err => {
-                        muatDataAntrian();
+                        setTimeout(() => {
+                            btnCustomer.dataset.loading = "false";
+                            muatDataAntrian();
+                        }, 500);
                     });
                 });
             } else if (statusSayaGlobal === "Melayani") {
                 tampilkanModalKonfirmasi("Selesai Pelayanan", `Apakah Anda sudah selesai melayani customer?`, function() {
+                    btnCustomer.dataset.loading = "true";
                     btnCustomer.disabled = true;
                     btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
                     
@@ -499,11 +530,17 @@
                     fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
-                        tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
-                        muatDataAntrian();
+                        setTimeout(() => {
+                            btnCustomer.dataset.loading = "false";
+                            tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
+                            muatDataAntrian();
+                        }, 500);
                     })
                     .catch(err => {
-                        muatDataAntrian();
+                        setTimeout(() => {
+                            btnCustomer.dataset.loading = "false";
+                            muatDataAntrian();
+                        }, 500);
                     });
                 });
             }
