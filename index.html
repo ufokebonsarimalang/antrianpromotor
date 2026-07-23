@@ -197,6 +197,7 @@
             
             <button type="button" id="btn-spv-timer" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvTambahTimer', this, '⏱️ Tambah Waktu Standby Urutan 1')">⏱️ Tambah Waktu Standby Urutan 1</button>
             <button type="button" id="btn-spv-selesai" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvSelesaikannya', this, '✅ Paksa Selesai Promotor (Lupa Klik)')">✅ Paksa Selesai Promotor (Lupa Klik)</button>
+            <button type="button" id="btn-spv-reset" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px; background: #dc2626;" onclick="bukaFormResetDevice()">🔄 Reset Perangkat Promotor</button>
             <button type="button" class="btn-cancel" style="margin-top:6px; font-size:10px; padding:7px;" onclick="logoutSPV()">Keluar Mode SPV</button>
         </div>
 
@@ -394,6 +395,40 @@
             }).catch(() => {
                 btnElement.disabled = false;
                 btnElement.innerHTML = defaultText;
+                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
+            });
+        }
+
+        function bukaFormResetDevice() {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = "🔄 Reset Perangkat Sales";
+            document.getElementById('modal-desc').innerHTML = `
+                Masukkan nama promotor yang perangkatnya ingin di-reset:<br><br>
+                <input type="text" id="input-reset-nama" placeholder="Contoh: Budi" style="text-align:center; font-size:14px;">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-danger" onclick="eksekusiResetDevice()">Reset Sekarang</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function eksekusiResetDevice() {
+            const namaSales = document.getElementById('input-reset-nama').value.trim();
+            const pin = "1234"; 
+
+            if(!namaSales) {
+                alert("Masukkan nama sales!");
+                return;
+            }
+
+            tutupModal();
+
+            fetch(`${SCRIPT_URL}?aksi=spvResetDevice&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pin)}`)
+            .then(res => res.json())
+            .then(res => {
+                tampilkanModal("Status Reset", res.pesan);
+            }).catch(() => {
                 tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
             });
         }
