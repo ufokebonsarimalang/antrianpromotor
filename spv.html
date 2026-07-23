@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard SPV - UFO Kebonsari</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --spv-purple: #7c3aed;
+            --spv-dark: #5b21b6;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --primary: #3b82f6;
+        }
+
+        *, body, button, select, input {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            box-sizing: border-box;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text-main);
+            margin: 0; padding: 16px;
+            display: flex; justify-content: center;
+        }
+
+        .spv-container {
+            width: 100%; max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-spv {
+            background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%);
+            border-radius: 16px;
+            padding: 20px; color: white;
+            text-align: center; margin-bottom: 20px;
+        }
+        .header-spv h2 { margin: 0 0 4px 0; font-size: 20px; font-weight: 800; }
+        .header-spv p { margin: 0; font-size: 12px; opacity: 0.8; }
+
+        .status-badge {
+            display: inline-block; padding: 6px 14px; border-radius: 20px;
+            font-size: 11px; font-weight: 800; margin-top: 10px; text-transform: uppercase;
+        }
+        .status-open { background: #dcfce7; color: #15803d; }
+        .status-closed { background: #fee2e2; color: #b91c1c; }
+
+        .input-group { margin-bottom: 14px; text-align: left; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+
+        select, input[type="text"], input[type="password"] { 
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+            background: #ffffff; font-size: 13px; color: var(--text-main); outline: none;
+        }
+
+        button { 
+            width: 100%; padding: 12px; border-radius: 10px; 
+            font-size: 12px; font-weight: 700; cursor: pointer; border: none;
+            text-transform: uppercase; transition: all 0.2s;
+        }
+        button:active { transform: scale(0.98); }
+
+        .btn-purple { background: var(--spv-purple); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-cancel { background: #f1f5f9; color: #475569; }
+
+        .spv-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;
+        }
+        .spv-grid .full-width { grid-column: span 2; }
+        .spv-grid button { padding: 12px 8px; font-size: 11px; }
+
+        .list-box {
+            background: #f8fafc; border: 1px solid var(--border);
+            border-radius: 14px; padding: 14px; margin-top: 20px;
+        }
+        .list-box h4 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; color: var(--text-muted); }
+        .list-box ul { list-style: none; padding: 0; margin: 0; font-size: 13px; }
+        .list-box li { padding: 8px 10px; background: white; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; }
+
+        /* MODAL POPUP */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-box { background: white; width: 100%; max-width: 340px; padding: 22px; border-radius: 16px; text-align: center; }
+        .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+        .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 8px; }
+        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; }
+    </style>
+</head>
+<body>
+
+    <div class="spv-container">
+        <div class="header-spv">
+            <h2>🔑 Control Panel SPV</h2>
+            <p>Manajemen Antrian Sales UFO Kebonsari</p>
+            <div id="badge-status-sistem" class="status-badge status-open">
+                STATUS: OPEN
+            </div>
+        </div>
+
+        <!-- FORM LOGIN SPV -->
+        <div id="login-spv-box">
+            <div class="input-group">
+                <label>Masukkan PIN SPV Khusus</label>
+                <input type="password" id="input-pin-spv" placeholder="PIN SPV" style="text-align: center; font-size: 16px; letter-spacing: 2px;">
+            </div>
+            <button type="button" class="btn-purple" onclick="prosesLoginSPV()">Masuk Panel Kontrol</button>
+        </div>
+
+        <!-- MENU KONTROL LENGKAP -->
+        <div id="controls-spv-box" style="display: none;">
+            <div class="spv-grid">
+                <button type="button" class="btn-success full-width" onclick="bukaModalToggleSistem('BUKA')">▶ START / BUKA ANTRIAN</button>
+                <button type="button" class="btn-danger full-width" onclick="bukaModalToggleSistem('TUTUP')">⏹ STOP / TUTUP ANTRIAN</button>
+
+                <button type="button" class="btn-warning full-width" onclick="bukaModalFormSPV('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">+ Tambah Timer Standby</button>
+
+                <button type="button" class="btn-primary" onclick="bukaModalFormSPV('spvAmbilAntrianBebas', 'Customer Janjian', true)">Cust. Janjian</button>
+                <button type="button" class="btn-primary" style="background: #0284c7;" onclick="bukaModalFormSPV('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Cust.</button>
+
+                <button type="button" class="btn-success" onclick="bukaModalFormSPV('spvDaftarAntri', 'Masukkan Promotor ke Antrian', true)">+ Masukkan Antri</button>
+                <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPV('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan Antri</button>
+
+                <button type="button" class="btn-danger full-width" onclick="bukaModalFormSPV('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
+                <button type="button" class="btn-danger full-width" style="background: #b91c1c;" onclick="bukaModalFormSPV('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Sales</button>
+            </div>
+
+            <button type="button" class="btn-cancel" style="margin-top: 16px;" onclick="logoutSPV()">Kunci Panel SPV</button>
+        </div>
+
+        <!-- LIVE LIST UNTUK SPV -->
+        <div class="list-box">
+            <h4>Live Urutan Antrian Realtime</h4>
+            <ul id="item-antrian-list">
+                <li><span>Memuat data...</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP -->
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modal-title" class="modal-title">Pemberitahuan</div>
+            <div id="modal-desc" class="modal-desc">Isi pesan...</div>
+            <div id="modal-actions" class="modal-actions">
+                <button type="button" class="btn-primary" onclick="tutupModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+        let masterSalesGlobal = [];
+
+        window.onload = function() {
+            muatMasterSales();
+            muatDataAntrian();
+            setInterval(muatDataAntrian, 4000);
+        };
+
+        function prosesLoginSPV() {
+            const pin = document.getElementById('input-pin-spv').value;
+            if(!pin) return alert("Masukkan PIN SPV!");
+
+            fetch(`${SCRIPT_URL}?aksi=loginSPV&pin=${encodeURIComponent(pin)}`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses") {
+                    document.getElementById('login-spv-box').style.display = 'none';
+                    document.getElementById('controls-spv-box').style.display = 'block';
+                } else {
+                    tampilkanModal("Gagal Login", res.pesan);
+                }
+            });
+        }
+
+        function logoutSPV() {
+            document.getElementById('input-pin-spv').value = "";
+            document.getElementById('login-spv-box').style.display = 'block';
+            document.getElementById('controls-spv-box').style.display = 'none';
+        }
+
+        function bukaModalToggleSistem(targetStatus) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
+            document.getElementById('modal-desc').innerHTML = `
+                Status baru: <b>${targetStatus}</b><br><br>
+                Masukkan PIN SPV:<br><br>
+                <input type="password" id="spv-toggle-pin" placeholder="PIN SPV" style="text-align:center;">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-primary" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function eksekusiToggleSistem(targetStatus) {
+            const pin = document.getElementById('spv-toggle-pin').value;
+            fetch(`${SCRIPT_URL}?aksi=spvSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}`)
+            .then(res => res.json())
+            .then(res => {
+                tutupModal();
+                tampilkanModal("Status Sistem", res.pesan);
+                muatDataAntrian();
+            });
+        }
+
+        function bukaModalFormSPV(aksiName, judulAksi, butuhPilihPromotor = true) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = judulAksi;
+            let options = '<option value="">-- Pilih Promotor --</option>';
+            masterSalesGlobal.forEach(n => options += `<option value="${n}">${n}</option>`);
+
+            let htmlContent = "";
+            if (butuhPilihPromotor) htmlContent += `Promotor:<br><select id="spv-select-sales">${options}</select><br><br>`;
+            htmlContent += `PIN SPV:<br><input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center;">`;
+
+            document.getElementById('modal-desc').innerHTML = htmlContent;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-primary" onclick="eksekusiAksiSPV('${aksiName}', ${butuhPilihPromotor})">Proses</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function eksekusiAksiSPV(aksiName, butuhPilihPromotor) {
+            let namaSales = butuhPilihPromotor ? document.getElementById('spv-select-sales').value : "";
+            const pin = document.getElementById('spv-input-pin').value;
+
+            fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&namaPromotor=${encodeURIComponent(namaSales)}`)
+            .then(res => res.json())
+            .then(res => {
+                tutupModal();
+                tampilkanModal("Status SPV", res.pesan);
+                muatDataAntrian();
+            });
+        }
+
+        function muatMasterSales() {
+            fetch(`${SCRIPT_URL}?aksi=getMasterSales`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses") masterSalesGlobal = res.data || [];
+            });
+        }
+
+        function muatDataAntrian() {
+            fetch(`${SCRIPT_URL}?aksi=getAntrian`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses") {
+                    const statusSistem = res.statusAntrian || "BUKA";
+                    const badge = document.getElementById('badge-status-sistem');
+                    badge.innerText = statusSistem === "BUKA" ? "STATUS: OPEN" : "STATUS: CLOSED";
+                    badge.className = statusSistem === "BUKA" ? "status-badge status-open" : "status-badge status-closed";
+
+                    let listHtml = "";
+                    const data = res.data || [];
+                    if(data.length > 0) {
+                        data.forEach((item, index) => {
+                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted); font-size:11px;">${item.status}</span></li>`;
+                        });
+                    } else {
+                        listHtml = "<li><span>Belum ada promotor aktif</span></li>";
+                    }
+                    document.getElementById('item-antrian-list').innerHTML = listHtml;
+                }
+            });
+        }
+
+        function tampilkanModal(judul, pesan) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerHTML = pesan.replace(/\n/g, '<br>');
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-primary" onclick="tutupModal()">OK</button>`;
+            modal.classList.add('active');
+        }
+
+        function tutupModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
