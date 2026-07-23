@@ -75,6 +75,7 @@
             width: 100%; padding: 12px; border-radius: 10px; 
             font-size: 12px; font-weight: 700; cursor: pointer; border: none;
             text-transform: uppercase; transition: all 0.2s ease;
+            display: inline-flex; justify-content: center; align-items: center; gap: 8px;
         }
         button:active { transform: scale(0.98); }
 
@@ -84,6 +85,20 @@
         .btn-danger { background: var(--danger); color: white; }
         .btn-cancel { background: #e2e8f0; color: var(--text-main); }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
+
+        /* SPINNER STYLING */
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         .user-badge {
             background: #f8fafc; border: 1px solid var(--border); border-radius: 12px;
@@ -145,7 +160,7 @@
                 <label>Pilih Nama Anda (Kunci Perangkat)</label>
                 <select id="pilih-sales"><option value="">-- Memuat Data --</option></select>
             </div>
-            <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
+            <button type="button" id="btn-simpan- hp" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
         <!-- MENU PROMOTOR -->
@@ -240,9 +255,16 @@
             if(!namaPilih) return tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
 
             tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih})?`, function() {
+                const btnSimpan = document.querySelector('#panel-login button');
+                const textAsli = btnSimpan.innerHTML;
+                btnSimpan.disabled = true;
+                btnSimpan.innerHTML = `<span class="spinner"></span> Menyimpan...`;
+
                 fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}`)
                 .then(res => res.json())
                 .then(res => {
+                    btnSimpan.disabled = false;
+                    btnSimpan.innerHTML = textAsli;
                     if(res.status === "sukses") {
                         localStorage.setItem('ufo_sales_permanent_device', namaPilih);
                         document.getElementById('panel-login').style.display = 'none';
@@ -253,7 +275,11 @@
                     } else {
                         tampilkanModal("Gagal", res.pesan);
                     }
-                }).catch(() => tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mengunci perangkat."));
+                }).catch(() => {
+                    btnSimpan.disabled = false;
+                    btnSimpan.innerHTML = textAsli;
+                    tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mengunci perangkat.");
+                });
             });
         }
 
@@ -415,9 +441,9 @@
             
             const btnAntri = document.getElementById('btn-utama-antri');
             btnAntri.disabled = true;
-            btnAntri.innerText = "Memproses...";
+            btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
 
-            // Ubah UI secara instan lokal menjadi Standby agar langsung terlihat responsif tanpa klik 2x
+            // Update UI instan lokal menjadi Standby
             statusSayaGlobal = "Standby";
             let tempSembuhList = [...daftarAntrianGlobal];
             if(!tempSembuhList.some(x => x.nama.toLowerCase() === namaSales.toLowerCase())) {
@@ -445,7 +471,7 @@
             if (statusSayaGlobal === "Standby") {
                 tampilkanModalKonfirmasi("Konfirmasi", `Sudah membawa customer?`, function() {
                     btnCustomer.disabled = true;
-                    btnCustomer.innerText = "Memproses...";
+                    btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
                     
                     // Update UI instan lokal menjadi Melayani
                     statusSayaGlobal = "Melayani";
@@ -464,9 +490,9 @@
             } else if (statusSayaGlobal === "Melayani") {
                 tampilkanModalKonfirmasi("Selesai Pelayanan", `Apakah Anda sudah selesai melayani customer?`, function() {
                     btnCustomer.disabled = true;
-                    btnCustomer.innerText = "Memproses...";
+                    btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
                     
-                    // Update UI instan lokal kembali bersih / keluar antrian
+                    // Update UI instan lokal keluar antrian
                     statusSayaGlobal = "belum_ada";
                     renderUIRental(daftarAntrianGlobal.filter(x => x.nama.toLowerCase() !== namaSales.toLowerCase()), statusSistemGlobal, waktuTerakhirStandbyGlobal);
 
