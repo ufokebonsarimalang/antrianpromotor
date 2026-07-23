@@ -196,7 +196,7 @@
             <h3>Panel Kontrol SPV</h3>
             <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Akses Kontrol Penuh SPV</p>
             
-            <button type="button" id="btn-spv-timer" class="btn-warning" onclick="spvAksi('spvTambahTimer', this, 'Tambah Waktu Standby Urutan 1')">Tambah Waktu Standby Urutan 1</button>
+            <button type="button" id="btn-spv-timer" class="btn-warning" onclick="spvAksiLangsung('spvTambahTimer', '')">Tambah Waktu Standby Urutan 1</button>
             <button type="button" id="btn-spv-customer-bebas" class="btn-primary" onclick="bukaFormSPVAmbilCustomer()">Aktifkan Customer Janjian</button>
             <button type="button" id="btn-spv-paksa-membawa" class="btn-primary" style="background: #0284c7;" onclick="bukaFormSPVPaksaMembawa()">Paksa Ubah: Membawa Customer</button>
             <button type="button" id="btn-spv-paksa-selesai" class="btn-danger" onclick="bukaFormSPVPaksaSelesai()">Paksa Selesai Melayani</button>
@@ -396,38 +396,30 @@
             tampilkanModal("Keluar", "Mode SPV ditutup.");
         }
 
-     function spvAksi(aksiName, namaSales = "") {
-    // 1. Meminta SPV memasukkan PIN secara langsung
-    const pin = prompt("Masukkan PIN SPV:");
-    
-    if (!pin) {
-        return; // Batal jika PIN tidak diisi / dibatalkan
-    }
+        function spvAksiLangsung(aksiName, namaSales = "") {
+            const pin = prompt("Masukkan PIN SPV:");
+            if (!pin) return;
 
-    // 2. Gunakan SCRIPT_URL yang sesuai dengan file HTML Anda
-    let url = SCRIPT_URL + "?aksi=" + aksiName + "&pin=" + encodeURIComponent(pin);
-    if (namaSales) {
-        url += "&namaSales=" + encodeURIComponent(namaSales);
-    }
+            tampilkanModal("Memproses", "Mohon tunggu sebentar...");
 
-    // 3. Tampilkan modal loading sederhana menggunakan fungsi bawaan Anda
-    tampilkanModal("Memproses", "Mohon tunggu sebentar...");
-
-    // 4. Kirim request ke Google Apps Script
-    fetch(url)
-        .then(response => response.json())
-        .then(result => {
-            tampilkanModal("Status SPV", result.pesan);
-            if (result.status === "sukses") {
-                // Refresh data setelah sukses
-                muatDataAntrian();
+            let url = `${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}`;
+            if (namaSales) {
+                url += `&namaSales=${encodeURIComponent(namaSales)}`;
             }
-        })
-        .catch(error => {
-            tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
-            console.error(error);
-        });
-}
+
+            fetch(url)
+                .then(res => res.json())
+                .then(res => {
+                    tampilkanModal("Status SPV", res.pesan);
+                    if (res.status === "sukses") {
+                        muatDataAntrian();
+                    }
+                })
+                .catch(() => {
+                    tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
+                });
+        }
+
         function buatDropdownSales(idSelect) {
             let options = '<option value="">-- Pilih Promotor --</option>';
             masterSalesGlobal.forEach(n => {
@@ -452,28 +444,12 @@
 
         function eksekusiSPVAmbilCustomer() {
             const namaSales = document.getElementById('select-spv-nama-cust').value;
-            const pin = "1234";
-            const btn = document.getElementById('btn-modal-eksekusi-cust');
-
             if(!namaSales) {
                 alert("Pilih promotor terlebih dahulu!");
                 return;
             }
-
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-            fetch(`${SCRIPT_URL}?aksi=spvAmbilAntrianBebas&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pin)}`)
-            .then(res => res.json())
-            .then(res => {
-                tutupModal();
-                tampilkanModal("Status SPV", res.pesan);
-                muatDataAntrian();
-            }).catch(() => {
-                btn.disabled = false;
-                btn.innerHTML = "Proses";
-                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
-            });
+            tutupModal();
+            spvAksiLangsung('spvAmbilAntrianBebas', namaSales);
         }
 
         function bukaFormSPVPaksaMembawa() {
@@ -492,28 +468,12 @@
 
         function eksekusiSPVPaksaMembawa() {
             const namaSales = document.getElementById('select-spv-paksa-membawa').value;
-            const pin = "1234";
-            const btn = document.getElementById('btn-modal-eksekusi-paksa-membawa');
-
             if(!namaSales) {
                 alert("Pilih promotor terlebih dahulu!");
                 return;
             }
-
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-            fetch(`${SCRIPT_URL}?aksi=spvAmbilAntrianBebas&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pin)}`)
-            .then(res => res.json())
-            .then(res => {
-                tutupModal();
-                tampilkanModal("Status SPV", res.pesan);
-                muatDataAntrian();
-            }).catch(() => {
-                btn.disabled = false;
-                btn.innerHTML = "Proses";
-                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
-            });
+            tutupModal();
+            spvAksiLangsung('spvAmbilAntrianBebas', namaSales);
         }
 
         function bukaFormSPVPaksaSelesai() {
@@ -532,28 +492,12 @@
 
         function eksekusiSPVPaksaSelesai() {
             const namaSales = document.getElementById('select-spv-paksa-selesai').value;
-            const pin = "1234";
-            const btn = document.getElementById('btn-modal-eksekusi-paksa-selesai');
-
             if(!namaSales) {
                 alert("Pilih promotor terlebih dahulu!");
                 return;
             }
-
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-            fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
-            .then(res => res.json())
-            .then(res => {
-                tutupModal();
-                tampilkanModal("Status SPV", res.pesan);
-                muatDataAntrian();
-            }).catch(() => {
-                btn.disabled = false;
-                btn.innerHTML = "Selesaikan";
-                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
-            });
+            tutupModal();
+            spvAksiLangsung('selesaiMelayani', namaSales);
         }
 
         function bukaFormSPVMasukkanAntrian() {
@@ -572,28 +516,12 @@
 
         function eksekusiSPVMasukkanAntrian() {
             const namaSales = document.getElementById('select-spv-nama-masuk').value;
-            const pin = "1234";
-            const btn = document.getElementById('btn-modal-eksekusi-masuk');
-
             if(!namaSales) {
                 alert("Pilih promotor terlebih dahulu!");
                 return;
             }
-
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-            fetch(`${SCRIPT_URL}?aksi=spvDaftarAntri&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pin)}`)
-            .then(res => res.json())
-            .then(res => {
-                tutupModal();
-                tampilkanModal("Status SPV", res.pesan);
-                muatDataAntrian();
-            }).catch(() => {
-                btn.disabled = false;
-                btn.innerHTML = "Masukkan";
-                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
-            });
+            tutupModal();
+            spvAksiLangsung('spvDaftarAntri', namaSales);
         }
 
         function bukaFormSPVKeluarkanAntrian() {
@@ -612,28 +540,12 @@
 
         function eksekusiSPVKeluarkanAntrian() {
             const namaSales = document.getElementById('select-spv-nama-keluar').value;
-            const pin = "1234";
-            const btn = document.getElementById('btn-modal-eksekusi-keluar');
-
             if(!namaSales) {
                 alert("Pilih promotor terlebih dahulu!");
                 return;
             }
-
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-            fetch(`${SCRIPT_URL}?aksi=spvKeluarkanAntrian&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pin)}`)
-            .then(res => res.json())
-            .then(res => {
-                tutupModal();
-                tampilkanModal("Status SPV", res.pesan);
-                muatDataAntrian();
-            }).catch(() => {
-                btn.disabled = false;
-                btn.innerHTML = "Keluarkan";
-                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
-            });
+            tutupModal();
+            spvAksiLangsung('spvKeluarkanAntrian', namaSales);
         }
 
         function bukaFormResetDevice() {
@@ -652,27 +564,12 @@
 
         function eksekusiResetDevice() {
             const namaSales = document.getElementById('select-reset-nama').value;
-            const pin = "1234"; 
-            const btn = document.getElementById('btn-modal-eksekusi-reset');
-
             if(!namaSales) {
                 alert("Pilih promotor terlebih dahulu!");
                 return;
             }
-
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-            fetch(`${SCRIPT_URL}?aksi=spvResetDevice&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pin)}`)
-            .then(res => res.json())
-            .then(res => {
-                tutupModal();
-                tampilkanModal("Status Reset", res.pesan);
-            }).catch(() => {
-                btn.disabled = false;
-                btn.innerHTML = "Reset Sekarang";
-                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
-            });
+            tutupModal();
+            spvAksiLangsung('spvResetDevice', namaSales);
         }
 
         function tampilkanModal(judul, pesan) {
@@ -738,14 +635,12 @@
 
                     if(daftarAntrianGlobal.length > 0) {
                         daftarAntrianGlobal.forEach((item, index) => {
-                            // Cek timeout otomatis 10 menit khusus untuk urutan pertama yang berstatus standby
                             if (index === 0 && item.status === "Standby" && waktuTerakhirStandbyGlobal) {
                                 const waktuStandbyMs = new Date(waktuTerakhirStandbyGlobal).getTime();
                                 const selisihMs = sekarangMs - waktuStandbyMs;
                                 const batasMs = BATAS_MENIT * 60 * 1000;
                                 
                                 if (selisihMs > batasMs) {
-                                    // Waktu habis dan tidak lapor, sembunyikan atau lewati dari list aktif/tidak dihitung sebagai utama
                                     return; 
                                 }
                             }
