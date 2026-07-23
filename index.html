@@ -11,11 +11,9 @@
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
             --success: #10b981;
-            --success-hover: #059669;
             --warning: #f59e0b;
             --danger: #ef4444;
             --spv-color: #7c3aed;
-            --spv-hover: #6d28d9;
             --background: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
@@ -105,7 +103,6 @@
             background: #ffffff; font-size: 13px; color: var(--text-main); outline: none;
             transition: all 0.2s;
         }
-        select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
         button { 
             width: 100%; padding: 12px; border-radius: 10px; 
@@ -123,7 +120,7 @@
         .btn-spv-trigger { background: #f3e8ff; color: var(--spv-color); border: 1px solid #ddd6fe; margin-top: 12px; }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; transform: none !important; }
 
-        /* GRID DUA KOLOM UNTUK ACTION SPV MODERN */
+        /* LAYOUT MENU SPV MODERN (GRID DUA KOLOM) */
         .spv-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -179,7 +176,7 @@
             <p class="sub-title">Sistem Giliran Promotor UFO Kebonsari</p>
         </div>
 
-        <!-- INDIKATOR STATUS SISTEM -->
+        <!-- STATUS SISTEM (OPEN / CLOSED) -->
         <div id="badge-status-sistem" class="status-badge-sistem status-open">
             STATUS ANTRIAN: OPEN
         </div>
@@ -192,7 +189,7 @@
             <span id="label-timer-mundur" class="timer-mundur" style="display: none;">Waktu tersisa: --:--</span>
         </div>
 
-        <!-- PANEL LOGIN SALES -->
+        <!-- PANEL LOGIN & KUNCI PERANGKAT -->
         <div id="panel-login">
             <div class="input-group">
                 <label>Pilih Nama Anda (Kunci Perangkat)</label>
@@ -201,7 +198,7 @@
             <button type="button" id="btn-simpan-hp" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
-        <!-- PANEL MENU UTAMA SALES -->
+        <!-- PANEL MENU UTAMA PROMOTOR -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <div>
@@ -218,7 +215,7 @@
         <!-- TOMBOL MODE SPV -->
         <button type="button" class="btn-spv-trigger" onclick="bukaFormLoginSPV()">🔑 Masuk Mode SPV</button>
 
-        <!-- PANEL KONTROL SPV (TAMPILAN MODERN + FITUR LENGKAP) -->
+        <!-- PANEL KONTROL SPV MODERN (SEMUA FITUR LENGKAP) -->
         <div id="panel-kontrol-spv" class="panel-spv-box" style="display: none;">
             <h3>Panel Kontrol SPV</h3>
             <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 10px 0;">Akses Kontrol & Atur Antrian Sales</p>
@@ -251,7 +248,7 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP MODERN -->
+    <!-- MODAL POPUP ELEGAN -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
@@ -272,7 +269,7 @@
         let statusSistemGlobal = "BUKA";
         const BATAS_MENIT = 10;
 
-        // VARIABEL PERINGATAN STANDBY 1 MENIT
+        // VARIABEL PERINGATAN 1 MENIT
         var sudahPeringatan1Menit = false;
 
         window.onload = function() {
@@ -385,7 +382,7 @@
             }
         }
 
-        // FUNGSI CEK PERINGATAN STANDBY 1 MENIT (+ GETAR HP)
+        // FUNGSI CEK PERINGATAN STANDBY 1 MENIT (POPUP + GETAR HP)
         function prosesCekPeringatanStandby(response, namaPromotorLogin) {
             if (response.data && response.data.length > 0) {
                 var promotorUrutan1 = response.data[0].nama;
@@ -600,7 +597,7 @@
                     
                     const akunSaya = getAkunAktif();
 
-                    // PANGGIL CEK PERINGATAN STANDBY 1 MENIT
+                    // CEK PERINGATAN STANDBY 1 MENIT
                     prosesCekPeringatanStandby(res, akunSaya);
 
                     const badge = document.getElementById('badge-status-sistem');
