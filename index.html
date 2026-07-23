@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Antrian Walk-In Sales - UFO Kebonsari</title>
+    <!-- Menghilangkan Peringatan Favicon 404 -->
+    <link rel="shortcut icon" href="#">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -223,75 +225,79 @@
             return devId;
         }
 
-      function cekAkunKeServer() {
-    const deviceId = getDeviceId();
-    
-    fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`)
-    .then(res => res.json())
-    .then(res => {
-        if (res.status === "terkunci") {
-            namaSalesAktifGlobal = res.nama;
-            document.getElementById('panel-login').style.display = 'none';
-            document.getElementById('panel-menu-utama').style.display = 'block';
-            document.getElementById('label-user-aktif').innerText = res.nama;
-            muatDataAntrian();
-        } else {
-            // Jika status 'bebas', paksa tampilkan menu login & reset pilihan nama
-            namaSalesAktifGlobal = "";
-            document.getElementById('panel-login').style.display = 'block';
-            document.getElementById('panel-menu-utama').style.display = 'none';
-            document.getElementById('pilih-sales').value = ""; // Reset dropdown
-            muatDataAntrian();
-        }
-    })
-    .catch(err => {
-        console.error("Gagal mengecek akun:", err);
-        muatDataAntrian();
-    });
-}
-
-function simpanAkunHP() {
-    const namaPilih = document.getElementById('pilih-sales').value;
-    const deviceId = getDeviceId();
-    if(!namaPilih) return tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
-
-    tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih})?`, function() {
-        const btnSimpan = document.querySelector('#panel-login button');
-        const textAsli = btnSimpan.innerHTML;
-        btnSimpan.disabled = true;
-        btnSimpan.innerHTML = `<span class="spinner"></span> Menyimpan...`;
-
-        fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}`)
-        .then(res => res.json())
-        .then(res => {
-            setTimeout(() => {
-                btnSimpan.disabled = false;
-                btnSimpan.innerHTML = textAsli;
-                
-                if(res.status === "sukses") {
-                    namaSalesAktifGlobal = namaPilih;
+        function cekAkunKeServer() {
+            const deviceId = getDeviceId();
+            
+            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === "terkunci") {
+                    namaSalesAktifGlobal = res.nama;
                     document.getElementById('panel-login').style.display = 'none';
                     document.getElementById('panel-menu-utama').style.display = 'block';
-                    document.getElementById('label-user-aktif').innerText = namaPilih;
+                    document.getElementById('label-user-aktif').innerText = res.nama;
                     muatDataAntrian();
-                    tampilkanModal("Berhasil", `HP terikat untuk: ${namaPilih}`);
                 } else {
-                    // --- PERBAIKAN UTAMA SAAT GAGAL ---
-                    namaSalesAktifGlobal = ""; // Batalkan nama aktif
-                    document.getElementById('pilih-sales').value = ""; // Reset pilihan dropdown ke awal
-                    document.getElementById('panel-login').style.display = 'block'; // Tahan di layar login
-                    document.getElementById('panel-menu-utama').style.display = 'none'; // Sembunyikan panel utama
-                    
-                    tampilkanModal("Akses Ditolak", res.pesan);
+                    namaSalesAktifGlobal = "";
+                    document.getElementById('panel-login').style.display = 'block';
+                    document.getElementById('panel-menu-utama').style.display = 'none';
+                    document.getElementById('pilih-sales').value = ""; 
+                    muatDataAntrian();
                 }
-            }, 400);
-        }).catch(() => {
-            btnSimpan.disabled = false;
-            btnSimpan.innerHTML = textAsli;
-            tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mengunci perangkat.");
-        });
-    });
-}
+            })
+            .catch(err => {
+                console.error("Gagal mengecek akun:", err);
+                muatDataAntrian();
+            });
+        }
+
+        function simpanAkunHP() {
+            const namaPilih = document.getElementById('pilih-sales').value;
+            const deviceId = getDeviceId();
+            if(!namaPilih) return tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
+
+            tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih})?`, function() {
+                const btnSimpan = document.querySelector('#panel-login button');
+                const textAsli = btnSimpan.innerHTML;
+                btnSimpan.disabled = true;
+                btnSimpan.innerHTML = `<span class="spinner"></span> Menyimpan...`;
+
+                fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}`, {
+                    method: 'GET',
+                    redirect: 'follow'
+                })
+                .then(res => res.json())
+                .then(res => {
+                    setTimeout(() => {
+                        btnSimpan.disabled = false;
+                        btnSimpan.innerHTML = textAsli;
+                        
+                        if(res.status === "sukses") {
+                            namaSalesAktifGlobal = namaPilih;
+                            document.getElementById('panel-login').style.display = 'none';
+                            document.getElementById('panel-menu-utama').style.display = 'block';
+                            document.getElementById('label-user-aktif').innerText = namaPilih;
+                            muatDataAntrian();
+                            tampilkanModal("Berhasil", `HP terikat untuk: ${namaPilih}`);
+                        } else {
+                            namaSalesAktifGlobal = ""; 
+                            document.getElementById('pilih-sales').value = ""; 
+                            document.getElementById('panel-login').style.display = 'block'; 
+                            document.getElementById('panel-menu-utama').style.display = 'none'; 
+                            
+                            tampilkanModal("Akses Ditolak", res.pesan);
+                        }
+                    }, 400);
+                }).catch(() => {
+                    btnSimpan.disabled = false;
+                    btnSimpan.innerHTML = textAsli;
+                    tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mengunci perangkat.");
+                });
+            });
+        }
 
         function getAkunAktif() {
             return namaSalesAktifGlobal;
@@ -336,7 +342,10 @@ function simpanAkunHP() {
         }
 
         function muatMasterSales() {
-            fetch(`${SCRIPT_URL}?aksi=getMasterSales`)
+            fetch(`${SCRIPT_URL}?aksi=getMasterSales`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
             .then(res => res.json())
             .then(res => {
                 if(res.status === "sukses") {
@@ -444,7 +453,10 @@ function simpanAkunHP() {
                 return;
             }
 
-            fetch(`${SCRIPT_URL}?aksi=getAntrian`)
+            fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
             .then(res => res.json())
             .then(res => {
                 if(res && res.status === "sukses") {
@@ -473,7 +485,10 @@ function simpanAkunHP() {
             }
             renderUIRental(tempSembuhList, statusSistemGlobal, waktuTerakhirStandbyGlobal);
 
-            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
+            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
             .then(res => res.json())
             .then(res => {
                 setTimeout(() => {
@@ -505,7 +520,10 @@ function simpanAkunHP() {
                     statusSayaGlobal = "Melayani";
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuTerakhirStandbyGlobal);
 
-                    fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
+                    fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, {
+                        method: 'GET',
+                        redirect: 'follow'
+                    })
                     .then(res => res.json())
                     .then(res => {
                         setTimeout(() => {
@@ -530,7 +548,10 @@ function simpanAkunHP() {
                     statusSayaGlobal = "belum_ada";
                     renderUIRental(daftarAntrianGlobal.filter(x => x.nama.toLowerCase() !== namaSales.toLowerCase()), statusSistemGlobal, waktuTerakhirStandbyGlobal);
 
-                    fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
+                    fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`, {
+                        method: 'GET',
+                        redirect: 'follow'
+                    })
                     .then(res => res.json())
                     .then(res => {
                         setTimeout(() => {
