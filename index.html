@@ -364,7 +364,7 @@
             });
         }
 
-        function muatDataAntrian() {
+       function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
@@ -374,6 +374,7 @@
                     let salesUtama = "Belum ada antrian";
                     const akunSaya = getAkunAktif();
                     
+                    // Reset status awal
                     statusSayaGlobal = "belum_ada"; 
                     waktuTerakhirStandbyGlobal = res.waktuStandbyPertama || null;
 
@@ -383,11 +384,12 @@
                         daftarAntrianGlobal.forEach((item, index) => {
                             if(index === 0) {
                                 salesUtama = item.nama;
-                                if(item.nama === akunSaya) {
+                                if(item.nama === akunSaya && item.status === "Standby") {
                                     apakahSayaUrutanPertama = true;
                                 }
                             }
                             
+                            // CEK STATUS AKUN PRIBADI SECARA LANGSUNG DARI DATA SERVER
                             if(item.nama === akunSaya) {
                                 if(item.status === "Standby") {
                                     statusSayaGlobal = "standby";
@@ -405,6 +407,7 @@
                     const btnAntri = document.getElementById('btn-utama-antri');
                     const btnCustomer = document.getElementById('btn-utama-customer');
 
+                    // RENDER TOMBOL BERDASARKAN STATUS TERBARU
                     if (statusSayaGlobal === "standby") {
                         btnAntri.innerText = "Anda Sudah Di Antrian";
                         btnAntri.className = "btn-success btn-disabled";
@@ -438,6 +441,7 @@
                         btnCustomer.style.cursor = "pointer";
 
                     } else {
+                        // Jika belum ada di list, pastikan tombol daftar aktif dan tombol customer disembunyikan
                         btnAntri.innerText = "Masuk Shift / Ikut Antri";
                         btnAntri.className = "btn-success";
                         btnAntri.disabled = false;
@@ -450,7 +454,19 @@
                 }
             });
         }
-
+        function simpanAkunHP() {
+            const namaPilih = document.getElementById('pilih-sales').value;
+            if(!namaPilih) {
+                tampilkanModal("Perhatian", "Silakan pilih nama Anda terlebih dahulu!");
+                return;
+            }
+            tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih})? Tidak dapat diubah setelah disimpan.`, function() {
+                localStorage.setItem('ufo_sales_permanent_device', namaPilih);
+                cekAkunTersimpan();
+                muatDataAntrian(); // <--- Tambahkan ini agar langsung sinkron
+                tampilkanModal("Berhasil", `HP ini resmi terikat untuk akun: ${namaPilih}`);
+            });
+        }
      function aksiUtamaAntri() {
             const namaSales = getAkunAktif();
             if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
