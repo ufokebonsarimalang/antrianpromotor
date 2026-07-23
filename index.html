@@ -208,6 +208,9 @@
         let namaSalesAktifGlobal = "";
         const BATAS_MENIT = 10;
         var sudahPeringatan1Menit = false;
+        
+        // VARIABEL PENGUNCI SINKRONISASI agar tidak terjadi race condition
+        let sedangProsesAksi = false;
 
         window.onload = function() {
             cekAkunKeServer();
@@ -216,35 +219,31 @@
             setInterval(hitungMundurLokal, 1000); 
         };
 
-       function getDeviceId() {
-    // 1. Cek dulu apakah ada di LocalStorage
-    let devId = localStorage.getItem('ufo_device_perm_id');
-    
-    // 2. Jika LocalStorage terhapus (Clear Cache), racik ulang ID berbasis Hardware HP
-    if (!devId) {
-        const info = window.navigator.userAgent + window.navigator.hardwareConcurrency + screen.width + screen.height;
-        
-        // Membaca Canvas GPU Fingerprint
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = "top";
-        ctx.font = "14px 'Arial'";
-        ctx.fillText("UFO-Kebonsari-Device", 2, 15);
-        const canvasData = canvas.toDataURL();
+        function getDeviceId() {
+            let devId = localStorage.getItem('ufo_device_perm_id');
+            if (!devId) {
+                const info = window.navigator.userAgent + window.navigator.hardwareConcurrency + screen.width + screen.height;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = "top";
+                ctx.font = "14px 'Arial'";
+                ctx.fillText("UFO-Kebonsari-Device", 2, 15);
+                const canvasData = canvas.toDataURL();
 
-        let hash = 0;
-        const str = info + canvasData;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash |= 0;
+                let hash = 0;
+                const str = info + canvasData;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash |= 0;
+                }
+                
+                devId = "DEV-HW-" + Math.abs(hash);
+                localStorage.setItem('ufo_device_perm_id', devId);
+            }
+            return devId;
         }
-        
-        devId = "DEV-HW-" + Math.abs(hash);
-        localStorage.setItem('ufo_device_perm_id', devId);
-    }
-    return devId;
-}
+
         function cekAkunKeServer() {
             const deviceId = getDeviceId();
             
@@ -469,7 +468,9 @@
         function muatDataAntrian() {
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
-            if ((btnAntri && btnAntri.dataset.loading === "true") || (btnCustomer && btnCustomer.dataset.loading === "true")) {
+            
+            // JIKA SEDANG PROSES AKSI ATAU LOADING, ABORT REFRESH Latar Belakang
+            if (sedangProsesAksi || (btnAntri && btnAntri.dataset.loading === "true") || (btnCustomer && btnCustomer.dataset.loading === "true")) {
                 return;
             }
 
@@ -479,7 +480,7 @@
             })
             .then(res => res.json())
             .then(res => {
-                if(res && res.status === "sukses") {
+                if(!sedangProsesAksi && res && res.status === "sukses") {
                     const akunSaya = getAkunAktif().trim();
                     prosesCekPeringatanStandby(res, akunSaya);
                     renderUIRental(res.data, res.statusAntrian, res.waktuStandbyPertama);
@@ -489,47 +490,49 @@
             });
         }
 
-     function aksiUtamaAntri() {
-    const namaSales = getAkunAktif();
-    if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
-    
-    const btnAntri = document.getElementById('btn-utama-antri');
-    btnAntri.dataset.loading = "true";
-    btnAntri.disabled = true;
-    btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
+        function aksiUtamaAntri() {
+            const namaSales = getAkunAktif();
+            if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
+            
+            // 1. PISAHKAN DARI REFRESH OTOMATIS
+            sedangProsesAksi = true;
 
-    // 1. UPDATE UI INSTAN: Masukkan status ke lokal agar tombol & list langsung berubah
-    statusSayaGlobal = "Standby";
-    
-    // Cek apakah nama sudah ada di list global, jika belum maka tambahkan sementara
-    let tempSembuhList = [...daftarAntrianGlobal];
-    if(!tempSembuhList.some(x => String(x.nama).trim().toLowerCase() === namaSales.trim().toLowerCase())) {
-        tempSembuhList.push({ nama: namaSales, status: "Standby" });
-    }
-    // Render langsung ke layar tanpa menunggu server
-    renderUIRental(tempSembuhList, statusSistemGlobal, waktuTerakhirStandbyGlobal);
+            const btnAntri = document.getElementById('btn-utama-antri');
+            btnAntri.dataset.loading = "true";
+            btnAntri.disabled = true;
+            btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
 
-    // 2. KIRIM KE SERVER
-    fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`, {
-        method: 'GET',
-        redirect: 'follow'
-    })
-    .then(res => res.json())
-    .then(res => {
-        // Beri jeda 800ms agar Google Sheets selesai memproses tulisan barunya
-        setTimeout(() => {
-            btnAntri.dataset.loading = "false";
-            tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
-            muatDataAntrian(); // Tarik data valid dari server
-        }, 800);
-    })
-    .catch(err => {
-        setTimeout(() => {
-            btnAntri.dataset.loading = "false";
-            muatDataAntrian();
-        }, 800);
-    });
-}
+            // 2. RENDER INSTAN KE LOKAL
+            statusSayaGlobal = "Standby";
+            let tempSembuhList = [...daftarAntrianGlobal];
+            if(!tempSembuhList.some(x => String(x.nama).trim().toLowerCase() === namaSales.trim().toLowerCase())) {
+                tempSembuhList.push({ nama: namaSales, status: "Standby" });
+            }
+            renderUIRental(tempSembuhList, statusSistemGlobal, waktuTerakhirStandbyGlobal);
+
+            // 3. KIRIM KE GOOGLE APPS SCRIPT
+            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
+            .then(res => res.json())
+            .then(res => {
+                // Beri jeda 1.5s agar Google Sheets tuntas menyimpan sebelum refresh server
+                setTimeout(() => {
+                    btnAntri.dataset.loading = "false";
+                    sedangProsesAksi = false; // Buka pengunci
+                    tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
+                    muatDataAntrian();
+                }, 1500);
+            })
+            .catch(err => {
+                setTimeout(() => {
+                    btnAntri.dataset.loading = "false";
+                    sedangProsesAksi = false; // Buka pengunci
+                    muatDataAntrian();
+                }, 1500);
+            });
+        }
 
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
@@ -539,6 +542,7 @@
 
             if (statusSayaGlobal === "Standby") {
                 tampilkanModalKonfirmasi("Konfirmasi", `Sudah membawa customer?`, function() {
+                    sedangProsesAksi = true;
                     btnCustomer.dataset.loading = "true";
                     btnCustomer.disabled = true;
                     btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
@@ -554,19 +558,22 @@
                     .then(res => {
                         setTimeout(() => {
                             btnCustomer.dataset.loading = "false";
+                            sedangProsesAksi = false;
                             tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
                             muatDataAntrian();
-                        }, 500);
+                        }, 1500);
                     })
                     .catch(err => {
                         setTimeout(() => {
                             btnCustomer.dataset.loading = "false";
+                            sedangProsesAksi = false;
                             muatDataAntrian();
-                        }, 500);
+                        }, 1500);
                     });
                 });
             } else if (statusSayaGlobal === "Melayani") {
                 tampilkanModalKonfirmasi("Selesai Pelayanan", `Apakah Anda sudah selesai melayani customer?`, function() {
+                    sedangProsesAksi = true;
                     btnCustomer.dataset.loading = "true";
                     btnCustomer.disabled = true;
                     btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
@@ -582,15 +589,17 @@
                     .then(res => {
                         setTimeout(() => {
                             btnCustomer.dataset.loading = "false";
+                            sedangProsesAksi = false;
                             tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
                             muatDataAntrian();
-                        }, 500);
+                        }, 1500);
                     })
                     .catch(err => {
                         setTimeout(() => {
                             btnCustomer.dataset.loading = "false";
+                            sedangProsesAksi = false;
                             muatDataAntrian();
-                        }, 500);
+                        }, 1500);
                     });
                 });
             }
