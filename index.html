@@ -396,25 +396,43 @@
             tampilkanModal("Keluar", "Mode SPV ditutup.");
         }
 
-        function spvAksi(aksiName, btnElement, defaultText) {
-            const pin = "8888"; 
-            btnElement.disabled = true;
-            btnElement.innerHTML = `<span class="spinner"></span> Memproses...`;
+      function spvAksi(aksiName, namaSales = "") {
+    // Meminta SPV memasukkan PIN secara langsung saat tombol diklik (aman dari intipan kode HTML)
+    const pin = prompt("Masukkan PIN SPV:");
+    
+    if (!pin) {
+        return; // Batal jika PIN tidak diisi / dibatalkan
+    }
 
-            fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}`)
-            .then(res => res.json())
-            .then(res => {
-                btnElement.disabled = false;
-                btnElement.innerHTML = defaultText;
-                tampilkanModal("Status SPV", res.pesan);
-                muatDataAntrian();
-            }).catch(() => {
-                btnElement.disabled = false;
-                btnElement.innerHTML = defaultText;
-                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
-            });
-        }
+    // Tampilkan loading atau proses
+    Swal.fire({
+        title: 'Memproses...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
 
+    // Kirim request ke Google Apps Script
+    let url = WEB_APP_URL + "?aksi=" + aksiName + "&pin=" + pin;
+    if (namaSales) {
+        url += "&namaSales=" + encodeURIComponent(namaSales);
+    }
+
+    fetch(url)
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === "sukses") {
+                Swal.fire("Berhasil!", result.pesan, "success").then(() => {
+                    location.reload(); // Refresh halaman untuk memperbarui data
+                });
+            } else {
+                Swal.fire("Gagal!", result.pesan, "error");
+            }
+        })
+        .catch(error => {
+            Swal.fire("Error!", "Terjadi kesalahan koneksi.", "error");
+            console.error(error);
+        });
+}
         function buatDropdownSales(idSelect) {
             let options = '<option value="">-- Pilih Promotor --</option>';
             masterSalesGlobal.forEach(n => {
