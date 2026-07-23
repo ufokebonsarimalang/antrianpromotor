@@ -182,13 +182,13 @@
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none;">Sudah Membawa Customer</button>
             
             <!-- TOMBOL AKSES SPV -->
-            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV (Wasit)</button>
+            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV</button>
         </div>
 
         <!-- PANEL KONTROL SPV -->
         <div id="panel-kontrol-spv" class="panel-spv-box" style="display: none;">
-            <h3>👑 Panel Kontrol SPV (Wasit)</h3>
-            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Anda login sebagai Wasit/SPV.</p>
+            <h3>👑 Panel Kontrol SPV</h3>
+            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Anda login sebagai SPV.</p>
             
             <button type="button" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvTambahTimer')">⏱️ Tambah Waktu Standby Urutan 1</button>
             <button type="button" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvGeserCustomer')">👥 Paksa Geser Urutan 1 (Lupa Tombol)</button>
@@ -299,12 +299,12 @@
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = "🔐 Verifikasi SPV";
             document.getElementById('modal-desc').innerHTML = `
-                Masukkan PIN SPV untuk membuka panel wasit:<br><br>
+                Masukkan PIN SPV untuk membuka panel:<br><br>
                 <input type="password" id="input-pin-spv" placeholder="Masukkan PIN" style="text-align:center; font-size:16px; letter-spacing:3px;">
             `;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-spv" onclick="prosesLoginSPV()">Masuk Wasit</button>
+                <button type="button" class="btn-spv" onclick="prosesLoginSPV()">Masuk</button>
             `;
             modal.classList.add('active');
         }
@@ -317,7 +317,7 @@
                 tutupModal();
                 if(res.status === "sukses") {
                     document.getElementById('panel-kontrol-spv').style.display = 'block';
-                    tampilkanModal("Berhasil", "Mode SPV Aktif! Anda memegang kendali wasit.");
+                    tampilkanModal("Berhasil", "Mode SPV Aktif! Anda memegang kendali.");
                 } else {
                     tampilkanModal("Gagal", res.pesan);
                 }
@@ -334,7 +334,7 @@
             fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}`)
             .then(res => res.json())
             .then(res => {
-                tampilkanModal("Status Wasit SPV", res.pesan);
+                tampilkanModal("Status SPV", res.pesan);
                 muatDataAntrian();
             });
         }
@@ -518,7 +518,8 @@
                 }
 
                 tampilkanModalKonfirmasi("Konfirmasi Selesai", `Apakah pelayanan sudah selesai dan ingin masuk kembali ke antrean paling bawah?`, function() {
-                    fetch(`${SCRIPT_URL}?aksi=selesaiPelayanan&namaSales=${encodeURIComponent(namaSales)}`)
+                  // KODE PERBAIKANNYA:
+fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
                         tampilkanModal("Status Antrian", res.pesan);
