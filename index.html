@@ -225,8 +225,8 @@
 
         window.onload = function() {
             cekAkunTersimpan();
-            muatDataAntrian();
-            setInterval(muatDataAntrian, 5000); 
+            ();
+            setInterval(, 5000); 
             setInterval(hitungMundurLokal, 1000); 
         };
 
@@ -379,12 +379,12 @@
             });
         }
 
-        function muatDataAntrian() {
+    function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
                 if(res.status === "sukses") {
-                    daftarAntrianGlobal = res.data;
+                    daftarAntrianGlobal = res.data || [];
                     let listHtml = "";
                     let salesUtama = "Belum ada antrian";
                     const akunSaya = getAkunAktif();
@@ -396,22 +396,23 @@
 
                     if(daftarAntrianGlobal.length > 0) {
                         daftarAntrianGlobal.forEach((item, index) => {
+                            // Ambil orang pertama yang statusnya Standby sebagai sales utama
                             if(index === 0) {
                                 salesUtama = item.nama;
-                                if(item.nama === akunSaya && item.status === "Standby") {
+                                if(item.nama === akunSaya) {
                                     apakahSayaUrutanPertama = true;
                                 }
                             }
                             
+                            // Cek status akun yang sedang aktif di HP ini
                             if(item.nama === akunSaya) {
                                 if(item.status === "Standby") {
                                     statusSayaGlobal = "standby";
-                                } else if(item.status === "Membawa Customer" || item.status === "Sudah Membawa Customer") {
+                                } else if(item.status === "Membawa Customer" || item.status === "Sudah Membawa Customer" || item.status === "Melayani Customer") {
                                     statusSayaGlobal = "membawa_customer";
-                                } else {
-                                    statusSayaGlobal = "belum_ada"; 
                                 }
                             }
+                            
                             listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted);">${item.status}</span></li>`;
                         });
                     } else {
