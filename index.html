@@ -195,7 +195,7 @@
             cekAkunTersimpan();
             muatMasterSales();
             muatDataAntrian();
-            setInterval(muatDataAntrian, 4000); 
+            setInterval(muatDataAntrian, 3000); 
             setInterval(hitungMundurLokal, 1000); 
         };
 
@@ -244,8 +244,11 @@
                 .then(res => res.json())
                 .then(res => {
                     if(res.status === "sukses") {
-                        cekAkunTersimpan();
-                        setTimeout(muatDataAntrian, 500);
+                        localStorage.setItem('ufo_sales_permanent_device', namaPilih);
+                        document.getElementById('panel-login').style.display = 'none';
+                        document.getElementById('panel-menu-utama').style.display = 'block';
+                        document.getElementById('label-user-aktif').innerText = namaPilih;
+                        muatDataAntrian();
                         tampilkanModal("Berhasil", `HP terikat untuk: ${namaPilih}`);
                     } else {
                         tampilkanModal("Gagal", res.pesan);
@@ -309,100 +312,99 @@
             }).catch(err => console.error("Gagal muat master sales"));
         }
 
+        function renderUIRental(dataAntrian, statusSistem, waktuStandbyPertama) {
+            daftarAntrianGlobal = dataAntrian || [];
+            statusSistemGlobal = statusSistem || "BUKA";
+            waktuTerakhirStandbyGlobal = waktuStandbyPertama || null;
+            const akunSaya = getAkunAktif().trim();
+
+            const badge = document.getElementById('badge-status-sistem');
+            badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
+            badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
+
+            let listHtml = "";
+            let salesUtama = "Belum ada antrian";
+            statusSayaGlobal = "belum_ada"; 
+            let apakahSayaUrutanPertama = false;
+
+            let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
+            if (listStandby.length > 0) {
+                salesUtama = listStandby[0].nama;
+                if (listStandby[0].nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
+                    apakahSayaUrutanPertama = true;
+                }
+            }
+
+            if(daftarAntrianGlobal.length > 0) {
+                let nomorUrut = 1;
+                daftarAntrianGlobal.forEach((item) => {
+                    const namaItem = String(item.nama).trim();
+
+                    if(namaItem.toLowerCase() === akunSaya.toLowerCase()) {
+                        statusSayaGlobal = item.status; 
+                    }
+
+                    if (item.status === "Standby") {
+                        listHtml += `<li><b>${nomorUrut}. ${item.nama}</b> <span class="badge-status-item badge-standby">Standby</span></li>`;
+                        nomorUrut++;
+                    } else if (item.status === "Melayani") {
+                        listHtml += `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
+                    }
+                });
+            } else {
+                listHtml = "<li><span>Belum ada promotor aktif</span></li>";
+            }
+
+            const btnAntri = document.getElementById('btn-utama-antri');
+            const btnCustomer = document.getElementById('btn-utama-customer');
+
+            if (statusSayaGlobal === "Melayani") {
+                btnAntri.innerText = "Sedang Melayani Customer";
+                btnAntri.className = "btn-warning btn-disabled";
+                btnAntri.disabled = true;
+
+                btnCustomer.style.display = "block";
+                btnCustomer.innerText = "SELESAI PELAYANAN";
+                btnCustomer.className = "btn-danger";
+                btnCustomer.disabled = false;
+
+            } else if (statusSayaGlobal === "Standby") {
+                btnAntri.innerText = "Anda Sudah Di Antrian";
+                btnAntri.className = "btn-success btn-disabled";
+                btnAntri.disabled = true;
+
+                btnCustomer.style.display = "block";
+                btnCustomer.innerText = "Sudah Membawa Customer";
+                btnCustomer.disabled = !apakahSayaUrutanPertama;
+                btnCustomer.className = apakahSayaUrutanPertama ? "btn-primary" : "btn-primary btn-disabled";
+
+            } else { 
+                if (statusSistemGlobal === "TUTUP") {
+                    btnAntri.innerText = "Antrian Ditutup Oleh SPV";
+                    btnAntri.className = "btn-danger btn-disabled";
+                    btnAntri.disabled = true;
+                } else {
+                    btnAntri.innerText = "Masuk Shift / Ikut Antri";
+                    btnAntri.className = "btn-success";
+                    btnAntri.disabled = false;
+                }
+                btnCustomer.style.display = "none";
+            }
+
+            document.getElementById('nama-aktif').innerText = salesUtama;
+            document.getElementById('item-antrian-list').innerHTML = listHtml;
+        }
+
         function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
                 if(res && res.status === "sukses") {
-                    daftarAntrianGlobal = res.data || [];
-                    statusSistemGlobal = res.statusAntrian || "BUKA";
                     const akunSaya = getAkunAktif().trim();
-
                     prosesCekPeringatanStandby(res, akunSaya);
-
-                    const badge = document.getElementById('badge-status-sistem');
-                    badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
-                    badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
-
-                    let listHtml = "";
-                    let salesUtama = "Belum ada antrian";
-                    statusSayaGlobal = "belum_ada"; 
-                    waktuTerakhirStandbyGlobal = null;
-                    let apakahSayaUrutanPertama = false;
-
-                    let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
-                    if (listStandby.length > 0) {
-                        salesUtama = listStandby[0].nama;
-                        if (listStandby[0].nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
-                            apakahSayaUrutanPertama = true;
-                        }
-                    }
-
-                    if (res.waktuStandbyPertama) {
-                        waktuTerakhirStandbyGlobal = res.waktuStandbyPertama;
-                    }
-
-                    if(daftarAntrianGlobal.length > 0) {
-                        let nomorUrut = 1;
-                        daftarAntrianGlobal.forEach((item) => {
-                            const namaItem = String(item.nama).trim();
-
-                            if(namaItem.toLowerCase() === akunSaya.toLowerCase()) {
-                                statusSayaGlobal = item.status; 
-                            }
-
-                            if (item.status === "Standby") {
-                                listHtml += `<li><b>${nomorUrut}. ${item.nama}</b> <span class="badge-status-item badge-standby">Standby</span></li>`;
-                                nomorUrut++;
-                            } else if (item.status === "Melayani") {
-                                listHtml += `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
-                            }
-                        });
-                    } else {
-                        listHtml = "<li><span>Belum ada promotor aktif</span></li>";
-                    }
-
-                    const btnAntri = document.getElementById('btn-utama-antri');
-                    const btnCustomer = document.getElementById('btn-utama-customer');
-
-                    if (statusSayaGlobal === "Melayani") {
-                        btnAntri.innerText = "Sedang Melayani Customer";
-                        btnAntri.className = "btn-warning btn-disabled";
-                        btnAntri.disabled = true;
-
-                        btnCustomer.style.display = "block";
-                        btnCustomer.innerText = "SELESAI PELAYANAN";
-                        btnCustomer.className = "btn-danger";
-                        btnCustomer.disabled = false;
-
-                    } else if (statusSayaGlobal === "Standby") {
-                        btnAntri.innerText = "Anda Sudah Di Antrian";
-                        btnAntri.className = "btn-success btn-disabled";
-                        btnAntri.disabled = true;
-
-                        btnCustomer.style.display = "block";
-                        btnCustomer.innerText = "Sudah Membawa Customer";
-                        btnCustomer.disabled = !apakahSayaUrutanPertama;
-                        btnCustomer.className = apakahSayaUrutanPertama ? "btn-primary" : "btn-primary btn-disabled";
-
-                    } else { 
-                        if (statusSistemGlobal === "TUTUP") {
-                            btnAntri.innerText = "Antrian Ditutup Oleh SPV";
-                            btnAntri.className = "btn-danger btn-disabled";
-                            btnAntri.disabled = true;
-                        } else {
-                            btnAntri.innerText = "Masuk Shift / Ikut Antri";
-                            btnAntri.className = "btn-success";
-                            btnAntri.disabled = false;
-                        }
-                        btnCustomer.style.display = "none";
-                    }
-
-                    document.getElementById('nama-aktif').innerText = salesUtama;
-                    document.getElementById('item-antrian-list').innerHTML = listHtml;
+                    renderUIRental(res.data, res.statusAntrian, res.waktuStandbyPertama);
                 }
             }).catch(err => {
-                // Mencegah error crash tampilan saat fetch tertunda sesaat
                 console.log("Menunggu sinkronisasi server...");
             });
         }
@@ -415,15 +417,22 @@
             btnAntri.disabled = true;
             btnAntri.innerText = "Memproses...";
 
+            // Ubah UI secara instan lokal menjadi Standby agar langsung terlihat responsif tanpa klik 2x
+            statusSayaGlobal = "Standby";
+            let tempSembuhList = [...daftarAntrianGlobal];
+            if(!tempSembuhList.some(x => x.nama.toLowerCase() === namaSales.toLowerCase())) {
+                tempSembuhList.push({ nama: namaSales, status: "Standby" });
+            }
+            renderUIRental(tempSembuhList, statusSistemGlobal, waktuTerakhirStandbyGlobal);
+
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
-                setTimeout(muatDataAntrian, 500);
+                muatDataAntrian();
             })
             .catch(err => {
-                tampilkanModal("Informasi", "Permintaan terkirim, memperbarui data...");
-                setTimeout(muatDataAntrian, 1000);
+                muatDataAntrian();
             });
         }
 
@@ -438,14 +447,18 @@
                     btnCustomer.disabled = true;
                     btnCustomer.innerText = "Memproses...";
                     
+                    // Update UI instan lokal menjadi Melayani
+                    statusSayaGlobal = "Melayani";
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuTerakhirStandbyGlobal);
+
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
                         tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
-                        setTimeout(muatDataAntrian, 500);
+                        muatDataAntrian();
                     })
                     .catch(err => {
-                        setTimeout(muatDataAntrian, 1000);
+                        muatDataAntrian();
                     });
                 });
             } else if (statusSayaGlobal === "Melayani") {
@@ -453,14 +466,18 @@
                     btnCustomer.disabled = true;
                     btnCustomer.innerText = "Memproses...";
                     
+                    // Update UI instan lokal kembali bersih / keluar antrian
+                    statusSayaGlobal = "belum_ada";
+                    renderUIRental(daftarAntrianGlobal.filter(x => x.nama.toLowerCase() !== namaSales.toLowerCase()), statusSistemGlobal, waktuTerakhirStandbyGlobal);
+
                     fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
                         tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
-                        setTimeout(muatDataAntrian, 500);
+                        muatDataAntrian();
                     })
                     .catch(err => {
-                        setTimeout(muatDataAntrian, 1000);
+                        muatDataAntrian();
                     });
                 });
             }
