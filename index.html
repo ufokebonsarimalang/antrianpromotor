@@ -155,7 +155,7 @@
         </div>
 
         <!-- LOGIN / KUNCI HP -->
-        <div id="panel-login">
+        <div id="panel-login" style="display: none;">
             <div class="input-group">
                 <label>Pilih Nama Anda (Kunci Perangkat)</label>
                 <select id="pilih-sales"><option value="">-- Memuat Data --</option></select>
@@ -203,50 +203,49 @@
         let masterSalesGlobal = [];
         let statusSayaGlobal = "belum_ada"; 
         let statusSistemGlobal = "BUKA";
+        let namaSalesAktifGlobal = "";
         const BATAS_MENIT = 10;
         var sudahPeringatan1Menit = false;
 
         window.onload = function() {
-            cekAkunTersimpan();
+            cekAkunKeServer();
             muatMasterSales();
-            muatDataAntrian();
             setInterval(muatDataAntrian, 3000); 
             setInterval(hitungMundurLokal, 1000); 
         };
 
         function getDeviceId() {
-            let name = "ufo_device_perm_id=";
-            let decodedCookie = decodeURIComponent(document.cookie);
-            let ca = decodedCookie.split(';');
-            for(let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) == ' ') c = c.substring(1);
-                if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+            let devId = localStorage.getItem('ufo_device_perm_id');
+            if (!devId) {
+                devId = 'DEV-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+                localStorage.setItem('ufo_device_perm_id', devId);
             }
-            let devId = 'DEV-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-            let d = new Date();
-            d.setTime(d.getTime() + (3650*24*60*60*1000));
-            document.cookie = name + devId + ";expires=" + d.toUTCString() + ";path=/";
             return devId;
         }
 
-        function cekAkunTersimpan() {
+        function cekAkunKeServer() {
             const deviceId = getDeviceId();
+            
             fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`)
             .then(res => res.json())
             .then(res => {
                 if (res.status === "terkunci") {
-                    localStorage.setItem('ufo_sales_permanent_device', res.nama);
+                    namaSalesAktifGlobal = res.nama;
                     document.getElementById('panel-login').style.display = 'none';
                     document.getElementById('panel-menu-utama').style.display = 'block';
                     document.getElementById('label-user-aktif').innerText = res.nama;
+                    muatDataAntrian();
                 } else {
-                    localStorage.removeItem('ufo_sales_permanent_device');
+                    namaSalesAktifGlobal = "";
                     document.getElementById('panel-login').style.display = 'block';
                     document.getElementById('panel-menu-utama').style.display = 'none';
+                    muatDataAntrian();
                 }
             })
-            .catch(err => console.error("Gagal mengecek akun:", err));
+            .catch(err => {
+                console.error("Gagal mengecek akun:", err);
+                muatDataAntrian();
+            });
         }
 
         function simpanAkunHP() {
@@ -267,7 +266,7 @@
                         btnSimpan.disabled = false;
                         btnSimpan.innerHTML = textAsli;
                         if(res.status === "sukses") {
-                            localStorage.setItem('ufo_sales_permanent_device', namaPilih);
+                            namaSalesAktifGlobal = namaPilih;
                             document.getElementById('panel-login').style.display = 'none';
                             document.getElementById('panel-menu-utama').style.display = 'block';
                             document.getElementById('label-user-aktif').innerText = namaPilih;
@@ -286,7 +285,7 @@
         }
 
         function getAkunAktif() {
-            return localStorage.getItem('ufo_sales_permanent_device') || "";
+            return namaSalesAktifGlobal;
         }
 
         function hitungMundurLokal() {
@@ -358,7 +357,7 @@
             let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
             if (listStandby.length > 0) {
                 salesUtama = listStandby[0].nama;
-                if (listStandby[0].nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
+                if (akunSaya && listStandby[0].nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
                     apakahSayaUrutanPertama = true;
                 }
             }
@@ -368,7 +367,7 @@
                 daftarAntrianGlobal.forEach((item) => {
                     const namaItem = String(item.nama).trim();
 
-                    if(namaItem.toLowerCase() === akunSaya.toLowerCase()) {
+                    if(akunSaya && namaItem.toLowerCase() === akunSaya.toLowerCase()) {
                         statusSayaGlobal = item.status; 
                     }
 
@@ -386,7 +385,6 @@
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
 
-            // Jika tombol sedang memproses (spinner aktif), jangan ubah teksnya secara otomatis lewat renderUIRental sementara waktu
             if (btnAntri.dataset.loading === "true" || btnCustomer.dataset.loading === "true") {
                 document.getElementById('nama-aktif').innerText = salesUtama;
                 document.getElementById('item-antrian-list').innerHTML = listHtml;
@@ -431,7 +429,6 @@
         }
 
         function muatDataAntrian() {
-            // Jangan timpa tampilan tombol jika sedang loading spinner
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
             if ((btnAntri && btnAntri.dataset.loading === "true") || (btnCustomer && btnCustomer.dataset.loading === "true")) {
@@ -460,7 +457,6 @@
             btnAntri.disabled = true;
             btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
 
-            // Update UI instan lokal menjadi Standby
             statusSayaGlobal = "Standby";
             let tempSembuhList = [...daftarAntrianGlobal];
             if(!tempSembuhList.some(x => x.nama.toLowerCase() === namaSales.toLowerCase())) {
@@ -497,7 +493,6 @@
                     btnCustomer.disabled = true;
                     btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
                     
-                    // Update UI instan lokal menjadi Melayani
                     statusSayaGlobal = "Melayani";
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuTerakhirStandbyGlobal);
 
@@ -523,7 +518,6 @@
                     btnCustomer.disabled = true;
                     btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
                     
-                    // Update UI instan lokal keluar antrian
                     statusSayaGlobal = "belum_ada";
                     renderUIRental(daftarAntrianGlobal.filter(x => x.nama.toLowerCase() !== namaSales.toLowerCase()), statusSistemGlobal, waktuTerakhirStandbyGlobal);
 
