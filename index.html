@@ -164,7 +164,7 @@
             <span id="label-timer-mundur" class="timer-mundur" style="display: none;">Waktu tersisa: --:--</span>
         </div>
 
-        <!-- PANEL LOGIN SALES (MUNCUL JIKA HP BELUM TERIKAT NAMA SALES) -->
+        <!-- PANEL LOGIN SALES -->
         <div id="panel-login">
             <div class="input-group">
                 <label>Pilih Nama Anda (Kunci Perangkat)</label>
@@ -173,7 +173,7 @@
             <button type="button" id="btn-simpan-hp" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
-        <!-- PANEL MENU UTAMA SALES (MUNCUL JIKA HP SUDAH TERIKAT) -->
+        <!-- PANEL MENU UTAMA SALES -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <div>
@@ -187,18 +187,22 @@
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none;">Sudah Membawa Customer</button>
         </div>
 
-        <!-- TOMBOL MASUK MODE SPV (SELALU MUNCUL DI LUAR, BEBAS TANPA HARUS DAFTAR AKUN SALES) -->
+        <!-- TOMBOL MASUK MODE SPV -->
         <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV</button>
 
-        <!-- PANEL KONTROL SPV (MUNCUL SETELAH INPUT PIN BENAR) -->
+        <!-- PANEL KONTROL SPV LENGKAP -->
         <div id="panel-kontrol-spv" class="panel-spv-box" style="display: none;">
             <h3>👑 Panel Kontrol SPV</h3>
-            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Anda login sebagai SPV.</p>
+            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Akses Kontrol Penuh SPV.</p>
             
             <button type="button" id="btn-spv-timer" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvTambahTimer', this, '⏱️ Tambah Waktu Standby Urutan 1')">⏱️ Tambah Waktu Standby Urutan 1</button>
+            <button type="button" id="btn-spv-customer-bebas" class="btn-primary" style="margin-top:4px; font-size:11px; padding:9px;" onclick="bukaFormSPVAmbilCustomer()">🤝 Aktifkan Customer Janjian (Bebas Urutan)</button>
             <button type="button" id="btn-spv-selesai" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvSelesaikannya', this, '✅ Paksa Selesai Promotor (Lupa Klik)')">✅ Paksa Selesai Promotor (Lupa Klik)</button>
+            <button type="button" id="btn-spv-masuk-antrian" class="btn-success" style="margin-top:4px; font-size:11px; padding:9px;" onclick="bukaFormSPVMasukkanAntrian()">➕ Masukkan Promotor ke Antrian</button>
+            <button type="button" id="btn-spv-keluar-antrian" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px; background: #ea580c;" onclick="bukaFormSPVKeluarkanAntrian()">❌ Keluarkan Promotor dari Antrian</button>
             <button type="button" id="btn-spv-reset" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px; background: #dc2626;" onclick="bukaFormResetDevice()">🔄 Reset Perangkat Promotor</button>
-            <button type="button" class="btn-cancel" style="margin-top:6px; font-size:10px; padding:7px;" onclick="logoutSPV()">Keluar Mode SPV</button>
+            
+            <button type="button" class="btn-cancel" style="margin-top:8px; font-size:10px; padding:7px;" onclick="logoutSPV()">Keluar Mode SPV</button>
         </div>
 
         <div class="list-box">
@@ -399,6 +403,128 @@
             });
         }
 
+        // --- FITUR SPV CUSTOMER JANJIAN & LAINNYA DENGAN SPINNER ---
+
+        function bukaFormSPVAmbilCustomer() {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = "🤝 Aktifkan Customer Janjian";
+            document.getElementById('modal-desc').innerHTML = `
+                Masukkan nama promotor yang kedatangan customer janjian (walau sedang di urutan bawah):<br><br>
+                <input type="text" id="input-spv-nama-cust" placeholder="Nama Promotor" style="text-align:center; font-size:14px;">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" id="btn-modal-eksekusi-cust" class="btn-primary" onclick="eksekusiSPVAmbilCustomer()">Proses</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function eksekusiSPVAmbilCustomer() {
+            const namaSales = document.getElementById('input-spv-nama-cust').value.trim();
+            const pin = "1234";
+            const btn = document.getElementById('btn-modal-eksekusi-cust');
+
+            if(!namaSales) {
+                alert("Masukkan nama promotor!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+            fetch(`${SCRIPT_URL}?aksi=spvAmbilAntrianBebas&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pin)}`)
+            .then(res => res.json())
+            .then(res => {
+                tutupModal();
+                tampilkanModal("Status SPV", res.pesan);
+                muatDataAntrian();
+            }).catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = "Proses";
+                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
+            });
+        }
+
+        function bukaFormSPVMasukkanAntrian() {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = "➕ Masukkan ke Antrian";
+            document.getElementById('modal-desc').innerHTML = `
+                Masukkan nama promotor yang ingin dimasukkan ke antrian (Shift Aktif):<br><br>
+                <input type="text" id="input-spv-nama-masuk" placeholder="Nama Promotor" style="text-align:center; font-size:14px;">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" id="btn-modal-eksekusi-masuk" class="btn-success" onclick="eksekusiSPVMasukkanAntrian()">Masukkan</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function eksekusiSPVMasukkanAntrian() {
+            const namaSales = document.getElementById('input-spv-nama-masuk').value.trim();
+            const pin = "1234";
+            const btn = document.getElementById('btn-modal-eksekusi-masuk');
+
+            if(!namaSales) {
+                alert("Masukkan nama promotor!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+            fetch(`${SCRIPT_URL}?aksi=spvDaftarAntri&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pin)}`)
+            .then(res => res.json())
+            .then(res => {
+                tutupModal();
+                tampilkanModal("Status SPV", res.pesan);
+                muatDataAntrian();
+            }).catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = "Masukkan";
+                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
+            });
+        }
+
+        function bukaFormSPVKeluarkanAntrian() {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = "❌ Keluarkan dari Antrian";
+            document.getElementById('modal-desc').innerHTML = `
+                Masukkan nama promotor yang ingin dikeluarkan dari antrian (Selesai Shift):<br><br>
+                <input type="text" id="input-spv-nama-keluar" placeholder="Nama Promotor" style="text-align:center; font-size:14px;">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" id="btn-modal-eksekusi-keluar" class="btn-warning" onclick="eksekusiSPVKeluarkanAntrian()">Keluarkan</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function eksekusiSPVKeluarkanAntrian() {
+            const namaSales = document.getElementById('input-spv-nama-keluar').value.trim();
+            const pin = "1234";
+            const btn = document.getElementById('btn-modal-eksekusi-keluar');
+
+            if(!namaSales) {
+                alert("Masukkan nama promotor!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+            fetch(`${SCRIPT_URL}?aksi=spvKeluarkanAntrian&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pin)}`)
+            .then(res => res.json())
+            .then(res => {
+                tutupModal();
+                tampilkanModal("Status SPV", res.pesan);
+                muatDataAntrian();
+            }).catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = "Keluarkan";
+                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
+            });
+        }
+
         function bukaFormResetDevice() {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = "🔄 Reset Perangkat Sales";
@@ -408,7 +534,7 @@
             `;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-danger" onclick="eksekusiResetDevice()">Reset Sekarang</button>
+                <button type="button" id="btn-modal-eksekusi-reset" class="btn-danger" onclick="eksekusiResetDevice()">Reset Sekarang</button>
             `;
             modal.classList.add('active');
         }
@@ -416,22 +542,29 @@
         function eksekusiResetDevice() {
             const namaSales = document.getElementById('input-reset-nama').value.trim();
             const pin = "1234"; 
+            const btn = document.getElementById('btn-modal-eksekusi-reset');
 
             if(!namaSales) {
                 alert("Masukkan nama sales!");
                 return;
             }
 
-            tutupModal();
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
 
             fetch(`${SCRIPT_URL}?aksi=spvResetDevice&namaSales=${encodeURIComponent(namaSales)}&pin=${encodeURIComponent(pin)}`)
             .then(res => res.json())
             .then(res => {
+                tutupModal();
                 tampilkanModal("Status Reset", res.pesan);
             }).catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = "Reset Sekarang";
                 tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
             });
         }
+
+        // --- UTILITIES MODAL & DATA ---
 
         function tampilkanModal(judul, pesan) {
             const modal = document.getElementById('custom-modal');
