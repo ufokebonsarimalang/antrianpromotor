@@ -269,7 +269,7 @@
                 labelTimer.innerText = `Sisa Waktu Standby: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
             } else {
                 labelTimer.style.display = 'block';
-                labelTimer.innerText = `Waktu Habis! Urutan bergeser otomatis.`;
+                labelTimer.innerText = `Waktu Standby Habis! Urutan bergeser ke bawah.`;
             }
         }
 
@@ -302,102 +302,105 @@
         }
 
         function muatDataAntrian() {
-    fetch(`${SCRIPT_URL}?aksi=getAntrian`)
-    .then(res => res.json())
-    .then(res => {
-        if(res.status === "sukses") {
-            daftarAntrianGlobal = res.data || [];
-            statusSistemGlobal = res.statusAntrian || "BUKA";
-            const akunSaya = getAkunAktif();
+            fetch(`${SCRIPT_URL}?aksi=getAntrian`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses") {
+                    daftarAntrianGlobal = res.data || [];
+                    statusSistemGlobal = res.statusAntrian || "BUKA";
+                    const akunSaya = getAkunAktif().trim();
 
-            prosesCekPeringatanStandby(res, akunSaya);
+                    prosesCekPeringatanStandby(res, akunSaya);
 
-            const badge = document.getElementById('badge-status-sistem');
-            badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
-            badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
+                    const badge = document.getElementById('badge-status-sistem');
+                    badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
+                    badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
 
-            let listHtml = "";
-            let salesUtama = "Belum ada antrian";
-            statusSayaGlobal = "belum_ada"; 
-            waktuTerakhirStandbyGlobal = null;
-            let apakahSayaUrutanPertama = false;
+                    let listHtml = "";
+                    let salesUtama = "Belum ada antrian";
+                    statusSayaGlobal = "belum_ada"; 
+                    waktuTerakhirStandbyGlobal = null;
+                    let apakahSayaUrutanPertama = false;
 
-            // Cari siapa promotor standby pertama untuk timer & display utama
-            let promotorStandbyPertama = daftarAntrianGlobal.find(item => item.status === "Standby");
-            if (promotorStandbyPertama) {
-                salesUtama = promotorStandbyPertama.nama;
-                if (promotorStandbyPertama.nama === akunSaya) {
-                    apakahSayaUrutanPertama = true;
-                }
-            }
-
-            // Ambil waktu standby untuk urutan #1 aktif
-            if (res.waktuStandbyPertama) {
-                waktuTerakhirStandbyGlobal = res.waktuStandbyPertama;
-            }
-
-            if(daftarAntrianGlobal.length > 0) {
-                daftarAntrianGlobal.forEach((item, index) => {
-                    // Cek status khusus untuk AKUN SAYA di dalam antrian
-                    if(item.nama === akunSaya) {
-                        statusSayaGlobal = item.status === "Standby" ? "standby" : "membawa_customer";
+                    // Cari promotor standby pertama
+                    let promotorStandbyPertama = daftarAntrianGlobal.find(item => String(item.status).toLowerCase().includes("standby"));
+                    if (promotorStandbyPertama) {
+                        salesUtama = promotorStandbyPertama.nama;
+                        if (promotorStandbyPertama.nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
+                            apakahSayaUrutanPertama = true;
+                        }
                     }
-                    
-                    let badgeStatus = item.status === "Standby" 
-                        ? `<span style="color:var(--primary); font-weight:bold;">Standby</span>` 
-                        : `<span style="color:var(--warning); font-weight:bold;">Melayani Customer</span>`;
 
-                    listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="font-size:11px;">${badgeStatus}</span></li>`;
-                });
-            } else {
-                listHtml = "<li><span>Belum ada promotor aktif</span></li>";
-            }
+                    if (res.waktuStandbyPertama) {
+                        waktuTerakhirStandbyGlobal = res.waktuStandbyPertama;
+                    }
 
-            const btnAntri = document.getElementById('btn-utama-antri');
-            const btnCustomer = document.getElementById('btn-utama-customer');
+                    if(daftarAntrianGlobal.length > 0) {
+                        daftarAntrianGlobal.forEach((item, index) => {
+                            const namaItem = String(item.nama).trim();
+                            const statusItem = String(item.status).trim().toLowerCase();
 
-            // PERBAIKAN LOGIKA TOMBOL PROMOTOR
-            if (statusSistemGlobal === "TUTUP" && statusSayaGlobal !== "standby" && statusSayaGlobal !== "membawa_customer") {
-                btnAntri.innerText = "Antrian Ditutup Oleh SPV";
-                btnAntri.className = "btn-danger btn-disabled";
-                btnAntri.disabled = true;
-                btnCustomer.style.display = "none";
+                            // Cek status Akun Saya
+                            if(namaItem.toLowerCase() === akunSaya.toLowerCase()) {
+                                if (statusItem.includes("customer") || statusItem.includes("membawa")) {
+                                    statusSayaGlobal = "membawa_customer";
+                                } else if (statusItem.includes("standby")) {
+                                    statusSayaGlobal = "standby";
+                                }
+                            }
+                            
+                            let badgeStatus = statusItem.includes("standby") 
+                                ? `<span style="color:var(--primary); font-weight:bold;">Standby</span>` 
+                                : `<span style="color:var(--warning); font-weight:bold;">Melayani Customer</span>`;
 
-            } else if (statusSayaGlobal === "standby") {
-                // Jika sedang standby di antrian
-                btnAntri.innerText = "Anda Sudah Di Antrian";
-                btnAntri.className = "btn-success btn-disabled";
-                btnAntri.disabled = true;
-                
-                btnCustomer.style.display = "block";
-                btnCustomer.innerText = "Sudah Membawa Customer";
-                btnCustomer.disabled = !apakahSayaUrutanPertama; // Hanya aktif jika dia urutan #1 Standby
-                btnCustomer.className = apakahSayaUrutanPertama ? "btn-primary" : "btn-primary btn-disabled";
+                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="font-size:11px;">${badgeStatus}</span></li>`;
+                        });
+                    } else {
+                        listHtml = "<li><span>Belum ada promotor aktif</span></li>";
+                    }
 
-            } else if (statusSayaGlobal === "membawa_customer") {
-                // Jika sedang melayani customer (MUNCULKAN TOMBOL SELESAI)
-                btnAntri.innerText = "Sedang Melayani Customer";
-                btnAntri.className = "btn-warning btn-disabled";
-                btnAntri.disabled = true;
+                    const btnAntri = document.getElementById('btn-utama-antri');
+                    const btnCustomer = document.getElementById('btn-utama-customer');
 
-                btnCustomer.style.display = "block";
-                btnCustomer.innerText = "Selesai Pelayanan (Keluar Status Melayani)";
-                btnCustomer.className = "btn-success";
-                btnCustomer.disabled = false;
+                    // ATUR TOMBOL
+                    if (statusSayaGlobal === "membawa_customer") {
+                        btnAntri.innerText = "Sedang Melayani Customer";
+                        btnAntri.className = "btn-warning btn-disabled";
+                        btnAntri.disabled = true;
 
-            } else {
-                // Jika tidak sedang antri / tidak sedang melayani
-                btnAntri.innerText = "Masuk Shift / Ikut Antri";
-                btnAntri.className = "btn-success";
-                btnAntri.disabled = false;
-                btnCustomer.style.display = "none";
-            }
+                        btnCustomer.style.display = "block";
+                        btnCustomer.innerText = "SELESAI PELAYANAN";
+                        btnCustomer.className = "btn-danger";
+                        btnCustomer.disabled = false;
 
-            document.getElementById('nama-aktif').innerText = salesUtama;
-            document.getElementById('item-antrian-list').innerHTML = listHtml;
+                    } else if (statusSayaGlobal === "standby") {
+                        btnAntri.innerText = "Anda Sudah Di Antrian";
+                        btnAntri.className = "btn-success btn-disabled";
+                        btnAntri.disabled = true;
+
+                        btnCustomer.style.display = "block";
+                        btnCustomer.innerText = "Sudah Membawa Customer";
+                        btnCustomer.disabled = !apakahSayaUrutanPertama;
+                        btnCustomer.className = apakahSayaUrutanPertama ? "btn-primary" : "btn-primary btn-disabled";
+
+                    } else {
+                        if (statusSistemGlobal === "TUTUP") {
+                            btnAntri.innerText = "Antrian Ditutup Oleh SPV";
+                            btnAntri.className = "btn-danger btn-disabled";
+                            btnAntri.disabled = true;
+                        } else {
+                            btnAntri.innerText = "Masuk Shift / Ikut Antri";
+                            btnAntri.className = "btn-success";
+                            btnAntri.disabled = false;
+                        }
+                        btnCustomer.style.display = "none";
+                    }
+
+                    document.getElementById('nama-aktif').innerText = salesUtama;
+                    document.getElementById('item-antrian-list').innerHTML = listHtml;
+                }
+            });
         }
-    });
-}
 
         function aksiUtamaAntri() {
             const namaSales = getAkunAktif();
