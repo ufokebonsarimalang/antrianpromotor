@@ -203,7 +203,7 @@
         <!-- TOMBOL MASUK MODE SPV -->
         <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">Masuk Mode SPV</button>
 
-        <!-- PANEL KONTROL SPV -->
+        <!-- PANEL KONTROL SPV (TAMPILAN BARU LENGKAP - FITUR LAMA) -->
         <div id="panel-kontrol-spv" class="panel-spv-box" style="display: none;">
             <h3>Panel Kontrol SPV</h3>
             <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Akses Kontrol Penuh SPV</p>
@@ -233,7 +233,7 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP -->
+    <!-- MODAL POPUP (DESAIN BAGUS BARU) -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
@@ -245,7 +245,7 @@
     </div>
 
     <script>
-        // MASUKKAN URL GOOGLE APPS SCRIPT SAMA SEPERTI MILIK ANDA
+        // MASUKKAN SCRIPT URL ANDA YANG SUDAH ADA
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         let waktuTerakhirStandbyGlobal = null;
@@ -253,15 +253,13 @@
         let masterSalesGlobal = [];
         let statusSayaGlobal = "belum_ada"; 
         let statusSistemGlobal = "BUKA";
-        let authenticatedSPVPin = ""; // Menyimpan PIN SPV setelah dipasang
-        let sudahPeringatan1Menit = false; 
         const BATAS_MENIT = 10;
 
         window.onload = function() {
             cekAkunTersimpan();
             muatMasterSales();
             muatDataAntrian();
-            setInterval(muatDataAntrian, 3000); // Sinkronisasi setiap 3 detik
+            setInterval(muatDataAntrian, 5000); 
             setInterval(hitungMundurLokal, 1000); 
         };
 
@@ -360,22 +358,6 @@
                 labelTimer.style.display = 'block';
                 labelTimer.style.color = menit < 2 ? 'var(--danger)' : '#d97706';
                 labelTimer.innerText = `Sisa Waktu Standby: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
-
-                // PERINGATAN POP-UP + GETAR (UNTUK PROMOTOR URUTAN 1)
-                const akunSaya = getAkunAktif();
-                if (daftarAntrianGlobal.length > 0 && daftarAntrianGlobal[0].nama === akunSaya) {
-                    if (totalDetik <= 60 && totalDetik > 0 && !sudahPeringatan1Menit) {
-                        sudahPeringatan1Menit = true;
-                        if ("vibrate" in navigator) {
-                            navigator.vibrate([500, 200, 500, 200, 500]);
-                        }
-                        tampilkanModal("⚠️ Waktu Terdesak!", "Waktu standby Anda tersisa KURA-NG DARI 1 MENIT!\nSilakan minta SPV untuk menambah timer atau ambil customer.");
-                    }
-                    if (totalDetik > 60) {
-                        sudahPeringatan1Menit = false;
-                    }
-                }
-
             } else {
                 labelTimer.style.display = 'block';
                 labelTimer.style.color = 'var(--danger)';
@@ -409,7 +391,6 @@
             .then(res => {
                 tutupModal();
                 if(res.status === "sukses") {
-                    authenticatedSPVPin = pin;
                     document.getElementById('panel-kontrol-spv').style.display = 'block';
                     tampilkanModal("Berhasil", "Mode SPV Aktif!");
                 } else {
@@ -423,7 +404,6 @@
         }
 
         function logoutSPV() {
-            authenticatedSPVPin = "";
             document.getElementById('panel-kontrol-spv').style.display = 'none';
             tampilkanModal("Keluar", "Mode SPV ditutup.");
         }
@@ -435,7 +415,7 @@
             document.getElementById('modal-desc').innerHTML = `
                 Anda akan mengubah status antrian menjadi: <b>${targetStatus}</b><br><br>
                 Masukkan PIN SPV:<br><br>
-                <input type="password" id="spv-toggle-pin" value="${authenticatedSPVPin}" placeholder="PIN SPV" style="text-align:center; font-size:15px; letter-spacing:2px;">
+                <input type="password" id="spv-toggle-pin" placeholder="PIN SPV" style="text-align:center; font-size:15px; letter-spacing:2px;">
             `;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
@@ -481,7 +461,7 @@
             if (butuhPilihPromotor) {
                 htmlContent += `Pilih Promotor:<br><br>${buatDropdownSales('spv-select-sales')}<br><br>`;
             }
-            htmlContent += `Masukkan PIN SPV:<br><br><input type="password" id="spv-input-pin" value="${authenticatedSPVPin}" placeholder="PIN SPV" style="text-align:center; font-size:15px; letter-spacing:2px;">`;
+            htmlContent += `Masukkan PIN SPV:<br><br><input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center; font-size:15px; letter-spacing:2px;">`;
 
             document.getElementById('modal-desc').innerHTML = htmlContent;
             document.getElementById('modal-actions').innerHTML = `
