@@ -93,6 +93,7 @@
             width: 100%; padding: 12px; margin-top: 8px; border-radius: 9px; 
             font-size: 12px; font-weight: 700; cursor: pointer; border: none;
             text-transform: uppercase; letter-spacing: 0.3px;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
         }
 
         .btn-primary { background: var(--primary); color: white; }
@@ -101,6 +102,20 @@
         .btn-spv { background: var(--spv-color); color: white; margin-top: 12px; }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
         
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .panel-spv-box {
             background: #f5f3ff;
             border: 1.5px solid #c4b5fd;
@@ -154,7 +169,7 @@
                 <label>Pilih Nama Anda (Kunci Perangkat)</label>
                 <select id="pilih-sales"><option value="">-- Memuat --</option></select>
             </div>
-            <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
+            <button type="button" id="btn-simpan-hp" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
         <div id="panel-menu-utama" style="display: none;">
@@ -176,8 +191,8 @@
             <h3>👑 Panel Kontrol SPV</h3>
             <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Anda login sebagai SPV.</p>
             
-            <button type="button" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvTambahTimer')">⏱️ Tambah Waktu Standby Urutan 1</button>
-            <button type="button" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvSelesaikannya')">✅ Paksa Selesai Promotor (Lupa Klik)</button>
+            <button type="button" id="btn-spv-timer" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvTambahTimer', this, '⏱️ Tambah Waktu Standby Urutan 1')">⏱️ Tambah Waktu Standby Urutan 1</button>
+            <button type="button" id="btn-spv-selesai" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvSelesaikannya', this, '✅ Paksa Selesai Promotor (Lupa Klik)')">✅ Paksa Selesai Promotor (Lupa Klik)</button>
             <button type="button" class="btn-cancel" style="margin-top:6px; font-size:10px; padding:7px;" onclick="logoutSPV()">Keluar Mode SPV</button>
         </div>
 
@@ -214,17 +229,29 @@
             setInterval(hitungMundurLokal, 1000); 
         };
 
-        // MEMBUAT / MENGAMBIL DEVICE ID UNIK YANG PERMANEN DI HARDWARE/BROWSER
+        // MEMBUAT / MENGAMBIL DEVICE ID MENGGUNAKAN COOKIE TAHAN LAMA (TIDAK HILANG SAAT HAPUS CACHE BIASA)
         function getDeviceId() {
-            let devId = localStorage.getItem('ufo_device_unique_id');
-            if (!devId) {
-                devId = 'DEV-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-                localStorage.setItem('ufo_device_unique_id', devId);
+            let name = "ufo_device_perm_id=";
+            let decodedCookie = decodeURIComponent(document.cookie);
+            let ca = decodedCookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
             }
+            // Jika belum ada, buat baru dan simpan selama 10 tahun
+            let devId = 'DEV-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+            let d = new Date();
+            d.setTime(d.getTime() + (3650*24*60*60*1000));
+            let expires = "expires=" + d.toUTCString();
+            document.cookie = name + devId + ";" + expires + ";path=/";
             return devId;
         }
 
-        // CEK KUNCI PERANGKAT LANGSUNG KE SERVER (GOOGLE SHEETS)
         function cekAkunTersimpan() {
             const deviceId = getDeviceId();
             
@@ -248,6 +275,7 @@
         function simpanAkunHP() {
             const namaPilih = document.getElementById('pilih-sales').value;
             const deviceId = getDeviceId();
+            const btn = document.getElementById('btn-simpan-hp');
             
             if(!namaPilih) {
                 tampilkanModal("Perhatian", "Silakan pilih nama Anda terlebih dahulu!");
@@ -255,9 +283,14 @@
             }
 
             tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih}) secara permanen?`, function() {
+                btn.disabled = true;
+                btn.innerHTML = `<span class="spinner"></span> Menyimpan...`;
+
                 fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}`)
                 .then(res => res.json())
                 .then(res => {
+                    btn.disabled = false;
+                    btn.innerHTML = `Simpan & Kunci di HP Ini`;
                     if(res.status === "sukses") {
                         cekAkunTersimpan();
                         muatDataAntrian();
@@ -265,6 +298,10 @@
                     } else {
                         tampilkanModal("Gagal Mengunci", res.pesan);
                     }
+                }).catch(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = `Simpan & Kunci di HP Ini`;
+                    tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
                 });
             });
         }
@@ -340,13 +377,22 @@
             tampilkanModal("Keluar", "Mode SPV ditutup.");
         }
 
-        function spvAksi(aksiName) {
+        function spvAksi(aksiName, btnElement, defaultText) {
             const pin = "1234"; 
+            btnElement.disabled = true;
+            btnElement.innerHTML = `<span class="spinner"></span> Memproses...`;
+
             fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}`)
             .then(res => res.json())
             .then(res => {
+                btnElement.disabled = false;
+                btnElement.innerHTML = defaultText;
                 tampilkanModal("Status SPV", res.pesan);
                 muatDataAntrian();
+            }).catch(() => {
+                btnElement.disabled = false;
+                btnElement.innerHTML = defaultText;
+                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
             });
         }
 
@@ -482,15 +528,22 @@
 
         function aksiUtamaAntri() {
             const namaSales = getAkunAktif();
+            const btn = document.getElementById('btn-utama-antri');
             if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
 
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`)
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan);
-                // Langsung perbarui status lokal agar 1 klik langsung merubah tombol
                 statusSayaGlobal = "standby";
                 muatDataAntrian();
+            }).catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = `Masuk Shift / Ikut Antri`;
+                tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
             });
         }
 
@@ -506,21 +559,39 @@
                 }
 
                 tampilkanModalKonfirmasi("Konfirmasi", `Apakah benar (${namaSales}) sudah membawa customer?`, function() {
+                    const textAsal = btnCustomer.innerText;
+                    btnCustomer.disabled = true;
+                    btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
+
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
+                        btnCustomer.disabled = false;
                         tampilkanModal("Status Antrian", res.pesan);
                         muatDataAntrian();
+                    }).catch(() => {
+                        btnCustomer.disabled = false;
+                        btnCustomer.innerHTML = textAsal;
+                        tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
                     });
                 });
 
             } else if (statusSayaGlobal === "membawa_customer") {
                 tampilkanModalKonfirmasi("Konfirmasi Selesai", `Apakah pelayanan sudah selesai dan ingin keluar dari status melayani?`, function() {
+                    const textAsal = btnCustomer.innerText;
+                    btnCustomer.disabled = true;
+                    btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
+
                     fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
+                        btnCustomer.disabled = false;
                         tampilkanModal("Status Antrian", res.pesan);
                         muatDataAntrian();
+                    }).catch(() => {
+                        btnCustomer.disabled = false;
+                        btnCustomer.innerHTML = textAsal;
+                        tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
                     });
                 });
             }
