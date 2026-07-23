@@ -451,7 +451,7 @@
             });
         }
 
-        function aksiUtamaAntri() {
+     function aksiUtamaAntri() {
             const namaSales = getAkunAktif();
             if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
 
@@ -459,7 +459,7 @@
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan);
-                muatDataAntrian();
+                muatDataAntrian(); // <--- Pastikan baris penyegaran data ini ada di sini!
             });
         }
 
