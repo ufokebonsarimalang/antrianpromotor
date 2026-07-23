@@ -416,8 +416,11 @@
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan);
-                // Jeda 300ms agar Google Sheet selesai melakukan pencatatan sepenuhnya
-                setTimeout(muatDataAntrian, 300);
+                setTimeout(muatDataAntrian, 200);
+            })
+            .catch(err => {
+                tampilkanModal("Gagal", "Terjadi kesalahan koneksi jaringan.");
+                muatDataAntrian();
             });
         }
 
@@ -431,22 +434,32 @@
                 tampilkanModalKonfirmasi("Konfirmasi", `Sudah membawa customer?`, function() {
                     btnCustomer.disabled = true;
                     btnCustomer.innerText = "Memproses...";
+                    
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
                         tampilkanModal("Status Antrian", res.pesan);
-                        setTimeout(muatDataAntrian, 300);
+                        setTimeout(muatDataAntrian, 200);
+                    })
+                    .catch(err => {
+                        tampilkanModal("Gagal", "Terjadi kesalahan koneksi jaringan.");
+                        muatDataAntrian();
                     });
                 });
             } else if (statusSayaGlobal === "Melayani") {
                 tampilkanModalKonfirmasi("Selesai Pelayanan", `Apakah Anda sudah selesai melayani customer?`, function() {
                     btnCustomer.disabled = true;
                     btnCustomer.innerText = "Memproses...";
+                    
                     fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
                         tampilkanModal("Status Antrian", res.pesan);
-                        setTimeout(muatDataAntrian, 300);
+                        setTimeout(muatDataAntrian, 200);
+                    })
+                    .catch(err => {
+                        tampilkanModal("Gagal", "Terjadi kesalahan koneksi jaringan.");
+                        muatDataAntrian();
                     });
                 });
             }
