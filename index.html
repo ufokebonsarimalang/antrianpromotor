@@ -269,7 +269,7 @@
                 labelTimer.innerText = `Sisa Waktu Standby: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
             } else {
                 labelTimer.style.display = 'block';
-                labelTimer.innerText = `Waktu Standby Habis! Urutan bergeser ke bawah.`;
+                labelTimer.innerText = `Waktu Standby Habis!`;
             }
         }
 
@@ -322,7 +322,6 @@
                     waktuTerakhirStandbyGlobal = null;
                     let apakahSayaUrutanPertama = false;
 
-                    // Cari promotor standby pertama
                     let promotorStandbyPertama = daftarAntrianGlobal.find(item => String(item.status).toLowerCase().includes("standby"));
                     if (promotorStandbyPertama) {
                         salesUtama = promotorStandbyPertama.nama;
@@ -338,25 +337,21 @@
                     if(daftarAntrianGlobal.length > 0) {
                         daftarAntrianGlobal.forEach((item, index) => {
                             const namaItem = String(item.nama).trim();
-                            const statusItem = String(item.status).trim().toLowerCase();
 
-                            // Cek status Akun Saya
                             if(namaItem.toLowerCase() === akunSaya.toLowerCase()) {
-                                if (statusItem.includes("customer") || statusItem.includes("membawa")) {
-                                    statusSayaGlobal = "membawa_customer";
-                                } else if (statusItem.includes("standby")) {
-                                    statusSayaGlobal = "standby";
-                                }
+                                statusSayaGlobal = "standby";
                             }
-                            
-                            let badgeStatus = statusItem.includes("standby") 
-                                ? `<span style="color:var(--primary); font-weight:bold;">Standby</span>` 
-                                : `<span style="color:var(--warning); font-weight:bold;">Melayani Customer</span>`;
 
-                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="font-size:11px;">${badgeStatus}</span></li>`;
+                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--primary); font-weight:bold; font-size:11px;">Standby</span></li>`;
                         });
                     } else {
                         listHtml = "<li><span>Belum ada promotor aktif</span></li>";
+                    }
+
+                    // Cek status lokal "Melayani Customer"
+                    const sedangMelayaniLokal = localStorage.getItem('ufo_status_melayani_' + akunSaya);
+                    if (sedangMelayaniLokal === "true") {
+                        statusSayaGlobal = "membawa_customer";
                     }
 
                     const btnAntri = document.getElementById('btn-utama-antri');
@@ -418,19 +413,23 @@
             if(!namaSales) return;
 
             if (statusSayaGlobal === "standby") {
-                tampilkanModalKonfirmasi("Konfirmasi", `Sudah membawa customer?`, function() {
+                tampilkanModalKonfirmasi("Konfirmasi", `Sudah membawa customer? Anda akan keluar dari list antrian.`, function() {
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
+                        if(res.status === "sukses") {
+                            localStorage.setItem('ufo_status_melayani_' + namaSales, "true");
+                        }
                         tampilkanModal("Status Antrian", res.pesan);
                         muatDataAntrian();
                     });
                 });
             } else if (statusSayaGlobal === "membawa_customer") {
-                tampilkanModalKonfirmasi("Selesai Pelayanan", `Keluar dari status melayani?`, function() {
+                tampilkanModalKonfirmasi("Selesai Pelayanan", `Apakah Anda sudah selesai melayani customer?`, function() {
                     fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
+                        localStorage.removeItem('ufo_status_melayani_' + namaSales);
                         tampilkanModal("Status Antrian", res.pesan);
                         muatDataAntrian();
                     });
