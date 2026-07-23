@@ -101,11 +101,6 @@
         .btn-spv { background: var(--spv-color); color: white; margin-top: 12px; }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
         
-        .btn-primary:active { background: var(--primary-hover); }
-        .btn-success:active { background: var(--success-hover); }
-        .btn-spv:active { background: #7c3aed; }
-
-        /* Panel SPV Khusus */
         .panel-spv-box {
             background: #f5f3ff;
             border: 1.5px solid #c4b5fd;
@@ -124,7 +119,6 @@
         #item-antrian-list { list-style: none; padding: 0; margin: 0; font-size: 12px; max-height: 140px; overflow-y: auto; }
         #item-antrian-list li { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
 
-        /* Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.6); display: flex; justify-content: center; align-items: center;
@@ -148,7 +142,6 @@
         <h2>🎫 Antrian Walk-In</h2>
         <p class="sub-title">Sistem Giliran Promotor UFO Kebonsari</p>
 
-        <!-- KOTAK UTAMA -->
         <div class="card-utama">
             <div class="label-giliran">Giliran Melayani Saat Ini</div>
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
@@ -156,7 +149,6 @@
             <span id="label-timer-mundur" class="timer-mundur" style="display: none;">Waktu tersisa: --:--</span>
         </div>
 
-        <!-- LOGIN PERANGKAT -->
         <div id="panel-login" style="display: none;">
             <div class="input-group">
                 <label>Pilih Nama Anda (Kunci Perangkat)</label>
@@ -165,7 +157,6 @@
             <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
-        <!-- MENU UTAMA PROMOTOR -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <div>
@@ -175,27 +166,21 @@
                 </div>
             </div>
 
-            <!-- TOMBOL 1: Untuk Daftar Antri / Cek Status -->
             <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Masuk Shift / Ikut Antri</button>
-            
-            <!-- TOMBOL 2: Untuk Ambil Customer / Selesai Pelayanan -->
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none;">Sudah Membawa Customer</button>
             
-            <!-- TOMBOL AKSES SPV -->
-            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV</button>
+            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV (Wasit)</button>
         </div>
 
-        <!-- PANEL KONTROL SPV -->
         <div id="panel-kontrol-spv" class="panel-spv-box" style="display: none;">
-            <h3>👑 Panel Kontrol SPV</h3>
-            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Anda login sebagai SPV.</p>
+            <h3>👑 Panel Kontrol SPV (Wasit)</h3>
+            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Anda login sebagai Wasit/SPV.</p>
             
             <button type="button" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvTambahTimer')">⏱️ Tambah Waktu Standby Urutan 1</button>
-            <button type="button" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvGeserCustomer')">👥 Paksa Geser Urutan 1 (Lupa Tombol)</button>
+            <button type="button" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvSelesaikannya')">✅ Paksa Selesai Promotor (Lupa Klik)</button>
             <button type="button" class="btn-cancel" style="margin-top:6px; font-size:10px; padding:7px;" onclick="logoutSPV()">Keluar Mode SPV</button>
         </div>
 
-        <!-- DAFTAR ANTRIAN -->
         <div class="list-box">
             <h4>📋 Live Urutan Antrian Hari Ini</h4>
             <ul id="item-antrian-list">
@@ -204,7 +189,6 @@
         </div>
     </div>
 
-    <!-- MODAL POP-UP -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
@@ -216,7 +200,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+        const SCRIPT_URL = "GANTI_DENGAN_URL_DEPLOY_GOOGLE_APPS_SCRIPT_ANDA";
 
         let waktuTerakhirStandbyGlobal = null;
         let daftarAntrianGlobal = [];
@@ -225,8 +209,8 @@
 
         window.onload = function() {
             cekAkunTersimpan();
-            ();
-            setInterval(, 5000); 
+            muatDataAntrian();
+            setInterval(muatDataAntrian, 5000); 
             setInterval(hitungMundurLokal, 1000); 
         };
 
@@ -262,7 +246,6 @@
 
         function hitungMundurLokal() {
             const labelTimer = document.getElementById('label-timer-mundur');
-            
             if (!waktuTerakhirStandbyGlobal) {
                 labelTimer.style.display = 'none';
                 return;
@@ -294,17 +277,16 @@
             }
         }
 
-        // --- SISTEM SPV / WASIT ---
         function bukaFormLoginSPV() {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = "🔐 Verifikasi SPV";
             document.getElementById('modal-desc').innerHTML = `
-                Masukkan PIN SPV untuk membuka panel:<br><br>
+                Masukkan PIN SPV untuk membuka panel wasit:<br><br>
                 <input type="password" id="input-pin-spv" placeholder="Masukkan PIN" style="text-align:center; font-size:16px; letter-spacing:3px;">
             `;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-spv" onclick="prosesLoginSPV()">Masuk</button>
+                <button type="button" class="btn-spv" onclick="prosesLoginSPV()">Masuk Wasit</button>
             `;
             modal.classList.add('active');
         }
@@ -317,7 +299,7 @@
                 tutupModal();
                 if(res.status === "sukses") {
                     document.getElementById('panel-kontrol-spv').style.display = 'block';
-                    tampilkanModal("Berhasil", "Mode SPV Aktif! Anda memegang kendali.");
+                    tampilkanModal("Berhasil", "Mode SPV Aktif! Anda memegang kendali wasit.");
                 } else {
                     tampilkanModal("Gagal", res.pesan);
                 }
@@ -334,12 +316,11 @@
             fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}`)
             .then(res => res.json())
             .then(res => {
-                tampilkanModal("Status SPV", res.pesan);
+                tampilkanModal("Status Wasit SPV", res.pesan);
                 muatDataAntrian();
             });
         }
 
-        // --- UTILITY MODAL & FETCH ---
         function tampilkanModal(judul, pesan) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judul;
@@ -348,17 +329,21 @@
             modal.classList.add('active');
         }
 
-        function tampilkanModalKonfirmasi(judul, pesan, callbackOk) {
+        function tampilkanModalKonfirmasi(judul, pesan, callbackOk, callbackCancel) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judul;
             document.getElementById('modal-desc').innerHTML = pesan;
             document.getElementById('modal-actions').innerHTML = `
-                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-cancel" id="modal-btn-cancel">Batal</button>
                 <button type="button" id="modal-btn-confirm" class="btn-primary">Ya, Lanjutkan</button>
             `;
             document.getElementById('modal-btn-confirm').onclick = function() {
                 tutupModal();
-                callbackOk();
+                if(callbackOk) callbackOk();
+            };
+            document.getElementById('modal-btn-cancel').onclick = function() {
+                tutupModal();
+                if(callbackCancel) callbackCancel();
             };
             modal.classList.add('active');
         }
@@ -379,7 +364,7 @@
             });
         }
 
-    function muatDataAntrian() {
+        function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
@@ -396,7 +381,6 @@
 
                     if(daftarAntrianGlobal.length > 0) {
                         daftarAntrianGlobal.forEach((item, index) => {
-                            // Ambil orang pertama yang statusnya Standby sebagai sales utama
                             if(index === 0) {
                                 salesUtama = item.nama;
                                 if(item.nama === akunSaya) {
@@ -404,7 +388,6 @@
                                 }
                             }
                             
-                            // Cek status akun yang sedang aktif di HP ini
                             if(item.nama === akunSaya) {
                                 if(item.status === "Standby") {
                                     statusSayaGlobal = "standby";
@@ -468,7 +451,6 @@
             });
         }
 
-        // Fungsi Tombol 1: Daftar Masuk Antri
         function aksiUtamaAntri() {
             const namaSales = getAkunAktif();
             if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
@@ -481,7 +463,6 @@
             });
         }
 
-        // Fungsi Tombol 2: Dinamis (Ambil Customer / Selesai Pelayanan)
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
             if(!namaSales) return tampilkanModal("Perhatian", "Akun perangkat belum terikat.");
@@ -493,11 +474,6 @@
                     return tampilkanModal("Perhatian", "Anda belum berada di Urutan Nomor 1. Harap tunggu giliran Anda!");
                 }
 
-                if(btnCustomer) {
-                    btnCustomer.disabled = true;
-                    btnCustomer.style.opacity = "0.6";
-                }
-
                 tampilkanModalKonfirmasi("Konfirmasi", `Apakah benar (${namaSales}) sudah membawa customer?`, function() {
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
@@ -505,32 +481,16 @@
                         tampilkanModal("Status Antrian", res.pesan);
                         muatDataAntrian();
                     });
-                }, function() {
-                    if(btnCustomer) {
-                        btnCustomer.disabled = false;
-                        btnCustomer.style.opacity = "1";
-                    }
                 });
 
             } else if (statusSayaGlobal === "membawa_customer") {
-                if(btnCustomer) {
-                    btnCustomer.disabled = true;
-                    btnCustomer.style.opacity = "0.6";
-                }
-
-                tampilkanModalKonfirmasi("Konfirmasi Selesai", `Apakah pelayanan sudah selesai dan ingin masuk kembali ke antrean paling bawah?`, function() {
-                  // KODE PERBAIKANNYA:
-fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
+                tampilkanModalKonfirmasi("Konfirmasi Selesai", `Apakah pelayanan sudah selesai dan ingin keluar dari status melayani?`, function() {
+                    fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`)
                     .then(res => res.json())
                     .then(res => {
                         tampilkanModal("Status Antrian", res.pesan);
                         muatDataAntrian();
                     });
-                }, function() {
-                    if(btnCustomer) {
-                        btnCustomer.disabled = false;
-                        btnCustomer.style.opacity = "1";
-                    }
                 });
             }
         }
