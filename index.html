@@ -164,8 +164,8 @@
             <span id="label-timer-mundur" class="timer-mundur" style="display: none;">Waktu tersisa: --:--</span>
         </div>
 
-        <!-- PANEL LOGIN (MUNCUL JIKA HP BELUM TERIKAT NAMA) -->
-        <div id="panel-login" style="display: none;">
+        <!-- PANEL LOGIN SALES (MUNCUL JIKA HP BELUM TERIKAT NAMA SALES) -->
+        <div id="panel-login">
             <div class="input-group">
                 <label>Pilih Nama Anda (Kunci Perangkat)</label>
                 <select id="pilih-sales"><option value="">-- Memuat --</option></select>
@@ -173,7 +173,7 @@
             <button type="button" id="btn-simpan-hp" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
-        <!-- PANEL MENU UTAMA (MUNCUL JIKA HP SUDAH TERIKAT) -->
+        <!-- PANEL MENU UTAMA SALES (MUNCUL JIKA HP SUDAH TERIKAT) -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <div>
@@ -185,10 +185,10 @@
 
             <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Masuk Shift / Ikut Antri</button>
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none;">Sudah Membawa Customer</button>
-            
-            <!-- TOMBOL MASUK MODE SPV SELALU ADA DIBAWAH MENU UTAMA -->
-            <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV</button>
         </div>
+
+        <!-- TOMBOL MASUK MODE SPV (SELALU MUNCUL DI LUAR, BEBAS TANPA HARUS DAFTAR AKUN SALES) -->
+        <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV</button>
 
         <!-- PANEL KONTROL SPV (MUNCUL SETELAH INPUT PIN BENAR) -->
         <div id="panel-kontrol-spv" class="panel-spv-box" style="display: none;">
@@ -234,7 +234,6 @@
             setInterval(hitungMundurLokal, 1000); 
         };
 
-        // DEVICE ID TAHAN LAMA (MENGGUNAKAN COOKIE 10 TAHUN)
         function getDeviceId() {
             let name = "ufo_device_perm_id=";
             let decodedCookie = decodeURIComponent(document.cookie);
@@ -529,7 +528,6 @@
             });
         }
 
-        // FUNGSI UTAMA ANTRI DISET INSTAN AGAR TIDAK PERLU 2 KALI KLIK
         function aksiUtamaAntri() {
             const namaSales = getAkunAktif();
             const btn = document.getElementById('btn-utama-antri');
@@ -542,7 +540,7 @@
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan);
-                statusSayaGlobal = "standby"; // Ubah status lokal langsung
+                statusSayaGlobal = "standby";
                 muatDataAntrian();
             }).catch(() => {
                 btn.disabled = false;
