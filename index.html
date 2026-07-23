@@ -489,41 +489,47 @@
             });
         }
 
-        function aksiUtamaAntri() {
-            const namaSales = getAkunAktif();
-            if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
-            
-            const btnAntri = document.getElementById('btn-utama-antri');
-            btnAntri.dataset.loading = "true";
-            btnAntri.disabled = true;
-            btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
+     function aksiUtamaAntri() {
+    const namaSales = getAkunAktif();
+    if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
+    
+    const btnAntri = document.getElementById('btn-utama-antri');
+    btnAntri.dataset.loading = "true";
+    btnAntri.disabled = true;
+    btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
 
-            statusSayaGlobal = "Standby";
-            let tempSembuhList = [...daftarAntrianGlobal];
-            if(!tempSembuhList.some(x => x.nama.toLowerCase() === namaSales.toLowerCase())) {
-                tempSembuhList.push({ nama: namaSales, status: "Standby" });
-            }
-            renderUIRental(tempSembuhList, statusSistemGlobal, waktuTerakhirStandbyGlobal);
+    // 1. UPDATE UI INSTAN: Masukkan status ke lokal agar tombol & list langsung berubah
+    statusSayaGlobal = "Standby";
+    
+    // Cek apakah nama sudah ada di list global, jika belum maka tambahkan sementara
+    let tempSembuhList = [...daftarAntrianGlobal];
+    if(!tempSembuhList.some(x => String(x.nama).trim().toLowerCase() === namaSales.trim().toLowerCase())) {
+        tempSembuhList.push({ nama: namaSales, status: "Standby" });
+    }
+    // Render langsung ke layar tanpa menunggu server
+    renderUIRental(tempSembuhList, statusSistemGlobal, waktuTerakhirStandbyGlobal);
 
-            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`, {
-                method: 'GET',
-                redirect: 'follow'
-            })
-            .then(res => res.json())
-            .then(res => {
-                setTimeout(() => {
-                    btnAntri.dataset.loading = "false";
-                    tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
-                    muatDataAntrian();
-                }, 500);
-            })
-            .catch(err => {
-                setTimeout(() => {
-                    btnAntri.dataset.loading = "false";
-                    muatDataAntrian();
-                }, 500);
-            });
-        }
+    // 2. KIRIM KE SERVER
+    fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}`, {
+        method: 'GET',
+        redirect: 'follow'
+    })
+    .then(res => res.json())
+    .then(res => {
+        // Beri jeda 800ms agar Google Sheets selesai memproses tulisan barunya
+        setTimeout(() => {
+            btnAntri.dataset.loading = "false";
+            tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
+            muatDataAntrian(); // Tarik data valid dari server
+        }, 800);
+    })
+    .catch(err => {
+        setTimeout(() => {
+            btnAntri.dataset.loading = "false";
+            muatDataAntrian();
+        }, 800);
+    });
+}
 
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
