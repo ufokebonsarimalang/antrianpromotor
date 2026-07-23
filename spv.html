@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard SPV - UFO Kebonsari</title>
+    <link rel="shortcut icon" href="#">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -70,6 +71,7 @@
             width: 100%; padding: 12px; border-radius: 10px; 
             font-size: 12px; font-weight: 700; cursor: pointer; border: none;
             text-transform: uppercase; transition: all 0.2s;
+            display: inline-flex; justify-content: center; align-items: center; gap: 8px;
         }
         button:active { transform: scale(0.98); }
 
@@ -79,6 +81,20 @@
         .btn-danger { background: var(--danger); color: white; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-cancel { background: #f1f5f9; color: #475569; }
+
+        /* SPINNER STYLING */
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         .spv-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;
@@ -92,7 +108,7 @@
         }
         .list-box h4 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; color: var(--text-muted); }
         .list-box ul { list-style: none; padding: 0; margin: 0; font-size: 13px; }
-        .list-box li { padding: 8px 10px; background: white; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .list-box li { padding: 8px 10px; background: white; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 
         /* MODAL POPUP */
         .modal-overlay {
@@ -126,7 +142,7 @@
                 <label>Masukkan PIN SPV Khusus</label>
                 <input type="password" id="input-pin-spv" placeholder="PIN SPV" style="text-align: center; font-size: 16px; letter-spacing: 2px;">
             </div>
-            <button type="button" class="btn-purple" onclick="prosesLoginSPV()">Masuk Panel Kontrol</button>
+            <button type="button" id="btn-login-spv" class="btn-purple" onclick="prosesLoginSPV()">Masuk Panel Kontrol</button>
         </div>
 
         <!-- MENU KONTROL LENGKAP -->
@@ -173,6 +189,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         let masterSalesGlobal = [];
+        let sedangProsesAksiSPV = false; // Kunci Sinkronisasi
 
         window.onload = function() {
             muatMasterSales();
@@ -182,17 +199,30 @@
 
         function prosesLoginSPV() {
             const pin = document.getElementById('input-pin-spv').value;
-            if(!pin) return alert("Masukkan PIN SPV!");
+            if(!pin) return tampilkanModal("Perhatian", "Masukkan PIN SPV!");
+
+            const btn = document.getElementById('btn-login-spv');
+            const textAsli = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Memeriksa...`;
 
             fetch(`${SCRIPT_URL}?aksi=loginSPV&pin=${encodeURIComponent(pin)}`)
             .then(res => res.json())
             .then(res => {
+                btn.disabled = false;
+                btn.innerHTML = textAsli;
+
                 if(res.status === "sukses") {
                     document.getElementById('login-spv-box').style.display = 'none';
                     document.getElementById('controls-spv-box').style.display = 'block';
                 } else {
                     tampilkanModal("Gagal Login", res.pesan);
                 }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = textAsli;
+                tampilkanModal("Gagal", "Terjadi gangguan jaringan saat login.");
             });
         }
 
@@ -212,19 +242,37 @@
             `;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-primary" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>
+                <button type="button" id="btn-modal-proses" class="btn-primary" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>
             `;
             modal.classList.add('active');
         }
 
         function eksekusiToggleSistem(targetStatus) {
             const pin = document.getElementById('spv-toggle-pin').value;
+            if(!pin) return alert("Masukkan PIN SPV!");
+
+            sedangProsesAksiSPV = true; // KUNCI REFRESH
+            const btnProses = document.getElementById('btn-modal-proses');
+            const textAsli = btnProses.innerHTML;
+            btnProses.disabled = true;
+            btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
+
             fetch(`${SCRIPT_URL}?aksi=spvSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}`)
             .then(res => res.json())
             .then(res => {
-                tutupModal();
-                tampilkanModal("Status Sistem", res.pesan);
-                muatDataAntrian();
+                setTimeout(() => {
+                    tutupModal();
+                    sedangProsesAksiSPV = false;
+                    tampilkanModal("Status Sistem", res.pesan);
+                    muatDataAntrian();
+                }, 1200);
+            })
+            .catch(() => {
+                setTimeout(() => {
+                    btnProses.disabled = false;
+                    btnProses.innerHTML = textAsli;
+                    sedangProsesAksiSPV = false;
+                }, 1200);
             });
         }
 
@@ -235,13 +283,13 @@
             masterSalesGlobal.forEach(n => options += `<option value="${n}">${n}</option>`);
 
             let htmlContent = "";
-            if (butuhPilihPromotor) htmlContent += `Promotor:<br><select id="spv-select-sales">${options}</select><br><br>`;
-            htmlContent += `PIN SPV:<br><input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center;">`;
+            if (butuhPilihPromotor) htmlContent += `Promotor:<br><select id="spv-select-sales" style="margin-bottom: 12px; margin-top: 4px;">${options}</select><br>`;
+            htmlContent += `PIN SPV:<br><input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center; margin-top: 4px;">`;
 
             document.getElementById('modal-desc').innerHTML = htmlContent;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-primary" onclick="eksekusiAksiSPV('${aksiName}', ${butuhPilihPromotor})">Proses</button>
+                <button type="button" id="btn-modal-proses-aksi" class="btn-primary" onclick="eksekusiAksiSPV('${aksiName}', ${butuhPilihPromotor})">Proses</button>
             `;
             modal.classList.add('active');
         }
@@ -250,12 +298,31 @@
             let namaSales = butuhPilihPromotor ? document.getElementById('spv-select-sales').value : "";
             const pin = document.getElementById('spv-input-pin').value;
 
+            if(butuhPilihPromotor && !namaSales) return alert("Pilih promotor terlebih dahulu!");
+            if(!pin) return alert("Masukkan PIN SPV!");
+
+            sedangProsesAksiSPV = true; // KUNCI REFRESH
+            const btnProses = document.getElementById('btn-modal-proses-aksi');
+            const textAsli = btnProses.innerHTML;
+            btnProses.disabled = true;
+            btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
+
             fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&namaPromotor=${encodeURIComponent(namaSales)}`)
             .then(res => res.json())
             .then(res => {
-                tutupModal();
-                tampilkanModal("Status SPV", res.pesan);
-                muatDataAntrian();
+                setTimeout(() => {
+                    tutupModal();
+                    sedangProsesAksiSPV = false;
+                    tampilkanModal("Status SPV", res.pesan);
+                    muatDataAntrian();
+                }, 1200);
+            })
+            .catch(() => {
+                setTimeout(() => {
+                    btnProses.disabled = false;
+                    btnProses.innerHTML = textAsli;
+                    sedangProsesAksiSPV = false;
+                }, 1200);
             });
         }
 
@@ -268,10 +335,12 @@
         }
 
         function muatDataAntrian() {
+            if(sedangProsesAksiSPV) return; // Mencegah data lama menimpa proses yang sedang berjalan
+
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
             .then(res => {
-                if(res.status === "sukses") {
+                if(!sedangProsesAksiSPV && res.status === "sukses") {
                     const statusSistem = res.statusAntrian || "BUKA";
                     const badge = document.getElementById('badge-status-sistem');
                     badge.innerText = statusSistem === "BUKA" ? "STATUS: OPEN" : "STATUS: CLOSED";
@@ -294,7 +363,7 @@
         function tampilkanModal(judul, pesan) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judul;
-            document.getElementById('modal-desc').innerHTML = pesan.replace(/\n/g, '<br>');
+            document.getElementById('modal-desc').innerHTML = String(pesan).replace(/\n/g, '<br>');
             document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-primary" onclick="tutupModal()">OK</button>`;
             modal.classList.add('active');
         }
