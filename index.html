@@ -90,10 +90,11 @@
         }
 
         button { 
-            width: 100%; padding: 12px; margin-top: 8px; border-radius: 9px; 
-            font-size: 12px; font-weight: 700; cursor: pointer; border: none;
-            text-transform: uppercase; letter-spacing: 0.3px;
-            display: flex; justify-content: center; align-items: center; gap: 8px;
+            width: 100%; padding: 11px 10px; margin-top: 6px; border-radius: 8px; 
+            font-size: 11px; font-weight: 700; cursor: pointer; border: none;
+            text-transform: uppercase; letter-spacing: 0.2px;
+            display: flex; justify-content: center; align-items: center; gap: 6px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
         .btn-primary { background: var(--primary); color: white; }
@@ -103,8 +104,8 @@
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
         
         .spinner {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: #ffffff;
@@ -120,11 +121,11 @@
             background: #f5f3ff;
             border: 1.5px solid #c4b5fd;
             border-radius: 12px;
-            padding: 12px;
+            padding: 12px 10px;
             margin-top: 12px;
             text-align: left;
         }
-        .panel-spv-box h3 { margin: 0 0 6px 0; font-size: 13px; color: #6d28d9; border-bottom: 1px solid #ddd6fe; padding-bottom: 4px; }
+        .panel-spv-box h3 { margin: 0 0 4px 0; font-size: 13px; color: #6d28d9; border-bottom: 1px solid #ddd6fe; padding-bottom: 4px; }
 
         .list-box {
             text-align: left; background: #f8fafc; border: 1px solid var(--border);
@@ -154,13 +155,13 @@
 <body>
 
     <div class="container">
-        <h2>🎫 Antrian Walk-In</h2>
+        <h2>Antrian Walk-In</h2>
         <p class="sub-title">Sistem Giliran Promotor UFO Kebonsari</p>
 
         <div class="card-utama">
             <div class="label-giliran">Giliran Melayani Saat Ini</div>
             <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
-            <div class="info-timer">⚡ Timer standby otomatis 10 menit.</div>
+            <div class="info-timer">Timer standby otomatis 10 menit.</div>
             <span id="label-timer-mundur" class="timer-mundur" style="display: none;">Waktu tersisa: --:--</span>
         </div>
 
@@ -188,25 +189,25 @@
         </div>
 
         <!-- TOMBOL MASUK MODE SPV -->
-        <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">🔐 Masuk Mode SPV</button>
+        <button type="button" class="btn-spv" onclick="bukaFormLoginSPV()">Masuk Mode SPV</button>
 
-        <!-- PANEL KONTROL SPV LENGKAP -->
+        <!-- PANEL KONTROL SPV RAPI (TANPA IKON) -->
         <div id="panel-kontrol-spv" class="panel-spv-box" style="display: none;">
-            <h3>👑 Panel Kontrol SPV</h3>
-            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Akses Kontrol Penuh SPV.</p>
+            <h3>Panel Kontrol SPV</h3>
+            <p style="font-size: 10px; color: #6b21a8; margin-top:0;">Akses Kontrol Penuh SPV</p>
             
-            <button type="button" id="btn-spv-timer" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvTambahTimer', this, '⏱️ Tambah Waktu Standby Urutan 1')">⏱️ Tambah Waktu Standby Urutan 1</button>
-            <button type="button" id="btn-spv-customer-bebas" class="btn-primary" style="margin-top:4px; font-size:11px; padding:9px;" onclick="bukaFormSPVAmbilCustomer()">🤝 Aktifkan Customer Janjian (Bebas Urutan)</button>
-            <button type="button" id="btn-spv-selesai" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px;" onclick="spvAksi('spvSelesaikannya', this, '✅ Paksa Selesai Promotor (Lupa Klik)')">✅ Paksa Selesai Promotor (Lupa Klik)</button>
-            <button type="button" id="btn-spv-masuk-antrian" class="btn-success" style="margin-top:4px; font-size:11px; padding:9px;" onclick="bukaFormSPVMasukkanAntrian()">➕ Masukkan Promotor ke Antrian</button>
-            <button type="button" id="btn-spv-keluar-antrian" class="btn-warning" style="margin-top:4px; font-size:11px; padding:9px; background: #ea580c;" onclick="bukaFormSPVKeluarkanAntrian()">❌ Keluarkan Promotor dari Antrian</button>
-            <button type="button" id="btn-spv-reset" class="btn-danger" style="margin-top:4px; font-size:11px; padding:9px; background: #dc2626;" onclick="bukaFormResetDevice()">🔄 Reset Perangkat Promotor</button>
+            <button type="button" id="btn-spv-timer" class="btn-warning" onclick="spvAksi('spvTambahTimer', this, 'Tambah Waktu Standby Urutan 1')">Tambah Waktu Standby Urutan 1</button>
+            <button type="button" id="btn-spv-customer-bebas" class="btn-primary" onclick="bukaFormSPVAmbilCustomer()">Aktifkan Customer Janjian</button>
+            <button type="button" id="btn-spv-selesai" class="btn-danger" onclick="spvAksi('spvSelesaikannya', this, 'Paksa Selesai Promotor')">Paksa Selesai Promotor</button>
+            <button type="button" id="btn-spv-masuk-antrian" class="btn-success" onclick="bukaFormSPVMasukkanAntrian()">Masukkan Promotor ke Antrian</button>
+            <button type="button" id="btn-spv-keluar-antrian" class="btn-warning" style="background: #ea580c;" onclick="bukaFormSPVKeluarkanAntrian()">Keluarkan Promotor dari Antrian</button>
+            <button type="button" id="btn-spv-reset" class="btn-danger" style="background: #dc2626;" onclick="bukaFormResetDevice()">Reset Perangkat Promotor</button>
             
             <button type="button" class="btn-cancel" style="margin-top:8px; font-size:10px; padding:7px;" onclick="logoutSPV()">Keluar Mode SPV</button>
         </div>
 
         <div class="list-box">
-            <h4>📋 Live Urutan Antrian Hari Ini</h4>
+            <h4>Live Urutan Antrian Hari Ini</h4>
             <ul id="item-antrian-list">
                 <li><span>Memuat data...</span></li>
             </ul>
@@ -342,17 +343,17 @@
                 
                 labelTimer.style.display = 'block';
                 labelTimer.style.color = menit < 2 ? 'var(--danger)' : '#d97706';
-                labelTimer.innerText = `⚠️ Sisa Waktu Standby: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                labelTimer.innerText = `Sisa Waktu Standby: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
             } else {
                 labelTimer.style.display = 'block';
                 labelTimer.style.color = 'var(--danger)';
-                labelTimer.innerText = `🚨 Waktu Habis! Urutan bergeser otomatis.`;
+                labelTimer.innerText = `Waktu Habis! Urutan bergeser otomatis.`;
             }
         }
 
         function bukaFormLoginSPV() {
             const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').innerText = "🔐 Verifikasi SPV";
+            document.getElementById('modal-title').innerText = "Verifikasi SPV";
             document.getElementById('modal-desc').innerHTML = `
                 Masukkan PIN SPV untuk membuka panel kontrol:<br><br>
                 <input type="password" id="input-pin-spv" placeholder="Masukkan PIN" style="text-align:center; font-size:16px; letter-spacing:3px;">
@@ -403,13 +404,11 @@
             });
         }
 
-        // --- FITUR SPV CUSTOMER JANJIAN & LAINNYA DENGAN SPINNER ---
-
         function bukaFormSPVAmbilCustomer() {
             const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').innerText = "🤝 Aktifkan Customer Janjian";
+            document.getElementById('modal-title').innerText = "Aktifkan Customer Janjian";
             document.getElementById('modal-desc').innerHTML = `
-                Masukkan nama promotor yang kedatangan customer janjian (walau sedang di urutan bawah):<br><br>
+                Masukkan nama promotor yang kedatangan customer janjian:<br><br>
                 <input type="text" id="input-spv-nama-cust" placeholder="Nama Promotor" style="text-align:center; font-size:14px;">
             `;
             document.getElementById('modal-actions').innerHTML = `
@@ -447,9 +446,9 @@
 
         function bukaFormSPVMasukkanAntrian() {
             const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').innerText = "➕ Masukkan ke Antrian";
+            document.getElementById('modal-title').innerText = "Masukkan ke Antrian";
             document.getElementById('modal-desc').innerHTML = `
-                Masukkan nama promotor yang ingin dimasukkan ke antrian (Shift Aktif):<br><br>
+                Masukkan nama promotor yang ingin dimasukkan ke antrian:<br><br>
                 <input type="text" id="input-spv-nama-masuk" placeholder="Nama Promotor" style="text-align:center; font-size:14px;">
             `;
             document.getElementById('modal-actions').innerHTML = `
@@ -487,9 +486,9 @@
 
         function bukaFormSPVKeluarkanAntrian() {
             const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').innerText = "❌ Keluarkan dari Antrian";
+            document.getElementById('modal-title').innerText = "Keluarkan dari Antrian";
             document.getElementById('modal-desc').innerHTML = `
-                Masukkan nama promotor yang ingin dikeluarkan dari antrian (Selesai Shift):<br><br>
+                Masukkan nama promotor yang ingin dikeluarkan dari antrian:<br><br>
                 <input type="text" id="input-spv-nama-keluar" placeholder="Nama Promotor" style="text-align:center; font-size:14px;">
             `;
             document.getElementById('modal-actions').innerHTML = `
@@ -527,7 +526,7 @@
 
         function bukaFormResetDevice() {
             const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').innerText = "🔄 Reset Perangkat Sales";
+            document.getElementById('modal-title').innerText = "Reset Perangkat Sales";
             document.getElementById('modal-desc').innerHTML = `
                 Masukkan nama promotor yang perangkatnya ingin di-reset:<br><br>
                 <input type="text" id="input-reset-nama" placeholder="Contoh: Budi" style="text-align:center; font-size:14px;">
@@ -563,8 +562,6 @@
                 tampilkanModal("Gagal", "Terjadi kesalahan koneksi.");
             });
         }
-
-        // --- UTILITIES MODAL & DATA ---
 
         function tampilkanModal(judul, pesan) {
             const modal = document.getElementById('custom-modal');
