@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard SPV - Antrian UFO Kebonsari</title>
+    <title>Dashboard SPV - UFO Kebonsari</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -17,24 +17,24 @@
 
         *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
         body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); text-align: center; }
+        .app-container { width: 100%; max-width: 480px; background: var(--card-bg); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); text-align: center; }
         
-        .gradient-header { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); border-radius: 16px; padding: 20px; color: white; margin-bottom: 16px; }
+        .gradient-header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 16px; padding: 20px; color: white; margin-bottom: 16px; }
         .gradient-header h2 { margin: 0; font-size: 20px; font-weight: 800; }
         .gradient-header p { margin: 4px 0 0 0; opacity: 0.85; font-size: 12px; }
 
-        .control-panel { background: #f1f5f9; border-radius: 14px; padding: 14px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border); }
-        .status-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; }
-        
-        button { width: 100%; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; }
+        .status-badge-sistem { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 16px; }
+        .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+        button { width: 100%; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; }
         button:active { transform: scale(0.98); }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-warning { background: var(--warning); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-cancel { background: #e2e8f0; color: var(--text-main); }
-        
-        /* JALUR ANTRIAN */
+
         .container-live-antrian { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; text-align: left; }
         .box-jalur-antrian { border-radius: 14px; padding: 14px; min-height: 100px; }
         .box-ha { background: var(--ha-bg); border: 1px solid #bae6fd; }
@@ -49,58 +49,51 @@
         
         .item-info-sales { display: flex; flex-direction: column; gap: 2px; }
         .sales-name { font-weight: 700; color: var(--text-main); }
-        .sales-timer { font-size: 10px; font-weight: 600; color: #d97706; }
+        .sales-timer { font-size: 10px; font-weight: 600; color: #d97706; display: flex; align-items: center; gap: 4px; }
         
-        .action-spv-item { display: flex; align-items: center; gap: 8px; }
-        .btn-hapus-item { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 6px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; }
+        .btn-hapus-item { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 6px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; border: none; }
         .btn-hapus-item:hover { background: #f87171; color: white; }
 
-        .promotor-link-btn { margin-top: 20px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; font-size: 11px; padding: 12px; border-radius: 10px; text-decoration: none; display: block; font-weight: 700; }
+        .promotor-link-btn { margin-top: 16px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; font-size: 11px; padding: 12px; border-radius: 10px; text-decoration: none; display: block; font-weight: 700; }
 
-        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-box { background: white; width: 100%; max-width: 320px; padding: 20px; border-radius: 16px; text-align: center; }
         .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
         .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
         .modal-actions { display: flex; gap: 8px; }
-        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; }
+        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; margin-bottom: 0; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <div class="gradient-header">
-            <h2>Panel Kontrol Supervisor</h2>
-            <p>UFO Kebonsari - Kelola Antrian Sales</p>
+            <h2>Halaman Supervisor</h2>
+            <p>UFO Kebonsari - Kontrol Antrian</p>
         </div>
 
-        <!-- PANEL KONTROL KELOLA ANTRIAN -->
-        <div class="control-panel">
-            <div class="status-row">
-                <span>Status Sistem Saat Ini:</span>
-                <strong id="label-status-sistem" style="color: var(--success);">OPEN</strong>
-            </div>
-            
-            <!-- TOMBOL BUKA/TUTUP ANTRIAN -->
-            <button type="button" id="btn-toggle-sistem" class="btn-danger" onclick="toggleStatusSistem()">
-                Tutup Pendaftaran Antrian
-            </button>
-
-            <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 4px 0; width: 100%;">
-
-            <!-- TOMBOL SAPU BERSIH / RESET -->
-            <button type="button" class="btn-warning" onclick="resetSemuaAntrian()" style="background: #ea580c; color: white;">
-                🧹 SAPU BERSIH / RESET SEMUA ANTRIAN
-            </button>
+        <!-- BADGE STATUS SISTERM (ASLI) -->
+        <div id="badge-status-sistem" class="status-badge-sistem status-open">
+            STATUS ANTRIAN: OPEN
         </div>
 
-        <!-- DAFTAR MONITORING ANTRIAN -->
+        <!-- TOMBOL BUKA/TUTUP ANTRIAN (ASLI) -->
+        <button type="button" id="btn-toggle-sistem" class="btn-danger" onclick="toggleStatusSistem()">
+            TUTUP PENDAFTARAN ANTRIAN
+        </button>
+
+        <!-- PENAMBAHAN FUSI BARU: TOMBOL RESET SELURUH ANTRIAN -->
+        <button type="button" class="btn-warning" onclick="resetSemuaAntrian()" style="background: #ea580c; color: white;">
+            🧹 RESET / SAPU BERSIH SELURUH ANTRIAN
+        </button>
+
+        <!-- LIVE DISPLAY ATAS-BAWAH (ASLI) -->
         <div class="container-live-antrian">
             <!-- JALUR HA -->
             <div class="box-jalur-antrian box-ha">
                 <div class="box-title title-ha">
-                    <span>🏠 DAFTAR ANTRIAN HA</span>
+                    <span>🏠 ANTRIAN HA (Home Appliances)</span>
                     <span id="cnt-ha">(0)</span>
                 </div>
                 <ul id="item-antrian-ha" class="list-antrian">
@@ -111,7 +104,7 @@
             <!-- JALUR AV -->
             <div class="box-jalur-antrian box-av">
                 <div class="box-title title-av">
-                    <span>📺 DAFTAR ANTRIAN AV</span>
+                    <span>📺 ANTRIAN AV (Audio Visual)</span>
                     <span id="cnt-av">(0)</span>
                 </div>
                 <ul id="item-antrian-av" class="list-antrian">
@@ -123,7 +116,7 @@
         <a href="index.html" class="promotor-link-btn">📱 KEMBALI KE HALAMAN PROMOTOR</a>
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL (ASLI) -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
@@ -180,18 +173,17 @@
         function renderUIRental(dataAntrian, statusSistem) {
             statusSistemGlobal = statusSistem || "BUKA";
 
-            const labelStatus = document.getElementById('label-status-sistem');
+            const badge = document.getElementById('badge-status-sistem');
             const btnToggle = document.getElementById('btn-toggle-sistem');
 
+            badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
+            badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
+
             if (statusSistemGlobal === "BUKA") {
-                labelStatus.innerText = "OPEN (Pendaftaran Dibuka)";
-                labelStatus.style.color = "var(--success)";
-                btnToggle.innerText = "🔒 TUTUP PENDAFTARAN ANTRIAN";
+                btnToggle.innerText = "TUTUP PENDAFTARAN ANTRIAN";
                 btnToggle.className = "btn-danger";
             } else {
-                labelStatus.innerText = "CLOSED (Pendaftaran Ditutup)";
-                labelStatus.style.color = "var(--danger)";
-                btnToggle.innerText = "🔓 BUKA PENDAFTARAN ANTRIAN";
+                btnToggle.innerText = "BUKA PENDAFTARAN ANTRIAN";
                 btnToggle.className = "btn-success";
             }
 
@@ -216,15 +208,13 @@
                     htmlHA += `
                         <li>
                             <div class="item-info-sales">
-                                <span class="sales-name">${item.nama} (${isMelayani ? 'Melayani' : 'No. ' + urut++})</span>
-                                ${!isMelayani ? `<span class="sales-timer">⏱️ Standby: <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span></span>` : '<span class="sales-timer" style="color:var(--success)">🟢 Sedang Melayani</span>'}
+                                <span class="sales-name">${item.nama}</span>
+                                ${!isMelayani ? `<span class="sales-timer">⏱️ <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span></span>` : ''}
                             </div>
-                            <div class="action-spv-item">
-                                <button type="button" class="btn-hapus-item" onclick="hapusSalesIndividual('${item.nama}')">Hapus</button>
-                            </div>
+                            <button type="button" class="btn-hapus-item" onclick="hapusSalesIndividual('${item.nama}')">Hapus</button>
                         </li>`;
                 });
-            } else { htmlHA = "<li><span style='color:var(--text-muted);'>Antrian Kosong</span></li>"; }
+            } else { htmlHA = "<li><span style='color:var(--text-muted);'>Kosong</span></li>"; }
             document.getElementById('item-antrian-ha').innerHTML = htmlHA;
 
             // RENDER AV
@@ -236,22 +226,19 @@
                     htmlAV += `
                         <li>
                             <div class="item-info-sales">
-                                <span class="sales-name">${item.nama} (${isMelayani ? 'Melayani' : 'No. ' + urut++})</span>
-                                ${!isMelayani ? `<span class="sales-timer">⏱️ Standby: <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span></span>` : '<span class="sales-timer" style="color:var(--success)">🟢 Sedang Melayani</span>'}
+                                <span class="sales-name">${item.nama}</span>
+                                ${!isMelayani ? `<span class="sales-timer">⏱️ <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span></span>` : ''}
                             </div>
-                            <div class="action-spv-item">
-                                <button type="button" class="btn-hapus-item" onclick="hapusSalesIndividual('${item.nama}')">Hapus</button>
-                            </div>
+                            <button type="button" class="btn-hapus-item" onclick="hapusSalesIndividual('${item.nama}')">Hapus</button>
                         </li>`;
                 });
-            } else { htmlAV = "<li><span style='color:var(--text-muted);'>Antrian Kosong</span></li>"; }
+            } else { htmlAV = "<li><span style='color:var(--text-muted);'>Kosong</span></li>"; }
             document.getElementById('item-antrian-av').innerHTML = htmlAV;
         }
 
-        // AKSI SPV: BUKA / TUTUP SISTEM
         function toggleStatusSistem() {
             const statusBaru = statusSistemGlobal === "BUKA" ? "TUTUP" : "BUKA";
-            tampilkanModalKonfirmasi("Konfirmasi System", `Ubah status pendaftaran antrian menjadi ${statusBaru}?`, function() {
+            tampilkanModalKonfirmasi("Konfirmasi Sistem", `Ubah status pendaftaran antrian menjadi ${statusBaru}?`, function() {
                 fetch(`${SCRIPT_URL}?aksi=spvToggleStatus&statusBaru=${encodeURIComponent(statusBaru)}`)
                 .then(res => res.json())
                 .then(res => {
@@ -261,9 +248,8 @@
             });
         }
 
-        // AKSI SPV: HAPUS PER SALES
         function hapusSalesIndividual(namaSales) {
-            tampilkanModalKonfirmasi("Keluarkah Sales?", `Keluarkan (${namaSales}) dari antrian?`, function() {
+            tampilkanModalKonfirmasi("Hapus Sales", `Hapus (${namaSales}) dari antrian?`, function() {
                 fetch(`${SCRIPT_URL}?aksi=spvHapus&namaSales=${encodeURIComponent(namaSales)}`)
                 .then(res => res.json())
                 .then(res => {
@@ -273,13 +259,13 @@
             });
         }
 
-        // AKSI SPV: RESET SEMUA ANTRIAN (SAPU BERSIH)
+        // FUNGSI BARU PENAMBAHAN: SAPU BERSIH ANTRIAN
         function resetSemuaAntrian() {
-            tampilkanModalKonfirmasi("PERATURAN RESET", "Apakah Anda yakin ingin MENYAPU BERSIH / MENGHAPUS SELURUH DAFTAR ANTRIAN? Fitur ini biasa digunakan saat tutup toko.", function() {
+            tampilkanModalKonfirmasi("Reset Antrian", "Yakin ingin menghapus SELURUH antrian hari ini? (Biasa digunakan saat toko tutup)", function() {
                 fetch(`${SCRIPT_URL}?aksi=spvReset&kategori=SEMUA`)
                 .then(res => res.json())
                 .then(res => {
-                    tampilkanModal("Selesai Reset", res.pesan);
+                    tampilkanModal("Berhasil Reset", res.pesan);
                     muatDataAntrian();
                 });
             });
