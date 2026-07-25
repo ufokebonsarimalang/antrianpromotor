@@ -755,15 +755,14 @@
             }
         }
 
-        function tampilkanModal(judul, pesan) {
-            const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').innerText = judul;
-            document.getElementById('modal-desc').innerHTML = String(pesan).replace(/
-/g, '<br>');
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-primary" onclick="tutupModal()">OK</button>`;
-            modal.classList.add('active');
-        }
-
+       function tampilkanModal(judul, pesan) {
+    const modal = document.getElementById('custom-modal');
+    document.getElementById('modal-title').innerText = judul;
+    // Gunakan escape character '\n' secara benar dalam satu baris:
+    document.getElementById('modal-desc').innerHTML = String(pesan).replace(/\n/g, '<br>'); 
+    document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-primary" onclick="tutupModal()">OK</button>`;
+    modal.classList.add('active');
+}
         function tampilkanModalKonfirmasi(judul, pesan, callbackOk) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judul;
