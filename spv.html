@@ -46,30 +46,30 @@
         .header-spv {
             background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%);
             border-radius: 16px;
-            padding: 20px; color: white;
+            padding: 22px; color: white;
             text-align: center; margin-bottom: 20px;
         }
-        .header-spv h2 { margin: 0 0 4px 0; font-size: 20px; font-weight: 800; }
-        .header-spv p { margin: 0; font-size: 12px; opacity: 0.8; }
+        .header-spv h2 { margin: 0 0 6px 0; font-size: 24px; font-weight: 800; }
+        .header-spv p { margin: 0; font-size: 14px; opacity: 0.9; }
 
         .status-badge {
-            display: inline-block; padding: 6px 14px; border-radius: 20px;
-            font-size: 11px; font-weight: 800; margin-top: 10px; text-transform: uppercase;
+            display: inline-block; padding: 8px 16px; border-radius: 20px;
+            font-size: 13px; font-weight: 800; margin-top: 12px; text-transform: uppercase;
         }
         .status-open { background: #dcfce7; color: #15803d; }
         .status-closed { background: #fee2e2; color: #b91c1c; }
 
-        .input-group { margin-bottom: 14px; text-align: left; }
-        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+        .input-group { margin-bottom: 16px; text-align: left; }
+        .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
 
         select, input[type="text"], input[type="password"] { 
-            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
-            background: #ffffff; font-size: 13px; color: var(--text-main); outline: none;
+            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border);
+            background: #ffffff; font-size: 15px; color: var(--text-main); outline: none;
         }
 
         button { 
-            width: 100%; padding: 12px; border-radius: 10px; 
-            font-size: 12px; font-weight: 700; cursor: pointer; border: none;
+            width: 100%; padding: 14px; border-radius: 12px; 
+            font-size: 14px; font-weight: 700; cursor: pointer; border: none;
             text-transform: uppercase; transition: all 0.2s;
             display: inline-flex; justify-content: center; align-items: center; gap: 8px;
         }
@@ -80,12 +80,12 @@
         .btn-warning { background: var(--warning); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-cancel { background: #f1f5f9; color: #475569; }
+        .btn-cancel { background: #f1f5f9; color: #475569; font-size: 13px; }
 
         /* SPINNER STYLING */
         .spinner {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: #ffffff;
@@ -97,18 +97,19 @@
         }
 
         .spv-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;
         }
         .spv-grid .full-width { grid-column: span 2; }
-        .spv-grid button { padding: 12px 8px; font-size: 11px; }
+        .spv-grid button { padding: 14px 10px; font-size: 13px; }
 
         .list-box {
             background: #f8fafc; border: 1px solid var(--border);
-            border-radius: 14px; padding: 14px; margin-top: 20px;
+            border-radius: 16px; padding: 16px; margin-top: 20px;
         }
-        .list-box h4 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; color: var(--text-muted); }
-        .list-box ul { list-style: none; padding: 0; margin: 0; font-size: 13px; }
-        .list-box li { padding: 8px 10px; background: white; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .list-box h4 { margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; color: var(--text-muted); font-weight: 800; }
+        .list-box ul { list-style: none; padding: 0; margin: 0; font-size: 15px; }
+        .list-box li { padding: 12px 14px; background: white; border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .list-box li span { font-size: 13px; font-weight: 600; }
 
         /* MODAL POPUP */
         .modal-overlay {
@@ -118,11 +119,12 @@
             z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-box { background: white; width: 100%; max-width: 340px; padding: 22px; border-radius: 16px; text-align: center; }
-        .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
-        .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; text-align: left; }
-        .modal-actions { display: flex; gap: 8px; }
-        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; }
+        .modal-box { background: white; width: 100%; max-width: 380px; padding: 24px; border-radius: 20px; text-align: center; }
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+        .modal-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; text-align: left; }
+        .modal-desc select, .modal-desc input { font-size: 14px; padding: 12px; }
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-actions button { flex: 1; padding: 12px; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -140,7 +142,7 @@
         <div id="login-spv-box">
             <div class="input-group">
                 <label>Masukkan PIN SPV Khusus</label>
-                <input type="password" id="input-pin-spv" placeholder="PIN SPV" style="text-align: center; font-size: 16px; letter-spacing: 2px;">
+                <input type="password" id="input-pin-spv" placeholder="PIN SPV" style="text-align: center; font-size: 18px; letter-spacing: 3px;">
             </div>
             <button type="button" id="btn-login-spv" class="btn-purple" onclick="prosesLoginSPV()">Masuk Panel Kontrol</button>
         </div>
@@ -151,7 +153,7 @@
                 <button type="button" class="btn-success full-width" onclick="bukaModalToggleSistem('BUKA')">▶ START / BUKA ANTRIAN</button>
                 <button type="button" class="btn-danger full-width" onclick="bukaModalToggleSistem('TUTUP')">⏹ STOP / TUTUP ANTRIAN</button>
 
-                <button type="button" class="btn-warning full-width" onclick="bukaModalFormSPVKategori('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">+ Tambah Timer Standby</button>
+                <button type="button" class="btn-warning full-width" onclick="bukaModalFormSPVKategori('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">⏱ Tambah Waktu Standby Urutan 1</button>
 
                 <button type="button" class="btn-primary" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Customer Janjian', true)">Cust. Janjian</button>
                 <button type="button" class="btn-primary" style="background: #0284c7;" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Cust.</button>
@@ -163,7 +165,7 @@
                 <button type="button" class="btn-danger full-width" style="background: #b91c1c;" onclick="bukaModalFormSPVKategori('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Sales</button>
             </div>
 
-            <button type="button" class="btn-cancel" style="margin-top: 16px;" onclick="logoutSPV()">Kunci Panel SPV</button>
+            <button type="button" class="btn-cancel" style="margin-top: 18px;" onclick="logoutSPV()">Kunci Panel SPV</button>
         </div>
 
         <!-- LIVE LIST UNTUK SPV -->
@@ -285,7 +287,7 @@
 
             let htmlContent = `
                 Kategori:<br>
-                <select id="spv-select-kategori" style="margin-bottom: 10px; margin-top: 4px;">
+                <select id="spv-select-kategori" style="margin-bottom: 12px; margin-top: 6px;">
                     <option value="HA">Home Appliance (HA)</option>
                     <option value="AV">Audio Video (AV)</option>
                 </select><br>
@@ -294,13 +296,13 @@
             if (butuhPilihPromotor) {
                 htmlContent += `
                     Promotor:<br>
-                    <select id="spv-select-sales" style="margin-bottom: 10px; margin-top: 4px;">${optionsSales}</select><br>
+                    <select id="spv-select-sales" style="margin-bottom: 12px; margin-top: 6px;">${optionsSales}</select><br>
                 `;
             }
 
             htmlContent += `
                 PIN SPV:<br>
-                <input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center; margin-top: 4px;">
+                <input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center; margin-top: 6px;">
             `;
 
             document.getElementById('modal-desc').innerHTML = htmlContent;
@@ -368,7 +370,7 @@
                     const data = res.data || [];
                     if(data.length > 0) {
                         data.forEach((item, index) => {
-                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span style="color:var(--text-muted); font-size:11px;">${item.status}</span></li>`;
+                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span>${item.status}</span></li>`;
                         });
                     } else {
                         listHtml = "<li><span>Belum ada promotor aktif</span></li>";
