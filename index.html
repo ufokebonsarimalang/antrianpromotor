@@ -14,17 +14,15 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --bg-color: #f1f5f9;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --border: #cbd5e1;
+            --border: #e2e8f0;
             --ha-color: #0284c7;
             --ha-bg: #f0f9ff;
-            --ha-border: #bae6fd;
             --av-color: #7c3aed;
             --av-bg: #faf5ff;
-            --av-border: #e9d5ff;
         }
 
         *, body, button, select, input {
@@ -40,7 +38,7 @@
         }
 
         .app-container {
-            width: 100%; max-width: 500px;
+            width: 100%; max-width: 480px;
             background: var(--card-bg);
             border-radius: 20px; padding: 20px;
             border: 1px solid var(--border);
@@ -50,7 +48,7 @@
 
         .gradient-header {
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border-radius: 16px; padding: 18px; color: white; margin-bottom: 14px;
+            border-radius: 16px; padding: 20px; color: white; margin-bottom: 16px;
         }
         .gradient-header h2 { margin: 0; font-size: 20px; font-weight: 800; }
         .gradient-header p { margin: 4px 0 0 0; opacity: 0.85; font-size: 12px; }
@@ -62,25 +60,7 @@
         .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
-        .grid-giliran {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-        .card-giliran-box {
-            border-radius: 14px; padding: 12px; text-align: center;
-        }
-        .card-ha { background: var(--ha-bg); border: 1px solid var(--ha-border); }
-        .card-av { background: var(--av-bg); border: 1px solid var(--av-border); }
-
-        .label-giliran { font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .label-ha { color: var(--ha-color); }
-        .label-av { color: var(--av-color); }
-
-        .nama-giliran-aktif { font-size: 15px; font-weight: 800; color: #0f172a; margin-top: 4px; word-break: break-word; }
-
-        .input-group { margin-bottom: 12px; text-align: left; }
+        .input-group { margin-bottom: 14px; text-align: left; }
         .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
 
         select, input[type="text"] { 
@@ -113,45 +93,42 @@
 
         .user-badge {
             background: #f8fafc; border: 1px solid var(--border); border-radius: 12px;
-            padding: 12px; margin-bottom: 12px; text-align: left; font-size: 12px;
+            padding: 12px; margin-bottom: 16px; text-align: left; font-size: 12px;
         }
 
-        .grid-list-antrian {
+        /* DUA TAMPILAN LIVE ANTRIAN (HA & AV) */
+        .grid-live-antrian {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
             margin-top: 16px;
             text-align: left;
         }
 
-        .box-antrian-jalur {
+        .box-jalur-antrian {
             border-radius: 12px;
             padding: 10px;
             min-height: 180px;
         }
-        .box-ha { background: #f0f9ff; border: 1px solid #bae6fd; }
-        .box-av { background: #faf5ff; border: 1px solid #e9d5ff; }
+        .box-ha { background: var(--ha-bg); border: 1px solid #bae6fd; }
+        .box-av { background: var(--av-bg); border: 1px solid #e9d5ff; }
 
         .box-title {
             font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;
-            display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px;
-            border-bottom: 2px solid;
+            padding-bottom: 4px; border-bottom: 2px solid;
+            display: flex; justify-content: space-between;
         }
         .title-ha { color: var(--ha-color); border-bottom-color: var(--ha-color); }
         .title-av { color: var(--av-color); border-bottom-color: var(--av-color); }
 
         .list-antrian { list-style: none; padding: 0; margin: 0; }
         .list-antrian li {
-            padding: 8px; background: #ffffff; border-radius: 8px; margin-bottom: 6px;
-            border: 1px solid var(--border); font-size: 11px;
-            display: flex; flex-direction: column; gap: 4px;
+            padding: 6px 8px; background: #ffffff; border-radius: 6px; margin-bottom: 6px;
+            border: 1px solid var(--border); font-size: 11px; font-weight: 600;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
-        .nama-sales-list { font-weight: 700; color: var(--text-main); word-break: break-word; }
-
-        .badge-status-item { 
-            font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; width: fit-content;
-        }
+        .badge-status-item { font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; }
         .badge-standby { background: #dbeafe; color: #1e40af; }
         .badge-melayani { background: #fef3c7; color: #92400e; }
 
@@ -186,17 +163,6 @@
             STATUS ANTRIAN: OPEN
         </div>
 
-        <div class="grid-giliran">
-            <div class="card-giliran-box card-ha">
-                <div class="label-giliran label-ha">🔥 Next HA</div>
-                <div id="nama-aktif-ha" class="nama-giliran-aktif">-</div>
-            </div>
-            <div class="card-giliran-box card-av">
-                <div class="label-giliran label-av">⚡ Next AV</div>
-                <div id="nama-aktif-av" class="nama-giliran-aktif">-</div>
-            </div>
-        </div>
-
         <!-- PANEL LOGIN -->
         <div id="panel-login" style="display: none;">
             <div class="input-group">
@@ -206,17 +172,17 @@
             <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
-        <!-- PANEL UTAMA PROMOTOR -->
+        <!-- PANEL UTAMA SERTA PILIHAN TAMBAHAN (HA / AV) -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <span>Akun HP Ini:</span> <strong id="label-user-aktif" style="color:var(--primary-dark);">-</strong>
             </div>
 
-            <!-- PILIHAN KATEGORI HANYA MUNCUL JIKA BELUM MASUK ANTRIAN MANAPUN -->
+            <!-- DOWNDOWN TAMBAHAN PILIHAN KATEGORI -->
             <div id="container-pilihan-kategori" class="input-group">
-                <label>Pilih 1 Jalur Antrian Utama Anda</label>
+                <label>Pilih Divisi Antrian</label>
                 <select id="pilih-kategori-antri">
-                    <option value="">-- Pilih Salah Satu (HA / AV) --</option>
+                    <option value="">-- Pilih Kategori Produk --</option>
                     <option value="HA">HA (Home Appliances)</option>
                     <option value="AV">AV (Audio Visual)</option>
                 </select>
@@ -226,25 +192,27 @@
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 10px;">Sudah Membawa Customer</button>
         </div>
 
-        <!-- TAMPILAN 2 BOX LIST ANTRIAN TERPISAH -->
-        <div class="grid-list-antrian">
-            <div class="box-antrian-jalur box-ha">
+        <!-- TAMPILAN LIVE ANTRIAN DUA KOLOM (HA & AV) -->
+        <div class="grid-live-antrian">
+            <!-- BOX ANTRIAN HA -->
+            <div class="box-jalur-antrian box-ha">
                 <div class="box-title title-ha">
-                    <span>🏠 JALUR HA</span>
-                    <span id="cnt-ha" style="opacity: 0.7;">(0)</span>
+                    <span>🏠 HA</span>
+                    <span id="cnt-ha">(0)</span>
                 </div>
                 <ul id="item-antrian-ha" class="list-antrian">
-                    <li><span style="color:var(--text-muted);">Memuat...</span></li>
+                    <li><span>Memuat...</span></li>
                 </ul>
             </div>
 
-            <div class="box-antrian-jalur box-av">
+            <!-- BOX ANTRIAN AV -->
+            <div class="box-jalur-antrian box-av">
                 <div class="box-title title-av">
-                    <span>📺 JALUR AV</span>
-                    <span id="cnt-av" style="opacity: 0.7;">(0)</span>
+                    <span>📺 AV</span>
+                    <span id="cnt-av">(0)</span>
                 </div>
                 <ul id="item-antrian-av" class="list-antrian">
-                    <li><span style="color:var(--text-muted);">Memuat...</span></li>
+                    <li><span>Memuat...</span></li>
                 </ul>
             </div>
         </div>
@@ -268,7 +236,6 @@
 
         let daftarAntrianGlobal = [];
         let statusSayaGlobal = "belum_ada"; 
-        let kategoriSayaGlobal = ""; 
         let statusSistemGlobal = "BUKA";
         let namaSalesAktifGlobal = "";
         let sedangProsesAksi = false;
@@ -356,6 +323,7 @@
             });
         }
 
+        /* MEMUTUSKAN LOGIKA TAMPILAN TANPA MERUBAH PROSES ASLI */
         function renderUIRental(dataAntrian, statusSistem) {
             daftarAntrianGlobal = dataAntrian || [];
             statusSistemGlobal = statusSistem || "BUKA";
@@ -366,88 +334,63 @@
             badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
             badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
 
-            // Pisahkan antrian HA & AV
+            // Pisahkan data untuk tampilan HA dan AV
             const antrianHA = daftarAntrianGlobal.filter(x => String(x.kategori).toUpperCase() === 'HA');
             const antrianAV = daftarAntrianGlobal.filter(x => String(x.kategori).toUpperCase() === 'AV');
 
             document.getElementById('cnt-ha').innerText = `(${antrianHA.length})`;
             document.getElementById('cnt-av').innerText = `(${antrianAV.length})`;
 
-            const standbyHA = antrianHA.filter(x => x.status === "Standby");
-            const standbyAV = antrianAV.filter(x => x.status === "Standby");
-
-            document.getElementById('nama-aktif-ha').innerText = standbyHA.length > 0 ? standbyHA[0].nama : "-";
-            document.getElementById('nama-aktif-av').innerText = standbyAV.length > 0 ? standbyAV[0].nama : "-";
-
-            // Cek Status Promotor Login saat ini
+            // Cari status promotor login asli
             statusSayaGlobal = "belum_ada";
-            kategoriSayaGlobal = "";
-            let apakahSayaNomorSatu = false;
-
             daftarAntrianGlobal.forEach(item => {
                 if (akunSaya && String(item.nama).trim().toLowerCase() === akunSaya) {
                     statusSayaGlobal = item.status;
-                    kategoriSayaGlobal = item.kategori;
-
-                    if (item.kategori === 'HA' && standbyHA.length > 0 && standbyHA[0].nama.toLowerCase() === akunSaya) {
-                        apakahSayaNomorSatu = true;
-                    }
-                    if (item.kategori === 'AV' && standbyAV.length > 0 && standbyAV[0].nama.toLowerCase() === akunSaya) {
-                        apakahSayaNomorSatu = true;
-                    }
                 }
             });
 
             // RENDER JALUR HA
             let htmlHA = "";
             if (antrianHA.length > 0) {
-                let urutHA = 1;
+                let urut = 1;
                 antrianHA.forEach(item => {
                     const isMelayani = item.status === "Melayani";
-                    const badgeClass = isMelayani ? "badge-melayani" : "badge-standby";
-                    const statusTxt = isMelayani ? "Melayani" : `No. ${urutHA++}`;
-
                     htmlHA += `
                         <li>
-                            <span class="nama-sales-list">${item.nama}</span>
-                            <span class="badge-status-item ${badgeClass}">${statusTxt}</span>
-                        </li>
-                    `;
+                            <span>${item.nama}</span>
+                            <span class="badge-status-item ${isMelayani ? 'badge-melayani' : 'badge-standby'}">
+                                ${isMelayani ? 'Melayani' : urut++}
+                            </span>
+                        </li>`;
                 });
-            } else { 
-                htmlHA = `<li><span style="color:var(--text-muted); text-align:center; display:block; padding: 10px 0;">Kosong</span></li>`; 
-            }
+            } else { htmlHA = "<li><span style='color:var(--text-muted);'>Kosong</span></li>"; }
             document.getElementById('item-antrian-ha').innerHTML = htmlHA;
 
             // RENDER JALUR AV
             let htmlAV = "";
             if (antrianAV.length > 0) {
-                let urutAV = 1;
+                let urut = 1;
                 antrianAV.forEach(item => {
                     const isMelayani = item.status === "Melayani";
-                    const badgeClass = isMelayani ? "badge-melayani" : "badge-standby";
-                    const statusTxt = isMelayani ? "Melayani" : `No. ${urutAV++}`;
-
                     htmlAV += `
                         <li>
-                            <span class="nama-sales-list">${item.nama}</span>
-                            <span class="badge-status-item ${badgeClass}">${statusTxt}</span>
-                        </li>
-                    `;
+                            <span>${item.nama}</span>
+                            <span class="badge-status-item ${isMelayani ? 'badge-melayani' : 'badge-standby'}">
+                                ${isMelayani ? 'Melayani' : urut++}
+                            </span>
+                        </li>`;
                 });
-            } else { 
-                htmlAV = `<li><span style="color:var(--text-muted); text-align:center; display:block; padding: 10px 0;">Kosong</span></li>`; 
-            }
+            } else { htmlAV = "<li><span style='color:var(--text-muted);'>Kosong</span></li>"; }
             document.getElementById('item-antrian-av').innerHTML = htmlAV;
 
-            // KONTROL INTEGRITAS BINDING / ANTI ANTRI GANDA
+            // FUNGSI UTAMA TOMBOL (SESUAI LOGIKA ASLI ANDA)
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
             const containerKategori = document.getElementById('container-pilihan-kategori');
 
             if (statusSayaGlobal === "Melayani") {
                 containerKategori.style.display = "none";
-                btnAntri.innerText = `Sedang Melayani (${kategoriSayaGlobal})`;
+                btnAntri.innerText = "Sedang Melayani Customer";
                 btnAntri.className = "btn-warning btn-disabled";
                 btnAntri.disabled = true;
 
@@ -457,19 +400,17 @@
                 btnCustomer.disabled = false;
 
             } else if (statusSayaGlobal === "Standby") {
-                // KUNCI! Sembunyikan dropdown pilihan agar tidak bisa double-antri ke jalur lain
                 containerKategori.style.display = "none";
-                btnAntri.innerText = `Terkunci di Jalur (${kategoriSayaGlobal})`;
+                btnAntri.innerText = "Sudah Dalam Antrian";
                 btnAntri.className = "btn-success btn-disabled";
                 btnAntri.disabled = true;
 
                 btnCustomer.style.display = "block";
                 btnCustomer.innerText = "Sudah Membawa Customer";
-                btnCustomer.disabled = !apakahSayaNomorSatu;
-                btnCustomer.className = apakahSayaNomorSatu ? "btn-primary" : "btn-primary btn-disabled";
+                btnCustomer.className = "btn-primary";
+                btnCustomer.disabled = false; // LOGIKA ASLI ANDA TIDAK DIKUNCI
 
             } else {
-                // BELUM ADA DI ANTRIAN MANAPUN -> Boleh memilih 1 kategori
                 containerKategori.style.display = "block";
                 btnCustomer.style.display = "none";
 
@@ -501,7 +442,7 @@
             const kategori = document.getElementById('pilih-kategori-antri').value;
 
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
-            if(!kategori) return tampilkanModal("Perhatian", "Pilih salah satu jalur antrian terlebih dahulu!");
+            if(!kategori) return tampilkanModal("Perhatian", "Silakan pilih divisi HA atau AV terlebih dahulu!");
 
             sedangProsesAksi = true;
             const btnAntri = document.getElementById('btn-utama-antri');
