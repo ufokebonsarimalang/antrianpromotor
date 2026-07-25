@@ -411,7 +411,12 @@
             let listHtmlHA = "";
             let listHtmlAV = "";
             let salesUtama = "Belum ada antrian";
-            statusSayaGlobal = "belum_ada"; 
+            
+            // Jaga status lokal jika sedang proses agar tidak langsung ke-reset oleh polling background
+            if (!sedangProsesAksi) {
+                statusSayaGlobal = "belum_ada"; 
+            }
+            
             let apakahSayaUrutanPertama = false;
 
             let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
@@ -432,10 +437,11 @@
                     const kategoriItem = item.kategori ? item.kategori : "HA"; 
 
                     if(akunSaya && namaItem.toLowerCase() === akunSaya.toLowerCase()) {
-                        statusSayaGlobal = item.status; 
-                        // Otomatis sesuaikan dropdown dengan kategori yang sudah terdaftar di server
+                        if (!sedangProsesAksi) {
+                            statusSayaGlobal = item.status; 
+                        }
                         const selectKat = document.getElementById('pilih-kategori');
-                        if (selectKat && kategoriItem) {
+                        if (selectKat && kategoriItem && !sedangProsesAksi) {
                             selectKat.value = kategoriItem;
                         }
                     }
@@ -480,7 +486,6 @@
                 btnCustomer.className = "btn-danger";
                 btnCustomer.disabled = false;
 
-                // Kunci pilihan kategori saat sedang melayani
                 selectKategori.disabled = true;
 
             } else if (statusSayaGlobal === "Standby") {
@@ -493,7 +498,6 @@
                 btnCustomer.disabled = !apakahSayaUrutanPertama;
                 btnCustomer.className = apakahSayaUrutanPertama ? "btn-primary" : "btn-primary btn-disabled";
 
-                // Kunci pilihan kategori saat sudah masuk antrian standby
                 selectKategori.disabled = true;
 
             } else { 
@@ -507,8 +511,6 @@
                     btnAntri.disabled = false;
                 }
                 btnCustomer.style.display = "none";
-
-                // Buka kunci kategori jika belum masuk antrian
                 selectKategori.disabled = false;
             }
 
@@ -541,22 +543,47 @@
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
             
-            sedangProsesAksi = true; 
+            sedangProsesAksi = true; // Langsung kunci agar data background tidak masuk sembarangan
 
             const btnAntri = document.getElementById('btn-utama-antri');
+            const btnCustomer = document.getElementById('btn-utama-customer');
+            const selectKategori = document.getElementById('pilih-kategori');
+
             btnAntri.dataset.loading = "true";
             btnAntri.disabled = true;
             btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
+            selectKategori.disabled = true;
 
-            // Langsung kunci kategori saat tombol diklik
-            document.getElementById('pilih-kategori').disabled = true;
-
+            // Langsung atur state lokal ke "Standby" agar tombol berubah instan tanpa menunggu fetch selesai
             statusSayaGlobal = "Standby";
+            btnAntri.innerText = "Anda Sudah Di Antrian";
+            btnAntri.className = "btn-success btn-disabled";
+            btnAntri.disabled = true;
+            btnCustomer.style.display = "block";
+            btnCustomer.innerText = "Sudah Membawa Customer";
+            btnCustomer.disabled = true;
+            btnCustomer.className = "btn-primary btn-disabled";
+
             let tempSembuhList = [...daftarAntrianGlobal];
             if(!tempSembuhList.some(x => String(x.nama).trim().toLowerCase() === namaSales.trim().toLowerCase())) {
                 tempSembuhList.push({ nama: namaSales, status: "Standby", kategori: kategoriPilih });
             }
-            renderUIRental(tempSembuhList, statusSistemGlobal, waktuTerakhirStandbyGlobal);
+            
+            // Perbarui tampilan list sementara secara lokal
+            let listHtmlHA = "";
+            let listHtmlAV = "";
+            let urutHA = 1;
+            let urutAV = 1;
+            tempSembuhList.forEach((item) => {
+                const kat = item.kategori || "HA";
+                if(item.status === "Standby") {
+                    let u = kat === "AV" ? urutAV++ : urutHA++;
+                    let htmlItem = `<li><b>${u}. ${item.nama}</b> <div><span class="badge-status-item badge-standby">Standby</span></div></li>`;
+                    if(kat === "AV") listHtmlAV += htmlItem; else listHtmlHA += htmlItem;
+                }
+            });
+            document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA || "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian HA</span></li>";
+            document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV || "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian AV</span></li>";
 
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, {
                 method: 'GET',
@@ -565,11 +592,12 @@
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
+                // Beri waktu 2 detik agar database Google benar-benar menulis dan aman dari pembacaan awal
                 setTimeout(() => {
                     btnAntri.dataset.loading = "false";
                     sedangProsesAksi = false;
                     muatDataAntrian();
-                }, 1500);
+                }, 2000);
             })
             .catch(err => {
                 btnAntri.dataset.loading = "false";
@@ -605,7 +633,7 @@
                             btnCustomer.dataset.loading = "false";
                             sedangProsesAksi = false;
                             muatDataAntrian();
-                        }, 1500);
+                        }, 2000);
                     })
                     .catch(err => {
                         btnCustomer.dataset.loading = "false";
@@ -634,7 +662,7 @@
                             btnCustomer.dataset.loading = "false";
                             sedangProsesAksi = false;
                             muatDataAntrian();
-                        }, 1500);
+                        }, 2000);
                     })
                     .catch(err => {
                         btnCustomer.dataset.loading = "false";
