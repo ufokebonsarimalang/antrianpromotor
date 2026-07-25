@@ -412,7 +412,6 @@
             let listHtmlAV = "";
             let salesUtama = "Belum ada antrian";
             
-            // Jaga status lokal jika sedang proses agar tidak langsung ke-reset oleh polling background
             if (!sedangProsesAksi) {
                 statusSayaGlobal = "belum_ada"; 
             }
@@ -423,6 +422,9 @@
             if (listStandby.length > 0) {
                 let kat = listStandby[0].kategori || "HA";
                 salesUtama = `${listStandby[0].nama} (${kat})`;
+                
+                // PERBAIKAN DI SINI:
+                // Cek apakah akun saya ada di urutan teratas (indeks 0 dari list yang Standby)
                 if (akunSaya && listStandby[0].nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
                     apakahSayaUrutanPertama = true;
                 }
@@ -495,6 +497,8 @@
 
                 btnCustomer.style.display = "block";
                 btnCustomer.innerText = "Sudah Membawa Customer";
+                
+                // Tombol aktif jika dia murni urutan pertama saat itu
                 btnCustomer.disabled = !apakahSayaUrutanPertama;
                 btnCustomer.className = apakahSayaUrutanPertama ? "btn-primary" : "btn-primary btn-disabled";
 
