@@ -376,8 +376,9 @@
                     const data = res.data || [];
                     if(data.length > 0) {
                         data.forEach((item, index) => {
-                            // Menambahkan keterangan teks "Waktu Standby" sebelum timer/status
-                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span>Waktu Standby: ${item.status}</span></li>`;
+                            // Mengambil properti timer/waktu standby dengan berbagai kemungkinan nama variabel dari backend (timer, sisaWaktu, atau status)
+                            let waktuStandby = item.timer || item.sisaWaktu || item.status || "-";
+                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span>Waktu Standby: ${waktuStandby}</span></li>`;
                         });
                     } else {
                         listHtml = "<li><span>Belum ada promotor aktif</span></li>";
