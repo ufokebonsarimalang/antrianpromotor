@@ -72,6 +72,11 @@
             width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
             background: #ffffff; font-size: 13px; color: var(--text-main); outline: none;
         }
+        select:disabled {
+            background-color: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+        }
 
         button { 
             width: 100%; padding: 12px; border-radius: 10px; 
@@ -428,6 +433,11 @@
 
                     if(akunSaya && namaItem.toLowerCase() === akunSaya.toLowerCase()) {
                         statusSayaGlobal = item.status; 
+                        // Otomatis sesuaikan dropdown dengan kategori yang sudah terdaftar di server
+                        const selectKat = document.getElementById('pilih-kategori');
+                        if (selectKat && kategoriItem) {
+                            selectKat.value = kategoriItem;
+                        }
                     }
 
                     let itemHtml = "";
@@ -451,6 +461,7 @@
 
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
+            const selectKategori = document.getElementById('pilih-kategori');
 
             if (btnAntri.dataset.loading === "true" || btnCustomer.dataset.loading === "true") {
                 document.getElementById('nama-aktif').innerText = salesUtama;
@@ -469,6 +480,9 @@
                 btnCustomer.className = "btn-danger";
                 btnCustomer.disabled = false;
 
+                // Kunci pilihan kategori saat sedang melayani
+                selectKategori.disabled = true;
+
             } else if (statusSayaGlobal === "Standby") {
                 btnAntri.innerText = "Anda Sudah Di Antrian";
                 btnAntri.className = "btn-success btn-disabled";
@@ -478,6 +492,9 @@
                 btnCustomer.innerText = "Sudah Membawa Customer";
                 btnCustomer.disabled = !apakahSayaUrutanPertama;
                 btnCustomer.className = apakahSayaUrutanPertama ? "btn-primary" : "btn-primary btn-disabled";
+
+                // Kunci pilihan kategori saat sudah masuk antrian standby
+                selectKategori.disabled = true;
 
             } else { 
                 if (statusSistemGlobal === "TUTUP") {
@@ -490,6 +507,9 @@
                     btnAntri.disabled = false;
                 }
                 btnCustomer.style.display = "none";
+
+                // Buka kunci kategori jika belum masuk antrian
+                selectKategori.disabled = false;
             }
 
             document.getElementById('nama-aktif').innerText = salesUtama;
@@ -498,7 +518,6 @@
         }
 
         function muatDataAntrian() {
-            // JANGAN TIMPA UI JIKA SEDANG DALAM PROSES AKSI ATAU TUNGGU 3 DETIK PERTAMA
             if (sedangProsesAksi) return;
 
             fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
@@ -522,14 +541,16 @@
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
             
-            sedangProsesAksi = true; // Kunci agar polling background tidak mereset tampilan
+            sedangProsesAksi = true; 
 
             const btnAntri = document.getElementById('btn-utama-antri');
             btnAntri.dataset.loading = "true";
             btnAntri.disabled = true;
             btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
 
-            // Update tampilan lokal seketika agar tombol berubah tanpa menunggu fetch selesai
+            // Langsung kunci kategori saat tombol diklik
+            document.getElementById('pilih-kategori').disabled = true;
+
             statusSayaGlobal = "Standby";
             let tempSembuhList = [...daftarAntrianGlobal];
             if(!tempSembuhList.some(x => String(x.nama).trim().toLowerCase() === namaSales.trim().toLowerCase())) {
@@ -544,7 +565,6 @@
             .then(res => res.json())
             .then(res => {
                 tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
-                // Beri jeda sedikit agar Google Sheets selesai menulis data baru sebelum unlock
                 setTimeout(() => {
                     btnAntri.dataset.loading = "false";
                     sedangProsesAksi = false;
