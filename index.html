@@ -57,13 +57,20 @@
         .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
+        /* KARTU GILIRAN UTAMA (HA & AV BERDAMPINGAN/TERPISAH JELAS) */
+        .card-giliran-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
         .card-giliran-utama {
             background: #eff6ff; border: 1px solid #bfdbfe;
-            border-radius: 14px; padding: 16px; margin-bottom: 16px;
+            border-radius: 14px; padding: 14px 10px; text-align: center;
         }
-        .label-giliran { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); }
-        .nama-giliran-aktif { font-size: 26px; font-weight: 800; color: #1e3a8a; margin: 4px 0; }
-        .timer-mundur { font-size: 13px; font-weight: 800; color: var(--danger); margin-top: 4px; display: block; }
+        .label-giliran { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--primary); }
+        .nama-giliran-aktif { font-size: 18px; font-weight: 800; color: #1e3a8a; margin: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .timer-mundur { font-size: 11px; font-weight: 800; color: var(--danger); margin-top: 4px; display: block; }
 
         .input-group { margin-bottom: 14px; text-align: left; }
         .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
@@ -155,15 +162,19 @@
             STATUS ANTRIAN: OPEN
         </div>
 
-        <!-- KARTU GILIRAN UTAMA DENGAN 2 TIMER (HA & AV) -->
-        <div class="card-giliran-utama">
-            <div class="label-giliran">Giliran Melayani Saat Ini</div>
-            <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
-            
-            <!-- Timer Terpisah untuk HA dan AV -->
-            <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
-                <span id="timer-mundur-ha" class="timer-mundur" style="display: none;">Timer HA (--:--)</span>
-                <span id="timer-mundur-av" class="timer-mundur" style="display: none; color: #2563eb;">Timer AV (--:--)</span>
+        <!-- KARTU GILIRAN UTAMA HA & AV BERDAMPINGAN DENGAN TIMERNYA MASING-MASING -->
+        <div class="card-giliran-wrapper">
+            <!-- Kartu Giliran HA -->
+            <div class="card-giliran-utama">
+                <div class="label-giliran">Giliran HA Saat Ini</div>
+                <div id="nama-aktif-ha" class="nama-giliran-aktif">-</div>
+                <span id="timer-mundur-ha" class="timer-mundur" style="display: none;">--:--</span>
+            </div>
+            <!-- Kartu Giliran AV -->
+            <div class="card-giliran-utama" style="background: #fdf4ff; border-color: #f5d0fe;">
+                <div class="label-giliran" style="color: #9333ea;">Giliran AV Saat Ini</div>
+                <div id="nama-aktif-av" class="nama-giliran-aktif" style="color: #6b21a8;">-</div>
+                <span id="timer-mundur-av" class="timer-mundur" style="display: none;">--:--</span>
             </div>
         </div>
 
@@ -368,10 +379,10 @@
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
                         labelTimerHA.style.display = 'block';
-                        labelTimerHA.innerText = `Sisa Waktu Standby HA: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                        labelTimerHA.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
                     } else {
                         labelTimerHA.style.display = 'block';
-                        labelTimerHA.innerText = `Waktu Standby HA Habis!`;
+                        labelTimerHA.innerText = `Habis!`;
                     }
                 } else {
                     labelTimerHA.style.display = 'none';
@@ -391,10 +402,10 @@
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
                         labelTimerAV.style.display = 'block';
-                        labelTimerAV.innerText = `Sisa Waktu Standby AV: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                        labelTimerAV.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
                     } else {
                         labelTimerAV.style.display = 'block';
-                        labelTimerAV.innerText = `Waktu Standby AV Habis!`;
+                        labelTimerAV.innerText = `Habis!`;
                     }
                 } else {
                     labelTimerAV.style.display = 'none';
@@ -465,7 +476,8 @@
 
             let listHtmlHA = "";
             let listHtmlAV = "";
-            let salesUtamaText = [];
+            let namaHANow = "-";
+            let namaAVNow = "-";
             statusSayaGlobal = "belum_ada"; 
             let apakahSayaUrutanPertamaHA = false;
             let apakahSayaUrutanPertamaAV = false;
@@ -475,19 +487,17 @@
             let standbyAV = listStandby.find(item => item.kategori === "AV");
 
             if (standbyHA) {
-                salesUtamaText.push(`HA: ${standbyHA.nama}`);
+                namaHANow = standbyHA.nama;
                 if (akunSaya && standbyHA.nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
                     apakahSayaUrutanPertamaHA = true;
                 }
             }
             if (standbyAV) {
-                salesUtamaText.push(`AV: ${standbyAV.nama}`);
+                namaAVNow = standbyAV.nama;
                 if (akunSaya && standbyAV.nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
                     apakahSayaUrutanPertamaAV = true;
                 }
             }
-
-            let textUtamaFinal = salesUtamaText.length > 0 ? salesUtamaText.join(" | ") : "Belum ada antrian";
 
             if(daftarAntrianGlobal.length > 0) {
                 let urutHA = 1;
@@ -529,7 +539,8 @@
             const selectKategori = document.getElementById('pilih-kategori');
 
             if (btnAntri.dataset.loading === "true" || btnCustomer.dataset.loading === "true") {
-                document.getElementById('nama-aktif').innerText = textUtamaFinal;
+                document.getElementById('nama-aktif-ha').innerText = namaHANow;
+                document.getElementById('nama-aktif-av').innerText = namaAVNow;
                 document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
                 document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
                 return;
@@ -577,7 +588,8 @@
                 selectKategori.disabled = false;
             }
 
-            document.getElementById('nama-aktif').innerText = textUtamaFinal;
+            document.getElementById('nama-aktif-ha').innerText = namaHANow;
+            document.getElementById('nama-aktif-av').innerText = namaAVNow;
             document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
             document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
