@@ -27,12 +27,18 @@
         .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
-        button { width: 100%; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .panel-tombol-spv { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .row-tombol-kategori { display: flex; gap: 8px; }
+        .row-tombol-kategori button { flex: 1; }
+
+        button { width: 100%; padding: 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 6px; }
         button:active { transform: scale(0.98); }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-warning { background: var(--warning); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        .btn-reset-ha { background: #0284c7; color: white; }
+        .btn-reset-av { background: #7c3aed; color: white; }
         .btn-cancel { background: #e2e8f0; color: var(--text-main); }
 
         .container-live-antrian { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; text-align: left; }
@@ -62,7 +68,7 @@
         .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
         .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
         .modal-actions { display: flex; gap: 8px; }
-        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; margin-bottom: 0; }
+        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -73,22 +79,35 @@
             <p>UFO Kebonsari - Kontrol Antrian</p>
         </div>
 
-        <!-- BADGE STATUS SISTERM (ASLI) -->
+        <!-- BADGE STATUS SISTEM -->
         <div id="badge-status-sistem" class="status-badge-sistem status-open">
             STATUS ANTRIAN: OPEN
         </div>
 
-        <!-- TOMBOL BUKA/TUTUP ANTRIAN (ASLI) -->
-        <button type="button" id="btn-toggle-sistem" class="btn-danger" onclick="toggleStatusSistem()">
-            TUTUP PENDAFTARAN ANTRIAN
-        </button>
+        <!-- KUMPULAN SEMUA TOMBOL SPV -->
+        <div class="panel-tombol-spv">
+            <!-- TOMBOL 1: BUKA / TUTUP ANTRIAN -->
+            <button type="button" id="btn-toggle-sistem" class="btn-danger" onclick="toggleStatusSistem()">
+                🔒 TUTUP PENDAFTARAN ANTRIAN
+            </button>
 
-        <!-- PENAMBAHAN FUSI BARU: TOMBOL RESET SELURUH ANTRIAN -->
-        <button type="button" class="btn-warning" onclick="resetSemuaAntrian()" style="background: #ea580c; color: white;">
-            🧹 RESET / SAPU BERSIH SELURUH ANTRIAN
-        </button>
+            <!-- TOMBOL 2: RESET SEMUA ANTRIAN -->
+            <button type="button" class="btn-warning" onclick="resetAntrianKategori('SEMUA')" style="background: #ea580c; color: white;">
+                🧹 RESET SELURUH ANTRIAN (HA + AV)
+            </button>
 
-        <!-- LIVE DISPLAY ATAS-BAWAH (ASLI) -->
+            <!-- TOMBOL 3 & 4: RESET SPESIFIK HA / AV -->
+            <div class="row-tombol-kategori">
+                <button type="button" class="btn-reset-ha" onclick="resetAntrianKategori('HA')">
+                    🏠 RESET ANTRIAN HA
+                </button>
+                <button type="button" class="btn-reset-av" onclick="resetAntrianKategori('AV')">
+                    📺 RESET ANTRIAN AV
+                </button>
+            </div>
+        </div>
+
+        <!-- LIVE DISPLAY ATAS BAWAH -->
         <div class="container-live-antrian">
             <!-- JALUR HA -->
             <div class="box-jalur-antrian box-ha">
@@ -116,7 +135,7 @@
         <a href="index.html" class="promotor-link-btn">📱 KEMBALI KE HALAMAN PROMOTOR</a>
     </div>
 
-    <!-- MODAL (ASLI) -->
+    <!-- MODAL -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
@@ -180,10 +199,10 @@
             badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
 
             if (statusSistemGlobal === "BUKA") {
-                btnToggle.innerText = "TUTUP PENDAFTARAN ANTRIAN";
+                btnToggle.innerText = "🔒 TUTUP PENDAFTARAN ANTRIAN";
                 btnToggle.className = "btn-danger";
             } else {
-                btnToggle.innerText = "BUKA PENDAFTARAN ANTRIAN";
+                btnToggle.innerText = "🔓 BUKA PENDAFTARAN ANTRIAN";
                 btnToggle.className = "btn-success";
             }
 
@@ -209,7 +228,7 @@
                         <li>
                             <div class="item-info-sales">
                                 <span class="sales-name">${item.nama}</span>
-                                ${!isMelayani ? `<span class="sales-timer">⏱️ <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span></span>` : ''}
+                                ${!isMelayani ? `<span class="sales-timer">⏱️ Standby: <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span></span>` : '<span class="sales-timer" style="color:var(--success)">🟢 Sedang Melayani</span>'}
                             </div>
                             <button type="button" class="btn-hapus-item" onclick="hapusSalesIndividual('${item.nama}')">Hapus</button>
                         </li>`;
@@ -227,7 +246,7 @@
                         <li>
                             <div class="item-info-sales">
                                 <span class="sales-name">${item.nama}</span>
-                                ${!isMelayani ? `<span class="sales-timer">⏱️ <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span></span>` : ''}
+                                ${!isMelayani ? `<span class="sales-timer">⏱️ Standby: <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span></span>` : '<span class="sales-timer" style="color:var(--success)">🟢 Sedang Melayani</span>'}
                             </div>
                             <button type="button" class="btn-hapus-item" onclick="hapusSalesIndividual('${item.nama}')">Hapus</button>
                         </li>`;
@@ -249,7 +268,7 @@
         }
 
         function hapusSalesIndividual(namaSales) {
-            tampilkanModalKonfirmasi("Hapus Sales", `Hapus (${namaSales}) dari antrian?`, function() {
+            tampilkanModalKonfirmasi("Hapus Sales", `Keluarkan (${namaSales}) dari antrian?`, function() {
                 fetch(`${SCRIPT_URL}?aksi=spvHapus&namaSales=${encodeURIComponent(namaSales)}`)
                 .then(res => res.json())
                 .then(res => {
@@ -259,10 +278,11 @@
             });
         }
 
-        // FUNGSI BARU PENAMBAHAN: SAPU BERSIH ANTRIAN
-        function resetSemuaAntrian() {
-            tampilkanModalKonfirmasi("Reset Antrian", "Yakin ingin menghapus SELURUH antrian hari ini? (Biasa digunakan saat toko tutup)", function() {
-                fetch(`${SCRIPT_URL}?aksi=spvReset&kategori=SEMUA`)
+        // FUNGSI RESET UNIVERSAL (BISA PILIH HA, AV, ATAU SEMUA)
+        function resetAntrianKategori(kategori) {
+            let labelPesan = kategori === "SEMUA" ? "SELURUH ANTRIAN (HA & AV)" : `ANTRIAN DIVISI ${kategori}`;
+            tampilkanModalKonfirmasi("Reset Antrian", `Apakah Anda yakin ingin menghapus ${labelPesan}?`, function() {
+                fetch(`${SCRIPT_URL}?aksi=spvReset&kategori=${encodeURIComponent(kategori)}`)
                 .then(res => res.json())
                 .then(res => {
                     tampilkanModal("Berhasil Reset", res.pesan);
