@@ -96,45 +96,46 @@
             padding: 12px; margin-bottom: 16px; text-align: left; font-size: 12px;
         }
 
-        /* DUA TAMPILAN LIVE ANTRIAN (HA & AV) */
-        .grid-live-antrian {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 16px;
+        /* CONTAINER ANTRIAN ATAS-BAWAH (STACKED) */
+        .container-live-antrian {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 20px;
             text-align: left;
         }
 
         .box-jalur-antrian {
-            border-radius: 12px;
-            padding: 10px;
-            min-height: 180px;
+            border-radius: 14px;
+            padding: 14px;
+            min-height: 100px;
         }
         .box-ha { background: var(--ha-bg); border: 1px solid #bae6fd; }
         .box-av { background: var(--av-bg); border: 1px solid #e9d5ff; }
 
         .box-title {
-            font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;
-            padding-bottom: 4px; border-bottom: 2px solid;
-            display: flex; justify-content: space-between;
+            font-size: 13px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px;
+            padding-bottom: 6px; border-bottom: 2px solid;
+            display: flex; justify-content: space-between; align-items: center;
         }
         .title-ha { color: var(--ha-color); border-bottom-color: var(--ha-color); }
         .title-av { color: var(--av-color); border-bottom-color: var(--av-color); }
 
         .list-antrian { list-style: none; padding: 0; margin: 0; }
         .list-antrian li {
-            padding: 6px 8px; background: #ffffff; border-radius: 6px; margin-bottom: 6px;
-            border: 1px solid var(--border); font-size: 11px; font-weight: 600;
+            padding: 10px 12px; background: #ffffff; border-radius: 8px; margin-bottom: 8px;
+            border: 1px solid var(--border); font-size: 13px; font-weight: 600;
             display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
-        .badge-status-item { font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; }
+        .badge-status-item { font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; }
         .badge-standby { background: #dbeafe; color: #1e40af; }
         .badge-melayani { background: #fef3c7; color: #92400e; }
 
         .spv-link-btn {
-            margin-top: 16px; background: #faf5ff; border: 1px solid #e9d5ff; color: #7c3aed;
-            font-size: 11px; padding: 10px; border-radius: 10px; text-decoration: none; display: block; font-weight: 700;
+            margin-top: 20px; background: #faf5ff; border: 1px solid #e9d5ff; color: #7c3aed;
+            font-size: 11px; padding: 12px; border-radius: 10px; text-decoration: none; display: block; font-weight: 700;
         }
 
         .modal-overlay {
@@ -178,7 +179,7 @@
                 <span>Akun HP Ini:</span> <strong id="label-user-aktif" style="color:var(--primary-dark);">-</strong>
             </div>
 
-            <!-- DOWNDOWN TAMBAHAN PILIHAN KATEGORI -->
+            <!-- DROPDOWN TAMBAHAN PILIHAN KATEGORI -->
             <div id="container-pilihan-kategori" class="input-group">
                 <label>Pilih Divisi Antrian</label>
                 <select id="pilih-kategori-antri">
@@ -192,12 +193,12 @@
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 10px;">Sudah Membawa Customer</button>
         </div>
 
-        <!-- TAMPILAN LIVE ANTRIAN DUA KOLOM (HA & AV) -->
-        <div class="grid-live-antrian">
-            <!-- BOX ANTRIAN HA -->
+        <!-- TAMPILAN LIVE ANTRIAN ATAS-BAWAH (ATAS: HA, BAWAH: AV) -->
+        <div class="container-live-antrian">
+            <!-- BOX ANTRIAN HA (ATAS) -->
             <div class="box-jalur-antrian box-ha">
                 <div class="box-title title-ha">
-                    <span>🏠 HA</span>
+                    <span>🏠 ANTRIAN HA (Home Appliances)</span>
                     <span id="cnt-ha">(0)</span>
                 </div>
                 <ul id="item-antrian-ha" class="list-antrian">
@@ -205,10 +206,10 @@
                 </ul>
             </div>
 
-            <!-- BOX ANTRIAN AV -->
+            <!-- BOX ANTRIAN AV (BAWAH) -->
             <div class="box-jalur-antrian box-av">
                 <div class="box-title title-av">
-                    <span>📺 AV</span>
+                    <span>📺 ANTRIAN AV (Audio Visual)</span>
                     <span id="cnt-av">(0)</span>
                 </div>
                 <ul id="item-antrian-av" class="list-antrian">
@@ -323,7 +324,6 @@
             });
         }
 
-        /* MEMUTUSKAN LOGIKA TAMPILAN TANPA MERUBAH PROSES ASLI */
         function renderUIRental(dataAntrian, statusSistem) {
             daftarAntrianGlobal = dataAntrian || [];
             statusSistemGlobal = statusSistem || "BUKA";
@@ -334,14 +334,23 @@
             badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
             badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
 
-            // Pisahkan data untuk tampilan HA dan AV
-            const antrianHA = daftarAntrianGlobal.filter(x => String(x.kategori).toUpperCase() === 'HA');
-            const antrianAV = daftarAntrianGlobal.filter(x => String(x.kategori).toUpperCase() === 'AV');
+            // PISAHKAN DATA BERDASARKAN KATEGORI (Toleran jika kosong/HA)
+            const antrianHA = [];
+            const antrianAV = [];
+
+            daftarAntrianGlobal.forEach(item => {
+                const kat = String(item.kategori || '').trim().toUpperCase();
+                if (kat === 'AV') {
+                    antrianAV.push(item);
+                } else {
+                    antrianHA.push(item);
+                }
+            });
 
             document.getElementById('cnt-ha').innerText = `(${antrianHA.length})`;
             document.getElementById('cnt-av').innerText = `(${antrianAV.length})`;
 
-            // Cari status promotor login asli
+            // Status Promotor
             statusSayaGlobal = "belum_ada";
             daftarAntrianGlobal.forEach(item => {
                 if (akunSaya && String(item.nama).trim().toLowerCase() === akunSaya) {
@@ -349,7 +358,7 @@
                 }
             });
 
-            // RENDER JALUR HA
+            // RENDER JALUR HA (ATAS)
             let htmlHA = "";
             if (antrianHA.length > 0) {
                 let urut = 1;
@@ -359,14 +368,14 @@
                         <li>
                             <span>${item.nama}</span>
                             <span class="badge-status-item ${isMelayani ? 'badge-melayani' : 'badge-standby'}">
-                                ${isMelayani ? 'Melayani' : urut++}
+                                ${isMelayani ? 'Melayani' : 'No. ' + urut++}
                             </span>
                         </li>`;
                 });
-            } else { htmlHA = "<li><span style='color:var(--text-muted);'>Kosong</span></li>"; }
+            } else { htmlHA = "<li><span style='color:var(--text-muted); padding: 4px 0;'>Kosong</span></li>"; }
             document.getElementById('item-antrian-ha').innerHTML = htmlHA;
 
-            // RENDER JALUR AV
+            // RENDER JALUR AV (BAWAH)
             let htmlAV = "";
             if (antrianAV.length > 0) {
                 let urut = 1;
@@ -376,14 +385,14 @@
                         <li>
                             <span>${item.nama}</span>
                             <span class="badge-status-item ${isMelayani ? 'badge-melayani' : 'badge-standby'}">
-                                ${isMelayani ? 'Melayani' : urut++}
+                                ${isMelayani ? 'Melayani' : 'No. ' + urut++}
                             </span>
                         </li>`;
                 });
-            } else { htmlAV = "<li><span style='color:var(--text-muted);'>Kosong</span></li>"; }
+            } else { htmlAV = "<li><span style='color:var(--text-muted); padding: 4px 0;'>Kosong</span></li>"; }
             document.getElementById('item-antrian-av').innerHTML = htmlAV;
 
-            // FUNGSI UTAMA TOMBOL (SESUAI LOGIKA ASLI ANDA)
+            // KONTROL TOMBOL UTAMA
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
             const containerKategori = document.getElementById('container-pilihan-kategori');
@@ -408,7 +417,7 @@
                 btnCustomer.style.display = "block";
                 btnCustomer.innerText = "Sudah Membawa Customer";
                 btnCustomer.className = "btn-primary";
-                btnCustomer.disabled = false; // LOGIKA ASLI ANDA TIDAK DIKUNCI
+                btnCustomer.disabled = false;
 
             } else {
                 containerKategori.style.display = "block";
