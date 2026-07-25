@@ -120,7 +120,7 @@
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-box { background: white; width: 100%; max-width: 340px; padding: 22px; border-radius: 16px; text-align: center; }
         .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
-        .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+        .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; text-align: left; }
         .modal-actions { display: flex; gap: 8px; }
         .modal-actions button { flex: 1; padding: 10px; font-size: 11px; }
     </style>
@@ -151,16 +151,16 @@
                 <button type="button" class="btn-success full-width" onclick="bukaModalToggleSistem('BUKA')">▶ START / BUKA ANTRIAN</button>
                 <button type="button" class="btn-danger full-width" onclick="bukaModalToggleSistem('TUTUP')">⏹ STOP / TUTUP ANTRIAN</button>
 
-                <button type="button" class="btn-warning full-width" onclick="bukaModalFormSPV('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">+ Tambah Timer Standby</button>
+                <button type="button" class="btn-warning full-width" onclick="bukaModalFormSPVKategori('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">+ Tambah Timer Standby</button>
 
-                <button type="button" class="btn-primary" onclick="bukaModalFormSPV('spvAmbilAntrianBebas', 'Customer Janjian', true)">Cust. Janjian</button>
-                <button type="button" class="btn-primary" style="background: #0284c7;" onclick="bukaModalFormSPV('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Cust.</button>
+                <button type="button" class="btn-primary" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Customer Janjian', true)">Cust. Janjian</button>
+                <button type="button" class="btn-primary" style="background: #0284c7;" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Cust.</button>
 
-                <button type="button" class="btn-success" onclick="bukaModalFormSPV('spvDaftarAntri', 'Masukkan Promotor ke Antrian', true)">+ Masukkan Antri</button>
-                <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPV('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan Antri</button>
+                <button type="button" class="btn-success" onclick="bukaModalFormSPVKategori('spvDaftarAntri', 'Masukkan Promotor ke Antrian', true)">+ Masukkan Antri</button>
+                <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan Antri</button>
 
-                <button type="button" class="btn-danger full-width" onclick="bukaModalFormSPV('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
-                <button type="button" class="btn-danger full-width" style="background: #b91c1c;" onclick="bukaModalFormSPV('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Sales</button>
+                <button type="button" class="btn-danger full-width" onclick="bukaModalFormSPVKategori('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
+                <button type="button" class="btn-danger full-width" style="background: #b91c1c;" onclick="bukaModalFormSPVKategori('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Sales</button>
             </div>
 
             <button type="button" class="btn-cancel" style="margin-top: 16px;" onclick="logoutSPV()">Kunci Panel SPV</button>
@@ -276,25 +276,43 @@
             });
         }
 
-        function bukaModalFormSPV(aksiName, judulAksi, butuhPilihPromotor = true) {
+        function bukaModalFormSPVKategori(aksiName, judulAksi, butuhPilihPromotor = true) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judulAksi;
-            let options = '<option value="">-- Pilih Promotor --</option>';
-            masterSalesGlobal.forEach(n => options += `<option value="${n}">${n}</option>`);
+            
+            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
+            masterSalesGlobal.forEach(n => optionsSales += `<option value="${n}">${n}</option>`);
 
-            let htmlContent = "";
-            if (butuhPilihPromotor) htmlContent += `Promotor:<br><select id="spv-select-sales" style="margin-bottom: 12px; margin-top: 4px;">${options}</select><br>`;
-            htmlContent += `PIN SPV:<br><input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center; margin-top: 4px;">`;
+            let htmlContent = `
+                Kategori:<br>
+                <select id="spv-select-kategori" style="margin-bottom: 10px; margin-top: 4px;">
+                    <option value="HA">Home Appliance (HA)</option>
+                    <option value="AV">Audio Video (AV)</option>
+                </select><br>
+            `;
+
+            if (butuhPilihPromotor) {
+                htmlContent += `
+                    Promotor:<br>
+                    <select id="spv-select-sales" style="margin-bottom: 10px; margin-top: 4px;">${optionsSales}</select><br>
+                `;
+            }
+
+            htmlContent += `
+                PIN SPV:<br>
+                <input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center; margin-top: 4px;">
+            `;
 
             document.getElementById('modal-desc').innerHTML = htmlContent;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" id="btn-modal-proses-aksi" class="btn-primary" onclick="eksekusiAksiSPV('${aksiName}', ${butuhPilihPromotor})">Proses</button>
+                <button type="button" id="btn-modal-proses-aksi" class="btn-primary" onclick="eksekusiAksiSPVKategori('${aksiName}', ${butuhPilihPromotor})">Proses</button>
             `;
             modal.classList.add('active');
         }
 
-        function eksekusiAksiSPV(aksiName, butuhPilihPromotor) {
+        function eksekusiAksiSPVKategori(aksiName, butuhPilihPromotor) {
+            const kategori = document.getElementById('spv-select-kategori').value;
             let namaSales = butuhPilihPromotor ? document.getElementById('spv-select-sales').value : "";
             const pin = document.getElementById('spv-input-pin').value;
 
@@ -307,7 +325,7 @@
             btnProses.disabled = true;
             btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
 
-            fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&namaPromotor=${encodeURIComponent(namaSales)}`)
+            fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&namaPromotor=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`)
             .then(res => res.json())
             .then(res => {
                 setTimeout(() => {
