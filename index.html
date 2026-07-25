@@ -57,17 +57,13 @@
         .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
-        .card-giliran-container {
-            display: flex; gap: 10px; margin-bottom: 16px;
-        }
         .card-giliran-utama {
-            flex: 1;
             background: #eff6ff; border: 1px solid #bfdbfe;
-            border-radius: 14px; padding: 14px 10px; text-align: center;
+            border-radius: 14px; padding: 16px; margin-bottom: 16px;
         }
-        .label-giliran { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--primary); }
-        .nama-giliran-aktif { font-size: 18px; font-weight: 800; color: #1e3a8a; margin: 4px 0; word-break: break-word; }
-        .timer-mundur { font-size: 11px; font-weight: 800; color: var(--danger); margin-top: 4px; display: block; }
+        .label-giliran { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); }
+        .nama-giliran-aktif { font-size: 26px; font-weight: 800; color: #1e3a8a; margin: 4px 0; }
+        .timer-mundur { font-size: 13px; font-weight: 800; color: var(--danger); margin-top: 4px; display: block; }
 
         .input-group { margin-bottom: 14px; text-align: left; }
         .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
@@ -159,17 +155,15 @@
             STATUS ANTRIAN: OPEN
         </div>
 
-        <!-- DUA KARTU GILIRAN MELAYANI (HA DAN AV) -->
-        <div class="card-giliran-container">
-            <div class="card-giliran-utama">
-                <div class="label-giliran">Melayani HA</div>
-                <div id="nama-aktif-ha" class="nama-giliran-aktif">-</div>
-                <span id="label-timer-mundur-ha" class="timer-mundur" style="display: none;">--:--</span>
-            </div>
-            <div class="card-giliran-utama">
-                <div class="label-giliran">Melayani AV</div>
-                <div id="nama-aktif-av" class="nama-giliran-aktif">-</div>
-                <span id="label-timer-mundur-av" class="timer-mundur" style="display: none;">--:--</span>
+        <!-- KARTU GILIRAN UTAMA DENGAN 2 TIMER (HA & AV) -->
+        <div class="card-giliran-utama">
+            <div class="label-giliran">Giliran Melayani Saat Ini</div>
+            <div id="nama-aktif" class="nama-giliran-aktif">Memuat...</div>
+            
+            <!-- Timer Terpisah untuk HA dan AV -->
+            <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+                <span id="timer-mundur-ha" class="timer-mundur" style="display: none;">Timer HA (--:--)</span>
+                <span id="timer-mundur-av" class="timer-mundur" style="display: none; color: #2563eb;">Timer AV (--:--)</span>
             </div>
         </div>
 
@@ -235,8 +229,8 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
-        let waktuTerakhirStandbyGlobalHA = null;
-        let waktuTerakhirStandbyGlobalAV = null;
+        let waktuStandbyHAGlobal = null;
+        let waktuStandbyAVGlobal = null;
         let daftarAntrianGlobal = [];
         let masterSalesGlobal = [];
         let statusSayaGlobal = "belum_ada"; 
@@ -359,57 +353,67 @@
         }
 
         function hitungMundurLokal() {
+            const labelTimerHA = document.getElementById('timer-mundur-ha');
+            const labelTimerAV = document.getElementById('timer-mundur-av');
+            const now = new Date().getTime();
+
             // Timer HA
-            const labelTimerHA = document.getElementById('label-timer-mundur-ha');
-            if (!waktuTerakhirStandbyGlobalHA) { labelTimerHA.style.display = 'none'; }
-            else {
-                const waktuLokalServerHA = new Date(waktuTerakhirStandbyGlobalHA).getTime();
-                if (!isNaN(waktuLokalServerHA)) {
-                    const selisihMsHA = new Date().getTime() - waktuLokalServerHA;
-                    const sisaMsHA = (BATAS_MENIT * 60 * 1000) - selisihMsHA;
-                    if (sisaMsHA > 0) {
-                        const totalDetik = Math.floor(sisaMsHA / 1000);
+            if (waktuStandbyHAGlobal) {
+                const waktuHA = new Date(waktuStandbyHAGlobal).getTime();
+                if (!isNaN(waktuHA)) {
+                    const selisihMs = now - waktuHA;
+                    const sisaMs = (BATAS_MENIT * 60 * 1000) - selisihMs;
+                    if (sisaMs > 0) {
+                        const totalDetik = Math.floor(sisaMs / 1000);
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
                         labelTimerHA.style.display = 'block';
-                        labelTimerHA.innerText = `Sisa: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                        labelTimerHA.innerText = `Sisa Waktu Standby HA: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
                     } else {
                         labelTimerHA.style.display = 'block';
-                        labelTimerHA.innerText = `Habis!`;
+                        labelTimerHA.innerText = `Waktu Standby HA Habis!`;
                     }
+                } else {
+                    labelTimerHA.style.display = 'none';
                 }
+            } else {
+                labelTimerHA.style.display = 'none';
             }
 
             // Timer AV
-            const labelTimerAV = document.getElementById('label-timer-mundur-av');
-            if (!waktuTerakhirStandbyGlobalAV) { labelTimerAV.style.display = 'none'; }
-            else {
-                const waktuLokalServerAV = new Date(waktuTerakhirStandbyGlobalAV).getTime();
-                if (!isNaN(waktuLokalServerAV)) {
-                    const selisihMsAV = new Date().getTime() - waktuLokalServerAV;
-                    const sisaMsAV = (BATAS_MENIT * 60 * 1000) - selisihMsAV;
-                    if (sisaMsAV > 0) {
-                        const totalDetik = Math.floor(sisaMsAV / 1000);
+            if (waktuStandbyAVGlobal) {
+                const waktuAV = new Date(waktuStandbyAVGlobal).getTime();
+                if (!isNaN(waktuAV)) {
+                    const selisihMs = now - waktuAV;
+                    const sisaMs = (BATAS_MENIT * 60 * 1000) - selisihMs;
+                    if (sisaMs > 0) {
+                        const totalDetik = Math.floor(sisaMs / 1000);
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
                         labelTimerAV.style.display = 'block';
-                        labelTimerAV.innerText = `Sisa: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                        labelTimerAV.innerText = `Sisa Waktu Standby AV: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
                     } else {
                         labelTimerAV.style.display = 'block';
-                        labelTimerAV.innerText = `Habis!`;
+                        labelTimerAV.innerText = `Waktu Standby AV Habis!`;
                     }
+                } else {
+                    labelTimerAV.style.display = 'none';
                 }
+            } else {
+                labelTimerAV.style.display = 'none';
             }
         }
 
         function prosesCekPeringatanStandby(response, namaPromotorLogin) {
             if (response.data && response.data.length > 0) {
-                // Cek HA
-                let listStandbyHA = response.data.filter(item => item.status === "Standby" && (item.kategori || "HA") === "HA");
-                if (listStandbyHA.length > 0) {
-                    var promotorUrutan1HA = listStandbyHA[0].nama;
-                    var sisaDetikHA = response.sisaDetikHA !== undefined ? response.sisaDetikHA : response.sisaDetik;
-                    if (promotorUrutan1HA === namaPromotorLogin) {
+                let listStandby = response.data.filter(item => item.status === "Standby");
+                if (listStandby.length > 0) {
+                    let standbyHA = listStandby.find(item => (item.kategori || "HA") === "HA");
+                    let standbyAV = listStandby.find(item => item.kategori === "AV");
+
+                    // Cek Peringatan HA
+                    if (standbyHA && standbyHA.nama === namaPromotorLogin) {
+                        let sisaDetikHA = response.sisaDetikHA !== undefined ? response.sisaDetikHA : response.sisaDetik;
                         if (sisaDetikHA !== null && sisaDetikHA <= 60 && sisaDetikHA > 0 && !sudahPeringatan1MenitHA) {
                             sudahPeringatan1MenitHA = true;
                             if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
@@ -417,14 +421,10 @@
                         }
                         if (sisaDetikHA > 60) sudahPeringatan1MenitHA = false;
                     }
-                }
 
-                // Cek AV
-                let listStandbyAV = response.data.filter(item => item.status === "Standby" && item.kategori === "AV");
-                if (listStandbyAV.length > 0) {
-                    var promotorUrutan1AV = listStandbyAV[0].nama;
-                    var sisaDetikAV = response.sisaDetikAV !== undefined ? response.sisaDetikAV : response.sisaDetik;
-                    if (promotorUrutan1AV === namaPromotorLogin) {
+                    // Cek Peringatan AV
+                    if (standbyAV && standbyAV.nama === namaPromotorLogin) {
+                        let sisaDetikAV = response.sisaDetikAV !== undefined ? response.sisaDetikAV : response.sisaDetik;
                         if (sisaDetikAV !== null && sisaDetikAV <= 60 && sisaDetikAV > 0 && !sudahPeringatan1MenitAV) {
                             sudahPeringatan1MenitAV = true;
                             if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
@@ -452,11 +452,11 @@
             }).catch(err => console.error("Gagal muat master sales"));
         }
 
-        function renderUIRental(dataAntrian, statusSistem, waktuStandbyPertamaHA, waktuStandbyPertamaAV) {
+        function renderUIRental(dataAntrian, statusSistem, waktuStandbyHA, waktuStandbyAV) {
             daftarAntrianGlobal = dataAntrian || [];
             statusSistemGlobal = statusSistem || "BUKA";
-            waktuTerakhirStandbyGlobalHA = waktuStandbyPertamaHA || null;
-            waktuTerakhirStandbyGlobalAV = waktuStandbyPertamaAV || null;
+            waktuStandbyHAGlobal = waktuStandbyHA || null;
+            waktuStandbyAVGlobal = waktuStandbyAV || null;
             const akunSaya = getAkunAktif().trim();
 
             const badge = document.getElementById('badge-status-sistem');
@@ -465,45 +465,29 @@
 
             let listHtmlHA = "";
             let listHtmlAV = "";
-            let salesUtamaHA = "-";
-            let salesUtamaAV = "-";
-            
-            if (!sedangProsesAksi) {
-                statusSayaGlobal = "belum_ada"; 
-            }
-            
+            let salesUtamaText = [];
+            statusSayaGlobal = "belum_ada"; 
             let apakahSayaUrutanPertamaHA = false;
             let apakahSayaUrutanPertamaAV = false;
 
-            // Cari siapa yang sedang Standby urutan 1 di HA
-            let listStandbyHA = daftarAntrianGlobal.filter(item => item.status === "Standby" && (item.kategori || "HA") === "HA");
-            if (listStandbyHA.length > 0) {
-                salesUtamaHA = listStandbyHA[0].nama;
-                if (akunSaya && listStandbyHA[0].nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
+            let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
+            let standbyHA = listStandby.find(item => (item.kategori || "HA") === "HA");
+            let standbyAV = listStandby.find(item => item.kategori === "AV");
+
+            if (standbyHA) {
+                salesUtamaText.push(`HA: ${standbyHA.nama}`);
+                if (akunSaya && standbyHA.nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
                     apakahSayaUrutanPertamaHA = true;
                 }
             }
-
-            // Cari siapa yang sedang Standby urutan 1 di AV
-            let listStandbyAV = daftarAntrianGlobal.filter(item => item.status === "Standby" && item.kategori === "AV");
-            if (listStandbyAV.length > 0) {
-                salesUtamaAV = listStandbyAV[0].nama;
-                if (akunSaya && listStandbyAV[0].nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
+            if (standbyAV) {
+                salesUtamaText.push(`AV: ${standbyAV.nama}`);
+                if (akunSaya && standbyAV.nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
                     apakahSayaUrutanPertamaAV = true;
                 }
             }
 
-            // Cek juga jika ada yang sedang Melayani di HA atau AV
-            daftarAntrianGlobal.forEach(item => {
-                const kat = item.kategori || "HA";
-                if (item.status === "Melayani") {
-                    if (kat === "AV") {
-                        salesUtamaAV = item.nama + " (Melayani)";
-                    } else {
-                        salesUtamaHA = item.nama + " (Melayani)";
-                    }
-                }
-            });
+            let textUtamaFinal = salesUtamaText.length > 0 ? salesUtamaText.join(" | ") : "Belum ada antrian";
 
             if(daftarAntrianGlobal.length > 0) {
                 let urutHA = 1;
@@ -514,11 +498,9 @@
                     const kategoriItem = item.kategori ? item.kategori : "HA"; 
 
                     if(akunSaya && namaItem.toLowerCase() === akunSaya.toLowerCase()) {
-                        if (!sedangProsesAksi) {
-                            statusSayaGlobal = item.status; 
-                        }
+                        statusSayaGlobal = item.status; 
                         const selectKat = document.getElementById('pilih-kategori');
-                        if (selectKat && kategoriItem && !sedangProsesAksi) {
+                        if (selectKat && kategoriItem) {
                             selectKat.value = kategoriItem;
                         }
                     }
@@ -528,7 +510,7 @@
                         let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> <div><span class="badge-status-item badge-standby">Standby</span></div></li>`;
                     } else if (item.status === "Melayani") {
-                        itemHtml = `<li><b>${item.nama}</b> <div><span class="badge-status-item badge-melayani">Melayani</span></div></li>`;
+                        itemHtml = `<li><b>${item.nama}</b> <div><span class="badge-status-item badge-melayani">Melayani (${kategoriItem})</span></div></li>`;
                     }
 
                     if (kategoriItem === "AV") {
@@ -547,16 +529,11 @@
             const selectKategori = document.getElementById('pilih-kategori');
 
             if (btnAntri.dataset.loading === "true" || btnCustomer.dataset.loading === "true") {
-                document.getElementById('nama-aktif-ha').innerText = salesUtamaHA;
-                document.getElementById('nama-aktif-av').innerText = salesUtamaAV;
+                document.getElementById('nama-aktif').innerText = textUtamaFinal;
                 document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
                 document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
                 return;
             }
-
-            // Tentukan apakah user aktif saat ini berada di kategori tertentu dan apakah dia urutan pertama di kategori tersebut
-            let kategoriSaya = selectKategori.value;
-            let apakahSayaUrutanPertamaAktif = (kategoriSaya === "AV") ? apakahSayaUrutanPertamaAV : apakahSayaUrutanPertamaHA;
 
             if (statusSayaGlobal === "Melayani") {
                 btnAntri.innerText = "Sedang Melayani Customer";
@@ -578,9 +555,11 @@
                 btnCustomer.style.display = "block";
                 btnCustomer.innerText = "Sudah Membawa Customer";
                 
-                // Tombol aktif jika dia urutan pertama di kategorinya sendiri
-                btnCustomer.disabled = !apakahSayaUrutanPertamaAktif;
-                btnCustomer.className = apakahSayaUrutanPertamaAktif ? "btn-primary" : "btn-primary btn-disabled";
+                let kategoriSaya = selectKategori.value;
+                let bisaAmbil = (kategoriSaya === "AV" && apakahSayaUrutanPertamaAV) || (kategoriSaya !== "AV" && apakahSayaUrutanPertamaHA);
+
+                btnCustomer.disabled = !bisaAmbil;
+                btnCustomer.className = bisaAmbil ? "btn-primary" : "btn-primary btn-disabled";
 
                 selectKategori.disabled = true;
 
@@ -598,8 +577,7 @@
                 selectKategori.disabled = false;
             }
 
-            document.getElementById('nama-aktif-ha').innerText = salesUtamaHA;
-            document.getElementById('nama-aktif-av').innerText = salesUtamaAV;
+            document.getElementById('nama-aktif').innerText = textUtamaFinal;
             document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
             document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
@@ -616,7 +594,7 @@
                 if(!sedangProsesAksi && res && res.status === "sukses") {
                     const akunSaya = getAkunAktif().trim();
                     prosesCekPeringatanStandby(res, akunSaya);
-                    renderUIRental(res.data, res.statusAntrian, res.waktuStandbyPertamaHA, res.waktuStandbyPertamaAV);
+                    renderUIRental(res.data, res.statusAntrian, res.waktuStandbyHA || res.waktuStandbyPertama, res.waktuStandbyAV);
                 }
             }).catch(err => {
                 console.log("Menunggu sinkronisasi server...");
@@ -631,42 +609,18 @@
             sedangProsesAksi = true; 
 
             const btnAntri = document.getElementById('btn-utama-antri');
-            const btnCustomer = document.getElementById('btn-utama-customer');
-            const selectKategori = document.getElementById('pilih-kategori');
-
             btnAntri.dataset.loading = "true";
             btnAntri.disabled = true;
             btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
-            selectKategori.disabled = true;
+
+            document.getElementById('pilih-kategori').disabled = true;
 
             statusSayaGlobal = "Standby";
-            btnAntri.innerText = "Anda Sudah Di Antrian";
-            btnAntri.className = "btn-success btn-disabled";
-            btnAntri.disabled = true;
-            btnCustomer.style.display = "block";
-            btnCustomer.innerText = "Sudah Membawa Customer";
-            btnCustomer.disabled = true;
-            btnCustomer.className = "btn-primary btn-disabled";
-
             let tempSembuhList = [...daftarAntrianGlobal];
             if(!tempSembuhList.some(x => String(x.nama).trim().toLowerCase() === namaSales.trim().toLowerCase())) {
                 tempSembuhList.push({ nama: namaSales, status: "Standby", kategori: kategoriPilih });
             }
-            
-            let listHtmlHA = "";
-            let listHtmlAV = "";
-            let urutHA = 1;
-            let urutAV = 1;
-            tempSembuhList.forEach((item) => {
-                const kat = item.kategori || "HA";
-                if(item.status === "Standby") {
-                    let u = kat === "AV" ? urutAV++ : urutHA++;
-                    let htmlItem = `<li><b>${u}. ${item.nama}</b> <div><span class="badge-status-item badge-standby">Standby</span></div></li>`;
-                    if(kat === "AV") listHtmlAV += htmlItem; else listHtmlHA += htmlItem;
-                }
-            });
-            document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA || "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian HA</span></li>";
-            document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV || "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian AV</span></li>";
+            renderUIRental(tempSembuhList, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, {
                 method: 'GET',
@@ -679,7 +633,7 @@
                     btnAntri.dataset.loading = "false";
                     sedangProsesAksi = false;
                     muatDataAntrian();
-                }, 2000);
+                }, 1500);
             })
             .catch(err => {
                 btnAntri.dataset.loading = "false";
@@ -702,7 +656,7 @@
                     btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
                     
                     statusSayaGlobal = "Melayani";
-                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuTerakhirStandbyGlobalHA, waktuTerakhirStandbyGlobalAV);
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, {
                         method: 'GET',
@@ -715,7 +669,7 @@
                             btnCustomer.dataset.loading = "false";
                             sedangProsesAksi = false;
                             muatDataAntrian();
-                        }, 2000);
+                        }, 1500);
                     })
                     .catch(err => {
                         btnCustomer.dataset.loading = "false";
@@ -731,7 +685,7 @@
                     btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
                     
                     statusSayaGlobal = "belum_ada";
-                    renderUIRental(daftarAntrianGlobal.filter(x => x.nama.toLowerCase() !== namaSales.toLowerCase()), statusSistemGlobal, waktuTerakhirStandbyGlobalHA, waktuTerakhirStandbyGlobalAV);
+                    renderUIRental(daftarAntrianGlobal.filter(x => x.nama.toLowerCase() !== namaSales.toLowerCase()), statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
                     fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`, {
                         method: 'GET',
@@ -744,7 +698,7 @@
                             btnCustomer.dataset.loading = "false";
                             sedangProsesAksi = false;
                             muatDataAntrian();
-                        }, 2000);
+                        }, 1500);
                     })
                     .catch(err => {
                         btnCustomer.dataset.loading = "false";
@@ -755,14 +709,14 @@
             }
         }
 
-       function tampilkanModal(judul, pesan) {
-    const modal = document.getElementById('custom-modal');
-    document.getElementById('modal-title').innerText = judul;
-    // Gunakan escape character '\n' secara benar dalam satu baris:
-    document.getElementById('modal-desc').innerHTML = String(pesan).replace(/\n/g, '<br>'); 
-    document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-primary" onclick="tutupModal()">OK</button>`;
-    modal.classList.add('active');
-}
+        function tampilkanModal(judul, pesan) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerHTML = String(pesan).replace(/\n/g, '<br>');
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-primary" onclick="tutupModal()">OK</button>`;
+            modal.classList.add('active');
+        }
+
         function tampilkanModalKonfirmasi(judul, pesan, callbackOk) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judul;
