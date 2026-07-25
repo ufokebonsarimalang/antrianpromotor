@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Tambah Waktu Timer - UFO Kebonsari</title>
+    <link rel="shortcut icon" href="#">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        *, body, button, select {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            box-sizing: border-box;
+        }
+
+        body { 
+            background: var(--bg-color); 
+            color: var(--text-main);
+            margin: 0; padding: 16px;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%; max-width: 440px;
+            background: var(--card-bg);
+            border-radius: 20px; padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .gradient-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border-radius: 16px; padding: 20px; color: white; margin-bottom: 20px;
+        }
+        .gradient-header h2 { margin: 0; font-size: 18px; font-weight: 800; }
+        .gradient-header p { margin: 4px 0 0 0; opacity: 0.85; font-size: 12px; }
+
+        .input-group { margin-bottom: 16px; text-align: left; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+
+        select { 
+            width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border);
+            background: #ffffff; font-size: 14px; color: var(--text-main); outline: none;
+        }
+
+        button { 
+            width: 100%; padding: 14px; border-radius: 10px; 
+            font-size: 13px; font-weight: 700; cursor: pointer; border: none;
+            text-transform: uppercase; transition: all 0.2s ease;
+            background: var(--primary); color: white;
+        }
+        button:active { transform: scale(0.98); }
+
+        .info-box {
+            background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;
+            padding: 12px; font-size: 12px; color: #1e40af; margin-bottom: 20px; text-align: left;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="gradient-header">
+            <h2>Panel Tambah Waktu Timer</h2>
+            <p>UFO Kebonsari</p>
+        </div>
+
+        <div class="info-box">
+            ℹ️ Pilih nama promotor yang sedang dalam status <b>Standby</b> untuk memperpanjang durasi waktu timernya.
+        </div>
+
+        <div class="input-group">
+            <label>Pilih Promotor (Standby)</label>
+            <select id="select-promotor-standby">
+                <option value="">-- Memuat daftar promotor... --</option>
+            </select>
+        </div>
+
+        <button type="button" onclick="tambahWaktuTimer()">
+            ⏱️ Tambah Waktu Timer
+        </button>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+
+        window.onload = function() {
+            muatDataStandby();
+            setInterval(muatDataStandby, 4000); // Otomatis refresh daftar promotor standby setiap 4 detik
+        };
+
+        function muatDataStandby() {
+            fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses" && res.data) {
+                    let listStandby = res.data.filter(item => item.status === "Standby");
+                    let html = '<option value="">-- Pilih Promotor Standby --</option>';
+                    
+                    if (listStandby.length > 0) {
+                        listStandby.forEach(item => {
+                            const kategori = item.kategori || "HA";
+                            html += `<option value="${item.nama}" data-kategori="${kategori}">${item.nama} (${kategori})</option>`;
+                        });
+                    } else {
+                        html = '<option value="">-- Tidak ada promotor yang Standby --</option>';
+                    }
+                    
+                    document.getElementById('select-promotor-standby').innerHTML = html;
+                }
+            }).catch(err => console.log("Gagal menyinkronkan data"));
+        }
+
+        function tambahWaktuTimer() {
+            const selectEl = document.getElementById('select-promotor-standby');
+            const namaSales = selectEl.value;
+            
+            if(!namaSales) {
+                alert("Silakan pilih promotor yang sedang standby terlebih dahulu!");
+                return;
+            }
+
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            const kategori = selectedOption.getAttribute('data-kategori') || "HA";
+
+            if (confirm(`Yakin ingin menambah waktu timer untuk ${namaSales} (${kategori})?`)) {
+                fetch(`${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`, {
+                    method: 'GET',
+                    redirect: 'follow'
+                })
+                .then(res => res.json())
+                .then(res => {
+                    alert(res.pesan);
+                    muatDataStandby();
+                })
+                .catch(err => alert("Gagal terhubung ke server."));
+            }
+        }
+    </script>
+</body>
+</html>
