@@ -78,12 +78,12 @@
         </div>
 
         <div class="info-box">
-            ℹ️ Pilih nama promotor yang sedang dalam status <b>Standby</b> untuk memperpanjang durasi waktu timernya.
+            ℹ️ Pilih nama promotor yang sedang dalam status <b>Standby</b>. Sisa timer aktif akan terlihat di samping nama.
         </div>
 
         <div class="input-group">
-            <label>Pilih Promotor (Standby)</label>
-            <select id="select-promotor-standby">
+            <label>Pilih Promotor & Sisa Waktu</label>
+            <select id="select-promotor-standby" onfocus="sedangFokus = true" onblur="sedangFokus = false">
                 <option value="">-- Memuat daftar promotor... --</option>
             </select>
         </div>
@@ -95,13 +95,19 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+        const BATAS_MENIT = 10;
+        let dataStandbyGlobal = [];
+        let sedangFokus = false; // Mencegah dropdown ke-reset saat sedang dipilih
 
         window.onload = function() {
             muatDataStandby();
-            setInterval(muatDataStandby, 4000); // Otomatis refresh daftar promotor standby setiap 4 detik
+            setInterval(muatDataStandby, 3000); 
         };
 
         function muatDataStandby() {
+            // Jika dropdown sedang diklik/dibuka oleh pengguna, jangan refresh tampilan agar tidak mereset pilihan
+            if (sedangFokus) return;
+
             fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
                 method: 'GET',
                 redirect: 'follow'
@@ -109,21 +115,59 @@
             .then(res => res.json())
             .then(res => {
                 if(res.status === "sukses" && res.data) {
-                    let listStandby = res.data.filter(item => item.status === "Standby");
-                    let html = '<option value="">-- Pilih Promotor Standby --</option>';
+                    dataStandbyGlobal = res.data.filter(item => item.status === "Standby");
                     
-                    if (listStandby.length > 0) {
-                        listStandby.forEach(item => {
-                            const kategori = item.kategori || "HA";
-                            html += `<option value="${item.nama}" data-kategori="${kategori}">${item.nama} (${kategori})</option>`;
-                        });
-                    } else {
-                        html = '<option value="">-- Tidak ada promotor yang Standby --</option>';
-                    }
-                    
-                    document.getElementById('select-promotor-standby').innerHTML = html;
+                    window.waktuServerHA = res.waktuStandbyHA || res.waktuStandbyPertama;
+                    window.waktuServerAV = res.waktuStandbyAV;
+
+                    renderDropdown();
                 }
             }).catch(err => console.log("Gagal menyinkronkan data"));
+        }
+
+        function renderDropdown() {
+            const selectEl = document.getElementById('select-promotor-standby');
+            const nilaiTerpilihSebelumnya = selectEl.value; 
+            
+            let html = '<option value="">-- Pilih Promotor Standby --</option>';
+            
+            if (dataStandbyGlobal.length > 0) {
+                const now = new Date().getTime();
+
+                dataStandbyGlobal.forEach(item => {
+                    const kategori = item.kategori || "HA";
+                    let sisaTimerStr = "00:00";
+
+                    let waktuStandbyTarget = (kategori === "AV") ? window.waktuServerAV : window.waktuServerHA;
+                    
+                    if (waktuStandbyTarget) {
+                        const waktuMulai = new Date(waktuStandbyTarget).getTime();
+                        if (!isNaN(waktuMulai)) {
+                            const selisihMs = now - waktuMulai;
+                            const sisaMs = (BATAS_MENIT * 60 * 1000) - selisihMs;
+                            if (sisaMs > 0) {
+                                const totalDetik = Math.floor(sisaMs / 1000);
+                                const menit = Math.floor(totalDetik / 60);
+                                const detik = totalDetik % 60;
+                                sisaTimerStr = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                            } else {
+                                sisaTimerStr = "Habis!";
+                            }
+                        }
+                    }
+
+                    html += `<option value="${item.nama}" data-kategori="${kategori}">
+                        ${item.nama} (${kategori}) — Sisa Waktu: ${sisaTimerStr}
+                    </option>`;
+                });
+            } else {
+                html = '<option value="">-- Tidak ada promotor yang Standby --</option>';
+            }
+            
+            selectEl.innerHTML = html;
+            if (nilaiTerpilihSebelumnya) {
+                selectEl.value = nilaiTerpilihSebelumnya;
+            }
         }
 
         function tambahWaktuTimer() {
@@ -139,16 +183,24 @@
             const kategori = selectedOption.getAttribute('data-kategori') || "HA";
 
             if (confirm(`Yakin ingin menambah waktu timer untuk ${namaSales} (${kategori})?`)) {
-                fetch(`${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`, {
+                // Set fokus ke false agar sistem boleh me-refresh data setelah perintah kirim
+                sedangFokus = false;
+
+                const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`;
+                
+                fetch(urlAksi, {
                     method: 'GET',
                     redirect: 'follow'
                 })
                 .then(res => res.json())
                 .then(res => {
                     alert(res.pesan);
-                    muatDataStandby();
+                    muatDataStandby(); // Langsung ambil data terbaru
                 })
-                .catch(err => alert("Gagal terhubung ke server."));
+                .catch(err => {
+                    console.error(err);
+                    alert("Gagal terhubung ke server.");
+                });
             }
         }
     </script>
