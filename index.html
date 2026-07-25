@@ -57,13 +57,12 @@
         .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
-        /* KARTU GILIRAN UTAMA HA & AV BERDAMPINGAN */
-        .card-giliran-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
+       .card-giliran-wrapper {
+    display: flex;
+    flex-direction: column; /* Mengubah susunan menjadi ke bawah (vertikal) */
+    gap: 10px;
+    margin-bottom: 16px;
+}
         .card-giliran-utama {
             background: #eff6ff; border: 1px solid #bfdbfe;
             border-radius: 14px; padding: 14px 10px; text-align: center;
