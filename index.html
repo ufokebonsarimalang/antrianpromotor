@@ -57,7 +57,7 @@
         .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
-        /* KARTU GILIRAN UTAMA (HA & AV BERDAMPINGAN/TERPISAH JELAS) */
+        /* KARTU GILIRAN UTAMA HA & AV BERDAMPINGAN */
         .card-giliran-wrapper {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -69,7 +69,7 @@
             border-radius: 14px; padding: 14px 10px; text-align: center;
         }
         .label-giliran { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--primary); }
-        .nama-giliran-aktif { font-size: 18px; font-weight: 800; color: #1e3a8a; margin: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nama-giliran-aktif { font-size: 16px; font-weight: 800; color: #1e3a8a; margin: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .timer-mundur { font-size: 11px; font-weight: 800; color: var(--danger); margin-top: 4px; display: block; }
 
         .input-group { margin-bottom: 14px; text-align: left; }
@@ -162,19 +162,19 @@
             STATUS ANTRIAN: OPEN
         </div>
 
-        <!-- KARTU GILIRAN UTAMA HA & AV BERDAMPINGAN DENGAN TIMERNYA MASING-MASING -->
+        <!-- KARTU GILIRAN UTAMA HA & AV DENGAN MASING-MASING TIMERNYA -->
         <div class="card-giliran-wrapper">
             <!-- Kartu Giliran HA -->
             <div class="card-giliran-utama">
                 <div class="label-giliran">Giliran HA Saat Ini</div>
                 <div id="nama-aktif-ha" class="nama-giliran-aktif">-</div>
-                <span id="timer-mundur-ha" class="timer-mundur" style="display: none;">--:--</span>
+                <span id="timer-mundur-ha" class="timer-mundur">00:00</span>
             </div>
             <!-- Kartu Giliran AV -->
             <div class="card-giliran-utama" style="background: #fdf4ff; border-color: #f5d0fe;">
                 <div class="label-giliran" style="color: #9333ea;">Giliran AV Saat Ini</div>
                 <div id="nama-aktif-av" class="nama-giliran-aktif" style="color: #6b21a8;">-</div>
-                <span id="timer-mundur-av" class="timer-mundur" style="display: none;">--:--</span>
+                <span id="timer-mundur-av" class="timer-mundur" style="color: #9333ea;">00:00</span>
             </div>
         </div>
 
@@ -368,7 +368,7 @@
             const labelTimerAV = document.getElementById('timer-mundur-av');
             const now = new Date().getTime();
 
-            // Timer HA
+            // Timer HA selalu tampil (jika ada waktu standby HA aktif, hitung mundurnya; jika tidak, tampilkan 00:00)
             if (waktuStandbyHAGlobal) {
                 const waktuHA = new Date(waktuStandbyHAGlobal).getTime();
                 if (!isNaN(waktuHA)) {
@@ -378,20 +378,18 @@
                         const totalDetik = Math.floor(sisaMs / 1000);
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
-                        labelTimerHA.style.display = 'block';
                         labelTimerHA.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
                     } else {
-                        labelTimerHA.style.display = 'block';
                         labelTimerHA.innerText = `Habis!`;
                     }
                 } else {
-                    labelTimerHA.style.display = 'none';
+                    labelTimerHA.innerText = "00:00";
                 }
             } else {
-                labelTimerHA.style.display = 'none';
+                labelTimerHA.innerText = "00:00";
             }
 
-            // Timer AV
+            // Timer AV selalu tampil (jika ada waktu standby AV aktif, hitung mundurnya; jika tidak, tampilkan 00:00)
             if (waktuStandbyAVGlobal) {
                 const waktuAV = new Date(waktuStandbyAVGlobal).getTime();
                 if (!isNaN(waktuAV)) {
@@ -401,17 +399,15 @@
                         const totalDetik = Math.floor(sisaMs / 1000);
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
-                        labelTimerAV.style.display = 'block';
                         labelTimerAV.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
                     } else {
-                        labelTimerAV.style.display = 'block';
                         labelTimerAV.innerText = `Habis!`;
                     }
                 } else {
-                    labelTimerAV.style.display = 'none';
+                    labelTimerAV.innerText = "00:00";
                 }
             } else {
-                labelTimerAV.style.display = 'none';
+                labelTimerAV.innerText = "00:00";
             }
         }
 
