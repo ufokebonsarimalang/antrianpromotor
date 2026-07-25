@@ -17,7 +17,7 @@
 
         *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
         body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 480px; background: var(--card-bg); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); text-align: center; }
+        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); text-align: center; }
         
         .gradient-header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 16px; padding: 20px; color: white; margin-bottom: 16px; }
         .gradient-header h2 { margin: 0; font-size: 20px; font-weight: 800; }
@@ -27,11 +27,20 @@
         .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
+        /* PANEL KONTROL & INPUT */
+        .box-input-spv { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 16px; text-align: left; }
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+        select, input[type="text"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #ffffff; font-size: 12px; color: var(--text-main); outline: none; }
+
+        .row-tombol-aksi { display: flex; gap: 8px; margin-top: 8px; }
+        .row-tombol-aksi button { flex: 1; margin-bottom: 0; }
+
         .panel-tombol-spv { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
         .row-tombol-kategori { display: flex; gap: 8px; }
         .row-tombol-kategori button { flex: 1; }
 
-        button { width: 100%; padding: 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 6px; }
+        button { width: 100%; padding: 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 8px; }
         button:active { transform: scale(0.98); }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
@@ -41,6 +50,7 @@
         .btn-reset-av { background: #7c3aed; color: white; }
         .btn-cancel { background: #e2e8f0; color: var(--text-main); }
 
+        /* LIVE DISPLAY & TOMBOL AKSI PER ITEM */
         .container-live-antrian { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; text-align: left; }
         .box-jalur-antrian { border-radius: 14px; padding: 14px; min-height: 100px; }
         .box-ha { background: var(--ha-bg); border: 1px solid #bae6fd; }
@@ -51,16 +61,26 @@
         .title-av { color: var(--av-color); border-bottom-color: var(--av-color); }
 
         .list-antrian { list-style: none; padding: 0; margin: 0; }
-        .list-antrian li { padding: 10px 12px; background: #ffffff; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .list-antrian li { background: #ffffff; border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
         
-        .item-info-sales { display: flex; flex-direction: column; gap: 2px; }
-        .sales-name { font-weight: 700; color: var(--text-main); }
-        .sales-timer { font-size: 10px; font-weight: 600; color: #d97706; display: flex; align-items: center; gap: 4px; }
-        
-        .btn-hapus-item { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 6px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; border: none; }
-        .btn-hapus-item:hover { background: #f87171; color: white; }
+        .item-header-sales { display: flex; justify-content: space-between; align-items: center; }
+        .sales-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
+        .sales-status-badge { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
+        .badge-standby { background: #fef3c7; color: #d97706; }
+        .badge-melayani { background: #dcfce7; color: #15803d; }
+        .badge-izin { background: #f3f4f6; color: #4b5563; }
 
-        .promotor-link-btn { margin-top: 16px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; font-size: 11px; padding: 12px; border-radius: 10px; text-decoration: none; display: block; font-weight: 700; }
+        .sales-timer { font-size: 11px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+
+        /* TOMBOL KECIL DI TIAP BARIS SALES */
+        .group-btn-item { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+        .btn-action-mini { flex: 1; min-width: 60px; padding: 6px 4px; border-radius: 6px; font-size: 9px; font-weight: 800; cursor: pointer; border: none; text-transform: uppercase; display: inline-flex; justify-content: center; align-items: center; margin-bottom: 0; }
+        .btn-act-serve { background: #10b981; color: white; }
+        .btn-act-finish { background: #2563eb; color: white; }
+        .btn-act-break { background: #f59e0b; color: white; }
+        .btn-act-delete { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+        .promotor-link-btn { margin-top: 16px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; font-size: 11px; padding: 12px; border-radius: 10px; text-decoration: none; display: block; font-weight: 700; text-align: center; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
@@ -68,7 +88,7 @@
         .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
         .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
         .modal-actions { display: flex; gap: 8px; }
-        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; }
+        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -76,43 +96,62 @@
     <div class="app-container">
         <div class="gradient-header">
             <h2>Halaman Supervisor</h2>
-            <p>UFO Kebonsari - Kontrol Antrian</p>
+            <p>UFO Kebonsari - Panel Kontrol & Aksi Lengkap</p>
         </div>
 
-        <!-- BADGE STATUS SISTEM -->
+        <!-- STATUS SISTEM -->
         <div id="badge-status-sistem" class="status-badge-sistem status-open">
             STATUS ANTRIAN: OPEN
         </div>
 
-        <!-- KUMPULAN SEMUA TOMBOL SPV -->
+        <!-- FORM INPUT SPV (MASUKKAN & KELUARKAN MANUAL) -->
+        <div class="box-input-spv">
+            <div class="input-group">
+                <label>Pilih Nama Sales</label>
+                <select id="spv-pilih-sales">
+                    <option value="">-- Memuat Data Sales --</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Pilih Divisi / Kategori</label>
+                <select id="spv-pilih-kategori">
+                    <option value="HA">HA (Home Appliances)</option>
+                    <option value="AV">AV (Audio Visual)</option>
+                </select>
+            </div>
+
+            <div class="row-tombol-aksi">
+                <button type="button" class="btn-success" onclick="spvMasukanAntrian()">➕ MASUKKAN</button>
+                <button type="button" class="btn-danger" onclick="spvKeluarkanAntrian()">➖ KELUARKAN</button>
+            </div>
+        </div>
+
+        <!-- PANEL TOMBOL UTAMA SISTEM -->
         <div class="panel-tombol-spv">
-            <!-- TOMBOL 1: BUKA / TUTUP ANTRIAN -->
             <button type="button" id="btn-toggle-sistem" class="btn-danger" onclick="toggleStatusSistem()">
                 🔒 TUTUP PENDAFTARAN ANTRIAN
             </button>
 
-            <!-- TOMBOL 2: RESET SEMUA ANTRIAN -->
             <button type="button" class="btn-warning" onclick="resetAntrianKategori('SEMUA')" style="background: #ea580c; color: white;">
                 🧹 RESET SELURUH ANTRIAN (HA + AV)
             </button>
 
-            <!-- TOMBOL 3 & 4: RESET SPESIFIK HA / AV -->
             <div class="row-tombol-kategori">
                 <button type="button" class="btn-reset-ha" onclick="resetAntrianKategori('HA')">
-                    🏠 RESET ANTRIAN HA
+                    🏠 RESET HA
                 </button>
                 <button type="button" class="btn-reset-av" onclick="resetAntrianKategori('AV')">
-                    📺 RESET ANTRIAN AV
+                    📺 RESET AV
                 </button>
             </div>
         </div>
 
-        <!-- LIVE DISPLAY ATAS BAWAH -->
+        <!-- TAMPILAN LIVE ANTRIAN DENGAN TOMBOL AKSI LENGKAP -->
         <div class="container-live-antrian">
             <!-- JALUR HA -->
             <div class="box-jalur-antrian box-ha">
                 <div class="box-title title-ha">
-                    <span>🏠 ANTRIAN HA (Home Appliances)</span>
+                    <span>🏠 ANTRIAN HA</span>
                     <span id="cnt-ha">(0)</span>
                 </div>
                 <ul id="item-antrian-ha" class="list-antrian">
@@ -123,7 +162,7 @@
             <!-- JALUR AV -->
             <div class="box-jalur-antrian box-av">
                 <div class="box-title title-av">
-                    <span>📺 ANTRIAN AV (Audio Visual)</span>
+                    <span>📺 ANTRIAN AV</span>
                     <span id="cnt-av">(0)</span>
                 </div>
                 <ul id="item-antrian-av" class="list-antrian">
@@ -152,10 +191,23 @@
         let statusSistemGlobal = "BUKA";
 
         window.onload = function() {
+            muatMasterSales();
             muatDataAntrian();
             setInterval(muatDataAntrian, 3000);
             setInterval(updateTimerDisplay, 1000);
         };
+
+        function muatMasterSales() {
+            fetch(`${SCRIPT_URL}?aksi=getMasterSales`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses") {
+                    let html = '<option value="">-- Pilih Nama Sales --</option>';
+                    (res.data || []).forEach(n => html += `<option value="${n}">${n}</option>`);
+                    document.getElementById('spv-pilih-sales').innerHTML = html;
+                }
+            });
+        }
 
         function muatDataAntrian() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
@@ -218,43 +270,80 @@
             document.getElementById('cnt-ha').innerText = `(${antrianHA.length})`;
             document.getElementById('cnt-av').innerText = `(${antrianAV.length})`;
 
-            // RENDER HA
-            let htmlHA = "";
-            if (antrianHA.length > 0) {
-                let urut = 1;
-                antrianHA.forEach(item => {
-                    const isMelayani = item.status === "Melayani";
-                    htmlHA += `
-                        <li>
-                            <div class="item-info-sales">
-                                <span class="sales-name">${item.nama}</span>
-                                ${!isMelayani ? `<span class="sales-timer">⏱️ Standby: <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span></span>` : '<span class="sales-timer" style="color:var(--success)">🟢 Sedang Melayani</span>'}
-                            </div>
-                            <button type="button" class="btn-hapus-item" onclick="hapusSalesIndividual('${item.nama}')">Hapus</button>
-                        </li>`;
-                });
-            } else { htmlHA = "<li><span style='color:var(--text-muted);'>Kosong</span></li>"; }
-            document.getElementById('item-antrian-ha').innerHTML = htmlHA;
-
-            // RENDER AV
-            let htmlAV = "";
-            if (antrianAV.length > 0) {
-                let urut = 1;
-                antrianAV.forEach(item => {
-                    const isMelayani = item.status === "Melayani";
-                    htmlAV += `
-                        <li>
-                            <div class="item-info-sales">
-                                <span class="sales-name">${item.nama}</span>
-                                ${!isMelayani ? `<span class="sales-timer">⏱️ Standby: <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span></span>` : '<span class="sales-timer" style="color:var(--success)">🟢 Sedang Melayani</span>'}
-                            </div>
-                            <button type="button" class="btn-hapus-item" onclick="hapusSalesIndividual('${item.nama}')">Hapus</button>
-                        </li>`;
-                });
-            } else { htmlAV = "<li><span style='color:var(--text-muted);'>Kosong</span></li>"; }
-            document.getElementById('item-antrian-av').innerHTML = htmlAV;
+            document.getElementById('item-antrian-ha').innerHTML = buildHTMLList(antrianHA);
+            document.getElementById('item-antrian-av').innerHTML = buildHTMLList(antrianAV);
         }
 
+        function buildHTMLList(list) {
+            if (!list || list.length === 0) {
+                return "<li><span style='color:var(--text-muted); font-size:12px;'>Antrian kosong</span></li>";
+            }
+
+            let html = "";
+            list.forEach(item => {
+                const isMelayani = item.status === "Melayani";
+                const isIzin = item.status === "Izin";
+                let badgeClass = "badge-standby";
+                let statusLabel = "Standby";
+
+                if (isMelayani) { badgeClass = "badge-melayani"; statusLabel = "Melayani"; }
+                else if (isIzin) { badgeClass = "badge-izin"; statusLabel = "Izin"; }
+
+                html += `
+                    <li>
+                        <div class="item-header-sales">
+                            <span class="sales-name">${item.nama}</span>
+                            <span class="sales-status-badge ${badgeClass}">${statusLabel}</span>
+                        </div>
+                        
+                        <div class="sales-timer">
+                            ⏱️ Waktu: <span class="timer-value" data-waktu="${item.waktu}">${hitungDurasi(item.waktu)}</span>
+                        </div>
+
+                        <!-- TOMBOL AKSI DI SETIAP NAMA SALES -->
+                        <div class="group-btn-item">
+                            <button type="button" class="btn-action-mini btn-act-serve" onclick="aksiUbahStatus('${item.nama}', 'Melayani')">🟢 Layani</button>
+                            <button type="button" class="btn-action-mini btn-act-finish" onclick="aksiUbahStatus('${item.nama}', 'Selesai')">✅ Selesai</button>
+                            <button type="button" class="btn-action-mini btn-act-break" onclick="aksiUbahStatus('${item.nama}', 'Izin')">⏸️ Izin</button>
+                            <button type="button" class="btn-action-mini btn-act-delete" onclick="hapusSalesIndividual('${item.nama}')">🗑️ Hapus</button>
+                        </div>
+                    </li>`;
+            });
+            return html;
+        }
+
+        // AKSI SPV: MASUKKAN KE ANTRIAN
+        function spvMasukanAntrian() {
+            const nama = document.getElementById('spv-pilih-sales').value;
+            const kat = document.getElementById('spv-pilih-kategori').value;
+            if(!nama) return tampilkanModal("Perhatian", "Pilih nama sales terlebih dahulu!");
+
+            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(nama)}&kategori=${encodeURIComponent(kat)}`)
+            .then(res => res.json())
+            .then(res => {
+                tampilkanModal("Informasi SPV", res.pesan);
+                muatDataAntrian();
+            });
+        }
+
+        // AKSI SPV: KELUARKAN DARI ANTRIAN (VIA FORM)
+        function spvKeluarkanAntrian() {
+            const nama = document.getElementById('spv-pilih-sales').value;
+            if(!nama) return tampilkanModal("Perhatian", "Pilih nama sales terlebih dahulu!");
+            hapusSalesIndividual(nama);
+        }
+
+        // AKSI UBAH STATUS (MELAYANI / SELESAI / IZIN) PER ITEM
+        function aksiUbahStatus(namaSales, statusAksi) {
+            fetch(`${SCRIPT_URL}?aksi=updateStatusSales&namaSales=${encodeURIComponent(namaSales)}&statusAksi=${encodeURIComponent(statusAksi)}`)
+            .then(res => res.json())
+            .then(res => {
+                tampilkanModal("Status Diperbarui", res.pesan);
+                muatDataAntrian();
+            });
+        }
+
+        // TOGGLE BUKA / TUTUP SISTEM
         function toggleStatusSistem() {
             const statusBaru = statusSistemGlobal === "BUKA" ? "TUTUP" : "BUKA";
             tampilkanModalKonfirmasi("Konfirmasi Sistem", `Ubah status pendaftaran antrian menjadi ${statusBaru}?`, function() {
@@ -267,6 +356,7 @@
             });
         }
 
+        // HAPUS SALES DARI ANTRIAN
         function hapusSalesIndividual(namaSales) {
             tampilkanModalKonfirmasi("Hapus Sales", `Keluarkan (${namaSales}) dari antrian?`, function() {
                 fetch(`${SCRIPT_URL}?aksi=spvHapus&namaSales=${encodeURIComponent(namaSales)}`)
@@ -278,7 +368,7 @@
             });
         }
 
-        // FUNGSI RESET UNIVERSAL (BISA PILIH HA, AV, ATAU SEMUA)
+        // RESET KATEGORI / SEMUA
         function resetAntrianKategori(kategori) {
             let labelPesan = kategori === "SEMUA" ? "SELURUH ANTRIAN (HA & AV)" : `ANTRIAN DIVISI ${kategori}`;
             tampilkanModalKonfirmasi("Reset Antrian", `Apakah Anda yakin ingin menghapus ${labelPesan}?`, function() {
