@@ -517,7 +517,6 @@
             })
             .then(res => res.json())
             .then(res => {
-                // Beri jeda 1.5s agar Google Sheets tuntas menyimpan sebelum refresh server
                 setTimeout(() => {
                     btnAntri.dataset.loading = "false";
                     sedangProsesAksi = false; // Buka pengunci
