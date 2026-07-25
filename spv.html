@@ -107,9 +107,15 @@
             border-radius: 16px; padding: 16px; margin-top: 20px;
         }
         .list-box h4 { margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; color: var(--text-muted); font-weight: 800; }
-        .list-box ul { list-style: none; padding: 0; margin: 0; font-size: 15px; }
-        .list-box li { padding: 12px 14px; background: white; border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .list-box li span { font-size: 13px; font-weight: 600; }
+        .list-box ul { list-style: none; padding: 0; margin: 0; }
+        
+        /* DIPERBESAR DAN DIBUAT LEBIH JELAS */
+        .list-box li { 
+            padding: 14px 16px; background: white; border-radius: 12px; margin-bottom: 10px; 
+            border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; 
+        }
+        .list-box li b { font-size: 16px; font-weight: 800; color: var(--text-main); }
+        .list-box li span { font-size: 14px; font-weight: 700; color: var(--spv-purple); }
 
         /* MODAL POPUP */
         .modal-overlay {
@@ -370,7 +376,8 @@
                     const data = res.data || [];
                     if(data.length > 0) {
                         data.forEach((item, index) => {
-                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span>${item.status}</span></li>`;
+                            // Menambahkan keterangan teks "Waktu Standby" sebelum timer/status
+                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span>Waktu Standby: ${item.status}</span></li>`;
                         });
                     } else {
                         listHtml = "<li><span>Belum ada promotor aktif</span></li>";
