@@ -237,6 +237,246 @@
     </div>
 
     <script>
+      <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antrian Walk-In Sales - UFO Kebonsari</title>
+    <!-- Menghilangkan Peringatan Favicon 404 -->
+    <link rel="shortcut icon" href="#">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        *, body, button, select, input {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            box-sizing: border-box;
+        }
+
+        body { 
+            background: var(--bg-color); 
+            color: var(--text-main);
+            margin: 0; padding: 16px;
+            display: flex; justify-content: center; min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%; max-width: 480px;
+            background: var(--card-bg);
+            border-radius: 20px; padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .gradient-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border-radius: 16px; padding: 20px; color: white; margin-bottom: 16px;
+        }
+        .gradient-header h2 { margin: 0; font-size: 20px; font-weight: 800; }
+        .gradient-header p { margin: 4px 0 0 0; opacity: 0.85; font-size: 12px; }
+
+        .status-badge-sistem {
+            display: inline-block; padding: 6px 14px; border-radius: 20px;
+            font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 16px;
+        }
+        .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+        /* KARTU GILIRAN UTAMA HA & AV BERDAMPINGAN */
+        .card-giliran-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .card-giliran-utama {
+            background: #eff6ff; border: 1px solid #bfdbfe;
+            border-radius: 14px; padding: 14px 10px; text-align: center;
+        }
+        .label-giliran { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--primary); }
+        .nama-giliran-aktif { font-size: 16px; font-weight: 800; color: #1e3a8a; margin: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .timer-mundur { font-size: 11px; font-weight: 800; color: var(--danger); margin-top: 4px; display: block; }
+
+        .input-group { margin-bottom: 14px; text-align: left; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+
+        select, input[type="text"] { 
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+            background: #ffffff; font-size: 13px; color: var(--text-main); outline: none;
+        }
+        select:disabled {
+            background-color: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        button { 
+            width: 100%; padding: 12px; border-radius: 10px; 
+            font-size: 12px; font-weight: 700; cursor: pointer; border: none;
+            text-transform: uppercase; transition: all 0.2s ease;
+            display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        button:active { transform: scale(0.98); }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-cancel { background: #e2e8f0; color: var(--text-main); }
+        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
+
+        /* SPINNER STYLING */
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .user-badge {
+            background: #f8fafc; border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px; margin-bottom: 16px; text-align: left; font-size: 12px;
+        }
+
+        .list-antrian { list-style: none; padding: 0; margin: 10px 0 0 0; text-align: left; }
+        .list-antrian li {
+            padding: 10px 12px; background: #ffffff; border-radius: 8px; margin-bottom: 6px;
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); font-size: 13px;
+        }
+
+        .badge-status-item {
+            font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px;
+        }
+        .badge-standby { background: #dbeafe; color: #1e40af; }
+        .badge-melayani { background: #fef3c7; color: #92400e; }
+
+        .spv-link-btn {
+            margin-top: 20px; background: #faf5ff; border: 1px solid #e9d5ff; color: #7c3aed;
+            font-size: 11px; padding: 10px; border-radius: 10px; text-decoration: none; display: block; font-weight: 700;
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-box { background: white; width: 100%; max-width: 320px; padding: 20px; border-radius: 16px; text-align: center; }
+        .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+        .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 8px; }
+        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="gradient-header">
+            <h2>Antrian Walk-In Sales</h2>
+            <p>UFO Kebonsari</p>
+        </div>
+
+        <div id="badge-status-sistem" class="status-badge-sistem status-open">
+            STATUS ANTRIAN: OPEN
+        </div>
+
+        <!-- KARTU GILIRAN UTAMA HA & AV DENGAN MASING-MASING TIMERNYA -->
+        <div class="card-giliran-wrapper">
+            <!-- Kartu Giliran HA -->
+            <div class="card-giliran-utama">
+                <div class="label-giliran">Giliran HA Saat Ini</div>
+                <div id="nama-aktif-ha" class="nama-giliran-aktif">-</div>
+                <span id="timer-mundur-ha" class="timer-mundur">00:00</span>
+            </div>
+            <!-- Kartu Giliran AV -->
+            <div class="card-giliran-utama" style="background: #fdf4ff; border-color: #f5d0fe;">
+                <div class="label-giliran" style="color: #9333ea;">Giliran AV Saat Ini</div>
+                <div id="nama-aktif-av" class="nama-giliran-aktif" style="color: #6b21a8;">-</div>
+                <span id="timer-mundur-av" class="timer-mundur" style="color: #9333ea;">00:00</span>
+            </div>
+        </div>
+
+        <!-- LOGIN / KUNCI HP -->
+        <div id="panel-login" style="display: none;">
+            <div class="input-group">
+                <label>Pilih Nama Anda (Kunci Perangkat)</label>
+                <select id="pilih-sales"><option value="">-- Memuat Data --</option></select>
+            </div>
+            <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
+        </div>
+
+        <!-- MENU PROMOTOR -->
+        <div id="panel-menu-utama" style="display: none;">
+            <div class="user-badge">
+                <span>Akun HP Ini:</span> <strong id="label-user-aktif" style="color:var(--primary-dark);">-</strong>
+            </div>
+
+            <!-- Pilihan Kategori HA / AV -->
+            <div class="input-group">
+                <label>Pilih Kategori Antrian</label>
+                <select id="pilih-kategori">
+                    <option value="HA">HA (Home Appliance)</option>
+                    <option value="AV">AV (Audio Video)</option>
+                </select>
+            </div>
+
+            <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Masuk Shift / Ikut Antri</button>
+            <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 10px;">Sudah Membawa Customer</button>
+        </div>
+
+        <!-- LIVE LIST DIPISAH HA DAN AV -->
+        <div style="margin-top: 20px; text-align: left;">
+            <div style="margin-bottom: 20px;">
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Live Urutan HA</span>
+                <ul id="item-antrian-list-ha" class="list-antrian">
+                    <li><span>Memuat data...</span></li>
+                </ul>
+            </div>
+
+            <div>
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Live Urutan AV</span>
+                <ul id="item-antrian-list-av" class="list-antrian">
+                    <li><span>Memuat data...</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <a href="spv.html" class="spv-link-btn">🔑 BUKA HALAMAN SPV</a>
+    </div>
+
+    <!-- MODAL -->
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modal-title" class="modal-title">Pemberitahuan</div>
+            <div id="modal-desc" class="modal-desc">Isi pesan...</div>
+            <div id="modal-actions" class="modal-actions">
+                <button type="button" class="btn-primary" onclick="tutupModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         let waktuStandbyHAGlobal = null;
@@ -575,7 +815,7 @@
                     btnAntri.className = "btn-danger btn-disabled";
                     btnAntri.disabled = true;
                 } else {
-                    btnAntri.innerText = "Daftar Antrian";
+                    btnAntri.innerText = "Masuk Shift / Ikut Antri";
                     btnAntri.className = "btn-success";
                     btnAntri.disabled = false;
                 }
@@ -743,5 +983,7 @@
             document.getElementById('custom-modal').classList.remove('active');
         }
     </script>
+</body>
+</html>
 </body>
 </html>
