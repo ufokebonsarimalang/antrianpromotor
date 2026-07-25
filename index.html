@@ -118,7 +118,6 @@
         }
         .badge-standby { background: #dbeafe; color: #1e40af; }
         .badge-melayani { background: #fef3c7; color: #92400e; }
-        .badge-kategori { background: #f3e8ff; color: #7e22ce; margin-left: 6px; }
 
         .spv-link-btn {
             margin-top: 20px; background: #faf5ff; border: 1px solid #e9d5ff; color: #7c3aed;
@@ -172,12 +171,12 @@
                 <span>Akun HP Ini:</span> <strong id="label-user-aktif" style="color:var(--primary-dark);">-</strong>
             </div>
 
-            <!-- Pilihan Kategori Tambahan yang Aman -->
+            <!-- Pilihan Kategori HA / AV -->
             <div class="input-group">
-                <label>Pilih Kategori Shift / Antrian</label>
+                <label>Pilih Kategori Antrian</label>
                 <select id="pilih-kategori">
-                    <option value="Reguler">Reguler</option>
-                    <option value="HA/AV">HA/AV</option>
+                    <option value="HA">HA (Home Appliance)</option>
+                    <option value="AV">AV (Audio Video)</option>
                 </select>
             </div>
 
@@ -185,12 +184,21 @@
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 10px;">Sudah Membawa Customer</button>
         </div>
 
-        <!-- LIVE LIST -->
+        <!-- LIVE LIST DIPISAH HA DAN AV -->
         <div style="margin-top: 20px; text-align: left;">
-            <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Live Urutan Antrian</span>
-            <ul id="item-antrian-list" class="list-antrian">
-                <li><span>Memuat data...</span></li>
-            </ul>
+            <div style="margin-bottom: 20px;">
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Live Urutan HA</span>
+                <ul id="item-antrian-list-ha" class="list-antrian">
+                    <li><span>Memuat data...</span></li>
+                </ul>
+            </div>
+
+            <div>
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Live Urutan AV</span>
+                <ul id="item-antrian-list-av" class="list-antrian">
+                    <li><span>Memuat data...</span></li>
+                </ul>
+            </div>
         </div>
 
         <a href="spv.html" class="spv-link-btn">🔑 BUKA HALAMAN SPV</a>
@@ -395,46 +403,59 @@
             badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
             badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
 
-            let listHtml = "";
+            let listHtmlHA = "";
+            let listHtmlAV = "";
             let salesUtama = "Belum ada antrian";
             statusSayaGlobal = "belum_ada"; 
             let apakahSayaUrutanPertama = false;
 
             let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
             if (listStandby.length > 0) {
-                salesUtama = listStandby[0].nama;
+                let kat = listStandby[0].kategori || "HA";
+                salesUtama = `${listStandby[0].nama} (${kat})`;
                 if (akunSaya && listStandby[0].nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
                     apakahSayaUrutanPertama = true;
                 }
             }
 
             if(daftarAntrianGlobal.length > 0) {
-                let nomorUrut = 1;
+                let urutHA = 1;
+                let urutAV = 1;
+                
                 daftarAntrianGlobal.forEach((item) => {
                     const namaItem = String(item.nama).trim();
-                    const kategoriItem = item.kategori ? item.kategori : "Reguler";
+                    const kategoriItem = item.kategori ? item.kategori : "HA"; 
 
                     if(akunSaya && namaItem.toLowerCase() === akunSaya.toLowerCase()) {
                         statusSayaGlobal = item.status; 
                     }
 
+                    let itemHtml = "";
                     if (item.status === "Standby") {
-                        listHtml += `<li><b>${nomorUrut}. ${item.nama}</b> <div><span class="badge-status-item badge-kategori">${kategoriItem}</span> <span class="badge-status-item badge-standby">Standby</span></div></li>`;
-                        nomorUrut++;
+                        let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
+                        itemHtml = `<li><b>${urut}. ${item.nama}</b> <div><span class="badge-status-item badge-standby">Standby</span></div></li>`;
                     } else if (item.status === "Melayani") {
-                        listHtml += `<li><b>${item.nama}</b> <div><span class="badge-status-item badge-kategori">${kategoriItem}</span> <span class="badge-status-item badge-melayani">Melayani</span></div></li>`;
+                        itemHtml = `<li><b>${item.nama}</b> <div><span class="badge-status-item badge-melayani">Melayani</span></div></li>`;
+                    }
+
+                    if (kategoriItem === "AV") {
+                        listHtmlAV += itemHtml;
+                    } else {
+                        listHtmlHA += itemHtml;
                     }
                 });
-            } else {
-                listHtml = "<li><span>Belum ada promotor aktif</span></li>";
             }
+
+            if(!listHtmlHA) listHtmlHA = "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian HA</span></li>";
+            if(!listHtmlAV) listHtmlAV = "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian AV</span></li>";
 
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
 
             if (btnAntri.dataset.loading === "true" || btnCustomer.dataset.loading === "true") {
                 document.getElementById('nama-aktif').innerText = salesUtama;
-                document.getElementById('item-antrian-list').innerHTML = listHtml;
+                document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
+                document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
                 return;
             }
 
@@ -472,7 +493,8 @@
             }
 
             document.getElementById('nama-aktif').innerText = salesUtama;
-            document.getElementById('item-antrian-list').innerHTML = listHtml;
+            document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
+            document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
 
         function muatDataAntrian() {
