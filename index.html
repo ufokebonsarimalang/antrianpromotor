@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antrian Walk-In Sales - UFO Kebonsari</title>
+    <!-- Menghilangkan Peringatan Favicon 404 -->
+    <link rel="shortcut icon" href="#">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        *, body, button, select, input {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            box-sizing: border-box;
+        }
+
+        body { 
+            background: var(--bg-color); 
+            color: var(--text-main);
+            margin: 0; padding: 16px;
+            display: flex; justify-content: center; min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%; max-width: 480px;
+            background: var(--card-bg);
+            border-radius: 20px; padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .gradient-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border-radius: 16px; padding: 20px; color: white; margin-bottom: 16px;
+        }
+        .gradient-header h2 { margin: 0; font-size: 20px; font-weight: 800; }
+        .gradient-header p { margin: 4px 0 0 0; opacity: 0.85; font-size: 12px; }
+
+        .status-badge-sistem {
+            display: inline-block; padding: 6px 14px; border-radius: 20px;
+            font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 16px;
+        }
+        .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+        .card-giliran-container {
+            display: flex; gap: 10px; margin-bottom: 16px;
+        }
+        .card-giliran-utama {
+            flex: 1;
+            background: #eff6ff; border: 1px solid #bfdbfe;
+            border-radius: 14px; padding: 14px 10px; text-align: center;
+        }
+        .label-giliran { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--primary); }
+        .nama-giliran-aktif { font-size: 18px; font-weight: 800; color: #1e3a8a; margin: 4px 0; word-break: break-word; }
+        .timer-mundur { font-size: 11px; font-weight: 800; color: var(--danger); margin-top: 4px; display: block; }
+
+        .input-group { margin-bottom: 14px; text-align: left; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+
+        select, input[type="text"] { 
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+            background: #ffffff; font-size: 13px; color: var(--text-main); outline: none;
+        }
+        select:disabled {
+            background-color: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        button { 
+            width: 100%; padding: 12px; border-radius: 10px; 
+            font-size: 12px; font-weight: 700; cursor: pointer; border: none;
+            text-transform: uppercase; transition: all 0.2s ease;
+            display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        button:active { transform: scale(0.98); }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-cancel { background: #e2e8f0; color: var(--text-main); }
+        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
+
+        /* SPINNER STYLING */
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .user-badge {
+            background: #f8fafc; border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px; margin-bottom: 16px; text-align: left; font-size: 12px;
+        }
+
+        .list-antrian { list-style: none; padding: 0; margin: 10px 0 0 0; text-align: left; }
+        .list-antrian li {
+            padding: 10px 12px; background: #ffffff; border-radius: 8px; margin-bottom: 6px;
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); font-size: 13px;
+        }
+
+        .badge-status-item {
+            font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px;
+        }
+        .badge-standby { background: #dbeafe; color: #1e40af; }
+        .badge-melayani { background: #fef3c7; color: #92400e; }
+
+        .spv-link-btn {
+            margin-top: 20px; background: #faf5ff; border: 1px solid #e9d5ff; color: #7c3aed;
+            font-size: 11px; padding: 10px; border-radius: 10px; text-decoration: none; display: block; font-weight: 700;
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-box { background: white; width: 100%; max-width: 320px; padding: 20px; border-radius: 16px; text-align: center; }
+        .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+        .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 8px; }
+        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="gradient-header">
+            <h2>Antrian Walk-In Sales</h2>
+            <p>UFO Kebonsari</p>
+        </div>
+
+        <div id="badge-status-sistem" class="status-badge-sistem status-open">
+            STATUS ANTRIAN: OPEN
+        </div>
+
+        <!-- DUA KARTU GILIRAN MELAYANI (HA DAN AV) -->
+        <div class="card-giliran-container">
+            <div class="card-giliran-utama">
+                <div class="label-giliran">Melayani HA</div>
+                <div id="nama-aktif-ha" class="nama-giliran-aktif">-</div>
+                <span id="label-timer-mundur-ha" class="timer-mundur" style="display: none;">--:--</span>
+            </div>
+            <div class="card-giliran-utama">
+                <div class="label-giliran">Melayani AV</div>
+                <div id="nama-aktif-av" class="nama-giliran-aktif">-</div>
+                <span id="label-timer-mundur-av" class="timer-mundur" style="display: none;">--:--</span>
+            </div>
+        </div>
+
+        <!-- LOGIN / KUNCI HP -->
+        <div id="panel-login" style="display: none;">
+            <div class="input-group">
+                <label>Pilih Nama Anda (Kunci Perangkat)</label>
+                <select id="pilih-sales"><option value="">-- Memuat Data --</option></select>
+            </div>
+            <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
+        </div>
+
+        <!-- MENU PROMOTOR -->
+        <div id="panel-menu-utama" style="display: none;">
+            <div class="user-badge">
+                <span>Akun HP Ini:</span> <strong id="label-user-aktif" style="color:var(--primary-dark);">-</strong>
+            </div>
+
+            <!-- Pilihan Kategori HA / AV -->
+            <div class="input-group">
+                <label>Pilih Kategori Antrian</label>
+                <select id="pilih-kategori">
+                    <option value="HA">HA (Home Appliance)</option>
+                    <option value="AV">AV (Audio Video)</option>
+                </select>
+            </div>
+
+            <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Masuk Shift / Ikut Antri</button>
+            <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 10px;">Sudah Membawa Customer</button>
+        </div>
+
+        <!-- LIVE LIST DIPISAH HA DAN AV -->
+        <div style="margin-top: 20px; text-align: left;">
+            <div style="margin-bottom: 20px;">
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Live Urutan HA</span>
+                <ul id="item-antrian-list-ha" class="list-antrian">
+                    <li><span>Memuat data...</span></li>
+                </ul>
+            </div>
+
+            <div>
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Live Urutan AV</span>
+                <ul id="item-antrian-list-av" class="list-antrian">
+                    <li><span>Memuat data...</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <a href="spv.html" class="spv-link-btn">🔑 BUKA HALAMAN SPV</a>
+    </div>
+
+    <!-- MODAL -->
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modal-title" class="modal-title">Pemberitahuan</div>
+            <div id="modal-desc" class="modal-desc">Isi pesan...</div>
+            <div id="modal-actions" class="modal-actions">
+                <button type="button" class="btn-primary" onclick="tutupModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+
+        let waktuTerakhirStandbyGlobalHA = null;
+        let waktuTerakhirStandbyGlobalAV = null;
+        let daftarAntrianGlobal = [];
+        let masterSalesGlobal = [];
+        let statusSayaGlobal = "belum_ada"; 
+        let statusSistemGlobal = "BUKA";
+        let namaSalesAktifGlobal = "";
+        const BATAS_MENIT = 10;
+        var sudahPeringatan1MenitHA = false;
+        var sudahPeringatan1MenitAV = false;
+        
+        let sedangProsesAksi = false;
+
+        window.onload = function() {
+            cekAkunKeServer();
+            muatMasterSales();
+            setInterval(muatDataAntrian, 3000); 
+            setInterval(hitungMundurLokal, 1000); 
+        };
+
+        function getDeviceId() {
+            let devId = localStorage.getItem('ufo_device_perm_id');
+            if (!devId) {
+                const info = window.navigator.userAgent + window.navigator.hardwareConcurrency + screen.width + screen.height;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = "top";
+                ctx.font = "14px 'Arial'";
+                ctx.fillText("UFO-Kebonsari-Device", 2, 15);
+                const canvasData = canvas.toDataURL();
+
+                let hash = 0;
+                const str = info + canvasData;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash |= 0;
+                }
+                
+                devId = "DEV-HW-" + Math.abs(hash);
+                localStorage.setItem('ufo_device_perm_id', devId);
+            }
+            return devId;
+        }
+
+        function cekAkunKeServer() {
+            const deviceId = getDeviceId();
+            
+            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === "terkunci") {
+                    namaSalesAktifGlobal = res.nama;
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = res.nama;
+                    muatDataAntrian();
+                } else {
+                    namaSalesAktifGlobal = "";
+                    document.getElementById('panel-login').style.display = 'block';
+                    document.getElementById('panel-menu-utama').style.display = 'none';
+                    document.getElementById('pilih-sales').value = ""; 
+                    muatDataAntrian();
+                }
+            })
+            .catch(err => {
+                console.error("Gagal mengecek akun:", err);
+                muatDataAntrian();
+            });
+        }
+
+        function simpanAkunHP() {
+            const namaPilih = document.getElementById('pilih-sales').value;
+            const deviceId = getDeviceId();
+            if(!namaPilih) return tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
+
+            tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih})?`, function() {
+                const btnSimpan = document.querySelector('#panel-login button');
+                const textAsli = btnSimpan.innerHTML;
+                btnSimpan.disabled = true;
+                btnSimpan.innerHTML = `<span class="spinner"></span> Menyimpan...`;
+
+                fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}`, {
+                    method: 'GET',
+                    redirect: 'follow'
+                })
+                .then(res => res.json())
+                .then(res => {
+                    setTimeout(() => {
+                        btnSimpan.disabled = false;
+                        btnSimpan.innerHTML = textAsli;
+                        
+                        if(res.status === "sukses") {
+                            namaSalesAktifGlobal = namaPilih;
+                            document.getElementById('panel-login').style.display = 'none';
+                            document.getElementById('panel-menu-utama').style.display = 'block';
+                            document.getElementById('label-user-aktif').innerText = namaPilih;
+                            muatDataAntrian();
+                            tampilkanModal("Berhasil", `HP terikat untuk: ${namaPilih}`);
+                        } else {
+                            namaSalesAktifGlobal = ""; 
+                            document.getElementById('pilih-sales').value = ""; 
+                            document.getElementById('panel-login').style.display = 'block'; 
+                            document.getElementById('panel-menu-utama').style.display = 'none'; 
+                            
+                            tampilkanModal("Akses Ditolak", res.pesan);
+                        }
+                    }, 400);
+                }).catch(() => {
+                    btnSimpan.disabled = false;
+                    btnSimpan.innerHTML = textAsli;
+                    tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mengunci perangkat.");
+                });
+            });
+        }
+
+        function getAkunAktif() {
+            return namaSalesAktifGlobal;
+        }
+
+        function hitungMundurLokal() {
+            // Timer HA
+            const labelTimerHA = document.getElementById('label-timer-mundur-ha');
+            if (!waktuTerakhirStandbyGlobalHA) { labelTimerHA.style.display = 'none'; }
+            else {
+                const waktuLokalServerHA = new Date(waktuTerakhirStandbyGlobalHA).getTime();
+                if (!isNaN(waktuLokalServerHA)) {
+                    const selisihMsHA = new Date().getTime() - waktuLokalServerHA;
+                    const sisaMsHA = (BATAS_MENIT * 60 * 1000) - selisihMsHA;
+                    if (sisaMsHA > 0) {
+                        const totalDetik = Math.floor(sisaMsHA / 1000);
+                        const menit = Math.floor(totalDetik / 60);
+                        const detik = totalDetik % 60;
+                        labelTimerHA.style.display = 'block';
+                        labelTimerHA.innerText = `Sisa: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                    } else {
+                        labelTimerHA.style.display = 'block';
+                        labelTimerHA.innerText = `Habis!`;
+                    }
+                }
+            }
+
+            // Timer AV
+            const labelTimerAV = document.getElementById('label-timer-mundur-av');
+            if (!waktuTerakhirStandbyGlobalAV) { labelTimerAV.style.display = 'none'; }
+            else {
+                const waktuLokalServerAV = new Date(waktuTerakhirStandbyGlobalAV).getTime();
+                if (!isNaN(waktuLokalServerAV)) {
+                    const selisihMsAV = new Date().getTime() - waktuLokalServerAV;
+                    const sisaMsAV = (BATAS_MENIT * 60 * 1000) - selisihMsAV;
+                    if (sisaMsAV > 0) {
+                        const totalDetik = Math.floor(sisaMsAV / 1000);
+                        const menit = Math.floor(totalDetik / 60);
+                        const detik = totalDetik % 60;
+                        labelTimerAV.style.display = 'block';
+                        labelTimerAV.innerText = `Sisa: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                    } else {
+                        labelTimerAV.style.display = 'block';
+                        labelTimerAV.innerText = `Habis!`;
+                    }
+                }
+            }
+        }
+
+        function prosesCekPeringatanStandby(response, namaPromotorLogin) {
+            if (response.data && response.data.length > 0) {
+                // Cek HA
+                let listStandbyHA = response.data.filter(item => item.status === "Standby" && (item.kategori || "HA") === "HA");
+                if (listStandbyHA.length > 0) {
+                    var promotorUrutan1HA = listStandbyHA[0].nama;
+                    var sisaDetikHA = response.sisaDetikHA !== undefined ? response.sisaDetikHA : response.sisaDetik;
+                    if (promotorUrutan1HA === namaPromotorLogin) {
+                        if (sisaDetikHA !== null && sisaDetikHA <= 60 && sisaDetikHA > 0 && !sudahPeringatan1MenitHA) {
+                            sudahPeringatan1MenitHA = true;
+                            if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
+                            tampilkanModal("⚠️ PERINGATAN STANDBY HA!", "Waktu standby HA tinggal 1 menit lagi! Hubungi SPV.");
+                        }
+                        if (sisaDetikHA > 60) sudahPeringatan1MenitHA = false;
+                    }
+                }
+
+                // Cek AV
+                let listStandbyAV = response.data.filter(item => item.status === "Standby" && item.kategori === "AV");
+                if (listStandbyAV.length > 0) {
+                    var promotorUrutan1AV = listStandbyAV[0].nama;
+                    var sisaDetikAV = response.sisaDetikAV !== undefined ? response.sisaDetikAV : response.sisaDetik;
+                    if (promotorUrutan1AV === namaPromotorLogin) {
+                        if (sisaDetikAV !== null && sisaDetikAV <= 60 && sisaDetikAV > 0 && !sudahPeringatan1MenitAV) {
+                            sudahPeringatan1MenitAV = true;
+                            if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
+                            tampilkanModal("⚠️ PERINGATAN STANDBY AV!", "Waktu standby AV tinggal 1 menit lagi! Hubungi SPV.");
+                        }
+                        if (sisaDetikAV > 60) sudahPeringatan1MenitAV = false;
+                    }
+                }
+            }
+        }
+
+        function muatMasterSales() {
+            fetch(`${SCRIPT_URL}?aksi=getMasterSales`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses") {
+                    masterSalesGlobal = res.data || [];
+                    let html = '<option value="">-- Pilih Nama Anda --</option>';
+                    masterSalesGlobal.forEach(n => html += `<option value="${n}">${n}</option>`);
+                    document.getElementById('pilih-sales').innerHTML = html;
+                }
+            }).catch(err => console.error("Gagal muat master sales"));
+        }
+
+        function renderUIRental(dataAntrian, statusSistem, waktuStandbyPertamaHA, waktuStandbyPertamaAV) {
+            daftarAntrianGlobal = dataAntrian || [];
+            statusSistemGlobal = statusSistem || "BUKA";
+            waktuTerakhirStandbyGlobalHA = waktuStandbyPertamaHA || null;
+            waktuTerakhirStandbyGlobalAV = waktuStandbyPertamaAV || null;
+            const akunSaya = getAkunAktif().trim();
+
+            const badge = document.getElementById('badge-status-sistem');
+            badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
+            badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
+
+            let listHtmlHA = "";
+            let listHtmlAV = "";
+            let salesUtamaHA = "-";
+            let salesUtamaAV = "-";
+            
+            if (!sedangProsesAksi) {
+                statusSayaGlobal = "belum_ada"; 
+            }
+            
+            let apakahSayaUrutanPertamaHA = false;
+            let apakahSayaUrutanPertamaAV = false;
+
+            // Cari siapa yang sedang Standby urutan 1 di HA
+            let listStandbyHA = daftarAntrianGlobal.filter(item => item.status === "Standby" && (item.kategori || "HA") === "HA");
+            if (listStandbyHA.length > 0) {
+                salesUtamaHA = listStandbyHA[0].nama;
+                if (akunSaya && listStandbyHA[0].nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
+                    apakahSayaUrutanPertamaHA = true;
+                }
+            }
+
+            // Cari siapa yang sedang Standby urutan 1 di AV
+            let listStandbyAV = daftarAntrianGlobal.filter(item => item.status === "Standby" && item.kategori === "AV");
+            if (listStandbyAV.length > 0) {
+                salesUtamaAV = listStandbyAV[0].nama;
+                if (akunSaya && listStandbyAV[0].nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
+                    apakahSayaUrutanPertamaAV = true;
+                }
+            }
+
+            // Cek juga jika ada yang sedang Melayani di HA atau AV
+            daftarAntrianGlobal.forEach(item => {
+                const kat = item.kategori || "HA";
+                if (item.status === "Melayani") {
+                    if (kat === "AV") {
+                        salesUtamaAV = item.nama + " (Melayani)";
+                    } else {
+                        salesUtamaHA = item.nama + " (Melayani)";
+                    }
+                }
+            });
+
+            if(daftarAntrianGlobal.length > 0) {
+                let urutHA = 1;
+                let urutAV = 1;
+                
+                daftarAntrianGlobal.forEach((item) => {
+                    const namaItem = String(item.nama).trim();
+                    const kategoriItem = item.kategori ? item.kategori : "HA"; 
+
+                    if(akunSaya && namaItem.toLowerCase() === akunSaya.toLowerCase()) {
+                        if (!sedangProsesAksi) {
+                            statusSayaGlobal = item.status; 
+                        }
+                        const selectKat = document.getElementById('pilih-kategori');
+                        if (selectKat && kategoriItem && !sedangProsesAksi) {
+                            selectKat.value = kategoriItem;
+                        }
+                    }
+
+                    let itemHtml = "";
+                    if (item.status === "Standby") {
+                        let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
+                        itemHtml = `<li><b>${urut}. ${item.nama}</b> <div><span class="badge-status-item badge-standby">Standby</span></div></li>`;
+                    } else if (item.status === "Melayani") {
+                        itemHtml = `<li><b>${item.nama}</b> <div><span class="badge-status-item badge-melayani">Melayani</span></div></li>`;
+                    }
+
+                    if (kategoriItem === "AV") {
+                        listHtmlAV += itemHtml;
+                    } else {
+                        listHtmlHA += itemHtml;
+                    }
+                });
+            }
+
+            if(!listHtmlHA) listHtmlHA = "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian HA</span></li>";
+            if(!listHtmlAV) listHtmlAV = "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian AV</span></li>";
+
+            const btnAntri = document.getElementById('btn-utama-antri');
+            const btnCustomer = document.getElementById('btn-utama-customer');
+            const selectKategori = document.getElementById('pilih-kategori');
+
+            if (btnAntri.dataset.loading === "true" || btnCustomer.dataset.loading === "true") {
+                document.getElementById('nama-aktif-ha').innerText = salesUtamaHA;
+                document.getElementById('nama-aktif-av').innerText = salesUtamaAV;
+                document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
+                document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
+                return;
+            }
+
+            // Tentukan apakah user aktif saat ini berada di kategori tertentu dan apakah dia urutan pertama di kategori tersebut
+            let kategoriSaya = selectKategori.value;
+            let apakahSayaUrutanPertamaAktif = (kategoriSaya === "AV") ? apakahSayaUrutanPertamaAV : apakahSayaUrutanPertamaHA;
+
+            if (statusSayaGlobal === "Melayani") {
+                btnAntri.innerText = "Sedang Melayani Customer";
+                btnAntri.className = "btn-warning btn-disabled";
+                btnAntri.disabled = true;
+
+                btnCustomer.style.display = "block";
+                btnCustomer.innerText = "SELESAI PELAYANAN";
+                btnCustomer.className = "btn-danger";
+                btnCustomer.disabled = false;
+
+                selectKategori.disabled = true;
+
+            } else if (statusSayaGlobal === "Standby") {
+                btnAntri.innerText = "Anda Sudah Di Antrian";
+                btnAntri.className = "btn-success btn-disabled";
+                btnAntri.disabled = true;
+
+                btnCustomer.style.display = "block";
+                btnCustomer.innerText = "Sudah Membawa Customer";
+                
+                // Tombol aktif jika dia urutan pertama di kategorinya sendiri
+                btnCustomer.disabled = !apakahSayaUrutanPertamaAktif;
+                btnCustomer.className = apakahSayaUrutanPertamaAktif ? "btn-primary" : "btn-primary btn-disabled";
+
+                selectKategori.disabled = true;
+
+            } else { 
+                if (statusSistemGlobal === "TUTUP") {
+                    btnAntri.innerText = "Antrian Ditutup Oleh SPV";
+                    btnAntri.className = "btn-danger btn-disabled";
+                    btnAntri.disabled = true;
+                } else {
+                    btnAntri.innerText = "Masuk Shift / Ikut Antri";
+                    btnAntri.className = "btn-success";
+                    btnAntri.disabled = false;
+                }
+                btnCustomer.style.display = "none";
+                selectKategori.disabled = false;
+            }
+
+            document.getElementById('nama-aktif-ha').innerText = salesUtamaHA;
+            document.getElementById('nama-aktif-av').innerText = salesUtamaAV;
+            document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
+            document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
+        }
+
+        function muatDataAntrian() {
+            if (sedangProsesAksi) return;
+
+            fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
+            .then(res => res.json())
+            .then(res => {
+                if(!sedangProsesAksi && res && res.status === "sukses") {
+                    const akunSaya = getAkunAktif().trim();
+                    prosesCekPeringatanStandby(res, akunSaya);
+                    renderUIRental(res.data, res.statusAntrian, res.waktuStandbyPertamaHA, res.waktuStandbyPertamaAV);
+                }
+            }).catch(err => {
+                console.log("Menunggu sinkronisasi server...");
+            });
+        }
+
+        function aksiUtamaAntri() {
+            const namaSales = getAkunAktif();
+            const kategoriPilih = document.getElementById('pilih-kategori').value;
+            if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
+            
+            sedangProsesAksi = true; 
+
+            const btnAntri = document.getElementById('btn-utama-antri');
+            const btnCustomer = document.getElementById('btn-utama-customer');
+            const selectKategori = document.getElementById('pilih-kategori');
+
+            btnAntri.dataset.loading = "true";
+            btnAntri.disabled = true;
+            btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
+            selectKategori.disabled = true;
+
+            statusSayaGlobal = "Standby";
+            btnAntri.innerText = "Anda Sudah Di Antrian";
+            btnAntri.className = "btn-success btn-disabled";
+            btnAntri.disabled = true;
+            btnCustomer.style.display = "block";
+            btnCustomer.innerText = "Sudah Membawa Customer";
+            btnCustomer.disabled = true;
+            btnCustomer.className = "btn-primary btn-disabled";
+
+            let tempSembuhList = [...daftarAntrianGlobal];
+            if(!tempSembuhList.some(x => String(x.nama).trim().toLowerCase() === namaSales.trim().toLowerCase())) {
+                tempSembuhList.push({ nama: namaSales, status: "Standby", kategori: kategoriPilih });
+            }
+            
+            let listHtmlHA = "";
+            let listHtmlAV = "";
+            let urutHA = 1;
+            let urutAV = 1;
+            tempSembuhList.forEach((item) => {
+                const kat = item.kategori || "HA";
+                if(item.status === "Standby") {
+                    let u = kat === "AV" ? urutAV++ : urutHA++;
+                    let htmlItem = `<li><b>${u}. ${item.nama}</b> <div><span class="badge-status-item badge-standby">Standby</span></div></li>`;
+                    if(kat === "AV") listHtmlAV += htmlItem; else listHtmlHA += htmlItem;
+                }
+            });
+            document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA || "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian HA</span></li>";
+            document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV || "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian AV</span></li>";
+
+            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, {
+                method: 'GET',
+                redirect: 'follow'
+            })
+            .then(res => res.json())
+            .then(res => {
+                tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
+                setTimeout(() => {
+                    btnAntri.dataset.loading = "false";
+                    sedangProsesAksi = false;
+                    muatDataAntrian();
+                }, 2000);
+            })
+            .catch(err => {
+                btnAntri.dataset.loading = "false";
+                sedangProsesAksi = false;
+                muatDataAntrian();
+            });
+        }
+
+        function aksiUtamaCustomer() {
+            const namaSales = getAkunAktif();
+            if(!namaSales) return;
+
+            const btnCustomer = document.getElementById('btn-utama-customer');
+
+            if (statusSayaGlobal === "Standby") {
+                tampilkanModalKonfirmasi("Konfirmasi", `Sudah membawa customer?`, function() {
+                    sedangProsesAksi = true;
+                    btnCustomer.dataset.loading = "true";
+                    btnCustomer.disabled = true;
+                    btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
+                    
+                    statusSayaGlobal = "Melayani";
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuTerakhirStandbyGlobalHA, waktuTerakhirStandbyGlobalAV);
+
+                    fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, {
+                        method: 'GET',
+                        redirect: 'follow'
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
+                        setTimeout(() => {
+                            btnCustomer.dataset.loading = "false";
+                            sedangProsesAksi = false;
+                            muatDataAntrian();
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        btnCustomer.dataset.loading = "false";
+                        sedangProsesAksi = false;
+                        muatDataAntrian();
+                    });
+                });
+            } else if (statusSayaGlobal === "Melayani") {
+                tampilkanModalKonfirmasi("Selesai Pelayanan", `Apakah Anda sudah selesai melayani customer?`, function() {
+                    sedangProsesAksi = true;
+                    btnCustomer.dataset.loading = "true";
+                    btnCustomer.disabled = true;
+                    btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
+                    
+                    statusSayaGlobal = "belum_ada";
+                    renderUIRental(daftarAntrianGlobal.filter(x => x.nama.toLowerCase() !== namaSales.toLowerCase()), statusSistemGlobal, waktuTerakhirStandbyGlobalHA, waktuTerakhirStandbyGlobalAV);
+
+                    fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`, {
+                        method: 'GET',
+                        redirect: 'follow'
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
+                        setTimeout(() => {
+                            btnCustomer.dataset.loading = "false";
+                            sedangProsesAksi = false;
+                            muatDataAntrian();
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        btnCustomer.dataset.loading = "false";
+                        sedangProsesAksi = false;
+                        muatDataAntrian();
+                    });
+                });
+            }
+        }
+
+        function tampilkanModal(judul, pesan) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerHTML = String(pesan).replace(/
+/g, '<br>');
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-primary" onclick="tutupModal()">OK</button>`;
+            modal.classList.add('active');
+        }
+
+        function tampilkanModalKonfirmasi(judul, pesan, callbackOk) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerHTML = pesan;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" id="btn-ok-confirm" class="btn-primary">Lanjutkan</button>
+            `;
+            document.getElementById('btn-ok-confirm').onclick = function() {
+                tutupModal();
+                if(callbackOk) callbackOk();
+            };
+            modal.classList.add('active');
+        }
+
+        function tutupModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
