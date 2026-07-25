@@ -106,16 +106,16 @@
             background: #f8fafc; border: 1px solid var(--border);
             border-radius: 16px; padding: 16px; margin-top: 20px;
         }
-        .list-box h4 { margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; color: var(--text-muted); font-weight: 800; }
+        .list-box h4 { margin: 0 0 12px 0; font-size: 15px; text-transform: uppercase; color: var(--text-muted); font-weight: 800; }
         .list-box ul { list-style: none; padding: 0; margin: 0; }
         
-        /* DIPERBESAR DAN DIBUAT LEBIH JELAS */
+        /* FONT DIPERBESAR JAUH LEBIH JELAS & BESAR */
         .list-box li { 
-            padding: 14px 16px; background: white; border-radius: 12px; margin-bottom: 10px; 
-            border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; 
+            padding: 18px; background: white; border-radius: 14px; margin-bottom: 12px; 
+            border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; align-items: flex-start; 
         }
-        .list-box li b { font-size: 16px; font-weight: 800; color: var(--text-main); }
-        .list-box li span { font-size: 14px; font-weight: 700; color: var(--spv-purple); }
+        .list-box li b { font-size: 20px; font-weight: 800; color: var(--text-main); }
+        .list-box li span { font-size: 17px; font-weight: 700; color: var(--spv-purple); }
 
         /* MODAL POPUP */
         .modal-overlay {
@@ -338,7 +338,7 @@
             .then(res => {
                 setTimeout(() => {
                     tutupModal();
-                    sedangProsesAksiSPV = false;
+                    sedangProsesAksiSPV5 = false;
                     tampilkanModal("Status SPV", res.pesan);
                     muatDataAntrian();
                 }, 1200);
@@ -376,9 +376,13 @@
                     const data = res.data || [];
                     if(data.length > 0) {
                         data.forEach((item, index) => {
-                            // Mengambil properti timer/waktu standby dengan berbagai kemungkinan nama variabel dari backend (timer, sisaWaktu, atau status)
-                            let waktuStandby = item.timer || item.sisaWaktu || item.status || "-";
-                            listHtml += `<li><b>${index + 1}. ${item.nama}</b> <span>Waktu Standby: ${waktuStandby}</span></li>`;
+                            // Mengambil data dari properti item yang ada dan menampilkan teks "Waktu Standby" secara eksplisit
+                            let timerVal = item.timer !== undefined && item.timer !== null ? item.timer : (item.sisaWaktu !== undefined ? item.sisaWaktu : (item.status || "00:00"));
+                            
+                            listHtml += `<li>
+                                <b>${index + 1}. ${item.nama}</b> 
+                                <span>Waktu Standby: ${timerVal}</span>
+                            </li>`;
                         });
                     } else {
                         listHtml = "<li><span>Belum ada promotor aktif</span></li>";
