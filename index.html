@@ -498,12 +498,8 @@
         }
 
         function muatDataAntrian() {
-            const btnAntri = document.getElementById('btn-utama-antri');
-            const btnCustomer = document.getElementById('btn-utama-customer');
-            
-            if (sedangProsesAksi || (btnAntri && btnAntri.dataset.loading === "true") || (btnCustomer && btnCustomer.dataset.loading === "true")) {
-                return;
-            }
+            // JANGAN TIMPA UI JIKA SEDANG DALAM PROSES AKSI ATAU TUNGGU 3 DETIK PERTAMA
+            if (sedangProsesAksi) return;
 
             fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
                 method: 'GET',
@@ -526,13 +522,14 @@
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
             
-            sedangProsesAksi = true;
+            sedangProsesAksi = true; // Kunci agar polling background tidak mereset tampilan
 
             const btnAntri = document.getElementById('btn-utama-antri');
             btnAntri.dataset.loading = "true";
             btnAntri.disabled = true;
             btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
 
+            // Update tampilan lokal seketika agar tombol berubah tanpa menunggu fetch selesai
             statusSayaGlobal = "Standby";
             let tempSembuhList = [...daftarAntrianGlobal];
             if(!tempSembuhList.some(x => String(x.nama).trim().toLowerCase() === namaSales.trim().toLowerCase())) {
@@ -546,19 +543,18 @@
             })
             .then(res => res.json())
             .then(res => {
+                tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
+                // Beri jeda sedikit agar Google Sheets selesai menulis data baru sebelum unlock
                 setTimeout(() => {
                     btnAntri.dataset.loading = "false";
                     sedangProsesAksi = false;
-                    tampilkanModal("Informasi Shift", res.pesan || "Berhasil diproses");
                     muatDataAntrian();
                 }, 1500);
             })
             .catch(err => {
-                setTimeout(() => {
-                    btnAntri.dataset.loading = "false";
-                    sedangProsesAksi = false;
-                    muatDataAntrian();
-                }, 1500);
+                btnAntri.dataset.loading = "false";
+                sedangProsesAksi = false;
+                muatDataAntrian();
             });
         }
 
@@ -584,19 +580,17 @@
                     })
                     .then(res => res.json())
                     .then(res => {
+                        tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
                         setTimeout(() => {
                             btnCustomer.dataset.loading = "false";
                             sedangProsesAksi = false;
-                            tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
                             muatDataAntrian();
                         }, 1500);
                     })
                     .catch(err => {
-                        setTimeout(() => {
-                            btnCustomer.dataset.loading = "false";
-                            sedangProsesAksi = false;
-                            muatDataAntrian();
-                        }, 1500);
+                        btnCustomer.dataset.loading = "false";
+                        sedangProsesAksi = false;
+                        muatDataAntrian();
                     });
                 });
             } else if (statusSayaGlobal === "Melayani") {
@@ -615,19 +609,17 @@
                     })
                     .then(res => res.json())
                     .then(res => {
+                        tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
                         setTimeout(() => {
                             btnCustomer.dataset.loading = "false";
                             sedangProsesAksi = false;
-                            tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
                             muatDataAntrian();
                         }, 1500);
                     })
                     .catch(err => {
-                        setTimeout(() => {
-                            btnCustomer.dataset.loading = "false";
-                            sedangProsesAksi = false;
-                            muatDataAntrian();
-                        }, 1500);
+                        btnCustomer.dataset.loading = "false";
+                        sedangProsesAksi = false;
+                        muatDataAntrian();
                     });
                 });
             }
