@@ -3,110 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Tambah Waktu Timer - UFO Kebonsari</title>
+    <title>Panel Kontrol Timer - UFO Kebonsari</title>
     <link rel="shortcut icon" href="#">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --primary: #2563eb;
-            --success: #10b981;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
+            --bg-color: #0f172a; /* Tema Gelap Elegan Khusus Panel Control */
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-ha: #3b82f6;
+            --accent-av: #8b5cf6;
+            --power-green: #10b981;
+            --danger: #ef4444;
         }
 
-        *, body, button, select {
+        *, body {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
             box-sizing: border-box;
+            margin: 0; padding: 0;
         }
 
         body { 
             background: var(--bg-color); 
             color: var(--text-main);
-            margin: 0; padding: 16px;
-            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .app-container {
-            width: 100%; max-width: 440px;
-            background: var(--card-bg);
-            border-radius: 20px; padding: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        .header-app {
             text-align: center;
+            margin-bottom: 28px;
+            width: 100%;
+            max-width: 800px;
         }
 
-        .gradient-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border-radius: 16px; padding: 20px; color: white; margin-bottom: 20px;
-        }
-        .gradient-header h2 { margin: 0; font-size: 18px; font-weight: 800; }
-        .gradient-header p { margin: 4px 0 0 0; opacity: 0.85; font-size: 12px; }
-
-        .input-group { margin-bottom: 16px; text-align: left; }
-        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-
-        select { 
-            width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border);
-            background: #ffffff; font-size: 14px; color: var(--text-main); outline: none;
+        .header-app h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
         }
 
-        button { 
-            width: 100%; padding: 14px; border-radius: 10px; 
-            font-size: 13px; font-weight: 700; cursor: pointer; border: none;
-            text-transform: uppercase; transition: all 0.2s ease;
-            background: var(--primary); color: white;
+        .header-app p {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
         }
-        button:active { transform: scale(0.98); }
 
-        .info-box {
-            background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;
-            padding: 12px; font-size: 12px; color: #1e40af; margin-bottom: 20px; text-align: left;
-            line-height: 1.4;
+        /* CARD DISPLAY DUA KOLOM DENGAN TULISAN BESAR */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
         }
+
+        .timer-card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 24px;
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+        }
+
+        .timer-card.ha::before { background: var(--accent-ha); }
+        .timer-card.av::before { background: var(--accent-av); }
+
+        .badge-kategori {
+            font-size: 13px;
+            font-weight: 800;
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .ha .badge-kategori { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .av .badge-kategori { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
+
+        .nama-promotor {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+            min-height: 36px;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .sisa-waktu-display {
+            font-size: 48px;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            margin: 12px 0 20px 0;
+            letter-spacing: -1px;
+        }
+
+        .ha .sisa-waktu-display { color: #93c5fd; }
+        .av .sisa-waktu-display { color: #c4b5fd; }
+        .sisa-waktu-display.habis { color: var(--danger) !important; animation: blink 1s infinite; }
+
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+
+        /* TOMBOL POWER ON RAKSASA */
+        .btn-power-container {
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .btn-power {
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            border: none;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn-power:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 24px -5px rgba(16, 185, 129, 0.5);
+        }
+
+        .btn-power:active {
+            transform: translateY(1px);
+        }
+
+        .btn-power:disabled {
+            background: #475569;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .power-icon {
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .kosong-state {
+            color: var(--text-muted);
+            font-size: 16px;
+            font-weight: 500;
+            font-style: italic;
+        }
+
+        /* MODAL POPUP CUSTOM SESUAI TEMA */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 28px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: all 0.25s ease;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn-cancel { background: #334155; color: #cbd5e1; }
+        .modal-btn-confirm { background: var(--power-green); color: white; }
+        .modal-btn-ok { background: var(--primary); color: white; width: 100%; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <div class="gradient-header">
-            <h2>Panel Tambah Waktu Timer</h2>
-            <p>UFO Kebonsari</p>
+    <div class="header-app">
+        <h1>PANEL KONTROL TIMER</h1>
+        <p>UFO KEBONSARI MALANG</p>
+    </div>
+
+    <div class="cards-grid">
+        <!-- CARD URUTAN 1 HA -->
+        <div class="timer-card ha">
+            <div class="badge-kategori">URUTAN NO 1 HA</div>
+            <div id="nama-ha" class="nama-promotor">Memuat...</div>
+            <div id="timer-ha" class="sisa-waktu-display">--:--</div>
+            <div class="btn-power-container">
+                <button id="btn-power-ha" class="btn-power" onclick="mintaKonfirmasi('HA')">
+                    <span class="power-icon">⏻</span> POWER ON
+                </button>
+            </div>
         </div>
 
-        <div class="info-box">
-            ℹ️ Pilih nama promotor yang sedang dalam status <b>Standby</b>. Sisa timer aktif akan terlihat di samping nama.
+        <!-- CARD URUTAN 1 AV -->
+        <div class="timer-card av">
+            <div class="badge-kategori">URUTAN NO 1 AV</div>
+            <div id="nama-av" class="nama-promotor">Memuat...</div>
+            <div id="timer-av" class="sisa-waktu-display">--:--</div>
+            <div class="btn-power-container">
+                <button id="btn-power-av" class="btn-power" onclick="mintaKonfirmasi('AV')">
+                    <span class="power-icon">⏻</span> POWER ON
+                </button>
+            </div>
         </div>
+    </div>
 
-        <div class="input-group">
-            <label>Pilih Promotor & Sisa Waktu</label>
-            <select id="select-promotor-standby" onmousedown="sedangFokus = true" onchange="sedangFokus = false" onblur="sedangFokus = false">
-                <option value="">-- Memuat daftar promotor... --</option>
-            </select>
+    <!-- MODAL POPUP CUSTOM -->
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modal-icon" class="modal-icon">⏱️</div>
+            <div id="modal-title" class="modal-title">Konfirmasi Power ON</div>
+            <div id="modal-desc" class="modal-desc">Apakah Anda yakin?</div>
+            <div id="modal-actions" class="modal-actions"></div>
         </div>
-
-        <button type="button" onclick="tambahWaktuTimer()">
-            ⏱️ Tambah Waktu Timer
-        </button>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         const BATAS_MENIT = 10;
-        let dataStandbyGlobal = [];
-        let sedangFokus = false;
+        
+        let promotorHA = null;
+        let promotorAV = null;
+        let targetKategoriAktif = "";
 
         window.onload = function() {
-            muatDataStandby();
-            setInterval(muatDataStandby, 3000); 
+            muatDataUrutanPertama();
+            setInterval(muatDataUrutanPertama, 2000);
         };
 
-        function muatDataStandby() {
-            if (sedangFokus) return;
-
+        function muatDataUrutanPertama() {
             fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
                 method: 'GET',
                 redirect: 'follow'
@@ -114,123 +326,169 @@
             .then(res => res.json())
             .then(res => {
                 if(res.status === "sukses" && res.data) {
-                    dataStandbyGlobal = res.data.filter(item => item.status === "Standby");
-                    
+                    const dataStandby = res.data.filter(item => item.status === "Standby");
+
+                    // Ambil persis Urutan 1 HA dan AV saja
+                    promotorHA = dataStandby.find(item => (item.kategori || "HA") === "HA") || null;
+                    promotorAV = dataStandby.find(item => item.kategori === "AV") || null;
+
                     window.waktuServerHA = res.waktuStandbyHA || res.waktuStandbyPertama;
                     window.waktuServerAV = res.waktuStandbyAV;
 
-                    renderDropdown();
+                    renderTampilan();
                 }
-            }).catch(err => console.log("Gagal menyinkronkan data"));
+            })
+            .catch(err => console.log("Gagal menyinkronkan data"));
         }
 
-        function renderDropdown() {
-            const selectEl = document.getElementById('select-promotor-standby');
-            const nilaiTerpilihSebelumnya = selectEl.value; 
+        function renderTampilan() {
             const now = new Date().getTime();
 
-            let opsiBaru = [];
-            opsiBaru.push({ value: "", text: "-- Pilih Promotor Standby --", kategori: "" });
+            // RENDER HA
+            const namaHaEl = document.getElementById('nama-ha');
+            const timerHaEl = document.getElementById('timer-ha');
+            const btnHaEl = document.getElementById('btn-power-ha');
 
-            if (dataStandbyGlobal.length > 0) {
-                dataStandbyGlobal.forEach(item => {
-                    const kategori = item.kategori || "HA";
-                    let sisaTimerStr = "00:00";
+            if (promotorHA) {
+                namaHaEl.textContent = promotorHA.nama;
+                namaHaEl.classList.remove('kosong-state');
+                btnHaEl.disabled = false;
 
-                    let waktuStandbyTarget = (kategori === "AV") ? window.waktuServerAV : window.waktuServerHA;
-                    
-                    if (waktuStandbyTarget) {
-                        const waktuMulai = new Date(waktuStandbyTarget).getTime();
-                        if (!isNaN(waktuMulai)) {
-                            const selisihMs = now - waktuMulai;
-                            const sisaMs = (BATAS_MENIT * 60 * 1000) - selisihMs;
-                            if (sisaMs > 0) {
-                                const totalDetik = Math.floor(sisaMs / 1000);
-                                const menit = Math.floor(totalDetik / 60);
-                                const detik = totalDetik % 60;
-                                sisaTimerStr = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
-                            } else {
-                                sisaTimerStr = "Habis!";
-                            }
-                        }
-                    }
-
-                    opsiBaru.push({
-                        value: item.nama,
-                        text: `${item.nama} (${kategori}) — Sisa Waktu: ${sisaTimerStr}`,
-                        kategori: kategori
-                    });
-                });
-            } else {
-                opsiBaru = [{ value: "", text: "-- Tidak ada promotor yang Standby --", kategori: "" }];
-            }
-
-            const opsiEksisting = selectEl.options;
-            let strukturSama = (opsiEksisting.length === opsiBaru.length);
-
-            if (strukturSama) {
-                for (let i = 0; i < opsiEksisting.length; i++) {
-                    if (opsiEksisting[i].value !== opsiBaru[i].value) {
-                        strukturSama = false;
-                        break;
-                    }
-                }
-            }
-
-            if (strukturSama) {
-                for (let i = 0; i < opsiEksisting.length; i++) {
-                    if (opsiEksisting[i].text !== opsiBaru[i].text) {
-                        opsiEksisting[i].text = opsiBaru[i].text;
-                    }
+                let sisaTimerStr = hitungSisaWaktu(window.waktuServerHA, now);
+                timerHaEl.textContent = sisaTimerStr;
+                
+                if (sisaTimerStr === "HABIS!") {
+                    timerHaEl.classList.add('habis');
+                } else {
+                    timerHaEl.classList.remove('habis');
                 }
             } else {
-                selectEl.innerHTML = "";
-                opsiBaru.forEach(opt => {
-                    const elOpt = document.createElement('option');
-                    elOpt.value = opt.value;
-                    elOpt.text = opt.text;
-                    if(opt.kategori) elOpt.setAttribute('data-kategori', opt.kategori);
-                    selectEl.appendChild(elOpt);
-                });
+                namaHaEl.textContent = "Tidak Ada Antrian";
+                namaHaEl.classList.add('kosong-state');
+                timerHaEl.textContent = "--:--";
+                timerHaEl.classList.remove('habis');
+                btnHaEl.disabled = true;
+            }
 
-                if (nilaiTerpilihSebelumnya) {
-                    selectEl.value = nilaiTerpilihSebelumnya;
+            // RENDER AV
+            const namaAvEl = document.getElementById('nama-av');
+            const timerAvEl = document.getElementById('timer-av');
+            const btnAvEl = document.getElementById('btn-power-av');
+
+            if (promotorAV) {
+                namaAvEl.textContent = promotorAV.nama;
+                namaAvEl.classList.remove('kosong-state');
+                btnAvEl.disabled = false;
+
+                let sisaTimerStr = hitungSisaWaktu(window.waktuServerAV, now);
+                timerAvEl.textContent = sisaTimerStr;
+
+                if (sisaTimerStr === "HABIS!") {
+                    timerAvEl.classList.add('habis');
+                } else {
+                    timerAvEl.classList.remove('habis');
                 }
+            } else {
+                namaAvEl.textContent = "Tidak Ada Antrian";
+                namaAvEl.classList.add('kosong-state');
+                timerAvEl.textContent = "--:--";
+                timerAvEl.classList.remove('habis');
+                btnAvEl.disabled = true;
             }
         }
 
-        function tambahWaktuTimer() {
-            const selectEl = document.getElementById('select-promotor-standby');
-            const namaSales = selectEl.value;
+        function hitungSisaWaktu(waktuStandbyTarget, now) {
+            if (!waktuStandbyTarget) return "10:00";
             
-            if(!namaSales) {
-                alert("Silakan pilih promotor yang sedang standby terlebih dahulu!");
-                return;
+            const waktuMulai = new Date(waktuStandbyTarget).getTime();
+            if (isNaN(waktuMulai)) return "10:00";
+
+            const selisihMs = now - waktuMulai;
+            const sisaMs = (BATAS_MENIT * 60 * 1000) - selisihMs;
+
+            if (sisaMs > 0) {
+                const totalDetik = Math.floor(sisaMs / 1000);
+                const menit = Math.floor(totalDetik / 60);
+                const detik = totalDetik % 60;
+                return `${menit}:${detik < 10 ? '0' : ''}${detik}`;
+            } else {
+                return "HABIS!";
             }
+        }
 
-            const selectedOption = selectEl.options[selectEl.selectedIndex];
-            const kategori = selectedOption.getAttribute('data-kategori') || "HA";
+        function mintaKonfirmasi(kategori) {
+            targetKategoriAktif = kategori;
+            const promotor = (kategori === "HA") ? promotorHA : promotorAV;
+            
+            if (!promotor) return;
 
-            if (confirm(`Yakin ingin menambah waktu timer untuk ${namaSales} (${kategori})?`)) {
-                sedangFokus = false;
+            bukaModal({
+                icon: "⏻",
+                title: `POWER ON TIMER (${kategori})`,
+                desc: `Reset/Tambah waktu timer untuk <br><b style="color: #ffffff; font-size: 16px;">${promotor.nama}</b>?`,
+                actions: `
+                    <button class="modal-btn modal-btn-cancel" onclick="tutupModal()">Batal</button>
+                    <button class="modal-btn modal-btn-confirm" onclick="eksekusiPowerOn()">Ya, Tambah</button>
+                `
+            });
+        }
 
-                // DIUBAH: Menggunakan "tambahWaktuAdmin" agar tidak perlu validasi PIN SPV
-                const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`;
-                
-                fetch(urlAksi, {
-                    method: 'GET',
-                    redirect: 'follow'
-                })
-                .then(res => res.json())
-                .then(res => {
-                    alert(res.pesan);
-                    muatDataStandby();
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Gagal terhubung ke server.");
+        function eksekusiPowerOn() {
+            const promotor = (targetKategoriAktif === "HA") ? promotorHA : promotorAV;
+            if (!promotor) return;
+
+            bukaModal({
+                icon: "⏳",
+                title: "Memproses...",
+                desc: "Memperbarui waktu timer ke server...",
+                actions: ""
+            });
+
+            const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(promotor.nama)}&kategori=${encodeURIComponent(targetKategoriAktif)}`;
+
+            fetch(urlAksi, {
+                method: 'GET',
+                redirect: 'follow'
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === "sukses") {
+                    bukaModal({
+                        icon: "✅",
+                        title: "Berhasil!",
+                        desc: res.pesan,
+                        actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">Selesai</button>`
+                    });
+                    muatDataUrutanPertama();
+                } else {
+                    bukaModal({
+                        icon: "⚠️",
+                        title: "Gagal",
+                        desc: res.pesan,
+                        actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">Tutup</button>`
+                    });
+                }
+            })
+            .catch(err => {
+                bukaModal({
+                    icon: "❌",
+                    title: "Koneksi Terganggu",
+                    desc: "Gagal terhubung ke server.",
+                    actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">Tutup</button>`
                 });
-            }
+            });
+        }
+
+        function bukaModal(config) {
+            document.getElementById('modal-icon').innerHTML = config.icon;
+            document.getElementById('modal-title').innerHTML = config.title;
+            document.getElementById('modal-desc').innerHTML = config.desc;
+            document.getElementById('modal-actions').innerHTML = config.actions;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function tutupModal() {
+            document.getElementById('custom-modal').classList.remove('active');
         }
     </script>
 </body>
