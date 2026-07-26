@@ -10,7 +10,7 @@
     <style>
         :root {
             --primary: #2563eb;
-            --bg-color: #0f172a; /* Tema Gelap Elegan Khusus Panel Control */
+            --bg-color: #0f172a;
             --card-bg: #1e293b;
             --card-border: #334155;
             --text-main: #f8fafc;
@@ -25,6 +25,8 @@
             font-family: 'Plus Jakarta Sans', sans-serif !important;
             box-sizing: border-box;
             margin: 0; padding: 0;
+            user-select: none;
+            -moz-user-select: none;
         }
 
         body { 
@@ -35,17 +37,37 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
         }
 
+        /* LAYAR BLOKIR MUTLAK UNTUK HP / TABLET */
+        #mobile-blocker {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #090d16;
+            z-index: 99999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        #mobile-blocker .icon { font-size: 64px; margin-bottom: 20px; }
+        #mobile-blocker h2 { color: var(--danger); font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+        #mobile-blocker p { color: var(--text-muted); font-size: 14px; line-height: 1.6; max-width: 320px; }
+
+        /* TAMPILAN UTAMA */
         .header-app {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
             width: 100%;
             max-width: 800px;
         }
 
         .header-app h1 {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 800;
             color: #ffffff;
             margin-bottom: 4px;
@@ -58,11 +80,25 @@
             font-weight: 500;
         }
 
-        /* CARD DISPLAY DUA KOLOM DENGAN TULISAN BESAR */
+        .btn-fullscreen {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-fullscreen:hover { background: rgba(59, 130, 246, 0.3); color: #ffffff; }
+
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
+            gap: 24px;
             width: 100%;
             max-width: 800px;
         }
@@ -71,7 +107,7 @@
             background: var(--card-bg);
             border: 2px solid var(--card-border);
             border-radius: 24px;
-            padding: 28px 20px;
+            padding: 32px 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -105,20 +141,20 @@
         .av .badge-kategori { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
 
         .nama-promotor {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 800;
             color: #ffffff;
             margin-bottom: 8px;
-            min-height: 36px;
+            min-height: 38px;
             line-height: 1.2;
             word-break: break-word;
         }
 
         .sisa-waktu-display {
-            font-size: 48px;
+            font-size: 52px;
             font-weight: 800;
             font-variant-numeric: tabular-nums;
-            margin: 12px 0 20px 0;
+            margin: 12px 0 24px 0;
             letter-spacing: -1px;
         }
 
@@ -126,15 +162,9 @@
         .av .sisa-waktu-display { color: #c4b5fd; }
         .sisa-waktu-display.habis { color: var(--danger) !important; animation: blink 1s infinite; }
 
-        @keyframes blink {
-            50% { opacity: 0.5; }
-        }
+        @keyframes blink { 50% { opacity: 0.5; } }
 
-        /* TOMBOL POWER ON RAKSASA */
-        .btn-power-container {
-            width: 100%;
-            margin-top: auto;
-        }
+        .btn-power-container { width: 100%; margin-top: auto; }
 
         .btn-power {
             width: 100%;
@@ -156,35 +186,14 @@
             transition: all 0.2s ease;
         }
 
-        .btn-power:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 24px -5px rgba(16, 185, 129, 0.5);
-        }
+        .btn-power:hover { transform: translateY(-2px); box-shadow: 0 14px 24px -5px rgba(16, 185, 129, 0.5); }
+        .btn-power:active { transform: translateY(1px); }
+        .btn-power:disabled { background: #475569; box-shadow: none; cursor: not-allowed; opacity: 0.5; }
 
-        .btn-power:active {
-            transform: translateY(1px);
-        }
+        .power-icon { font-size: 22px; line-height: 1; }
+        .kosong-state { color: var(--text-muted); font-size: 16px; font-weight: 500; font-style: italic; }
 
-        .btn-power:disabled {
-            background: #475569;
-            box-shadow: none;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .power-icon {
-            font-size: 22px;
-            line-height: 1;
-        }
-
-        .kosong-state {
-            color: var(--text-muted);
-            font-size: 16px;
-            font-weight: 500;
-            font-style: italic;
-        }
-
-        /* MODAL POPUP CUSTOM SESUAI TEMA */
+        /* MODAL POPUP */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -200,10 +209,7 @@
             padding: 16px;
         }
 
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
 
         .modal-box {
             background: var(--card-bg);
@@ -218,43 +224,15 @@
             transition: all 0.25s ease;
         }
 
-        .modal-overlay.active .modal-box {
-            transform: scale(1);
-        }
-
-        .modal-icon {
-            font-size: 42px;
-            margin-bottom: 12px;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: #ffffff;
-            margin-bottom: 8px;
-        }
-
-        .modal-desc {
-            font-size: 14px;
-            color: var(--text-muted);
-            line-height: 1.5;
-            margin-bottom: 24px;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-icon { font-size: 42px; margin-bottom: 12px; }
+        .modal-title { font-size: 18px; font-weight: 800; color: #ffffff; margin-bottom: 8px; }
+        .modal-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+        .modal-actions { display: flex; gap: 12px; }
 
         .modal-btn {
-            flex: 1;
-            padding: 14px;
-            border-radius: 12px;
-            border: none;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            flex: 1; padding: 14px; border-radius: 12px; border: none;
+            font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
         }
 
         .modal-btn-cancel { background: #334155; color: #cbd5e1; }
@@ -264,38 +242,46 @@
 </head>
 <body>
 
+    <!-- LAYAR BLOKIR MUTLAK UNTUK HP -->
+    <div id="mobile-blocker">
+        <div class="icon">🚫</div>
+        <h2>AKSES DITOLAK</h2>
+        <p>Halaman ini dikunci dan hanya dapat diakses melalui <b>Komputer/PC Kasir Resmi</b>. Akses dari HP (termasuk Mode Desktop) otomatis diblokir.</p>
+    </div>
+
     <div class="header-app">
         <h1>PANEL KONTROL TIMER</h1>
         <p>UFO KEBONSARI MALANG</p>
+        <button class="btn-fullscreen" onclick="toggleFullScreen()">🖥️ Sembunyikan Address Bar (Layar Penuh)</button>
     </div>
 
     <div class="cards-grid">
-        <!-- CARD URUTAN 1 HA -->
+        <!-- CARD HA -->
         <div class="timer-card ha">
             <div class="badge-kategori">URUTAN NO 1 HA</div>
             <div id="nama-ha" class="nama-promotor">Memuat...</div>
             <div id="timer-ha" class="sisa-waktu-display">--:--</div>
             <div class="btn-power-container">
                 <button id="btn-power-ha" class="btn-power" onclick="mintaKonfirmasi('HA')">
-                    <span class="power-icon"></span> POWER ON
+                    <span class="power-icon">⏻</span> POWER ON
                 </button>
             </div>
         </div>
 
-        <!-- CARD URUTAN 1 AV -->
+        <!-- CARD AV -->
         <div class="timer-card av">
             <div class="badge-kategori">URUTAN NO 1 AV</div>
             <div id="nama-av" class="nama-promotor">Memuat...</div>
             <div id="timer-av" class="sisa-waktu-display">--:--</div>
             <div class="btn-power-container">
                 <button id="btn-power-av" class="btn-power" onclick="mintaKonfirmasi('AV')">
-                    <span class="power-icon"></span> POWER ON
+                    <span class="power-icon">⏻</span> POWER ON
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL POPUP CUSTOM -->
+    <!-- MODAL POPUP -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-icon" class="modal-icon">⏱️</div>
@@ -313,7 +299,49 @@
         let promotorAV = null;
         let targetKategoriAktif = "";
 
+        // DETEKSI AKURAT BLOKIR HP (WALAUPUN PAKAI MODE DESKTOP)
+        function cekPerangkatMutlak() {
+            const ua = navigator.userAgent;
+            
+            // Cek kata kunci sistem operasi mobile secara ketat
+            const isMobileOS = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+            
+            // Cek apakah layar menggunakan teknologi sentuh utama (ciri khas HP/Tablet)
+            const isTouchDevice = (navigator.maxTouchPoints && navigator.maxTouchPoints > 2) || ('ontouchstart' in window);
+
+            // Jika terdeteksi OS HP atau layar sentuh murni, blokir mutlak
+            if (isMobileOS || (isTouchDevice && window.innerWidth <= 1024)) {
+                document.getElementById('mobile-blocker').style.display = 'flex';
+            }
+        }
+
+        // FUNGSI LAYAR PENUH
+        function toggleFullScreen() {
+            if (!document.fullscreenElement && !document.mozFullScreenElement) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                }
+            }
+        }
+
+        // MATIKAN KLIK KANAN & INSPECT
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'i' || e.key === 'k')) || e.key === 'F12') {
+                e.preventDefault();
+            }
+        });
+
         window.onload = function() {
+            cekPerangkatMutlak();
             muatDataUrutanPertama();
             setInterval(muatDataUrutanPertama, 2000);
         };
@@ -328,7 +356,6 @@
                 if(res.status === "sukses" && res.data) {
                     const dataStandby = res.data.filter(item => item.status === "Standby");
 
-                    // Ambil persis Urutan 1 HA dan AV saja
                     promotorHA = dataStandby.find(item => (item.kategori || "HA") === "HA") || null;
                     promotorAV = dataStandby.find(item => item.kategori === "AV") || null;
 
@@ -419,7 +446,6 @@
         function mintaKonfirmasi(kategori) {
             targetKategoriAktif = kategori;
             const promotor = (kategori === "HA") ? promotorHA : promotorAV;
-            
             if (!promotor) return;
 
             bukaModal({
