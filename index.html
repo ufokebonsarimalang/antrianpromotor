@@ -352,7 +352,7 @@
                         document.getElementById('label-user-aktif').innerText = namaPilih;
                         
                         tampilkanModal("Berhasil", `HP terikat untuk: ${namaPilih}`);
-                        muatDataAntrian();
+                        muatDataAntrian(true);
                     } else {
                         namaSalesAktifGlobal = ""; 
                         localStorage.removeItem('ufo_nama_sales_aktif');
@@ -653,8 +653,9 @@
             document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
 
-        function muatDataAntrian() {
-            if (sedangProsesAksi) return;
+        // FUNGSI TARIK DATA DI-PERBAIKI SUPAYA TIDAK TERBLOKIR SESAAT KETIKA PROSES
+        function muatDataAntrian(paksaTarik = false) {
+            if (sedangProsesAksi && !paksaTarik) return;
 
             fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
                 method: 'GET',
@@ -662,7 +663,7 @@
             })
             .then(res => res.json())
             .then(res => {
-                if(!sedangProsesAksi && res && res.status === "sukses") {
+                if(res && res.status === "sukses") {
                     const akunSaya = getAkunAktif().trim();
                     prosesCekPeringatanStandby(res, akunSaya);
                     renderUIRental(res.data, res.statusAntrian, res.waktuStandbyHA || res.waktuStandbyPertama, res.waktuStandbyAV);
@@ -696,7 +697,6 @@
             .then(res => res.json())
             .then(res => {
                 btnAntri.dataset.loading = "false";
-                sedangProsesAksi = false;
 
                 if (res.status === "sukses") {
                     tampilkanModal("Informasi Antrian", res.pesan || "Berhasil masuk antrian");
@@ -707,7 +707,11 @@
                     btnAntri.innerHTML = "Daftar Antrian";
                 }
                 
-                muatDataAntrian();
+                // BERI DELAY SANGAT SINGKAT LALU PAKSA REFRESH DATA INSTAN
+                setTimeout(() => {
+                    sedangProsesAksi = false;
+                    muatDataAntrian(true);
+                }, 400);
             })
             .catch(err => {
                 btnAntri.dataset.loading = "false";
@@ -731,9 +735,6 @@
                     btnCustomer.dataset.loading = "true";
                     btnCustomer.disabled = true;
                     btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
-                    
-                    statusSayaGlobal = "Melayani";
-                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, {
                         method: 'GET',
@@ -741,17 +742,17 @@
                     })
                     .then(res => res.json())
                     .then(res => {
+                        btnCustomer.dataset.loading = "false";
                         tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
                         setTimeout(() => {
-                            btnCustomer.dataset.loading = "false";
                             sedangProsesAksi = false;
-                            muatDataAntrian();
-                        }, 1500);
+                            muatDataAntrian(true);
+                        }, 400);
                     })
                     .catch(err => {
                         btnCustomer.dataset.loading = "false";
                         sedangProsesAksi = false;
-                        muatDataAntrian();
+                        muatDataAntrian(true);
                     });
                 });
             } else if (statusSayaGlobal === "Melayani") {
@@ -767,17 +768,17 @@
                     })
                     .then(res => res.json())
                     .then(res => {
+                        btnCustomer.dataset.loading = "false";
                         tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
                         setTimeout(() => {
-                            btnCustomer.dataset.loading = "false";
                             sedangProsesAksi = false;
-                            muatDataAntrian();
-                        }, 1500);
+                            muatDataAntrian(true);
+                        }, 400);
                     })
                     .catch(err => {
                         btnCustomer.dataset.loading = "false";
                         sedangProsesAksi = false;
-                        muatDataAntrian();
+                        muatDataAntrian(true);
                     });
                 });
             }
@@ -802,17 +803,17 @@
                     })
                     .then(res => res.json())
                     .then(res => {
+                        btnCS.dataset.loading = "false";
                         tampilkanModal("Status CS", res.pesan || "Posisi antrian dikunci");
                         setTimeout(() => {
-                            btnCS.dataset.loading = "false";
                             sedangProsesAksi = false;
-                            muatDataAntrian();
-                        }, 1500);
+                            muatDataAntrian(true);
+                        }, 400);
                     })
                     .catch(err => {
                         btnCS.dataset.loading = "false";
                         sedangProsesAksi = false;
-                        muatDataAntrian();
+                        muatDataAntrian(true);
                     });
                 });
             } else if (statusSayaGlobal === "Dipanggil CS") {
@@ -828,17 +829,17 @@
                     })
                     .then(res => res.json())
                     .then(res => {
+                        btnCS.dataset.loading = "false";
                         tampilkanModal("Status CS", res.pesan || "Kembali ke antrian aktif");
                         setTimeout(() => {
-                            btnCS.dataset.loading = "false";
                             sedangProsesAksi = false;
-                            muatDataAntrian();
-                        }, 1500);
+                            muatDataAntrian(true);
+                        }, 400);
                     })
                     .catch(err => {
                         btnCS.dataset.loading = "false";
                         sedangProsesAksi = false;
-                        muatDataAntrian();
+                        muatDataAntrian(true);
                     });
                 });
             }
