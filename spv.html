@@ -62,7 +62,7 @@
         .input-group { margin-bottom: 16px; text-align: left; }
         .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
 
-        select, input[type="text"], input[type="password"] { 
+        select, input[type="text"], input[type="password"], input[type="number"] { 
             width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border);
             background: #ffffff; font-size: 15px; color: var(--text-main); outline: none;
         }
@@ -82,7 +82,6 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-cancel { background: #f1f5f9; color: #475569; font-size: 13px; }
 
-        /* SPINNER STYLING */
         .spinner {
             width: 16px;
             height: 16px;
@@ -109,7 +108,6 @@
         .list-box h4 { margin: 0 0 12px 0; font-size: 15px; text-transform: uppercase; color: var(--text-muted); font-weight: 800; }
         .list-box ul { list-style: none; padding: 0; margin: 0; }
         
-        /* FONT DIPERBESAR JAUH LEBIH JELAS & BESAR */
         .list-box li { 
             padding: 18px; background: white; border-radius: 14px; margin-bottom: 12px; 
             border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; align-items: flex-start; 
@@ -117,7 +115,6 @@
         .list-box li b { font-size: 20px; font-weight: 800; color: var(--text-main); }
         .list-box li span { font-size: 17px; font-weight: 700; color: var(--spv-purple); }
 
-        /* MODAL POPUP */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
@@ -164,13 +161,14 @@
                 <button type="button" class="btn-primary" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Customer Janjian', true)">Cust. Janjian</button>
                 <button type="button" class="btn-primary" style="background: #0284c7;" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Cust.</button>
 
-                <button type="button" class="btn-success" onclick="bukaModalFormSPVKategori('spvDaftarAntri', 'Masukkan Promotor ke Antrian', true)">+ Masukkan Antri</button>
+                <!-- TOMBOL TAMBAH ANTRIAN DENGAN POSISI -->
+                <button type="button" class="btn-success" onclick="bukaModalTambahAntriSpv()">+ Masukkan Antri</button>
                 <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan Antri</button>
 
                 <button type="button" class="btn-danger full-width" onclick="bukaModalFormSPVKategori('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
                 <button type="button" class="btn-danger full-width" style="background: #b91c1c;" onclick="bukaModalFormSPVKategori('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Sales</button>
 
-                <!-- TOMBOL RESET SEMUA ANTRIAN (TOKO TUTUP) -->
+                <!-- RESET TOTAL -->
                 <button type="button" class="btn-danger full-width" style="background: #7f1d1d; margin-top: 6px;" onclick="bukaModalResetTotal()">🗑️ RESET SEMUA ANTRIAN (Toko Tutup)</button>
             </div>
 
@@ -332,6 +330,80 @@
             });
         }
 
+        /* MODAL KHUSUS MEMASUKKAN SALES DENGAN PILIHAN POSISI ANTRIAN */
+        function bukaModalTambahAntriSpv() {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = "Masukkan Promotor ke Antrian";
+
+            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
+            masterSalesGlobal.forEach(n => optionsSales += `<option value="${n}">${n}</option>`);
+
+            let htmlContent = `
+                Kategori:<br>
+                <select id="spv-select-kategori" style="margin-bottom: 12px; margin-top: 6px;">
+                    <option value="HA">Home Appliance (HA)</option>
+                    <option value="AV">Audio Video (AV)</option>
+                </select><br>
+
+                Promotor:<br>
+                <select id="spv-select-sales" style="margin-bottom: 12px; margin-top: 6px;">${optionsSales}</select><br>
+
+                Posisi Urutan Antrian:<br>
+                <select id="spv-select-posisi" style="margin-bottom: 12px; margin-top: 6px;">
+                    <option value="0">Paling Belakang (Default)</option>
+                    <option value="1">Urutan Ke-1 (Paling Depan)</option>
+                    <option value="2">Urutan Ke-2</option>
+                    <option value="3">Urutan Ke-3</option>
+                    <option value="4">Urutan Ke-4</option>
+                    <option value="5">Urutan Ke-5</option>
+                </select><br>
+
+                PIN SPV:<br>
+                <input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center; margin-top: 6px;">
+            `;
+
+            document.getElementById('modal-desc').innerHTML = htmlContent;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" id="btn-modal-proses-aksi" class="btn-primary" onclick="eksekusiTambahAntriSpv()">Proses</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function eksekusiTambahAntriSpv() {
+            const kategori = document.getElementById('spv-select-kategori').value;
+            const namaSales = document.getElementById('spv-select-sales').value;
+            const posisi = document.getElementById('spv-select-posisi').value;
+            const pin = document.getElementById('spv-input-pin').value;
+
+            if(!namaSales) return alert("Pilih promotor terlebih dahulu!");
+            if(!pin) return alert("Masukkan PIN SPV!");
+
+            sedangProsesAksiSPV = true; 
+            const btnProses = document.getElementById('btn-modal-proses-aksi');
+            const textAsli = btnProses.innerHTML;
+            btnProses.disabled = true;
+            btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+            fetch(`${SCRIPT_URL}?aksi=spvDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`)
+            .then(res => res.json())
+            .then(res => {
+                setTimeout(() => {
+                    tutupModal();
+                    sedangProsesAksiSPV = false;
+                    tampilkanModal("Status SPV", res.pesan);
+                    muatDataAntrian();
+                }, 1200);
+            })
+            .catch(() => {
+                setTimeout(() => {
+                    btnProses.disabled = false;
+                    btnProses.innerHTML = textAsli;
+                    sedangProsesAksiSPV = false;
+                }, 1200);
+            });
+        }
+
         function bukaModalFormSPVKategori(aksiName, judulAksi, butuhPilihPromotor = true) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judulAksi;
@@ -425,10 +497,11 @@
                     if(data.length > 0) {
                         data.forEach((item, index) => {
                             let timerVal = item.timer !== undefined && item.timer !== null ? item.timer : (item.sisaWaktu !== undefined ? item.sisaWaktu : (item.status || "00:00"));
+                            let katLabel = item.kategori ? ` (${item.kategori})` : '';
                             
                             listHtml += `<li>
-                                <b>${index + 1}. ${item.nama}</b> 
-                                <span>Waktu Standby: ${timerVal}</span>
+                                <b>${index + 1}. ${item.nama}${katLabel}</b> 
+                                <span>Status / Waktu: ${timerVal}</span>
                             </li>`;
                         });
                     } else {
