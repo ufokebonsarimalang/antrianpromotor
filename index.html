@@ -15,6 +15,7 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --purple-cs: #7c3aed;
             --bg-color: #f1f5f9;
             --card-bg: #ffffff;
             --text-main: #0f172a;
@@ -72,7 +73,6 @@
         .label-giliran { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; }
         .nama-giliran-aktif { font-size: 20px; font-weight: 800; color: #1e3a8a; margin: 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        /* GAYA TIMER & EFEK KEDIP MERAH */
         .timer-mundur { 
             font-size: 18px; 
             font-weight: 800; 
@@ -114,6 +114,7 @@
         .btn-success { background: var(--success); color: white; }
         .btn-warning { background: var(--warning); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        .btn-purple { background: var(--purple-cs); color: white; }
         .btn-cancel { background: #e2e8f0; color: var(--text-main); }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; }
 
@@ -146,6 +147,7 @@
         }
         .badge-standby { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
 
         .spv-link-btn {
             margin-top: 24px; background: #faf5ff; border: 2px solid #e9d5ff; color: #7c3aed;
@@ -216,8 +218,12 @@
                 </select>
             </div>
 
+            <!-- TOMBOL-TOMBOL AKSI PROMOTOR -->
             <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Daftar Antrian</button>
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
+            
+            <!-- TOMBOL DIPANGGIL CS & SELESAI CS -->
+            <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 12px;">📢 DIPANGGIL CS (KUNCI POSISI)</button>
         </div>
 
         <!-- LIVE LIST DIPISAH HA DAN AV -->
@@ -240,7 +246,7 @@
         <a href="spv.html" class="spv-link-btn">🔑 BUKA HALAMAN SPV</a>
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL POPUP -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
@@ -386,7 +392,7 @@
                             labelTimerHA.style.color = "#ef4444";
                         } else {
                             labelTimerHA.classList.remove('timer-warning-merah');
-                            labelTimerHA.style.color = "#2563eb"; // Biru HA
+                            labelTimerHA.style.color = "#2563eb";
                         }
                     } else {
                         labelTimerHA.innerText = `Habis!`;
@@ -420,7 +426,7 @@
                             labelTimerAV.style.color = "#ef4444";
                         } else {
                             labelTimerAV.classList.remove('timer-warning-merah');
-                            labelTimerAV.style.color = "#9333ea"; // Ungu AV
+                            labelTimerAV.style.color = "#9333ea";
                         }
                     } else {
                         labelTimerAV.innerText = `Habis!`;
@@ -542,6 +548,9 @@
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> <div><span class="badge-status-item badge-standby">Standby</span></div></li>`;
                     } else if (item.status === "Melayani") {
                         itemHtml = `<li><b>${item.nama}</b> <div><span class="badge-status-item badge-melayani">Melayani (${kategoriItem})</span></div></li>`;
+                    } else if (item.status === "Dipanggil CS") {
+                        let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
+                        itemHtml = `<li><b>${urut}. ${item.nama}</b> <div><span class="badge-status-item badge-cs">Dipanggil CS</span></div></li>`;
                     }
 
                     if (kategoriItem === "AV") {
@@ -557,9 +566,10 @@
 
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
+            const btnCS = document.getElementById('btn-utama-cs');
             const selectKategori = document.getElementById('pilih-kategori');
 
-            if (btnAntri.dataset.loading === "true" || btnCustomer.dataset.loading === "true") {
+            if (btnAntri.dataset.loading === "true" || btnCustomer.dataset.loading === "true" || btnCS.dataset.loading === "true") {
                 document.getElementById('nama-aktif-ha').innerText = namaHANow;
                 document.getElementById('nama-aktif-av').innerText = namaAVNow;
                 document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
@@ -567,6 +577,7 @@
                 return;
             }
 
+            // KONDISI TOMBOL BERDASARKAN STATUS
             if (statusSayaGlobal === "Melayani") {
                 btnAntri.innerText = "Sedang Melayani Customer";
                 btnAntri.className = "btn-warning btn-disabled";
@@ -577,6 +588,7 @@
                 btnCustomer.className = "btn-danger";
                 btnCustomer.disabled = false;
 
+                btnCS.style.display = "none";
                 selectKategori.disabled = true;
 
             } else if (statusSayaGlobal === "Standby") {
@@ -593,6 +605,25 @@
                 btnCustomer.disabled = !bisaAmbil;
                 btnCustomer.className = bisaAmbil ? "btn-primary" : "btn-primary btn-disabled";
 
+                btnCS.style.display = "block";
+                btnCS.innerText = "📢 DIPANGGIL CS (KUNCI POSISI)";
+                btnCS.className = "btn-purple";
+                btnCS.disabled = false;
+
+                selectKategori.disabled = true;
+
+            } else if (statusSayaGlobal === "Dipanggil CS") {
+                btnAntri.innerText = "Posisi Antrian Dikunci (Di CS)";
+                btnAntri.className = "btn-purple btn-disabled";
+                btnAntri.disabled = true;
+
+                btnCustomer.style.display = "none";
+
+                btnCS.style.display = "block";
+                btnCS.innerText = "✅ SELESAI CS (KEMBALI ANTRI)";
+                btnCS.className = "btn-success";
+                btnCS.disabled = false;
+
                 selectKategori.disabled = true;
 
             } else { 
@@ -606,6 +637,7 @@
                     btnAntri.disabled = false;
                 }
                 btnCustomer.style.display = "none";
+                btnCS.style.display = "none";
                 selectKategori.disabled = false;
             }
 
@@ -732,6 +764,68 @@
                     })
                     .catch(err => {
                         btnCustomer.dataset.loading = "false";
+                        sedangProsesAksi = false;
+                        muatDataAntrian();
+                    });
+                });
+            }
+        }
+
+        /* AKSI AKSI KHUSUS TOMBOL DIPANGGIL CS & SELESAI CS */
+        function aksiToggleCS() {
+            const namaSales = getAkunAktif();
+            if(!namaSales) return;
+
+            const btnCS = document.getElementById('btn-utama-cs');
+
+            if (statusSayaGlobal === "Standby") {
+                tampilkanModalKonfirmasi("Status Dipanggil CS", "Dipanggil oleh CS? Posisi antrian Anda akan dikunci dan tidak tergeser ke bawah.", function() {
+                    sedangProsesAksi = true;
+                    btnCS.dataset.loading = "true";
+                    btnCS.disabled = true;
+                    btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+                    fetch(`${SCRIPT_URL}?aksi=panggilCS&namaSales=${encodeURIComponent(namaSales)}`, {
+                        method: 'GET',
+                        redirect: 'follow'
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        tampilkanModal("Status CS", res.pesan || "Posisi antrian dikunci");
+                        setTimeout(() => {
+                            btnCS.dataset.loading = "false";
+                            sedangProsesAksi = false;
+                            muatDataAntrian();
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        btnCS.dataset.loading = "false";
+                        sedangProsesAksi = false;
+                        muatDataAntrian();
+                    });
+                });
+            } else if (statusSayaGlobal === "Dipanggil CS") {
+                tampilkanModalKonfirmasi("Selesai Urusan CS", "Urusan CS sudah selesai? Anda akan kembali aktif di posisi antrian semula.", function() {
+                    sedangProsesAksi = true;
+                    btnCS.dataset.loading = "true";
+                    btnCS.disabled = true;
+                    btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+                    fetch(`${SCRIPT_URL}?aksi=selesaiCS&namaSales=${encodeURIComponent(namaSales)}`, {
+                        method: 'GET',
+                        redirect: 'follow'
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        tampilkanModal("Status CS", res.pesan || "Kembali ke antrian aktif");
+                        setTimeout(() => {
+                            btnCS.dataset.loading = "false";
+                            sedangProsesAksi = false;
+                            muatDataAntrian();
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        btnCS.dataset.loading = "false";
                         sedangProsesAksi = false;
                         muatDataAntrian();
                     });
