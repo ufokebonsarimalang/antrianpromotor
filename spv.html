@@ -169,6 +169,9 @@
 
                 <button type="button" class="btn-danger full-width" onclick="bukaModalFormSPVKategori('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
                 <button type="button" class="btn-danger full-width" style="background: #b91c1c;" onclick="bukaModalFormSPVKategori('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Sales</button>
+
+                <!-- TOMBOL RESET SEMUA ANTRIAN (TOKO TUTUP) -->
+                <button type="button" class="btn-danger full-width" style="background: #7f1d1d; margin-top: 6px;" onclick="bukaModalResetTotal()">🗑️ RESET SEMUA ANTRIAN (Toko Tutup)</button>
             </div>
 
             <button type="button" class="btn-cancel" style="margin-top: 18px;" onclick="logoutSPV()">Kunci Panel SPV</button>
@@ -197,7 +200,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         let masterSalesGlobal = [];
-        let sedangProsesAksiSPV = false; // Kunci Sinkronisasi
+        let sedangProsesAksiSPV = false; 
 
         window.onload = function() {
             muatMasterSales();
@@ -259,7 +262,7 @@
             const pin = document.getElementById('spv-toggle-pin').value;
             if(!pin) return alert("Masukkan PIN SPV!");
 
-            sedangProsesAksiSPV = true; // KUNCI REFRESH
+            sedangProsesAksiSPV = true; 
             const btnProses = document.getElementById('btn-modal-proses');
             const textAsli = btnProses.innerHTML;
             btnProses.disabled = true;
@@ -272,6 +275,51 @@
                     tutupModal();
                     sedangProsesAksiSPV = false;
                     tampilkanModal("Status Sistem", res.pesan);
+                    muatDataAntrian();
+                }, 1200);
+            })
+            .catch(() => {
+                setTimeout(() => {
+                    btnProses.disabled = false;
+                    btnProses.innerHTML = textAsli;
+                    sedangProsesAksiSPV = false;
+                }, 1200);
+            });
+        }
+
+        function bukaModalResetTotal() {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = 'Reset Semua Antrian';
+            document.getElementById('modal-desc').innerHTML = `
+                ⚠️ PERINGATAN:<br>
+                Semua antrian (Standby & Melayani) akan dihapus total dari awal.<br><br>
+                Masukkan PIN SPV:<br><br>
+                <input type="password" id="spv-reset-pin" placeholder="PIN SPV" style="text-align:center;">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" id="btn-modal-reset" class="btn-danger" onclick="eksekusiResetTotal()">Reset Sekarang</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function eksekusiResetTotal() {
+            const pin = document.getElementById('spv-reset-pin').value;
+            if(!pin) return alert("Masukkan PIN SPV!");
+
+            sedangProsesAksiSPV = true;
+            const btnProses = document.getElementById('btn-modal-reset');
+            const textAsli = btnProses.innerHTML;
+            btnProses.disabled = true;
+            btnProses.innerHTML = `<span class="spinner"></span> Mereset...`;
+
+            fetch(`${SCRIPT_URL}?aksi=spvResetAntrian&pin=${encodeURIComponent(pin)}`)
+            .then(res => res.json())
+            .then(res => {
+                setTimeout(() => {
+                    tutupModal();
+                    sedangProsesAksiSPV = false;
+                    tampilkanModal("Status Reset Total", res.pesan);
                     muatDataAntrian();
                 }, 1200);
             })
@@ -327,7 +375,7 @@
             if(butuhPilihPromotor && !namaSales) return alert("Pilih promotor terlebih dahulu!");
             if(!pin) return alert("Masukkan PIN SPV!");
 
-            sedangProsesAksiSPV = true; // KUNCI REFRESH
+            sedangProsesAksiSPV = true; 
             const btnProses = document.getElementById('btn-modal-proses-aksi');
             const textAsli = btnProses.innerHTML;
             btnProses.disabled = true;
@@ -338,7 +386,7 @@
             .then(res => {
                 setTimeout(() => {
                     tutupModal();
-                    sedangProsesAksiSPV5 = false;
+                    sedangProsesAksiSPV = false;
                     tampilkanModal("Status SPV", res.pesan);
                     muatDataAntrian();
                 }, 1200);
@@ -361,7 +409,7 @@
         }
 
         function muatDataAntrian() {
-            if(sedangProsesAksiSPV) return; // Mencegah data lama menimpa proses yang sedang berjalan
+            if(sedangProsesAksiSPV) return; 
 
             fetch(`${SCRIPT_URL}?aksi=getAntrian`)
             .then(res => res.json())
@@ -376,7 +424,6 @@
                     const data = res.data || [];
                     if(data.length > 0) {
                         data.forEach((item, index) => {
-                            // Mengambil data dari properti item yang ada dan menampilkan teks "Waktu Standby" secara eksplisit
                             let timerVal = item.timer !== undefined && item.timer !== null ? item.timer : (item.sisaWaktu !== undefined ? item.sisaWaktu : (item.status || "00:00"));
                             
                             listHtml += `<li>
