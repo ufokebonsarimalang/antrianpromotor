@@ -15,11 +15,11 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --bg-color: #f8fafc;
+            --bg-color: #f1f5f9;
             --card-bg: #ffffff;
             --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
+            --text-muted: #475569;
+            --border: #cbd5e1;
         }
 
         *, body, button, select, input {
@@ -35,60 +35,62 @@
         }
 
         .app-container {
-            width: 100%; max-width: 480px;
+            width: 100%; max-width: 500px;
             background: var(--card-bg);
-            border-radius: 20px; padding: 20px;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            border-radius: 24px; padding: 24px;
+            border: 2px solid var(--border);
+            box-shadow: 0 15px 35px -5px rgba(0,0,0,0.1);
             text-align: center;
         }
 
         .gradient-header {
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border-radius: 16px; padding: 20px; color: white; margin-bottom: 16px;
+            border-radius: 18px; padding: 22px; color: white; margin-bottom: 18px;
+            box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.3);
         }
-        .gradient-header h2 { margin: 0; font-size: 20px; font-weight: 800; }
-        .gradient-header p { margin: 4px 0 0 0; opacity: 0.85; font-size: 12px; }
+        .gradient-header h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+        .gradient-header p { margin: 6px 0 0 0; opacity: 0.9; font-size: 13px; font-weight: 600; }
 
         .status-badge-sistem {
-            display: inline-block; padding: 6px 14px; border-radius: 20px;
-            font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 16px;
+            display: inline-block; padding: 8px 16px; border-radius: 20px;
+            font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 18px;
+            letter-spacing: 0.5px;
         }
-        .status-open { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-        .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+        .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
+        .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
 
         .card-giliran-wrapper {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 16px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
         .card-giliran-utama {
-            background: #eff6ff; border: 1px solid #bfdbfe;
-            border-radius: 14px; padding: 14px 10px; text-align: center;
+            background: #eff6ff; border: 2px solid #93c5fd;
+            border-radius: 16px; padding: 16px 12px; text-align: center;
         }
-        .label-giliran { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--primary); }
-        .nama-giliran-aktif { font-size: 16px; font-weight: 800; color: #1e3a8a; margin: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .timer-mundur { font-size: 15px; font-weight: 800; color: var(--danger); margin-top: 4px; display: block; }
+        .label-giliran { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; }
+        .nama-giliran-aktif { font-size: 20px; font-weight: 800; color: #1e3a8a; margin: 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .timer-mundur { font-size: 18px; font-weight: 800; color: var(--danger); margin-top: 4px; display: block; font-variant-numeric: tabular-nums; }
 
-        .input-group { margin-bottom: 14px; text-align: left; }
-        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+        .input-group { margin-bottom: 16px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
 
         select, input[type="text"] { 
-            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
-            background: #ffffff; font-size: 13px; color: var(--text-main); outline: none;
+            width: 100%; padding: 14px 16px; border-radius: 12px; border: 2px solid var(--border);
+            background: #ffffff; font-size: 15px; font-weight: 600; color: var(--text-main); outline: none;
+            transition: all 0.2s ease;
         }
-        select:disabled {
-            background-color: #f1f5f9;
-            color: #64748b;
-            cursor: not-allowed;
-        }
+        select:focus, input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        select:disabled { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; }
 
         button { 
-            width: 100%; padding: 12px; border-radius: 10px; 
-            font-size: 12px; font-weight: 700; cursor: pointer; border: none;
+            width: 100%; padding: 16px; border-radius: 14px; 
+            font-size: 15px; font-weight: 800; cursor: pointer; border: none;
             text-transform: uppercase; transition: all 0.2s ease;
-            display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+            display: inline-flex; justify-content: center; align-items: center; gap: 10px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         button:active { transform: scale(0.98); }
 
@@ -97,12 +99,12 @@
         .btn-warning { background: var(--warning); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-cancel { background: #e2e8f0; color: var(--text-main); }
-        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; }
+        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; }
 
         .spinner {
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: #ffffff;
             animation: spin 0.8s linear infinite;
@@ -113,39 +115,40 @@
         }
 
         .user-badge {
-            background: #f8fafc; border: 1px solid var(--border); border-radius: 12px;
-            padding: 12px; margin-bottom: 16px; text-align: left; font-size: 12px;
+            background: #f8fafc; border: 2px solid var(--border); border-radius: 14px;
+            padding: 14px; margin-bottom: 18px; text-align: left; font-size: 14px; font-weight: 600;
         }
 
-        .list-antrian { list-style: none; padding: 0; margin: 10px 0 0 0; text-align: left; }
+        .list-antrian { list-style: none; padding: 0; margin: 8px 0 0 0; text-align: left; }
         .list-antrian li {
-            padding: 10px 12px; background: #ffffff; border-radius: 8px; margin-bottom: 6px;
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); font-size: 13px;
+            padding: 12px 14px; background: #ffffff; border-radius: 10px; margin-bottom: 8px;
+            display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--border); font-size: 14px; font-weight: 700;
         }
 
         .badge-status-item {
-            font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px;
+            font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 6px;
         }
-        .badge-standby { background: #dbeafe; color: #1e40af; }
-        .badge-melayani { background: #fef3c7; color: #92400e; }
+        .badge-standby { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+        .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
 
         .spv-link-btn {
-            margin-top: 20px; background: #faf5ff; border: 1px solid #e9d5ff; color: #7c3aed;
-            font-size: 11px; padding: 10px; border-radius: 10px; text-decoration: none; display: block; font-weight: 700;
+            margin-top: 24px; background: #faf5ff; border: 2px solid #e9d5ff; color: #7c3aed;
+            font-size: 13px; padding: 14px; border-radius: 12px; text-decoration: none; display: block; font-weight: 800;
+            letter-spacing: 0.5px;
         }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
             display: flex; justify-content: center; align-items: center;
             z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-box { background: white; width: 100%; max-width: 320px; padding: 20px; border-radius: 16px; text-align: center; }
-        .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
-        .modal-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
-        .modal-actions { display: flex; gap: 8px; }
-        .modal-actions button { flex: 1; padding: 10px; font-size: 11px; }
+        .modal-box { background: white; width: 100%; max-width: 360px; padding: 24px; border-radius: 20px; text-align: center; border: 2px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; color: var(--text-main); }
+        .modal-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; font-weight: 600; }
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-actions button { flex: 1; padding: 12px; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -178,7 +181,7 @@
         <div id="panel-login" style="display: none;">
             <div class="input-group">
                 <label>Pilih Nama Anda (Kunci Perangkat)</label>
-                <select id="pilih-sales"><option value="">-- Memuat Data --</option></select>
+                <select id="pilih-sales"><option value="">-- Pilih Nama Anda --</option></select>
             </div>
             <button type="button" class="btn-primary" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
@@ -186,7 +189,7 @@
         <!-- MENU PROMOTOR -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
-                <span>Akun HP Ini:</span> <strong id="label-user-aktif" style="color:var(--primary-dark);">-</strong>
+                <span style="color: var(--text-muted);">Akun HP Ini:</span> <strong id="label-user-aktif" style="color:var(--primary-dark); font-size: 15px;">-</strong>
             </div>
 
             <div class="input-group">
@@ -198,20 +201,20 @@
             </div>
 
             <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Daftar Antrian</button>
-            <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 10px;">Sudah Membawa Customer</button>
+            <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
         </div>
 
         <!-- LIVE LIST DIPISAH HA DAN AV -->
-        <div style="margin-top: 20px; text-align: left;">
+        <div style="margin-top: 24px; text-align: left;">
             <div style="margin-bottom: 20px;">
-                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Live Urutan HA</span>
+                <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Live Urutan HA</span>
                 <ul id="item-antrian-list-ha" class="list-antrian">
                     <li><span>Memuat data...</span></li>
                 </ul>
             </div>
 
             <div>
-                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Live Urutan AV</span>
+                <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Live Urutan AV</span>
                 <ul id="item-antrian-list-av" class="list-antrian">
                     <li><span>Memuat data...</span></li>
                 </ul>
@@ -256,22 +259,16 @@
         };
 
         function getDeviceId() {
-    let devId = localStorage.getItem('ufo_device_perm_id');
-    
-    // Jika HP ini belum punya ID unik, buatkan UUID acak yang baru
-    if (!devId) {
-        // Generasi string acak berstandar UUID v4
-        devId = 'ufo-dev-' + 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-        
-        // Simpan permanen di localStorage HP ini
-        localStorage.setItem('ufo_device_perm_id', devId);
-    }
-    
-    return devId;
-}
+            let devId = localStorage.getItem('ufo_device_perm_id');
+            if (!devId) {
+                devId = 'ufo-dev-' + 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+                localStorage.setItem('ufo_device_perm_id', devId);
+            }
+            return devId;
+        }
 
         function cekAkunKeServer() {
             const deviceId = getDeviceId();
@@ -511,8 +508,8 @@
                 });
             }
 
-            if(!listHtmlHA) listHtmlHA = "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian HA</span></li>";
-            if(!listHtmlAV) listHtmlAV = "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian AV</span></li>";
+            if(!listHtmlHA) listHtmlHA = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian HA</span></li>";
+            if(!listHtmlAV) listHtmlAV = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian AV</span></li>";
 
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
