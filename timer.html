@@ -83,7 +83,7 @@
 
         <div class="input-group">
             <label>Pilih Promotor & Sisa Waktu</label>
-            <select id="select-promotor-standby" onfocus="sedangFokus = true" onblur="sedangFokus = false">
+            <select id="select-promotor-standby" onmousedown="sedangFokus = true" onchange="sedangFokus = false" onblur="sedangFokus = false">
                 <option value="">-- Memuat daftar promotor... --</option>
             </select>
         </div>
@@ -97,7 +97,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         const BATAS_MENIT = 10;
         let dataStandbyGlobal = [];
-        let sedangFokus = false; // Mencegah dropdown ke-reset saat sedang dipilih
+        let sedangFokus = false;
 
         window.onload = function() {
             muatDataStandby();
@@ -105,7 +105,7 @@
         };
 
         function muatDataStandby() {
-            // Jika dropdown sedang diklik/dibuka oleh pengguna, jangan refresh tampilan agar tidak mereset pilihan
+            // Jangan ganggu antarmuka saat pengguna sedang aktif memilih dropdown
             if (sedangFokus) return;
 
             fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
@@ -128,12 +128,13 @@
         function renderDropdown() {
             const selectEl = document.getElementById('select-promotor-standby');
             const nilaiTerpilihSebelumnya = selectEl.value; 
-            
-            let html = '<option value="">-- Pilih Promotor Standby --</option>';
-            
-            if (dataStandbyGlobal.length > 0) {
-                const now = new Date().getTime();
+            const now = new Date().getTime();
 
+            // Kumpulkan opsi-opsi baru
+            let opsiBaru = [];
+            opsiBaru.push({ value: "", text: "-- Pilih Promotor Standby --", kategori: "" });
+
+            if (dataStandbyGlobal.length > 0) {
                 dataStandbyGlobal.forEach(item => {
                     const kategori = item.kategori || "HA";
                     let sisaTimerStr = "00:00";
@@ -156,17 +157,50 @@
                         }
                     }
 
-                    html += `<option value="${item.nama}" data-kategori="${kategori}">
-                        ${item.nama} (${kategori}) — Sisa Waktu: ${sisaTimerStr}
-                    </option>`;
+                    opsiBaru.push({
+                        value: item.nama,
+                        text: `${item.nama} (${kategori}) — Sisa Waktu: ${sisaTimerStr}`,
+                        kategori: kategori
+                    });
                 });
             } else {
-                html = '<option value="">-- Tidak ada promotor yang Standby --</option>';
+                opsiBaru = [{ value: "", text: "-- Tidak ada promotor yang Standby --", kategori: "" }];
             }
-            
-            selectEl.innerHTML = html;
-            if (nilaiTerpilihSebelumnya) {
-                selectEl.value = nilaiTerpilihSebelumnya;
+
+            // Perbarui teks opsi yang ada jika struktur jumlah opsi & nama bernilai sama (Mencegah Re-render total)
+            const opsiEksisting = selectEl.options;
+            let strukturSama = (opsiEksisting.length === opsiBaru.length);
+
+            if (strukturSama) {
+                for (let i = 0; i < opsiEksisting.length; i++) {
+                    if (opsiEksisting[i].value !== opsiBaru[i].value) {
+                        strukturSama = false;
+                        break;
+                    }
+                }
+            }
+
+            if (strukturSama) {
+                // Hanya perbarui teks sisa waktunya saja tanpa merusak pilihan/DOM
+                for (let i = 0; i < opsiEksisting.length; i++) {
+                    if (opsiEksisting[i].text !== opsiBaru[i].text) {
+                        opsiEksisting[i].text = opsiBaru[i].text;
+                    }
+                }
+            } else {
+                // Jika daftar nama di antrian berubah/bertambah/berkurang, perbarui secara utuh
+                selectEl.innerHTML = "";
+                opsiBaru.forEach(opt => {
+                    const elOpt = document.createElement('option');
+                    elOpt.value = opt.value;
+                    elOpt.text = opt.text;
+                    if(opt.kategori) elOpt.setAttribute('data-kategori', opt.kategori);
+                    selectEl.appendChild(elOpt);
+                });
+
+                if (nilaiTerpilihSebelumnya) {
+                    selectEl.value = nilaiTerpilihSebelumnya;
+                }
             }
         }
 
@@ -183,10 +217,9 @@
             const kategori = selectedOption.getAttribute('data-kategori') || "HA";
 
             if (confirm(`Yakin ingin menambah waktu timer untuk ${namaSales} (${kategori})?`)) {
-                // Set fokus ke false agar sistem boleh me-refresh data setelah perintah kirim
                 sedangFokus = false;
 
-                const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`;
+                const urlAksi = `${SCRIPT_URL}?aksi=spvTambahTimer&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`;
                 
                 fetch(urlAksi, {
                     method: 'GET',
@@ -195,7 +228,7 @@
                 .then(res => res.json())
                 .then(res => {
                     alert(res.pesan);
-                    muatDataStandby(); // Langsung ambil data terbaru
+                    muatDataStandby();
                 })
                 .catch(err => {
                     console.error(err);
