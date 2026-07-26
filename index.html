@@ -71,7 +71,23 @@
         }
         .label-giliran { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; }
         .nama-giliran-aktif { font-size: 20px; font-weight: 800; color: #1e3a8a; margin: 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .timer-mundur { font-size: 18px; font-weight: 800; color: var(--danger); margin-top: 4px; display: block; font-variant-numeric: tabular-nums; }
+        
+        /* GAYA TIMER & EFEK KEDIP MERAH */
+        .timer-mundur { 
+            font-size: 18px; 
+            font-weight: 800; 
+            margin-top: 4px; 
+            display: block; 
+            font-variant-numeric: tabular-nums; 
+            transition: color 0.3s ease;
+        }
+        .timer-warning-merah { 
+            color: var(--danger) !important; 
+            animation: blinkAlert 1s infinite; 
+        }
+        @keyframes blinkAlert { 
+            50% { opacity: 0.3; } 
+        }
 
         .input-group { margin-bottom: 16px; text-align: left; }
         .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
@@ -353,6 +369,7 @@
             const labelTimerAV = document.getElementById('timer-mundur-av');
             const now = new Date().getTime();
 
+            // --- HITUNG MUNDUR HA ---
             if (waktuStandbyHAGlobal) {
                 const waktuHA = new Date(waktuStandbyHAGlobal).getTime();
                 if (!isNaN(waktuHA)) {
@@ -363,16 +380,30 @@
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
                         labelTimerHA.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                        
+                        if (totalDetik <= 60) {
+                            labelTimerHA.classList.add('timer-warning-merah');
+                            labelTimerHA.style.color = "#ef4444";
+                        } else {
+                            labelTimerHA.classList.remove('timer-warning-merah');
+                            labelTimerHA.style.color = "#2563eb"; // Biru HA
+                        }
                     } else {
                         labelTimerHA.innerText = `Habis!`;
+                        labelTimerHA.classList.add('timer-warning-merah');
                     }
                 } else {
                     labelTimerHA.innerText = "00:00";
+                    labelTimerHA.classList.remove('timer-warning-merah');
+                    labelTimerHA.style.color = "#2563eb";
                 }
             } else {
                 labelTimerHA.innerText = "00:00";
+                labelTimerHA.classList.remove('timer-warning-merah');
+                labelTimerHA.style.color = "#2563eb";
             }
 
+            // --- HITUNG MUNDUR AV ---
             if (waktuStandbyAVGlobal) {
                 const waktuAV = new Date(waktuStandbyAVGlobal).getTime();
                 if (!isNaN(waktuAV)) {
@@ -383,14 +414,27 @@
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
                         labelTimerAV.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                        
+                        if (totalDetik <= 60) {
+                            labelTimerAV.classList.add('timer-warning-merah');
+                            labelTimerAV.style.color = "#ef4444";
+                        } else {
+                            labelTimerAV.classList.remove('timer-warning-merah');
+                            labelTimerAV.style.color = "#9333ea"; // Ungu AV
+                        }
                     } else {
                         labelTimerAV.innerText = `Habis!`;
+                        labelTimerAV.classList.add('timer-warning-merah');
                     }
                 } else {
                     labelTimerAV.innerText = "00:00";
+                    labelTimerAV.classList.remove('timer-warning-merah');
+                    labelTimerAV.style.color = "#9333ea";
                 }
             } else {
                 labelTimerAV.innerText = "00:00";
+                labelTimerAV.classList.remove('timer-warning-merah');
+                labelTimerAV.style.color = "#9333ea";
             }
         }
 
