@@ -105,7 +105,6 @@
         };
 
         function muatDataStandby() {
-            // Jangan ganggu antarmuka saat pengguna sedang aktif memilih dropdown
             if (sedangFokus) return;
 
             fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
@@ -130,7 +129,6 @@
             const nilaiTerpilihSebelumnya = selectEl.value; 
             const now = new Date().getTime();
 
-            // Kumpulkan opsi-opsi baru
             let opsiBaru = [];
             opsiBaru.push({ value: "", text: "-- Pilih Promotor Standby --", kategori: "" });
 
@@ -167,7 +165,6 @@
                 opsiBaru = [{ value: "", text: "-- Tidak ada promotor yang Standby --", kategori: "" }];
             }
 
-            // Perbarui teks opsi yang ada jika struktur jumlah opsi & nama bernilai sama (Mencegah Re-render total)
             const opsiEksisting = selectEl.options;
             let strukturSama = (opsiEksisting.length === opsiBaru.length);
 
@@ -181,14 +178,12 @@
             }
 
             if (strukturSama) {
-                // Hanya perbarui teks sisa waktunya saja tanpa merusak pilihan/DOM
                 for (let i = 0; i < opsiEksisting.length; i++) {
                     if (opsiEksisting[i].text !== opsiBaru[i].text) {
                         opsiEksisting[i].text = opsiBaru[i].text;
                     }
                 }
             } else {
-                // Jika daftar nama di antrian berubah/bertambah/berkurang, perbarui secara utuh
                 selectEl.innerHTML = "";
                 opsiBaru.forEach(opt => {
                     const elOpt = document.createElement('option');
@@ -219,7 +214,8 @@
             if (confirm(`Yakin ingin menambah waktu timer untuk ${namaSales} (${kategori})?`)) {
                 sedangFokus = false;
 
-                const urlAksi = `${SCRIPT_URL}?aksi=spvTambahTimer&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`;
+                // DIUBAH: Menggunakan "tambahWaktuAdmin" agar tidak perlu validasi PIN SPV
+                const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`;
                 
                 fetch(urlAksi, {
                     method: 'GET',
