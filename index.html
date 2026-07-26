@@ -666,46 +666,46 @@
             });
         }
 
-        function aksiUtamaAntri() {
-            const namaSales = getAkunAktif();
-            const kategoriPilih = document.getElementById('pilih-kategori').value;
-            if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
-            
-            sedangProsesAksi = true; 
+       function aksiUtamaAntri() {
+    const namaSales = getAkunAktif();
+    const kategoriPilih = document.getElementById('pilih-kategori').value;
+    if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat.");
+    
+    sedangProsesAksi = true; 
 
-            const btnAntri = document.getElementById('btn-utama-antri');
-            btnAntri.dataset.loading = "true";
-            btnAntri.disabled = true;
-            btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
+    const btnAntri = document.getElementById('btn-utama-antri');
+    btnAntri.dataset.loading = "true";
+    btnAntri.disabled = true;
+    btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
 
-            document.getElementById('pilih-kategori').disabled = true;
+    document.getElementById('pilih-kategori').disabled = true;
 
-            statusSayaGlobal = "Standby";
-            let tempSembuhList = [...daftarAntrianGlobal];
-            if(!tempSembuhList.some(x => String(x.nama).trim().toLowerCase() === namaSales.trim().toLowerCase())) {
-                tempSembuhList.push({ nama: namaSales, status: "Standby", kategori: kategoriPilih });
-            }
-            renderUIRental(tempSembuhList, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
+    fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, {
+        method: 'GET',
+        redirect: 'follow'
+    })
+    .then(res => res.json())
+    .then(res => {
+        btnAntri.dataset.loading = "false";
+        sedangProsesAksi = false;
 
-            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, {
-                method: 'GET',
-                redirect: 'follow'
-            })
-            .then(res => res.json())
-            .then(res => {
-                tampilkanModal("Informasi Antrian", res.pesan || "Berhasil diproses");
-                setTimeout(() => {
-                    btnAntri.dataset.loading = "false";
-                    sedangProsesAksi = false;
-                    muatDataAntrian();
-                }, 1500);
-            })
-            .catch(err => {
-                btnAntri.dataset.loading = "false";
-                sedangProsesAksi = false;
-                muatDataAntrian();
-            });
+        if (res.status === "sukses") {
+            tampilkanModal("Informasi Antrian", res.pesan || "Berhasil masuk antrian");
+        } else {
+            tampilkanModal("Gagal", res.pesan || "Gagal mendaftar antrian.");
         }
+        
+        muatDataAntrian();
+    })
+    .catch(err => {
+        btnAntri.dataset.loading = "false";
+        sedangProsesAksi = false;
+        document.getElementById('pilih-kategori').disabled = false;
+        btnAntri.disabled = false;
+        btnAntri.innerHTML = "Daftar Antrian";
+        tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mendaftar.");
+    });
+}
 
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
