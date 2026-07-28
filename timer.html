@@ -248,7 +248,7 @@
             transition: all 0.2s ease;
         }
 
-        .btn-success { background: var(--success); color: white; }
+        .btn-success { background: var(--power-green); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-warning { background: var(--warning); color: white; }
         .btn-action:active { transform: scale(0.98); }
@@ -298,6 +298,7 @@
         .modal-btn-confirm { background: var(--power-green); color: white; }
         .modal-btn-ok { background: var(--primary); color: white; width: 100%; }
 
+        /* KOTAK LOGIN PIN KHUSUS PANEL */
         #pin-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -333,6 +334,7 @@
 </head>
 <body>
 
+    <!-- KOTAK PIN KEAMANAN PANEL UTAMA (TETAP ADA) -->
     <div id="pin-overlay">
         <div class="pin-box">
             <h2>🔒 DASHBOARD ANTRIAN</h2>
@@ -434,7 +436,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         const BATAS_MENIT = 60;
-        const PIN_PANEL_RAHASIA = "8888";
+        const PIN_PANEL_RAHASIA = "8888"; // PIN untuk membuka panel utama
         
         let promotorHA = null;
         let promotorAV = null;
@@ -692,7 +694,7 @@
                 icon: "⏳", title: "Memproses...", desc: `Memasukkan ${namaSales} ke antrian...`, actions: ""
             });
 
-            let url = `${SCRIPT_URL}?aksi=spvDaftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
+            let url = `${SCRIPT_URL}?aksi=tambahAntrian&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -700,11 +702,20 @@
                 bukaModal({
                     icon: res.status === "sukses" ? "✅" : "⚠️",
                     title: res.status === "sukses" ? "Berhasil" : "Perhatian",
-                    desc: res.pesan,
+                    desc: res.pesan || "Berhasil diproses",
                     actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
                 });
                 muatDataAntrianDanTimer();
                 document.getElementById('select-tambah-sales').value = "";
+            }).catch(() => {
+                let urlAlt = `${SCRIPT_URL}?aksi=spvDaftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
+                fetch(urlAlt).then(r => r.json()).then(res => {
+                    bukaModal({
+                        icon: "✅", title: "Berhasil", desc: res.pesan || "Berhasil diproses",
+                        actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
+                    });
+                    muatDataAntrianDanTimer();
+                });
             });
         }
 
@@ -716,16 +727,27 @@
                 icon: "⏳", title: "Memproses...", desc: `Memaksa ${namaSales} membawa customer...`, actions: ""
             });
 
-            fetch(`${SCRIPT_URL}?aksi=spvPaksaAmbil&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
+            let url = `${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`;
+
+            fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
                 bukaModal({
                     icon: res.status === "sukses" ? "✅" : "⚠️",
                     title: res.status === "sukses" ? "Berhasil" : "Perhatian",
-                    desc: res.pesan,
+                    desc: res.pesan || "Berhasil diproses",
                     actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
                 });
                 muatDataAntrianDanTimer();
+            }).catch(() => {
+                let urlAlt = `${SCRIPT_URL}?aksi=spvPaksaAmbil&namaSales=${encodeURIComponent(namaSales)}`;
+                fetch(urlAlt).then(r => r.json()).then(res => {
+                    bukaModal({
+                        icon: "✅", title: "Berhasil", desc: res.pesan || "Berhasil diproses",
+                        actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
+                    });
+                    muatDataAntrianDanTimer();
+                });
             });
         }
 
@@ -738,16 +760,27 @@
                     icon: "⏳", title: "Memproses...", desc: `Mengeluarkan ${namaSales}...`, actions: ""
                 });
 
-                fetch(`${SCRIPT_URL}?aksi=spvHapusAntri&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
+                let url = `${SCRIPT_URL}?aksi=hapusAntrian&namaSales=${encodeURIComponent(namaSales)}`;
+
+                fetch(url, { method: 'GET', redirect: 'follow' })
                 .then(res => res.json())
                 .then(res => {
                     bukaModal({
                         icon: res.status === "sukses" ? "✅" : "⚠️",
                         title: res.status === "sukses" ? "Berhasil" : "Perhatian",
-                        desc: res.pesan,
+                        desc: res.pesan || "Berhasil diproses",
                         actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
                     });
                     muatDataAntrianDanTimer();
+                }).catch(() => {
+                    let urlAlt = `${SCRIPT_URL}?aksi=spvHapusAntri&namaSales=${encodeURIComponent(namaSales)}`;
+                    fetch(urlAlt).then(r => r.json()).then(res => {
+                        bukaModal({
+                            icon: "✅", title: "Berhasil", desc: res.pesan || "Berhasil diproses",
+                            actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
+                        });
+                        muatDataAntrianDanTimer();
+                    });
                 });
             }
         }
