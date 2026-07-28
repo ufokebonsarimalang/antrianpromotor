@@ -287,33 +287,41 @@
             return devId;
         }
 function cekAkunKeServer() {
-            // Ambil nama sales yang terakhir kali aktif di HP ini dari memori permanen
-            const salesPernahAktif = localStorage.getItem('ufo_nama_sales_aktif');
-
-            if (salesPernahAktif) {
-                // Jika HP pernah aktif dengan nama tertentu, langsung aktifkan tampilannya secara instan
-                namaSalesAktifGlobal = salesPernahAktif;
-                document.getElementById('panel-login').style.display = 'none';
-                document.getElementById('panel-menu-utama').style.display = 'block';
-                document.getElementById('label-user-aktif').innerText = salesPernahAktif;
+            const deviceId = getDeviceId();
+            
+            // Tanyakan langsung ke Google Sheet (server) apakah deviceId ini sudah terikat
+            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, { method: 'GET', redirect: 'follow' })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === "terkunci" && res.nama) {
+                    // Jika di Sheet sudah tercatat terikat, langsung aktifkan menu utama tanpa perlu ikat ulang!
+                    namaSalesAktifGlobal = res.nama;
+                    localStorage.setItem('ufo_nama_sales_aktif', res.nama); // Simpan juga ke cache lokal agar cepat
+                    
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = res.nama;
+                } else {
+                    // Jika di Sheet memang benar-benar belum ada / kosong
+                    document.getElementById('panel-login').style.display = 'block';
+                    document.getElementById('panel-menu-utama').style.display = 'none';
+                }
                 muatDataAntrian();
-            } else {
-                // Jika benar-benar kosong, baru tampilkan pilihan login/pilih nama
-                fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.status === "sukses") {
-                        let html = '<option value="">-- Pilih Nama Anda --</option>';
-                        (res.data || []).forEach(n => html += `<option value="${n}">${n}</option>`);
-                        document.getElementById('pilih-sales').innerHTML = html;
-                    }
-                });
-                document.getElementById('panel-login').style.display = 'block';
-                document.getElementById('panel-menu-utama').style.display = 'none';
+            }).catch(() => {
+                // Fallback jika koneksi server sedang lambat, cek dari memori lokal cadangan
+                const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
+                if (cachedNama) {
+                    namaSalesAktifGlobal = cachedNama;
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = cachedNama;
+                } else {
+                    document.getElementById('panel-login').style.display = 'block';
+                    document.getElementById('panel-menu-utama').style.display = 'none';
+                }
                 muatDataAntrian();
-            }
+            });
         }
-
         function simpanAkunHP() {
             const namaPilih = document.getElementById('pilih-sales').value;
             const deviceId = getDeviceId();
