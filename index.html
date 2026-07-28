@@ -664,8 +664,7 @@ function cekAkunKeServer() {
             }
         }
 
-        // --- TAMBAHAN FUNGSI KELUAR ANTRIAN (ISTIRAHAT) ---
-        function bukaModalKeluarIstirahat() {
+   function bukaModalKeluarIstirahat() {
             tampilkanModalKonfirmasi("Keluar Antrian", "Apakah Anda yakin ingin keluar dari antrian untuk istirahat / ada keperluan?", function() {
                 const namaSales = getAkunAktif();
                 if (!namaSales) return;
@@ -677,10 +676,22 @@ function cekAkunKeServer() {
                     btnKeluar.innerHTML = `<span class="spinner"></span> Memproses...`;
                 }
 
+                bukaModal({
+                    icon: "⏳",
+                    title: "Memproses...",
+                    desc: "Sedang keluar dari antrian...",
+                    actions: ""
+                });
+
                 fetch(`${SCRIPT_URL}?aksi=spvHapusAntri&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                 .then(res => res.json())
                 .then(res => {
                     tampilkanModal("Berhasil Keluar", "Anda telah keluar dari antrian. Silakan masuk antrian kembali jika sudah selesai istirahat.");
+                    
+                    // LANGSUNG HAPUS CACHE/STATUS LOKAL AGAR TOMBOL KEMBALI NORMAL
+                    statusSayaGlobal = "belum_ada";
+                    
+                    // PAKSA TARIK DATA TERBARU SEKETIKA DARI SERVER
                     setTimeout(() => { 
                         sedangProsesAksi = false; 
                         muatDataAntrian(true); 
@@ -688,14 +699,13 @@ function cekAkunKeServer() {
                             btnKeluar.disabled = false;
                             btnKeluar.innerHTML = `☕ KELUAR ANTRIAN (ISTIRAHAT)`;
                         }
-                    }, 400);
+                    }, 300);
                 }).catch(() => {
                     sedangProsesAksi = false;
                     muatDataAntrian(true);
                 });
             });
         }
-
         function tampilkanModal(judul, desc) {
             document.getElementById('modal-title').innerText = judul;
             document.getElementById('modal-desc').innerText = desc;
