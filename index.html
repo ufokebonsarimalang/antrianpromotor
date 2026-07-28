@@ -286,8 +286,21 @@
             }
             return devId;
         }
+function cekAkunKeServer() {
+            // CEK INSTAN DARI LOCALSTORAGE TERLEBIH DAHULU AGAR TIDAK LEMOT
+            const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
+            if (cachedNama) {
+                namaSalesAktifGlobal = cachedNama;
+                const panelLogin = document.getElementById('panel-login');
+                const panelMenu = document.getElementById('panel-menu-utama');
+                const labelUser = document.getElementById('label-user-aktif');
+                
+                if (panelLogin) panelLogin.style.display = 'none';
+                if (panelMenu) panelMenu.style.display = 'block';
+                if (labelUser) labelUser.innerText = cachedNama;
+            }
 
-        function cekAkunKeServer() {
+            // Tetap verifikasi ke server di latar belakang secara senyap
             const deviceId = getDeviceId();
             fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -298,14 +311,13 @@
                     document.getElementById('panel-login').style.display = 'none';
                     document.getElementById('panel-menu-utama').style.display = 'block';
                     document.getElementById('label-user-aktif').innerText = res.nama;
-                    muatDataAntrian();
-                } else {
+                } else if (res.status === "belum_terikat" && !cachedNama) {
                     namaSalesAktifGlobal = "";
                     localStorage.removeItem('ufo_nama_sales_aktif');
                     document.getElementById('panel-login').style.display = 'block';
                     document.getElementById('panel-menu-utama').style.display = 'none';
-                    muatDataAntrian();
                 }
+                muatDataAntrian();
             }).catch(() => muatDataAntrian());
         }
 
