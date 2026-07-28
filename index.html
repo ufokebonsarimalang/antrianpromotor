@@ -61,10 +61,7 @@
         .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
 
         .card-giliran-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
+            display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;
         }
         .card-giliran-utama {
             background: #eff6ff; border: 2px solid #93c5fd;
@@ -74,20 +71,11 @@
         .nama-giliran-aktif { font-size: 20px; font-weight: 800; color: #1e3a8a; margin: 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .timer-mundur { 
-            font-size: 18px; 
-            font-weight: 800; 
-            margin-top: 4px; 
-            display: block; 
-            font-variant-numeric: tabular-nums; 
-            transition: color 0.3s ease;
+            font-size: 18px; font-weight: 800; margin-top: 4px; display: block; 
+            font-variant-numeric: tabular-nums; transition: color 0.3s ease;
         }
-        .timer-warning-merah { 
-            color: var(--danger) !important; 
-            animation: blinkAlert 1s infinite; 
-        }
-        @keyframes blinkAlert { 
-            50% { opacity: 0.3; } 
-        }
+        .timer-warning-merah { color: var(--danger) !important; animation: blinkAlert 1s infinite; }
+        @keyframes blinkAlert { 50% { opacity: 0.3; } }
 
         .input-group { margin-bottom: 16px; text-align: left; }
         .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
@@ -105,8 +93,7 @@
             font-size: 15px; font-weight: 800; cursor: pointer; border: none;
             text-transform: uppercase; transition: all 0.2s ease;
             display: inline-flex; justify-content: center; align-items: center; gap: 10px;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         button:active { transform: scale(0.98); }
 
@@ -119,17 +106,10 @@
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; }
 
         .spinner {
-            width: 18px;
-            height: 18px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #ffffff;
-            animation: spin 0.8s linear infinite;
-            display: inline-block;
+            width: 18px; height: 18px; border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .user-badge {
             background: #f8fafc; border: 2px solid var(--border); border-radius: 14px;
@@ -142,9 +122,7 @@
             display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--border); font-size: 14px; font-weight: 700;
         }
 
-        .badge-status-item {
-            font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 6px;
-        }
+        .badge-status-item { font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 6px; }
         .badge-standby { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
         .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
@@ -154,6 +132,15 @@
             font-size: 13px; padding: 14px; border-radius: 12px; text-decoration: none; display: block; font-weight: 800;
             letter-spacing: 0.5px;
         }
+
+        /* TOMBOL WHATSAPP LAPOR KECURANGAN */
+        .wa-report-btn {
+            margin-top: 12px; background: #25d366; border: 2px solid #1ebe57; color: white;
+            font-size: 13px; padding: 14px; border-radius: 12px; text-decoration: none; 
+            display: flex; justify-content: center; align-items: center; gap: 10px; font-weight: 800;
+            letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+        }
+        .wa-report-btn:hover { background: #20ba5a; }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -244,6 +231,12 @@
         </div>
 
         <a href="spv.html" class="spv-link-btn">🔑 BUKA HALAMAN SPV</a>
+
+        <!-- TOMBOL LAPOR KECURANGAN VIA WHATSAPP -->
+        <a href="https://wa.me/6289524391002?text=Halo%20SPV,%20saya%20ingin%20melaporkan%20terkait%20sistem%20antrian%20di%20UFO%20Kebonsari." target="_blank" class="wa-report-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            Laporkan via WhatsApp
+        </a>
     </div>
 
     <!-- MODAL POPUP -->
@@ -268,9 +261,6 @@
         let statusSistemGlobal = "BUKA";
         let namaSalesAktifGlobal = "";
         const BATAS_MENIT = 60;
-        var sudahPeringatan1MenitHA = false;
-        var sudahPeringatan1MenitAV = false;
-        
         let sedangProsesAksi = false;
 
         window.onload = function() {
@@ -294,11 +284,7 @@
 
         function cekAkunKeServer() {
             const deviceId = getDeviceId();
-            
-            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, {
-                method: 'GET',
-                redirect: 'follow'
-            })
+            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
                 if (res.status === "terkunci") {
@@ -313,14 +299,9 @@
                     localStorage.removeItem('ufo_nama_sales_aktif');
                     document.getElementById('panel-login').style.display = 'block';
                     document.getElementById('panel-menu-utama').style.display = 'none';
-                    document.getElementById('pilih-sales').value = ""; 
                     muatDataAntrian();
                 }
-            })
-            .catch(err => {
-                console.error("Gagal mengecek akun:", err);
-                muatDataAntrian();
-            });
+            }).catch(() => muatDataAntrian());
         }
 
         function simpanAkunHP() {
@@ -329,43 +310,20 @@
             if(!namaPilih) return tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
 
             tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih})?`, function() {
-                const btnSimpan = document.querySelector('#panel-login button');
-                const textAsli = btnSimpan.innerHTML;
-                btnSimpan.disabled = true;
-                btnSimpan.innerHTML = `<span class="spinner"></span> Menyimpan...`;
-
-                fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}`, {
-                    method: 'GET',
-                    redirect: 'follow'
-                })
+                fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}`, { method: 'GET', redirect: 'follow' })
                 .then(res => res.json())
                 .then(res => {
-                    btnSimpan.disabled = false;
-                    btnSimpan.innerHTML = textAsli;
-                    
                     if(res.status === "sukses") {
                         namaSalesAktifGlobal = namaPilih;
                         localStorage.setItem('ufo_nama_sales_aktif', namaPilih);
-
                         document.getElementById('panel-login').style.display = 'none';
                         document.getElementById('panel-menu-utama').style.display = 'block';
                         document.getElementById('label-user-aktif').innerText = namaPilih;
-                        
                         tampilkanModal("Berhasil", `HP terikat untuk: ${namaPilih}`);
                         muatDataAntrian(true);
                     } else {
-                        namaSalesAktifGlobal = ""; 
-                        localStorage.removeItem('ufo_nama_sales_aktif');
-                        document.getElementById('pilih-sales').value = ""; 
-                        document.getElementById('panel-login').style.display = 'block'; 
-                        document.getElementById('panel-menu-utama').style.display = 'none'; 
-                        
                         tampilkanModal("Akses Ditolak", res.pesan);
                     }
-                }).catch(() => {
-                    btnSimpan.disabled = false;
-                    btnSimpan.innerHTML = textAsli;
-                    tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mengunci perangkat.");
                 });
             });
         }
@@ -382,7 +340,6 @@
             const labelTimerAV = document.getElementById('timer-mundur-av');
             const now = new Date().getTime();
 
-            // --- HITUNG MUNDUR HA ---
             if (waktuStandbyHAGlobal) {
                 const waktuHA = new Date(waktuStandbyHAGlobal).getTime();
                 if (!isNaN(waktuHA)) {
@@ -393,30 +350,17 @@
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
                         labelTimerHA.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
-                        
-                        if (totalDetik <= 60) {
-                            labelTimerHA.classList.add('timer-warning-merah');
-                            labelTimerHA.style.color = "#ef4444";
-                        } else {
-                            labelTimerHA.classList.remove('timer-warning-merah');
-                            labelTimerHA.style.color = "#2563eb";
-                        }
+                        labelTimerHA.classList.toggle('timer-warning-merah', totalDetik <= 60);
                     } else {
                         labelTimerHA.innerText = `Habis!`;
                         labelTimerHA.classList.add('timer-warning-merah');
                     }
-                } else {
-                    labelTimerHA.innerText = "00:00";
-                    labelTimerHA.classList.remove('timer-warning-merah');
-                    labelTimerHA.style.color = "#2563eb";
                 }
             } else {
                 labelTimerHA.innerText = "00:00";
                 labelTimerHA.classList.remove('timer-warning-merah');
-                labelTimerHA.style.color = "#2563eb";
             }
 
-            // --- HITUNG MUNDUR AV ---
             if (waktuStandbyAVGlobal) {
                 const waktuAV = new Date(waktuStandbyAVGlobal).getTime();
                 if (!isNaN(waktuAV)) {
@@ -427,74 +371,28 @@
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
                         labelTimerAV.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
-                        
-                        if (totalDetik <= 60) {
-                            labelTimerAV.classList.add('timer-warning-merah');
-                            labelTimerAV.style.color = "#ef4444";
-                        } else {
-                            labelTimerAV.classList.remove('timer-warning-merah');
-                            labelTimerAV.style.color = "#9333ea";
-                        }
+                        labelTimerAV.classList.toggle('timer-warning-merah', totalDetik <= 60);
                     } else {
                         labelTimerAV.innerText = `Habis!`;
                         labelTimerAV.classList.add('timer-warning-merah');
                     }
-                } else {
-                    labelTimerAV.innerText = "00:00";
-                    labelTimerAV.classList.remove('timer-warning-merah');
-                    labelTimerAV.style.color = "#9333ea";
                 }
             } else {
                 labelTimerAV.innerText = "00:00";
                 labelTimerAV.classList.remove('timer-warning-merah');
-                labelTimerAV.style.color = "#9333ea";
-            }
-        }
-
-        function prosesCekPeringatanStandby(response, namaPromotorLogin) {
-            if (response.data && response.data.length > 0) {
-                let listStandby = response.data.filter(item => item.status === "Standby");
-                if (listStandby.length > 0) {
-                    let standbyHA = listStandby.find(item => (item.kategori || "HA") === "HA");
-                    let standbyAV = listStandby.find(item => item.kategori === "AV");
-
-                    if (standbyHA && standbyHA.nama === namaPromotorLogin) {
-                        let sisaDetikHA = response.sisaDetikHA !== undefined ? response.sisaDetikHA : response.sisaDetik;
-                        if (sisaDetikHA !== null && sisaDetikHA <= 60 && sisaDetikHA > 0 && !sudahPeringatan1MenitHA) {
-                            sudahPeringatan1MenitHA = true;
-                            if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
-                            tampilkanModal("⚠️ PERINGATAN STANDBY HA!", "Waktu standby HA tinggal 1 menit lagi! Hubungi SPV.");
-                        }
-                        if (sisaDetikHA > 60) sudahPeringatan1MenitHA = false;
-                    }
-
-                    if (standbyAV && standbyAV.nama === namaPromotorLogin) {
-                        let sisaDetikAV = response.sisaDetikAV !== undefined ? response.sisaDetikAV : response.sisaDetik;
-                        if (sisaDetikAV !== null && sisaDetikAV <= 60 && sisaDetikAV > 0 && !sudahPeringatan1MenitAV) {
-                            sudahPeringatan1MenitAV = true;
-                            if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
-                            tampilkanModal("⚠️ PERINGATAN STANDBY AV!", "Waktu standby AV tinggal 1 menit lagi! Hubungi SPV.");
-                        }
-                        if (sisaDetikAV > 60) sudahPeringatan1MenitAV = false;
-                    }
-                }
             }
         }
 
         function muatMasterSales() {
-            fetch(`${SCRIPT_URL}?aksi=getMasterSales`, {
-                method: 'GET',
-                redirect: 'follow'
-            })
+            fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
                 if(res.status === "sukses") {
-                    masterSalesGlobal = res.data || [];
                     let html = '<option value="">-- Pilih Nama Anda --</option>';
-                    masterSalesGlobal.forEach(n => html += `<option value="${n}">${n}</option>`);
+                    (res.data || []).forEach(n => html += `<option value="${n}">${n}</option>`);
                     document.getElementById('pilih-sales').innerHTML = html;
                 }
-            }).catch(err => console.error("Gagal muat master sales"));
+            });
         }
 
         function renderUIRental(dataAntrian, statusSistem, waktuStandbyHA, waktuStandbyAV) {
@@ -522,21 +420,15 @@
 
             if (standbyHA) {
                 namaHANow = standbyHA.nama;
-                if (akunSaya && standbyHA.nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
-                    apakahSayaUrutanPertamaHA = true;
-                }
+                if (akunSaya && standbyHA.nama.trim().toLowerCase() === akunSaya.toLowerCase()) apakahSayaUrutanPertamaHA = true;
             }
             if (standbyAV) {
                 namaAVNow = standbyAV.nama;
-                if (akunSaya && standbyAV.nama.trim().toLowerCase() === akunSaya.toLowerCase()) {
-                    apakahSayaUrutanPertamaAV = true;
-                }
+                if (akunSaya && standbyAV.nama.trim().toLowerCase() === akunSaya.toLowerCase()) apakahSayaUrutanPertamaAV = true;
             }
 
             if(daftarAntrianGlobal.length > 0) {
-                let urutHA = 1;
-                let urutAV = 1;
-                
+                let urutHA = 1, urutAV = 1;
                 daftarAntrianGlobal.forEach((item) => {
                     const namaItem = String(item.nama).trim();
                     const kategoriItem = item.kategori ? item.kategori : "HA"; 
@@ -544,27 +436,19 @@
                     if(akunSaya && namaItem.toLowerCase() === akunSaya.toLowerCase()) {
                         statusSayaGlobal = item.status; 
                         const selectKat = document.getElementById('pilih-kategori');
-                        if (selectKat && kategoriItem) {
-                            selectKat.value = kategoriItem;
-                        }
+                        if (selectKat) selectKat.value = kategoriItem;
                     }
 
                     let itemHtml = "";
                     if (item.status === "Standby") {
                         let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
-                        itemHtml = `<li><b>${urut}. ${item.nama}</b> <div><span class="badge-status-item badge-standby">Standby</span></div></li>`;
+                        itemHtml = `<li><b>${urut}. ${item.nama}</b> <span class="badge-status-item badge-standby">Standby</span></li>`;
                     } else if (item.status === "Melayani") {
-                        itemHtml = `<li><b>${item.nama}</b> <div><span class="badge-status-item badge-melayani">Melayani (${kategoriItem})</span></div></li>`;
-                    } else if (item.status === "Dipanggil CS") {
-                        let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
-                        itemHtml = `<li><b>${urut}. ${item.nama}</b> <div><span class="badge-status-item badge-cs">Dipanggil CS</span></div></li>`;
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
                     }
 
-                    if (kategoriItem === "AV") {
-                        listHtmlAV += itemHtml;
-                    } else {
-                        listHtmlHA += itemHtml;
-                    }
+                    if (kategoriItem === "AV") listHtmlAV += itemHtml;
+                    else listHtmlHA += itemHtml;
                 });
             }
 
@@ -573,16 +457,7 @@
 
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
-            const btnCS = document.getElementById('btn-utama-cs');
             const selectKategori = document.getElementById('pilih-kategori');
-
-            if (btnAntri.dataset.loading === "true" || btnCustomer.dataset.loading === "true" || btnCS.dataset.loading === "true") {
-                document.getElementById('nama-aktif-ha').innerText = namaHANow;
-                document.getElementById('nama-aktif-av').innerText = namaAVNow;
-                document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
-                document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
-                return;
-            }
 
             if (statusSayaGlobal === "Melayani") {
                 btnAntri.innerText = "Sedang Melayani Customer";
@@ -593,10 +468,7 @@
                 btnCustomer.innerText = "SELESAI PELAYANAN";
                 btnCustomer.className = "btn-danger";
                 btnCustomer.disabled = false;
-
-                btnCS.style.display = "none";
                 selectKategori.disabled = true;
-
             } else if (statusSayaGlobal === "Standby") {
                 btnAntri.innerText = "Anda Sudah Di Antrian";
                 btnAntri.className = "btn-success btn-disabled";
@@ -607,43 +479,14 @@
                 
                 let kategoriSaya = selectKategori.value;
                 let bisaAmbil = (kategoriSaya === "AV" && apakahSayaUrutanPertamaAV) || (kategoriSaya !== "AV" && apakahSayaUrutanPertamaHA);
-
                 btnCustomer.disabled = !bisaAmbil;
                 btnCustomer.className = bisaAmbil ? "btn-primary" : "btn-primary btn-disabled";
-
-                btnCS.style.display = "block";
-                btnCS.innerText = "DIPANGGIL CS (KUNCI POSISI)";
-                btnCS.className = "btn-purple";
-                btnCS.disabled = false;
-
                 selectKategori.disabled = true;
-
-            } else if (statusSayaGlobal === "Dipanggil CS") {
-                btnAntri.innerText = "Posisi Antrian Dikunci (Di CS)";
-                btnAntri.className = "btn-purple btn-disabled";
-                btnAntri.disabled = true;
-
-                btnCustomer.style.display = "none";
-
-                btnCS.style.display = "block";
-                btnCS.innerText = "SELESAI CS (KEMBALI ANTRI)";
-                btnCS.className = "btn-success";
-                btnCS.disabled = false;
-
-                selectKategori.disabled = true;
-
             } else { 
-                if (statusSistemGlobal === "TUTUP") {
-                    btnAntri.innerText = "Antrian Ditutup Oleh SPV";
-                    btnAntri.className = "btn-danger btn-disabled";
-                    btnAntri.disabled = true;
-                } else {
-                    btnAntri.innerText = "Daftar Antrian";
-                    btnAntri.className = "btn-success";
-                    btnAntri.disabled = false;
-                }
+                btnAntri.innerText = statusSistemGlobal === "TUTUP" ? "Antrian Ditutup Oleh SPV" : "Daftar Antrian";
+                btnAntri.className = statusSistemGlobal === "TUTUP" ? "btn-danger btn-disabled" : "btn-success";
+                btnAntri.disabled = (statusSistemGlobal === "TUTUP");
                 btnCustomer.style.display = "none";
-                btnCS.style.display = "none";
                 selectKategori.disabled = false;
             }
 
@@ -653,193 +496,57 @@
             document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
 
-        // FUNGSI TARIK DATA DI-PERBAIKI SUPAYA TIDAK TERBLOKIR SESAAT KETIKA PROSES
         function muatDataAntrian(paksaTarik = false) {
             if (sedangProsesAksi && !paksaTarik) return;
-
-            fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
-                method: 'GET',
-                redirect: 'follow'
-            })
+            fetch(`${SCRIPT_URL}?aksi=getAntrian`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
                 if(res && res.status === "sukses") {
-                    const akunSaya = getAkunAktif().trim();
-                    prosesCekPeringatanStandby(res, akunSaya);
-                    renderUIRental(res.data, res.statusAntrian, res.waktuStandbyHA || res.waktuStandbyPertama, res.waktuStandbyAV);
+                    renderUIRental(res.data, res.statusAntrian, res.waktuStandbyHA, res.waktuStandbyAV);
                 }
-            }).catch(err => {
-                console.log("Menunggu sinkronisasi server...");
-            });
+            }).catch(() => {});
         }
 
         function aksiUtamaAntri() {
             const namaSales = getAkunAktif().trim();
             const kategoriPilih = document.getElementById('pilih-kategori').value;
+            if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
             
-            if(!namaSales) {
-                return tampilkanModal("Perhatian", "Akun belum terikat dengan benar. Silakan muat ulang halaman.");
-            }
-            
-            sedangProsesAksi = true; 
-
+            sedangProsesAksi = true;
             const btnAntri = document.getElementById('btn-utama-antri');
-            btnAntri.dataset.loading = "true";
             btnAntri.disabled = true;
             btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
 
-            document.getElementById('pilih-kategori').disabled = true;
-
-            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, {
-                method: 'GET',
-                redirect: 'follow'
-            })
+            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
-                btnAntri.dataset.loading = "false";
-
-                if (res.status === "sukses") {
-                    tampilkanModal("Informasi Antrian", res.pesan || "Berhasil masuk antrian");
-                } else {
-                    tampilkanModal("Gagal", res.pesan || "Gagal mendaftar antrian.");
-                    document.getElementById('pilih-kategori').disabled = false;
-                    btnAntri.disabled = false;
-                    btnAntri.innerHTML = "Daftar Antrian";
-                }
-                
-                // BERI DELAY SANGAT SINGKAT LALU PAKSA REFRESH DATA INSTAN
-                setTimeout(() => {
-                    sedangProsesAksi = false;
-                    muatDataAntrian(true);
-                }, 400);
-            })
-            .catch(err => {
-                btnAntri.dataset.loading = "false";
-                sedangProsesAksi = false;
-                document.getElementById('pilih-kategori').disabled = false;
-                btnAntri.disabled = false;
-                btnAntri.innerHTML = "Daftar Antrian";
-                tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mendaftar.");
-            });
+                tampilkanModal("Informasi", res.pesan);
+                setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
+            }).catch(() => { sedangProsesAksi = false; muatDataAntrian(true); });
         }
 
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
             if(!namaSales) return;
 
-            const btnCustomer = document.getElementById('btn-utama-customer');
-
             if (statusSayaGlobal === "Standby") {
-                tampilkanModalKonfirmasi("Konfirmasi", `Sudah membawa customer?`, function() {
+                tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
                     sedangProsesAksi = true;
-                    btnCustomer.dataset.loading = "true";
-                    btnCustomer.disabled = true;
-                    btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-                    fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, {
-                        method: 'GET',
-                        redirect: 'follow'
-                    })
+                    fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                     .then(res => res.json())
                     .then(res => {
-                        btnCustomer.dataset.loading = "false";
-                        tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
-                        setTimeout(() => {
-                            sedangProsesAksi = false;
-                            muatDataAntrian(true);
-                        }, 400);
-                    })
-                    .catch(err => {
-                        btnCustomer.dataset.loading = "false";
-                        sedangProsesAksi = false;
-                        muatDataAntrian(true);
+                        tampilkanModal("Status", res.pesan);
+                        setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
                     });
                 });
             } else if (statusSayaGlobal === "Melayani") {
-                tampilkanModalKonfirmasi("Konfirmasi", `Selesai melayani customer?`, function() {
+                tampilkanModalKonfirmasi("Konfirmasi", "Selesai melayani customer?", function() {
                     sedangProsesAksi = true;
-                    btnCustomer.dataset.loading = "true";
-                    btnCustomer.disabled = true;
-                    btnCustomer.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-                    fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`, {
-                        method: 'GET',
-                        redirect: 'follow'
-                    })
+                    fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                     .then(res => res.json())
                     .then(res => {
-                        btnCustomer.dataset.loading = "false";
-                        tampilkanModal("Status Antrian", res.pesan || "Berhasil diproses");
-                        setTimeout(() => {
-                            sedangProsesAksi = false;
-                            muatDataAntrian(true);
-                        }, 400);
-                    })
-                    .catch(err => {
-                        btnCustomer.dataset.loading = "false";
-                        sedangProsesAksi = false;
-                        muatDataAntrian(true);
-                    });
-                });
-            }
-        }
-
-        function aksiToggleCS() {
-            const namaSales = getAkunAktif();
-            if(!namaSales) return;
-
-            const btnCS = document.getElementById('btn-utama-cs');
-
-            if (statusSayaGlobal === "Standby") {
-                tampilkanModalKonfirmasi("Status Dipanggil CS", "Dipanggil oleh CS? Posisi antrian Anda akan dikunci dan tidak tergeser ke bawah.", function() {
-                    sedangProsesAksi = true;
-                    btnCS.dataset.loading = "true";
-                    btnCS.disabled = true;
-                    btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-                    fetch(`${SCRIPT_URL}?aksi=panggilCS&namaSales=${encodeURIComponent(namaSales)}`, {
-                        method: 'GET',
-                        redirect: 'follow'
-                    })
-                    .then(res => res.json())
-                    .then(res => {
-                        btnCS.dataset.loading = "false";
-                        tampilkanModal("Status CS", res.pesan || "Posisi antrian dikunci");
-                        setTimeout(() => {
-                            sedangProsesAksi = false;
-                            muatDataAntrian(true);
-                        }, 400);
-                    })
-                    .catch(err => {
-                        btnCS.dataset.loading = "false";
-                        sedangProsesAksi = false;
-                        muatDataAntrian(true);
-                    });
-                });
-            } else if (statusSayaGlobal === "Dipanggil CS") {
-                tampilkanModalKonfirmasi("Selesai Urusan CS", "Urusan CS sudah selesai? Anda akan kembali aktif di posisi antrian semula.", function() {
-                    sedangProsesAksi = true;
-                    btnCS.dataset.loading = "true";
-                    btnCS.disabled = true;
-                    btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-                    fetch(`${SCRIPT_URL}?aksi=selesaiCS&namaSales=${encodeURIComponent(namaSales)}`, {
-                        method: 'GET',
-                        redirect: 'follow'
-                    })
-                    .then(res => res.json())
-                    .then(res => {
-                        btnCS.dataset.loading = "false";
-                        tampilkanModal("Status CS", res.pesan || "Kembali ke antrian aktif");
-                        setTimeout(() => {
-                            sedangProsesAksi = false;
-                            muatDataAntrian(true);
-                        }, 400);
-                    })
-                    .catch(err => {
-                        btnCS.dataset.loading = "false";
-                        sedangProsesAksi = false;
-                        muatDataAntrian(true);
+                        tampilkanModal("Status", res.pesan);
+                        setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
                     });
                 });
             }
@@ -860,10 +567,7 @@
                 <button type="button" class="btn-primary" id="btn-modal-ya">Ya</button>
             `;
             document.getElementById('custom-modal').classList.add('active');
-            document.getElementById('btn-modal-ya').onclick = function() {
-                tutupModal();
-                callbackYa();
-            };
+            document.getElementById('btn-modal-ya').onclick = function() { tutupModal(); callbackYa(); };
         }
 
         function tutupModal() {
