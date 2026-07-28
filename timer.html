@@ -391,12 +391,26 @@
         <div class="spv-control-card">
             <h3>⚙️ MANAJEMEN ANTRIAN SPV</h3>
             <div class="control-grid">
-                <!-- Tambah Antrian -->
+                <!-- Tambah Antrian dengan Kategori & Posisi Urutan -->
                 <div class="control-group">
                     <label>Masukkan Promotor ke Antrian</label>
-                    <select id="select-tambah-sales">
+                    <select id="select-tambah-sales" style="margin-bottom: 8px;">
                         <option value="">-- Pilih Promotor --</option>
                     </select>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <select id="select-tambah-kategori" style="width: 50%;">
+                            <option value="HA">HA (Home Appliance)</option>
+                            <option value="AV">AV (Audio Video)</option>
+                        </select>
+                        <select id="select-tambah-posisi" style="width: 50%;">
+                            <option value="0">Paling Belakang</option>
+                            <option value="1">Urutan Ke-1</option>
+                            <option value="2">Urutan Ke-2</option>
+                            <option value="3">Urutan Ke-3</option>
+                            <option value="4">Urutan Ke-4</option>
+                            <option value="5">Urutan Ke-5</option>
+                        </select>
+                    </div>
                     <button type="button" class="btn-action btn-success" onclick="aksiTambahAntrianSPV()">+ Masukkan Antrian</button>
                 </div>
 
@@ -675,13 +689,19 @@
         // --- FUNGSI AKSI MANAJEMEN SPV ---
         function aksiTambahAntrianSPV() {
             const namaSales = document.getElementById('select-tambah-sales').value;
+            const kategori = document.getElementById('select-tambah-kategori').value;
+            const posisi = document.getElementById('select-tambah-posisi').value;
+
             if(!namaSales) return alert("Pilih promotor terlebih dahulu!");
 
             bukaModal({
                 icon: "⏳", title: "Memproses...", desc: `Memasukkan ${namaSales} ke antrian...`, actions: ""
             });
 
-            fetch(`${SCRIPT_URL}?aksi=spvTambahAntri&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
+            // Menggunakan parameter aksi spvDaftarAntri agar sama persis dengan halaman SPV (mendukung kategori & posisi)
+            let url = `${SCRIPT_URL}?aksi=spvDaftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
+
+            fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
                 bukaModal({
