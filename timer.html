@@ -436,7 +436,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         const BATAS_MENIT = 60;
-        const PIN_PANEL_RAHASIA = "123456"; // Disesuaikan dengan default sheet setting
+        const PIN_PANEL_RAHASIA = "8888"; // PIN untuk membuka panel utama
         
         let promotorHA = null;
         let promotorAV = null;
@@ -452,28 +452,13 @@
 
         function validasiPinPanel() {
             const pinInput = document.getElementById('input-pin-panel').value;
-            
-            // Cek langsung ke server apakah PIN sesuai dengan database sheet
-            fetch(`${SCRIPT_URL}?aksi=loginSPV&pin=${encodeURIComponent(pinInput)}`, { method: 'GET', redirect: 'follow' })
-            .then(res => res.json())
-            .then(res => {
-                if (res.status === "sukses") {
-                    sessionStorage.setItem('panel_unlocked', "true");
-                    document.getElementById('pin-overlay').style.display = 'none';
-                } else {
-                    alert("PIN SPV Salah!");
-                    document.getElementById('input-pin-panel').value = "";
-                }
-            }).catch(() => {
-                // Fallback lokal jika offline/gagal fetch
-                if (pinInput === PIN_PANEL_RAHASIA) {
-                    sessionStorage.setItem('panel_unlocked', "true");
-                    document.getElementById('pin-overlay').style.display = 'none';
-                } else {
-                    alert("PIN Salah!");
-                    document.getElementById('input-pin-panel').value = "";
-                }
-            });
+            if (pinInput === PIN_PANEL_RAHASIA) {
+                sessionStorage.setItem('panel_unlocked', "true");
+                document.getElementById('pin-overlay').style.display = 'none';
+            } else {
+                alert("PIN Salah!");
+                document.getElementById('input-pin-panel').value = "";
+            }
         }
 
         function cekPerangkatMutlak() {
@@ -666,6 +651,7 @@
                 actions: ""
             });
 
+            // Menggunakan fungsi asli di GAS: tambahWaktuAdmin
             const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(promotor.nama)}&kategori=${encodeURIComponent(targetKategoriAktif)}`;
 
             fetch(urlAksi, { method: 'GET', redirect: 'follow' })
@@ -701,7 +687,6 @@
         function aksiTambahAntrianSPV() {
             const namaSales = document.getElementById('select-tambah-sales').value;
             const kategori = document.getElementById('select-tambah-kategori').value;
-            const posisi = document.getElementById('select-tambah-posisi').value;
 
             if(!namaSales) return alert("Pilih promotor terlebih dahulu!");
 
@@ -709,8 +694,8 @@
                 icon: "⏳", title: "Memproses...", desc: `Memasukkan ${namaSales} ke antrian...`, actions: ""
             });
 
-            // Menggunakan aksi spvDaftarAntri yang sesuai dengan backend Apps Script Anda
-            let url = `${SCRIPT_URL}?aksi=spvDaftarAntri&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
+            // Menggunakan fungsi asli di GAS: daftarAntri (tanpa PIN khusus, persis seperti promotor)
+            let url = `${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -734,12 +719,8 @@
                 icon: "⏳", title: "Memproses...", desc: `Memaksa ${namaSales} membawa customer...`, actions: ""
             });
 
-            // Cari kategori sales tersebut dari data antrian global
-            let itemSales = daftarAntrianGlobal.find(i => i.nama === namaSales);
-            let kategoriSales = itemSales ? (itemSales.kategori || "HA") : "HA";
-
-            // Menggunakan aksi spvAmbilAntrianBebas yang sesuai dengan backend Apps Script Anda
-            let url = `${SCRIPT_URL}?aksi=spvAmbilAntrianBebas&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriSales)}`;
+            // Menggunakan fungsi asli di GAS: ambilAntrian
+            let url = `${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -763,8 +744,8 @@
                     icon: "⏳", title: "Memproses...", desc: `Mengeluarkan ${namaSales}...`, actions: ""
                 });
 
-                // Menggunakan aksi spvSelesaiMelayani yang sesuai dengan backend Apps Script Anda
-                let url = `${SCRIPT_URL}?aksi=spvSelesaiMelayani&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(namaSales)}`;
+                // Menggunakan fungsi asli di GAS: selesaiMelayani
+                let url = `${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`;
 
                 fetch(url, { method: 'GET', redirect: 'follow' })
                 .then(res => res.json())
