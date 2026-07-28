@@ -495,20 +495,37 @@
 
         window.onload = function() {
             cekPerangkatMutlak();
+            muatMasterSalesInstant();
             muatMasterSales();
             muatDataAntrianDanTimer();
             setInterval(muatDataAntrianDanTimer, 3000);
         };
 
+        function muatMasterSalesInstant() {
+            const cachedSales = localStorage.getItem('ufo_master_sales_cache');
+            if (cachedSales) {
+                try {
+                    const dataSales = JSON.parse(cachedSales);
+                    masterSalesGlobal = dataSales || [];
+                    let html = '<option value="">-- Pilih Promotor --</option>';
+                    masterSalesGlobal.forEach(n => html += `<option value="${n}">${n}</option>`);
+                    const selectEl = document.getElementById('select-tambah-sales');
+                    if (selectEl) selectEl.innerHTML = html;
+                } catch(e) {}
+            }
+        }
+
         function muatMasterSales() {
             fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
-                if(res.status === "sukses") {
+                if(res.status === "sukses" && res.data) {
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(res.data));
                     masterSalesGlobal = res.data || [];
                     let html = '<option value="">-- Pilih Promotor --</option>';
                     masterSalesGlobal.forEach(n => html += `<option value="${n}">${n}</option>`);
-                    document.getElementById('select-tambah-sales').innerHTML = html;
+                    const selectEl = document.getElementById('select-tambah-sales');
+                    if (selectEl) selectEl.innerHTML = html;
                 }
             }).catch(err => console.error("Gagal muat master sales"));
         }
@@ -698,7 +715,7 @@
                 icon: "⏳", title: "Memproses...", desc: `Memasukkan ${namaSales} ke antrian...`, actions: ""
             });
 
-            // Menggunakan parameter aksi spvDaftarAntri agar sama persis dengan halaman SPV (mendukung kategori & posisi)
+            // Menggunakan parameter aksi spvDaftarAntri sesuai backend Google Apps Script Anda
             let url = `${SCRIPT_URL}?aksi=spvDaftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
