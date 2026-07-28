@@ -334,7 +334,7 @@
 </head>
 <body>
 
-    <!-- KOTAK PIN KEAMANAN PANEL UTAMA (TETAP ADA) -->
+    <!-- KOTAK PIN KEAMANAN PANEL UTAMA -->
     <div id="pin-overlay">
         <div class="pin-box">
             <h2>🔒 DASHBOARD ANTRIAN</h2>
@@ -436,7 +436,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         const BATAS_MENIT = 60;
-        const PIN_PANEL_RAHASIA = "8888"; // PIN untuk membuka panel utama
+        const PIN_PANEL_RAHASIA = "8888"; 
         
         let promotorHA = null;
         let promotorAV = null;
@@ -651,7 +651,7 @@
                 actions: ""
             });
 
-            const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(promotor.nama)}&kategori=${encodeURIComponent(targetKategoriAktif)}`;
+            const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(promotor.nama)}&kategori=${encodeURIComponent(targetKategoriAktif)}&pinSPV=${PIN_PANEL_RAHASIA}`;
 
             fetch(urlAksi, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -694,7 +694,7 @@
                 icon: "⏳", title: "Memproses...", desc: `Memasukkan ${namaSales} ke antrian...`, actions: ""
             });
 
-            let url = `${SCRIPT_URL}?aksi=tambahAntrian&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
+            let url = `${SCRIPT_URL}?aksi=tambahAntrian&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&pinSPV=${PIN_PANEL_RAHASIA}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -708,7 +708,7 @@
                 muatDataAntrianDanTimer();
                 document.getElementById('select-tambah-sales').value = "";
             }).catch(() => {
-                let urlAlt = `${SCRIPT_URL}?aksi=spvDaftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
+                let urlAlt = `${SCRIPT_URL}?aksi=spvDaftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&pinSPV=${PIN_PANEL_RAHASIA}`;
                 fetch(urlAlt).then(r => r.json()).then(res => {
                     bukaModal({
                         icon: "✅", title: "Berhasil", desc: res.pesan || "Berhasil diproses",
@@ -727,7 +727,7 @@
                 icon: "⏳", title: "Memproses...", desc: `Memaksa ${namaSales} membawa customer...`, actions: ""
             });
 
-            let url = `${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`;
+            let url = `${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}&pinSPV=${PIN_PANEL_RAHASIA}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -740,7 +740,7 @@
                 });
                 muatDataAntrianDanTimer();
             }).catch(() => {
-                let urlAlt = `${SCRIPT_URL}?aksi=spvPaksaAmbil&namaSales=${encodeURIComponent(namaSales)}`;
+                let urlAlt = `${SCRIPT_URL}?aksi=spvPaksaAmbil&namaSales=${encodeURIComponent(namaSales)}&pinSPV=${PIN_PANEL_RAHASIA}`;
                 fetch(urlAlt).then(r => r.json()).then(res => {
                     bukaModal({
                         icon: "✅", title: "Berhasil", desc: res.pesan || "Berhasil diproses",
@@ -760,7 +760,7 @@
                     icon: "⏳", title: "Memproses...", desc: `Mengeluarkan ${namaSales}...`, actions: ""
                 });
 
-                let url = `${SCRIPT_URL}?aksi=hapusAntrian&namaSales=${encodeURIComponent(namaSales)}`;
+                let url = `${SCRIPT_URL}?aksi=hapusAntrian&namaSales=${encodeURIComponent(namaSales)}&pinSPV=${PIN_PANEL_RAHASIA}`;
 
                 fetch(url, { method: 'GET', redirect: 'follow' })
                 .then(res => res.json())
@@ -773,7 +773,7 @@
                     });
                     muatDataAntrianDanTimer();
                 }).catch(() => {
-                    let urlAlt = `${SCRIPT_URL}?aksi=spvHapusAntri&namaSales=${encodeURIComponent(namaSales)}`;
+                    let urlAlt = `${SCRIPT_URL}?aksi=spvHapusAntri&namaSales=${encodeURIComponent(namaSales)}&pinSPV=${PIN_PANEL_RAHASIA}`;
                     fetch(urlAlt).then(r => r.json()).then(res => {
                         bukaModal({
                             icon: "✅", title: "Berhasil", desc: res.pesan || "Berhasil diproses",
