@@ -40,7 +40,6 @@
             align-items: center;
         }
 
-        /* LAYAR BLOKIR MUTLAK UNTUK HP / TABLET */
         #mobile-blocker {
             display: none;
             position: fixed;
@@ -183,7 +182,6 @@
 
         .kosong-state { color: var(--text-muted); font-size: 16px; font-weight: 500; font-style: italic; }
 
-        /* PANEL MANAJEMEN SPV TAMBAHAN */
         .spv-control-card {
             background: var(--card-bg);
             border: 2px solid var(--card-border);
@@ -255,7 +253,6 @@
         .btn-warning { background: var(--warning); color: white; }
         .btn-action:active { transform: scale(0.98); }
 
-        /* MODAL POPUP */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -301,7 +298,6 @@
         .modal-btn-confirm { background: var(--power-green); color: white; }
         .modal-btn-ok { background: var(--primary); color: white; width: 100%; }
 
-        /* KOTAK LOGIN PIN KHUSUS PANEL */
         #pin-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -337,7 +333,6 @@
 </head>
 <body>
 
-    <!-- KOTAK PIN KEAMANAN PANEL -->
     <div id="pin-overlay">
         <div class="pin-box">
             <h2>🔒 DASHBOARD ANTRIAN</h2>
@@ -347,11 +342,10 @@
         </div>
     </div>
 
-    <!-- LAYAR BLOKIR MUTLAK UNTUK HP -->
     <div id="mobile-blocker">
         <div class="icon">🚫</div>
         <h2>AKSES DITOLAK</h2>
-        <p>Halaman ini dikunci dan hanya dapat diakses melalui <b>Komputer SPV</b>. Akses dari HP (termasuk Mode Desktop) otomatis diblokir.</p>
+        <p>Halaman ini dikunci dan hanya dapat diakses melalui <b>Komputer SPV</b>. Akses dari HP otomatis diblokir.</p>
     </div>
 
     <div class="header-app">
@@ -360,9 +354,7 @@
     </div>
 
     <div class="main-container">
-        <!-- KARTU TIMER UTAMA -->
         <div class="cards-grid">
-            <!-- CARD HA -->
             <div class="timer-card ha">
                 <div class="badge-kategori">URUTAN NO 1 HA</div>
                 <div id="nama-ha" class="nama-promotor">Memuat...</div>
@@ -374,7 +366,6 @@
                 </div>
             </div>
 
-            <!-- CARD AV -->
             <div class="timer-card av">
                 <div class="badge-kategori">URUTAN NO 1 AV</div>
                 <div id="nama-av" class="nama-promotor">Memuat...</div>
@@ -387,11 +378,9 @@
             </div>
         </div>
 
-        <!-- PANEL MANAJEMEN SPV TAMBAHAN -->
         <div class="spv-control-card">
             <h3>⚙️ MANAJEMEN ANTRIAN SPV</h3>
             <div class="control-grid">
-                <!-- Tambah Antrian dengan Kategori & Posisi Urutan -->
                 <div class="control-group">
                     <label>Masukkan Promotor ke Antrian</label>
                     <select id="select-tambah-sales" style="margin-bottom: 8px;">
@@ -414,7 +403,6 @@
                     <button type="button" class="btn-action btn-success" onclick="aksiTambahAntrianSPV()">+ Masukkan Antrian</button>
                 </div>
 
-                <!-- Paksa Bawa Customer -->
                 <div class="control-group">
                     <label>Paksa Bawa Customer (Ambil Giliran)</label>
                     <select id="select-paksa-sales">
@@ -423,7 +411,6 @@
                     <button type="button" class="btn-action btn-warning" onclick="aksiPaksaBawaCustomerSPV()">⚡ Paksa Bawa Customer</button>
                 </div>
 
-                <!-- Keluarkan Antrian -->
                 <div class="control-group" style="grid-column: 1 / -1;">
                     <label>Keluarkan / Hapus dari Antrian</label>
                     <select id="select-hapus-sales">
@@ -435,7 +422,6 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-icon" class="modal-icon">⏱️</div>
@@ -448,7 +434,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         const BATAS_MENIT = 60;
-        const PIN_PANEL_RAHASIA = "8888"; // <-- GANTI PIN INI SESUAI KEINGINAN ANDA
+        const PIN_PANEL_RAHASIA = "8888";
         
         let promotorHA = null;
         let promotorAV = null;
@@ -456,7 +442,6 @@
         let masterSalesGlobal = [];
         let daftarAntrianGlobal = [];
 
-        // CEK APAKAH SUDAH LOGIN PIN SEBELUMNYA DI SESI INI
         document.addEventListener("DOMContentLoaded", function() {
             if (sessionStorage.getItem('panel_unlocked') === "true") {
                 document.getElementById('pin-overlay').style.display = 'none';
@@ -474,7 +459,6 @@
             }
         }
 
-        // DETEKSI AKURAT BLOKIR HP
         function cekPerangkatMutlak() {
             const ua = navigator.userAgent;
             const isMobileOS = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
@@ -485,7 +469,6 @@
             }
         }
 
-        // MATIKAN KLIK KANAN & INSPECT
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(e) {
             if ((e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'i' || e.key === 'k')) || e.key === 'F12') {
@@ -531,10 +514,7 @@
         }
 
         function muatDataAntrianDanTimer() {
-            fetch(`${SCRIPT_URL}?aksi=getAntrian`, {
-                method: 'GET',
-                redirect: 'follow'
-            })
+            fetch(`${SCRIPT_URL}?aksi=getAntrian`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
                 if(res.status === "sukses" && res.data) {
@@ -555,7 +535,6 @@
         }
 
         function updateDropdownSPV() {
-            // Dropdown Paksa Bawa Customer (Hanya yang status Standby)
             let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
             let htmlPaksa = '<option value="">-- Pilih Promotor Standby --</option>';
             listStandby.forEach(item => {
@@ -563,7 +542,6 @@
             });
             document.getElementById('select-paksa-sales').innerHTML = htmlPaksa;
 
-            // Dropdown Hapus Promotor (Semua yang ada di antrian aktif/melayani/standby)
             let htmlHapus = '<option value="">-- Pilih Promotor yang Aktif di Antrian --</option>';
             daftarAntrianGlobal.forEach(item => {
                 htmlHapus += `<option value="${item.nama}">${item.nama} - ${item.status} (${item.kategori || 'HA'})</option>`;
@@ -703,7 +681,6 @@
             });
         }
 
-        // --- FUNGSI AKSI MANAJEMEN SPV ---
         function aksiTambahAntrianSPV() {
             const namaSales = document.getElementById('select-tambah-sales').value;
             const kategori = document.getElementById('select-tambah-kategori').value;
@@ -715,7 +692,6 @@
                 icon: "⏳", title: "Memproses...", desc: `Memasukkan ${namaSales} ke antrian...`, actions: ""
             });
 
-            // Menggunakan parameter aksi spvDaftarAntri sesuai backend Google Apps Script Anda
             let url = `${SCRIPT_URL}?aksi=spvDaftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
