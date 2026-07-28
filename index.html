@@ -585,22 +585,27 @@ function cekAkunKeServer() {
             }).catch(() => {});
         }
 
-        function aksiUtamaAntri() {
+       function aksiUtamaAntri() {
             const namaSales = getAkunAktif().trim();
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
             
-            sedangProsesAksi = true;
-            const btnAntri = document.getElementById('btn-utama-antri');
-            btnAntri.disabled = true;
-            btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
+            // 1. UBAH TAMPILAN LOKAL SEKETIKA (TANPA MENUNGGU SERVER)
+            statusSayaGlobal = "Standby";
+            
+            // Masukkan sementara ke array lokal agar live list langsung menampilkan nama promotor
+            daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
+            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
+            // 2. Kirim permintaan ke Google Sheet di latar belakang
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
-                tampilkanModal("Informasi", res.pesan);
-                setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
-            }).catch(() => { sedangProsesAksi = false; muatDataAntrian(true); });
+                // Ambil data sinkronisasi paling baru dari server
+                muatDataAntrian(true);
+            }).catch(() => {
+                muatDataAntrian(true);
+            });
         }
 
         function aksiUtamaCustomer() {
@@ -609,22 +614,27 @@ function cekAkunKeServer() {
 
             if (statusSayaGlobal === "Standby") {
                 tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
-                    sedangProsesAksi = true;
+                    // Update lokal instan
+                    statusSayaGlobal = "Melayani";
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
+
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                     .then(res => res.json())
                     .then(res => {
-                        tampilkanModal("Status", res.pesan);
-                        setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
+                        muatDataAntrian(true);
                     });
                 });
             } else if (statusSayaGlobal === "Melayani") {
                 tampilkanModalKonfirmasi("Konfirmasi", "Selesai melayani customer?", function() {
-                    sedangProsesAksi = true;
+                    // Update lokal instan: Hapus nama dari daftar lokal
+                    daftarAntrianGlobal = daftarAntrianGlobal.filter(item => item.nama.trim().toLowerCase() !== namaSales.trim().toLowerCase());
+                    statusSayaGlobal = "belum_ada";
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
+
                     fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                     .then(res => res.json())
                     .then(res => {
-                        tampilkanModal("Status", res.pesan);
-                        setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
+                        muatDataAntrian(true);
                     });
                 });
             }
@@ -634,37 +644,50 @@ function cekAkunKeServer() {
             const namaSales = getAkunAktif();
             if(!namaSales) return;
 
-            const btnCS = document.getElementById('btn-utama-cs');
-
             if (statusSayaGlobal === "Standby") {
-                tampilkanModalKonfirmasi("Status Dipanggil CS/GUDANG", "Dipanggil oleh CS/GUDANG? Posisi antrian Anda akan dikunci dan tidak tergeser ke bawah.", function() {
-                    sedangProsesAksi = true;
-                    btnCS.disabled = true;
-                    btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
+                tampilkanModalKonfirmasi("Status Dipanggil CS/GUDANG", "Dipanggil oleh CS/GUDANG? Posisi antrian Anda akan dikunci.", function() {
+                    statusSayaGlobal = "Dipanggil CS/GUDANG";
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
                     fetch(`${SCRIPT_URL}?aksi=panggilCS&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                     .then(res => res.json())
                     .then(res => {
-                        tampilkanModal("Status CS/GUDANG", res.pesan || "Posisi antrian dikunci");
-                        setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
+                        muatDataAntrian(true);
                     });
                 });
             } else if (statusSayaGlobal === "Dipanggil CS/GUDANG" || statusSayaGlobal === "Dipanggil CS") {
-                tampilkanModalKonfirmasi("Selesai Urusan CS/GUDANG", "Urusan CS/GUDANG sudah selesai? Anda akan kembali aktif di posisi antrian semula.", function() {
-                    sedangProsesAksi = true;
-                    btnCS.disabled = true;
-                    btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
+                tampilkanModalKonfirmasi("Selesai Urusan CS/GUDANG", "Urusan CS/GUDANG sudah selesai? Kembali aktif di antrian.", function() {
+                    statusSayaGlobal = "Standby";
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
                     fetch(`${SCRIPT_URL}?aksi=selesaiCS&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                     .then(res => res.json())
                     .then(res => {
-                        tampilkanModal("Status CS/GUDANG", res.pesan || "Kembali ke antrian aktif");
-                        setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
+                        muatDataAntrian(true);
                     });
                 });
             }
         }
 
+        function bukaModalKeluarIstirahat() {
+            tampilkanModalKonfirmasi("Keluar Antrian", "Apakah Anda yakin ingin keluar dari antrian untuk istirahat?", function() {
+                const namaSales = getAkunAktif();
+                if (!namaSales) return;
+
+                // Update lokal instan agar langsung hilang tanpa jeda
+                daftarAntrianGlobal = daftarAntrianGlobal.filter(item => item.nama.trim().toLowerCase() !== namaSales.trim().toLowerCase());
+                statusSayaGlobal = "belum_ada";
+                renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
+
+                fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
+                .then(res => res.json())
+                .then(res => {
+                    muatDataAntrian(true);
+                }).catch(() => {
+                    muatDataAntrian(true);
+                });
+            });
+        }
 function bukaModalKeluarIstirahat() {
             tampilkanModalKonfirmasi("Keluar Antrian", "Apakah Anda yakin ingin keluar dari antrian untuk istirahat / ada keperluan?", function() {
                 const namaSales = getAkunAktif();
