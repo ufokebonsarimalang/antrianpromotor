@@ -585,29 +585,34 @@ function cekAkunKeServer() {
             }).catch(() => {});
         }
 
-       function aksiUtamaAntri() {
+      function aksiUtamaAntri() {
             const namaSales = getAkunAktif().trim();
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
             
-            // 1. UBAH TAMPILAN LOKAL SEKETIKA (TANPA MENUNGGU SERVER)
+            // 1. Berikan efek loading instan pada tombol agar mulus
+            const btnAntri = document.getElementById('btn-utama-antri');
+            btnAntri.disabled = true;
+            btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+            // 2. Update tampilan lokal seketika (Optimistic UI)
             statusSayaGlobal = "Standby";
-            
-            // Masukkan sementara ke array lokal agar live list langsung menampilkan nama promotor
-            daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
+            const adaAkun = daftarAntrianGlobal.some(item => item.nama.trim().toLowerCase() === namaSales.toLowerCase());
+            if (!adaAkun) {
+                daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
+            }
             renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
-            // 2. Kirim permintaan ke Google Sheet di latar belakang
+            // 3. Kirim permintaan ke server di latar belakang
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
-                // Ambil data sinkronisasi paling baru dari server
+                // Ambil data segar dari server untuk memastikan sinkron
                 muatDataAntrian(true);
             }).catch(() => {
                 muatDataAntrian(true);
             });
         }
-
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
             if(!namaSales) return;
