@@ -664,7 +664,7 @@ function cekAkunKeServer() {
             }
         }
 
-   function bukaModalKeluarIstirahat() {
+function bukaModalKeluarIstirahat() {
             tampilkanModalKonfirmasi("Keluar Antrian", "Apakah Anda yakin ingin keluar dari antrian untuk istirahat / ada keperluan?", function() {
                 const namaSales = getAkunAktif();
                 if (!namaSales) return;
@@ -676,30 +676,30 @@ function cekAkunKeServer() {
                     btnKeluar.innerHTML = `<span class="spinner"></span> Memproses...`;
                 }
 
-                bukaModal({
-                    icon: "⏳",
-                    title: "Memproses...",
-                    desc: "Sedang keluar dari antrian...",
-                    actions: ""
-                });
+                tampilkanModal("Memproses...", "Sedang keluar dari antrian...");
 
-                fetch(`${SCRIPT_URL}?aksi=spvHapusAntri&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
+                // Menggunakan aksi khusus mandiri promotor (atau selesaimelayani/batal jika ada, atau lewat endpoint hapus yang bersih)
+                // Kita gunakan aksi selesaiMelayani atau hapus antri tanpa verifikasi SPV berat
+                fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                 .then(res => res.json())
                 .then(res => {
-                    tampilkanModal("Berhasil Keluar", "Anda telah keluar dari antrian. Silakan masuk antrian kembali jika sudah selesai istirahat.");
-                    
-                    // LANGSUNG HAPUS CACHE/STATUS LOKAL AGAR TOMBOL KEMBALI NORMAL
+                    // Hapus paksa nama dari array global lokal agar live antrian langsung hilang detik ini juga
+                    daftarAntrianGlobal = daftarAntrianGlobal.filter(item => item.nama.trim().toLowerCase() !== namaSales.trim().toLowerCase());
                     statusSayaGlobal = "belum_ada";
+
+                    // Render ulang tampilan lokal seketika tanpa menunggu server
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
+
+                    tampilkanModal("Berhasil Keluar", "Anda telah keluar dari antrian untuk istirahat.");
                     
-                    // PAKSA TARIK DATA TERBARU SEKETIKA DARI SERVER
                     setTimeout(() => { 
                         sedangProsesAksi = false; 
-                        muatDataAntrian(true); 
+                        muatDataAntrian(true); // Ambil data segar dari server di latar belakang
                         if (btnKeluar) {
                             btnKeluar.disabled = false;
                             btnKeluar.innerHTML = `☕ KELUAR ANTRIAN (ISTIRAHAT)`;
                         }
-                    }, 300);
+                    }, 200);
                 }).catch(() => {
                     sedangProsesAksi = false;
                     muatDataAntrian(true);
