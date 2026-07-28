@@ -510,7 +510,7 @@
             }).catch(err => console.error("Gagal muat master sales"));
         }
 
-        function renderUIRental(dataAntrian, statusSistem, waktuStandbyHA, waktuStandbyAV) {
+     function renderUIRental(dataAntrian, statusSistem, waktuStandbyHA, waktuStandbyAV) {
             daftarAntrianGlobal = dataAntrian || [];
             statusSistemGlobal = statusSistem || "BUKA";
             waktuStandbyHAGlobal = waktuStandbyHA || null;
@@ -529,9 +529,10 @@
             let apakahSayaUrutanPertamaHA = false;
             let apakahSayaUrutanPertamaAV = false;
 
-            let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
-            let standbyHA = listStandby.find(item => (item.kategori || "HA") === "HA");
-            let standbyAV = listStandby.find(item => item.kategori === "AV");
+            // PERBAIKAN: Mencakup "Standby" dan "Dipanggil CS/GUDANG" agar timer AV & HA tidak salah baca
+            let listAktif = daftarAntrianGlobal.filter(item => item.status === "Standby" || item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS");
+            let standbyHA = listAktif.find(item => (item.kategori || "HA") === "HA");
+            let standbyAV = listAktif.find(item => item.kategori === "AV");
 
             if (standbyHA) {
                 namaHANow = standbyHA.nama;
@@ -568,7 +569,7 @@
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> <div><span class="badge-status-item badge-standby">Standby</span></div></li>`;
                     } else if (item.status === "Melayani") {
                         itemHtml = `<li><b>${item.nama}</b> <div><span class="badge-status-item badge-melayani">Melayani (${kategoriItem})</span></div></li>`;
-                    } else if (item.status === "Dipanggil CS/GUDANG") {
+                    } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
                         let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> <div><span class="badge-status-item badge-cs">Dipanggil CS/GUDANG</span></div></li>`;
                     }
@@ -631,7 +632,7 @@
 
                 selectKategori.disabled = true;
 
-            } else if (statusSayaGlobal === "Dipanggil CS/GUDANG") {
+            } else if (statusSayaGlobal === "Dipanggil CS/GUDANG" || statusSayaGlobal === "Dipanggil CS") {
                 btnAntri.innerText = "Posisi Antrian Dikunci (Di CS/GUDANG)";
                 btnAntri.className = "btn-purple btn-disabled";
                 btnAntri.disabled = true;
