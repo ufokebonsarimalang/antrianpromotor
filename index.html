@@ -122,7 +122,8 @@
             display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--border); font-size: 14px; font-weight: 700;
         }
 
-        .badge-status-item { font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 6px; }
+        /* Ukuran font badge live disesuaikan sedikit agar rapi dan tidak turun ke bawah */
+        .badge-status-item { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
         .badge-standby { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
         .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
@@ -209,8 +210,8 @@
             <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Daftar Antrian</button>
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
             
-            <!-- TOMBOL DIPANGGIL CS & SELESAI CS -->
-            <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 12px;">DIPANGGIL CS (KUNCI POSISI)</button>
+            <!-- TOMBOL DIPANGGIL CS/GUDANG & SELESAI CS -->
+            <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 12px;">DIPANGGIL CS/GUDANG (KUNCI POSISI)</button>
         </div>
 
         <!-- LIVE LIST DIPISAH HA DAN AV -->
@@ -445,6 +446,9 @@
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> <span class="badge-status-item badge-standby">Standby</span></li>`;
                     } else if (item.status === "Melayani") {
                         itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
+                    } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
+                        let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
+                        itemHtml = `<li><b>${urut}. ${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/GUDANG</span></li>`;
                     }
 
                     if (kategoriItem === "AV") listHtmlAV += itemHtml;
@@ -457,6 +461,7 @@
 
             const btnAntri = document.getElementById('btn-utama-antri');
             const btnCustomer = document.getElementById('btn-utama-customer');
+            const btnCS = document.getElementById('btn-utama-cs');
             const selectKategori = document.getElementById('pilih-kategori');
 
             if (statusSayaGlobal === "Melayani") {
@@ -468,6 +473,8 @@
                 btnCustomer.innerText = "SELESAI PELAYANAN";
                 btnCustomer.className = "btn-danger";
                 btnCustomer.disabled = false;
+
+                btnCS.style.display = "none";
                 selectKategori.disabled = true;
             } else if (statusSayaGlobal === "Standby") {
                 btnAntri.innerText = "Anda Sudah Di Antrian";
@@ -481,12 +488,32 @@
                 let bisaAmbil = (kategoriSaya === "AV" && apakahSayaUrutanPertamaAV) || (kategoriSaya !== "AV" && apakahSayaUrutanPertamaHA);
                 btnCustomer.disabled = !bisaAmbil;
                 btnCustomer.className = bisaAmbil ? "btn-primary" : "btn-primary btn-disabled";
+
+                btnCS.style.display = "block";
+                btnCS.innerText = "DIPANGGIL CS/GUDANG (KUNCI POSISI)";
+                btnCS.className = "btn-purple";
+                btnCS.disabled = false;
+
+                selectKategori.disabled = true;
+            } else if (statusSayaGlobal === "Dipanggil CS/GUDANG" || statusSayaGlobal === "Dipanggil CS") {
+                btnAntri.innerText = "Posisi Antrian Dikunci (Di CS/GUDANG)";
+                btnAntri.className = "btn-purple btn-disabled";
+                btnAntri.disabled = true;
+
+                btnCustomer.style.display = "none";
+
+                btnCS.style.display = "block";
+                btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)";
+                btnCS.className = "btn-success";
+                btnCS.disabled = false;
+
                 selectKategori.disabled = true;
             } else { 
                 btnAntri.innerText = statusSistemGlobal === "TUTUP" ? "Antrian Ditutup Oleh SPV" : "Daftar Antrian";
                 btnAntri.className = statusSistemGlobal === "TUTUP" ? "btn-danger btn-disabled" : "btn-success";
                 btnAntri.disabled = (statusSistemGlobal === "TUTUP");
                 btnCustomer.style.display = "none";
+                btnCS.style.display = "none";
                 selectKategori.disabled = false;
             }
 
@@ -546,6 +573,41 @@
                     .then(res => res.json())
                     .then(res => {
                         tampilkanModal("Status", res.pesan);
+                        setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
+                    });
+                });
+            }
+        }
+
+        function aksiToggleCS() {
+            const namaSales = getAkunAktif();
+            if(!namaSales) return;
+
+            const btnCS = document.getElementById('btn-utama-cs');
+
+            if (statusSayaGlobal === "Standby") {
+                tampilkanModalKonfirmasi("Status Dipanggil CS/GUDANG", "Dipanggil oleh CS/GUDANG? Posisi antrian Anda akan dikunci dan tidak tergeser ke bawah.", function() {
+                    sedangProsesAksi = true;
+                    btnCS.disabled = true;
+                    btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+                    fetch(`${SCRIPT_URL}?aksi=panggilCS&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
+                    .then(res => res.json())
+                    .then(res => {
+                        tampilkanModal("Status CS/GUDANG", res.pesan || "Posisi antrian dikunci");
+                        setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
+                    });
+                });
+            } else if (statusSayaGlobal === "Dipanggil CS/GUDANG" || statusSayaGlobal === "Dipanggil CS") {
+                tampilkanModalKonfirmasi("Selesai Urusan CS/GUDANG", "Urusan CS/GUDANG sudah selesai? Anda akan kembali aktif di posisi antrian semula.", function() {
+                    sedangProsesAksi = true;
+                    btnCS.disabled = true;
+                    btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+                    fetch(`${SCRIPT_URL}?aksi=selesaiCS&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
+                    .then(res => res.json())
+                    .then(res => {
+                        tampilkanModal("Status CS/GUDANG", res.pesan || "Kembali ke antrian aktif");
                         setTimeout(() => { sedangProsesAksi = false; muatDataAntrian(true); }, 400);
                     });
                 });
