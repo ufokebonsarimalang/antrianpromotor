@@ -287,36 +287,31 @@
             return devId;
         }
 function cekAkunKeServer() {
-            const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
-            
-            // Cek ke server untuk verifikasi binding
-            const deviceId = getDeviceId();
-            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, { method: 'GET', redirect: 'follow' })
-            .then(res => res.json())
-            .then(res => {
-                // TAMBAHAN PENGAMAN: Jika server merespon tetapi statusnya belum terikat atau data sheet kosong
-                if (res.status === "terkunci" && res.nama) {
-                    namaSalesAktifGlobal = res.nama;
-                    localStorage.setItem('ufo_nama_sales_aktif', res.nama);
-                    document.getElementById('panel-login').style.display = 'none';
-                    document.getElementById('panel-menu-utama').style.display = 'block';
-                    document.getElementById('label-user-aktif').innerText = res.nama;
-                } else {
-                    // JIKA DATA DI SHEET SUDAH DIHAPUS / TIDAK VALID, BERSIHKAN KUNCI LOKAL
-                    localStorage.removeItem('ufo_nama_sales_aktif');
-                    namaSalesAktifGlobal = "";
-                    document.getElementById('panel-login').style.display = 'block';
-                    document.getElementById('panel-menu-utama').style.display = 'none';
-                }
+            // Ambil nama sales yang terakhir kali aktif di HP ini dari memori permanen
+            const salesPernahAktif = localStorage.getItem('ufo_nama_sales_aktif');
+
+            if (salesPernahAktif) {
+                // Jika HP pernah aktif dengan nama tertentu, langsung aktifkan tampilannya secara instan
+                namaSalesAktifGlobal = salesPernahAktif;
+                document.getElementById('panel-login').style.display = 'none';
+                document.getElementById('panel-menu-utama').style.display = 'block';
+                document.getElementById('label-user-aktif').innerText = salesPernahAktif;
                 muatDataAntrian();
-            }).catch(() => {
-                // Jika koneksi server gagal tapi ada cache lokal, biarkan sementara, jika tidak ada tampilkan login
-                if (!cachedNama) {
-                    document.getElementById('panel-login').style.display = 'block';
-                    document.getElementById('panel-menu-utama').style.display = 'none';
-                }
+            } else {
+                // Jika benar-benar kosong, baru tampilkan pilihan login/pilih nama
+                fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === "sukses") {
+                        let html = '<option value="">-- Pilih Nama Anda --</option>';
+                        (res.data || []).forEach(n => html += `<option value="${n}">${n}</option>`);
+                        document.getElementById('pilih-sales').innerHTML = html;
+                    }
+                });
+                document.getElementById('panel-login').style.display = 'block';
+                document.getElementById('panel-menu-utama').style.display = 'none';
                 muatDataAntrian();
-            });
+            }
         }
 
         function simpanAkunHP() {
