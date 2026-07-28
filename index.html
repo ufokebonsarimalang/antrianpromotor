@@ -122,7 +122,6 @@
             display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--border); font-size: 14px; font-weight: 700;
         }
 
-        /* Ukuran font badge live disesuaikan sedikit agar rapi dan tidak turun ke bawah */
         .badge-status-item { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
         .badge-standby { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
@@ -134,7 +133,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* TOMBOL WHATSAPP LAPOR KECURANGAN */
         .wa-report-btn {
             margin-top: 12px; background: #25d366; border: 2px solid #1ebe57; color: white;
             font-size: 13px; padding: 14px; border-radius: 12px; text-decoration: none; 
@@ -174,7 +172,7 @@
             <div class="card-giliran-utama">
                 <div class="label-giliran">Giliran HA Saat Ini</div>
                 <div id="nama-aktif-ha" class="nama-giliran-aktif">-</div>
-                <span id="timer-mundur-ha" class="timer-mundur">00:00</span>
+                <span id="timer-mundur-ha" class="timer-mundur" style="color: var(--primary);">00:00</span>
             </div>
             <div class="card-giliran-utama" style="background: #fdf4ff; border-color: #f5d0fe;">
                 <div class="label-giliran" style="color: #9333ea;">Giliran AV Saat Ini</div>
@@ -336,12 +334,11 @@
             return namaSalesAktifGlobal;
         }
 
-      function hitungMundurLokal() {
+        function hitungMundurLokal() {
             const labelTimerHA = document.getElementById('timer-mundur-ha');
             const labelTimerAV = document.getElementById('timer-mundur-av');
             const now = new Date().getTime();
 
-            // --- HITUNG MUNDUR HA ---
             if (waktuStandbyHAGlobal) {
                 const waktuHA = new Date(waktuStandbyHAGlobal).getTime();
                 if (!isNaN(waktuHA)) {
@@ -352,14 +349,12 @@
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
                         labelTimerHA.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
-                        
-                        // DI SINI PENGATURAN WARNANYA
                         if (totalDetik <= 60) {
                             labelTimerHA.classList.add('timer-warning-merah');
-                            labelTimerHA.style.color = "#ef4444"; // Merah jika ≤ 1 menit
+                            labelTimerHA.style.color = "#ef4444";
                         } else {
                             labelTimerHA.classList.remove('timer-warning-merah');
-                            labelTimerHA.style.color = "#2563eb"; // Biru saat normal
+                            labelTimerHA.style.color = "#2563eb";
                         }
                     } else {
                         labelTimerHA.innerText = `Habis!`;
@@ -369,9 +364,37 @@
             } else {
                 labelTimerHA.innerText = "00:00";
                 labelTimerHA.classList.remove('timer-warning-merah');
-                labelTimerHA.style.color = "#2563eb"; // Biru saat kosong/00:00
+                labelTimerHA.style.color = "#2563eb";
             }
-            // ... (lanjut untuk AV)
+
+            if (waktuStandbyAVGlobal) {
+                const waktuAV = new Date(waktuStandbyAVGlobal).getTime();
+                if (!isNaN(waktuAV)) {
+                    const selisihMs = now - waktuAV;
+                    const sisaMs = (BATAS_MENIT * 60 * 1000) - selisihMs;
+                    if (sisaMs > 0) {
+                        const totalDetik = Math.floor(sisaMs / 1000);
+                        const menit = Math.floor(totalDetik / 60);
+                        const detik = totalDetik % 60;
+                        labelTimerAV.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                        if (totalDetik <= 60) {
+                            labelTimerAV.classList.add('timer-warning-merah');
+                            labelTimerAV.style.color = "#ef4444";
+                        } else {
+                            labelTimerAV.classList.remove('timer-warning-merah');
+                            labelTimerAV.style.color = "#9333ea";
+                        }
+                    } else {
+                        labelTimerAV.innerText = `Habis!`;
+                        labelTimerAV.classList.add('timer-warning-merah');
+                    }
+                }
+            } else {
+                labelTimerAV.innerText = "00:00";
+                labelTimerAV.classList.remove('timer-warning-merah');
+                labelTimerAV.style.color = "#9333ea";
+            }
+        }
 
         function muatMasterSales() {
             fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' })
