@@ -436,7 +436,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         const BATAS_MENIT = 60;
-        const PIN_PANEL_RAHASIA = "8888"; 
+        const PIN_PANEL_RAHASIA = "123456"; // Disesuaikan dengan default sheet setting
         
         let promotorHA = null;
         let promotorAV = null;
@@ -452,13 +452,28 @@
 
         function validasiPinPanel() {
             const pinInput = document.getElementById('input-pin-panel').value;
-            if (pinInput === PIN_PANEL_RAHASIA) {
-                sessionStorage.setItem('panel_unlocked', "true");
-                document.getElementById('pin-overlay').style.display = 'none';
-            } else {
-                alert("PIN Salah!");
-                document.getElementById('input-pin-panel').value = "";
-            }
+            
+            // Cek langsung ke server apakah PIN sesuai dengan database sheet
+            fetch(`${SCRIPT_URL}?aksi=loginSPV&pin=${encodeURIComponent(pinInput)}`, { method: 'GET', redirect: 'follow' })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === "sukses") {
+                    sessionStorage.setItem('panel_unlocked', "true");
+                    document.getElementById('pin-overlay').style.display = 'none';
+                } else {
+                    alert("PIN SPV Salah!");
+                    document.getElementById('input-pin-panel').value = "";
+                }
+            }).catch(() => {
+                // Fallback lokal jika offline/gagal fetch
+                if (pinInput === PIN_PANEL_RAHASIA) {
+                    sessionStorage.setItem('panel_unlocked', "true");
+                    document.getElementById('pin-overlay').style.display = 'none';
+                } else {
+                    alert("PIN Salah!");
+                    document.getElementById('input-pin-panel').value = "";
+                }
+            });
         }
 
         function cekPerangkatMutlak() {
@@ -651,7 +666,7 @@
                 actions: ""
             });
 
-            const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(promotor.nama)}&kategori=${encodeURIComponent(targetKategoriAktif)}&pinSPV=${PIN_PANEL_RAHASIA}`;
+            const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(promotor.nama)}&kategori=${encodeURIComponent(targetKategoriAktif)}`;
 
             fetch(urlAksi, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -694,7 +709,8 @@
                 icon: "⏳", title: "Memproses...", desc: `Memasukkan ${namaSales} ke antrian...`, actions: ""
             });
 
-            let url = `${SCRIPT_URL}?aksi=tambahAntrian&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&pinSPV=${PIN_PANEL_RAHASIA}`;
+            // Menggunakan aksi spvDaftarAntri yang sesuai dengan backend Apps Script Anda
+            let url = `${SCRIPT_URL}?aksi=spvDaftarAntri&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -707,15 +723,6 @@
                 });
                 muatDataAntrianDanTimer();
                 document.getElementById('select-tambah-sales').value = "";
-            }).catch(() => {
-                let urlAlt = `${SCRIPT_URL}?aksi=spvDaftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&pinSPV=${PIN_PANEL_RAHASIA}`;
-                fetch(urlAlt).then(r => r.json()).then(res => {
-                    bukaModal({
-                        icon: "✅", title: "Berhasil", desc: res.pesan || "Berhasil diproses",
-                        actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
-                    });
-                    muatDataAntrianDanTimer();
-                });
             });
         }
 
@@ -727,7 +734,12 @@
                 icon: "⏳", title: "Memproses...", desc: `Memaksa ${namaSales} membawa customer...`, actions: ""
             });
 
-            let url = `${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}&pinSPV=${PIN_PANEL_RAHASIA}`;
+            // Cari kategori sales tersebut dari data antrian global
+            let itemSales = daftarAntrianGlobal.find(i => i.nama === namaSales);
+            let kategoriSales = itemSales ? (itemSales.kategori || "HA") : "HA";
+
+            // Menggunakan aksi spvAmbilAntrianBebas yang sesuai dengan backend Apps Script Anda
+            let url = `${SCRIPT_URL}?aksi=spvAmbilAntrianBebas&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriSales)}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -739,15 +751,6 @@
                     actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
                 });
                 muatDataAntrianDanTimer();
-            }).catch(() => {
-                let urlAlt = `${SCRIPT_URL}?aksi=spvPaksaAmbil&namaSales=${encodeURIComponent(namaSales)}&pinSPV=${PIN_PANEL_RAHASIA}`;
-                fetch(urlAlt).then(r => r.json()).then(res => {
-                    bukaModal({
-                        icon: "✅", title: "Berhasil", desc: res.pesan || "Berhasil diproses",
-                        actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
-                    });
-                    muatDataAntrianDanTimer();
-                });
             });
         }
 
@@ -760,7 +763,8 @@
                     icon: "⏳", title: "Memproses...", desc: `Mengeluarkan ${namaSales}...`, actions: ""
                 });
 
-                let url = `${SCRIPT_URL}?aksi=hapusAntrian&namaSales=${encodeURIComponent(namaSales)}&pinSPV=${PIN_PANEL_RAHASIA}`;
+                // Menggunakan aksi spvSelesaiMelayani yang sesuai dengan backend Apps Script Anda
+                let url = `${SCRIPT_URL}?aksi=spvSelesaiMelayani&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(namaSales)}`;
 
                 fetch(url, { method: 'GET', redirect: 'follow' })
                 .then(res => res.json())
@@ -772,15 +776,6 @@
                         actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
                     });
                     muatDataAntrianDanTimer();
-                }).catch(() => {
-                    let urlAlt = `${SCRIPT_URL}?aksi=spvHapusAntri&namaSales=${encodeURIComponent(namaSales)}&pinSPV=${PIN_PANEL_RAHASIA}`;
-                    fetch(urlAlt).then(r => r.json()).then(res => {
-                        bukaModal({
-                            icon: "✅", title: "Berhasil", desc: res.pesan || "Berhasil diproses",
-                            actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
-                        });
-                        muatDataAntrianDanTimer();
-                    });
                 });
             }
         }
