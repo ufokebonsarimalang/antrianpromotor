@@ -336,11 +336,12 @@
             return namaSalesAktifGlobal;
         }
 
-        function hitungMundurLokal() {
+      function hitungMundurLokal() {
             const labelTimerHA = document.getElementById('timer-mundur-ha');
             const labelTimerAV = document.getElementById('timer-mundur-av');
             const now = new Date().getTime();
 
+            // --- HITUNG MUNDUR HA ---
             if (waktuStandbyHAGlobal) {
                 const waktuHA = new Date(waktuStandbyHAGlobal).getTime();
                 if (!isNaN(waktuHA)) {
@@ -351,7 +352,15 @@
                         const menit = Math.floor(totalDetik / 60);
                         const detik = totalDetik % 60;
                         labelTimerHA.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
-                        labelTimerHA.classList.toggle('timer-warning-merah', totalDetik <= 60);
+                        
+                        // DI SINI PENGATURAN WARNANYA
+                        if (totalDetik <= 60) {
+                            labelTimerHA.classList.add('timer-warning-merah');
+                            labelTimerHA.style.color = "#ef4444"; // Merah jika ≤ 1 menit
+                        } else {
+                            labelTimerHA.classList.remove('timer-warning-merah');
+                            labelTimerHA.style.color = "#2563eb"; // Biru saat normal
+                        }
                     } else {
                         labelTimerHA.innerText = `Habis!`;
                         labelTimerHA.classList.add('timer-warning-merah');
@@ -360,29 +369,9 @@
             } else {
                 labelTimerHA.innerText = "00:00";
                 labelTimerHA.classList.remove('timer-warning-merah');
+                labelTimerHA.style.color = "#2563eb"; // Biru saat kosong/00:00
             }
-
-            if (waktuStandbyAVGlobal) {
-                const waktuAV = new Date(waktuStandbyAVGlobal).getTime();
-                if (!isNaN(waktuAV)) {
-                    const selisihMs = now - waktuAV;
-                    const sisaMs = (BATAS_MENIT * 60 * 1000) - selisihMs;
-                    if (sisaMs > 0) {
-                        const totalDetik = Math.floor(sisaMs / 1000);
-                        const menit = Math.floor(totalDetik / 60);
-                        const detik = totalDetik % 60;
-                        labelTimerAV.innerText = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
-                        labelTimerAV.classList.toggle('timer-warning-merah', totalDetik <= 60);
-                    } else {
-                        labelTimerAV.innerText = `Habis!`;
-                        labelTimerAV.classList.add('timer-warning-merah');
-                    }
-                }
-            } else {
-                labelTimerAV.innerText = "00:00";
-                labelTimerAV.classList.remove('timer-warning-merah');
-            }
-        }
+            // ... (lanjut untuk AV)
 
         function muatMasterSales() {
             fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' })
