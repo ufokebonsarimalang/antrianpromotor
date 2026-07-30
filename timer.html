@@ -97,10 +97,11 @@
             background: var(--card-bg);
             border: 2px solid var(--card-border);
             border-radius: 24px;
-            padding: 28px 20px;
+            padding: 32px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             text-align: center;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
             position: relative;
@@ -144,10 +145,10 @@
         }
 
         .sisa-waktu-display {
-            font-size: 52px;
+            font-size: 56px;
             font-weight: 800;
             font-variant-numeric: tabular-nums;
-            margin: 12px 0 24px 0;
+            margin: 10px 0 0 0;
             letter-spacing: -1px;
         }
 
@@ -156,32 +157,6 @@
         .sisa-waktu-display.habis { color: var(--danger) !important; animation: blink 1s infinite; }
 
         @keyframes blink { 50% { opacity: 0.5; } }
-
-        .btn-power-container { width: 100%; margin-top: auto; }
-
-        .btn-power {
-            width: 100%;
-            padding: 16px;
-            border-radius: 16px;
-            border: none;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            font-size: 15px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
-            transition: all 0.2s ease;
-        }
-
-        .btn-power:hover { transform: translateY(-2px); box-shadow: 0 14px 24px -5px rgba(16, 185, 129, 0.5); }
-        .btn-power:active { transform: translateY(1px); }
-        .btn-power:disabled { background: #475569; box-shadow: none; cursor: not-allowed; opacity: 0.5; }
 
         .kosong-state { color: var(--text-muted); font-size: 16px; font-weight: 500; font-style: italic; }
 
@@ -376,30 +351,22 @@
     </div>
 
     <div class="main-container">
+        <!-- MONITOR DISPLAY TIMER NO 1 (MURNI DISPLAY) -->
         <div class="cards-grid">
             <div class="timer-card ha">
                 <div class="badge-kategori">URUTAN NO 1 HA</div>
                 <div id="nama-ha" class="nama-promotor">Memuat...</div>
                 <div id="timer-ha" class="sisa-waktu-display">--:--</div>
-                <div class="btn-power-container">
-                    <button id="btn-power-ha" class="btn-power" onclick="mintaKonfirmasiPower('HA')">
-                        <span class="power-icon"></span> POWER ON
-                    </button>
-                </div>
             </div>
 
             <div class="timer-card av">
                 <div class="badge-kategori">URUTAN NO 1 AV</div>
                 <div id="nama-av" class="nama-promotor">Memuat...</div>
                 <div id="timer-av" class="sisa-waktu-display">--:--</div>
-                <div class="btn-power-container">
-                    <button id="btn-power-av" class="btn-power" onclick="mintaKonfirmasiPower('AV')">
-                        <span class="power-icon"></span> POWER ON
-                    </button>
-                </div>
             </div>
         </div>
 
+        <!-- PANEL ANTRIAN KONTROL SPV -->
         <div class="spv-control-card">
             <h3>⚙️ PANEL ANTRIAN SPV</h3>
             <div class="control-grid">
@@ -429,7 +396,16 @@
                     <button type="button" class="btn-action btn-success" onclick="aksiTambahAntrianSPV()">Masukkan Antrian</button>
                 </div>
 
-                <!-- 2. PAKSA BAWA CUSTOMER -->
+                <!-- 2. TAMBAH TIMER URUTAN 1 (TANPA DROPDOWN HA/AV) -->
+                <div class="control-group">
+                    <div>
+                        <label>Tambah Timer Standby Urutan 1</label>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Mereset/menambah waktu 60 menit untuk promotor urutan No. 1</p>
+                    </div>
+                    <button type="button" class="btn-action btn-success" style="background: #10b981;" onclick="aksiTambahTimerSPV()">⏱️ Tambah Timer Urutan 1</button>
+                </div>
+
+                <!-- 3. PAKSA BAWA CUSTOMER -->
                 <div class="control-group">
                     <div>
                         <label>Paksa Bawa Customer</label>
@@ -440,7 +416,7 @@
                     <button type="button" class="btn-action btn-primary" style="background: #0284c7;" onclick="aksiPaksaBawaCustomerSPV()">Paksa Bawa Customer</button>
                 </div>
 
-                <!-- 3. PAKSA SELESAI MELAYANI -->
+                <!-- 4. PAKSA SELESAI MELAYANI -->
                 <div class="control-group">
                     <div>
                         <label>Paksa Selesai Melayani Customer</label>
@@ -451,7 +427,7 @@
                     <button type="button" class="btn-action btn-warning" onclick="aksiPaksaSelesaiMelayaniSPV()">Paksa Selesai Melayani</button>
                 </div>
 
-                <!-- 4. KELUARKAN DARI ANTRIAN -->
+                <!-- 5. KELUARKAN DARI ANTRIAN -->
                 <div class="control-group">
                     <div>
                         <label>Keluarkan dari Antrian Standby</label>
@@ -466,6 +442,7 @@
         </div>
     </div>
 
+    <!-- MODAL POPUP -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-icon" class="modal-icon">⏱️</div>
@@ -482,7 +459,6 @@
         
         let promotorHA = null;
         let promotorAV = null;
-        let targetKategoriAktif = "";
         let masterSalesGlobal = [];
         let daftarAntrianGlobal = [];
 
@@ -579,7 +555,6 @@
         }
 
         function updateDropdownSPV() {
-            // Simpan pilihan sementara jika sedang ada yang dipilih
             const valPaksa = document.getElementById('select-paksa-sales').value;
             const valSelesai = document.getElementById('select-selesai-sales').value;
             const valHapus = document.getElementById('select-hapus-sales').value;
@@ -620,12 +595,10 @@
 
             const namaHaEl = document.getElementById('nama-ha');
             const timerHaEl = document.getElementById('timer-ha');
-            const btnHaEl = document.getElementById('btn-power-ha');
 
             if (promotorHA) {
                 namaHaEl.textContent = promotorHA.nama;
                 namaHaEl.classList.remove('kosong-state');
-                btnHaEl.disabled = false;
 
                 let sisaTimerStr = hitungSisaWaktu(window.waktuServerHA, now);
                 timerHaEl.textContent = sisaTimerStr;
@@ -640,17 +613,14 @@
                 namaHaEl.classList.add('kosong-state');
                 timerHaEl.textContent = "--:--";
                 timerHaEl.classList.remove('habis');
-                btnHaEl.disabled = true;
             }
 
             const namaAvEl = document.getElementById('nama-av');
             const timerAvEl = document.getElementById('timer-av');
-            const btnAvEl = document.getElementById('btn-power-av');
 
             if (promotorAV) {
                 namaAvEl.textContent = promotorAV.nama;
                 namaAvEl.classList.remove('kosong-state');
-                btnAvEl.disabled = false;
 
                 let sisaTimerStr = hitungSisaWaktu(window.waktuServerAV, now);
                 timerAvEl.textContent = sisaTimerStr;
@@ -665,7 +635,6 @@
                 namaAvEl.classList.add('kosong-state');
                 timerAvEl.textContent = "--:--";
                 timerAvEl.classList.remove('habis');
-                btnAvEl.disabled = true;
             }
         }
 
@@ -688,42 +657,53 @@
             }
         }
 
-        function mintaKonfirmasiPower(kategori) {
-            targetKategoriAktif = kategori;
-            const promotor = (kategori === "HA") ? promotorHA : promotorAV;
-            if (!promotor) return;
+        /* AKSI TAMBAH TIMER URUTAN 1 (SEKALIGUS HA & AV) */
+        function aksiTambahTimerSPV() {
+            if (!promotorHA && !promotorAV) {
+                return alert("Tidak ada antrian promotor aktif pada HA maupun AV!");
+            }
+
+            let infoPromotor = "";
+            if (promotorHA) infoPromotor += `<br>• HA: <b>${promotorHA.nama}</b>`;
+            if (promotorAV) infoPromotor += `<br>• AV: <b>${promotorAV.nama}</b>`;
 
             bukaModal({
-                icon: "⏻",
-                title: `POWER ON TIMER (${kategori})`,
-                desc: `Reset/Tambah waktu timer untuk <br><b style="color: #ffffff; font-size: 16px;">${promotor.nama}</b>?`,
+                icon: "⏱️",
+                title: "TAMBAH TIMER URUTAN 1",
+                desc: `Reset/Tambah waktu timer 60 menit untuk Urutan 1:${infoPromotor}`,
                 actions: `
                     <button class="modal-btn modal-btn-cancel" onclick="tutupModal()">Batal</button>
-                    <button class="modal-btn modal-btn-confirm" onclick="eksekusiPowerOn()">Ya, Tambah</button>
+                    <button class="modal-btn modal-btn-confirm" onclick="eksekusiTambahTimerSekaligus()">Ya, Tambah Waktu</button>
                 `
             });
         }
 
-        function eksekusiPowerOn() {
-            const promotor = (targetKategoriAktif === "HA") ? promotorHA : promotorAV;
-            if (!promotor) return;
-
+        function eksekusiTambahTimerSekaligus() {
             bukaModal({
                 icon: "⏳", title: "Memproses...", desc: "Memperbarui waktu timer ke server...", actions: ""
             });
 
-            const urlAksi = `${SCRIPT_URL}?aksi=spvTambahTimer&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(promotor.nama)}&kategori=${encodeURIComponent(targetKategoriAktif)}`;
+            // Panggil API reset timer untuk HA dan AV
+            let janjiHA = promotorHA ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(promotorHA.nama)}&kategori=HA`) : Promise.resolve();
+            let janjiAV = promotorAV ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(promotorAV.nama)}&kategori=AV`) : Promise.resolve();
 
-            fetch(urlAksi, { method: 'GET', redirect: 'follow' })
-            .then(res => res.json())
-            .then(res => {
+            Promise.all([janjiHA, janjiAV])
+            .then(() => {
                 bukaModal({
-                    icon: res.status === "sukses" ? "✅" : "⚠️",
-                    title: res.status === "sukses" ? "Berhasil!" : "Gagal",
-                    desc: res.pesan,
+                    icon: "✅",
+                    title: "Berhasil!",
+                    desc: "Waktu timer urutan ke-1 telah berhasil diperbarui.",
                     actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">Tutup</button>`
                 });
                 muatDataAntrianDanTimer();
+            })
+            .catch(() => {
+                bukaModal({
+                    icon: "⚠️",
+                    title: "Gagal",
+                    desc: "Terjadi kesalahan saat memperbarui waktu timer.",
+                    actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">Tutup</button>`
+                });
             });
         }
 
@@ -755,13 +735,11 @@
             });
         }
 
-        /* PERBAIKAN 1: PAKSA BAWA CUSTOMER */
         function aksiPaksaBawaCustomerSPV() {
             const selectEl = document.getElementById('select-paksa-sales');
             const namaSales = selectEl.value;
             if(!namaSales) return alert("Pilih promotor standby terlebih dahulu!");
 
-            // Ambil kategori dari atribut data-kategori option atau data antrian
             const optSelected = selectEl.options[selectEl.selectedIndex];
             const katOpt = optSelected ? optSelected.getAttribute('data-kategori') : null;
             const itemSales = daftarAntrianGlobal.find(i => String(i.nama).trim() === String(namaSales).trim());
@@ -787,7 +765,6 @@
             });
         }
 
-        /* PERBAIKAN 2: PAKSA SELESAI MELAYANI */
         function aksiPaksaSelesaiMelayaniSPV() {
             const selectEl = document.getElementById('select-selesai-sales');
             const namaSales = selectEl.value;
@@ -818,7 +795,6 @@
             });
         }
 
-        /* PERBAIKAN 3: KELUARKAN DARI ANTRIAN */
         function aksiHapusAntrianSPV() {
             const selectEl = document.getElementById('select-hapus-sales');
             const namaSales = selectEl.value;
