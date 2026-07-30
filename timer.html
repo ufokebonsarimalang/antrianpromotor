@@ -61,7 +61,7 @@
             text-align: center;
             margin-bottom: 24px;
             width: 100%;
-            max-width: 900px;
+            max-width: 960px;
         }
 
         .header-app h1 {
@@ -80,7 +80,7 @@
 
         .main-container {
             width: 100%;
-            max-width: 900px;
+            max-width: 960px;
             display: flex;
             flex-direction: column;
             gap: 24px;
@@ -97,7 +97,7 @@
             background: var(--card-bg);
             border: 2px solid var(--card-border);
             border-radius: 24px;
-            padding: 32px 24px;
+            padding: 28px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -118,7 +118,7 @@
         .timer-card.av::before { background: var(--accent-av); }
 
         .badge-kategori {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
             padding: 6px 16px;
             border-radius: 20px;
@@ -130,14 +130,18 @@
         .ha .badge-kategori { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
         .av .badge-kategori { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
 
+        /* TEKS NAMA PROMOTOR TIDAK DIBATASI SUPAYA TIDAK TERPOTONG */
         .nama-promotor {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 800;
             color: #ffffff;
             margin-bottom: 8px;
             min-height: 38px;
-            line-height: 1.2;
-            word-break: break-word;
+            line-height: 1.3;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            width: 100%;
         }
 
         .sisa-waktu-display {
@@ -158,12 +162,12 @@
 
         .btn-power {
             width: 100%;
-            padding: 18px;
-            border-radius: 18px;
+            padding: 16px;
+            border-radius: 16px;
             border: none;
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -194,15 +198,18 @@
             font-size: 18px;
             font-weight: 800;
             color: #ffffff;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 8px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 12px;
         }
 
+        /* GRID KONTROL DIATUR RESPONSIF AGAR BERADA PADA POSISI PROPORSIAL */
         .control-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 16px;
         }
 
@@ -213,17 +220,21 @@
             border-radius: 16px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            justify-content: space-between;
+            gap: 12px;
         }
 
         .control-group label {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 800;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            line-height: 1.4;
+            white-space: normal;
         }
 
+        /* STYLING SELECT BISA MULTI-LINE AGAR PILIHAN TEKS PANJANG TERLIHAT JELAS */
         .control-group select {
             width: 100%;
             padding: 12px;
@@ -231,21 +242,34 @@
             border: 2px solid var(--card-border);
             background: var(--card-bg);
             color: var(--text-main);
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             outline: none;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .control-group select option {
+            background: #1e293b;
+            color: #ffffff;
+            padding: 10px;
         }
 
         .btn-action {
             width: 100%;
-            padding: 12px;
+            padding: 13px;
             border-radius: 10px;
             border: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
             text-transform: uppercase;
             cursor: pointer;
             transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
         }
 
         .btn-success { background: var(--power-green); color: white; }
@@ -287,7 +311,7 @@
         .modal-overlay.active .modal-box { transform: scale(1); }
         .modal-icon { font-size: 42px; margin-bottom: 12px; }
         .modal-title { font-size: 18px; font-weight: 800; color: #ffffff; margin-bottom: 8px; }
-        .modal-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+        .modal-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; word-wrap: break-word; }
         .modal-actions { display: flex; gap: 12px; }
 
         .modal-btn {
@@ -355,6 +379,7 @@
     </div>
 
     <div class="main-container">
+        <!-- LIVE DISPLAY TIMER URUTAN 1 -->
         <div class="cards-grid">
             <div class="timer-card ha">
                 <div class="badge-kategori">URUTAN NO 1 HA</div>
@@ -379,57 +404,66 @@
             </div>
         </div>
 
+        <!-- PANEL MANAJEMEN ANTRIAN SPV -->
         <div class="spv-control-card">
             <h3>⚙️ MANAJEMEN ANTRIAN SPV</h3>
             <div class="control-grid">
                 
-                <!-- 1. MASUKKAN PROMOTOR -->
+                <!-- 1. MASUKKAN PROMOTOR DENGAN POSISI -->
                 <div class="control-group">
-                    <label>Masukkan Promotor ke Antrian</label>
-                    <select id="select-tambah-sales" style="margin-bottom: 8px;">
-                        <option value="">-- Pilih Promotor --</option>
-                    </select>
-                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                        <select id="select-tambah-kategori" style="width: 50%;">
-                            <option value="HA">HA</option>
-                            <option value="AV">AV</option>
+                    <div>
+                        <label>Masukkan Promotor ke Antrian</label>
+                        <select id="select-tambah-sales" style="margin-top: 6px; margin-bottom: 8px;">
+                            <option value="">-- Pilih Promotor --</option>
                         </select>
-                        <select id="select-tambah-posisi" style="width: 50%;">
-                            <option value="0">Paling Belakang</option>
-                            <option value="1">Urutan Ke-1</option>
-                            <option value="2">Urutan Ke-2</option>
-                            <option value="3">Urutan Ke-3</option>
-                            <option value="4">Urutan Ke-4</option>
-                            <option value="5">Urutan Ke-5</option>
-                        </select>
+                        <div style="display: flex; gap: 8px;">
+                            <select id="select-tambah-kategori" style="width: 45%;">
+                                <option value="HA">HA</option>
+                                <option value="AV">AV</option>
+                            </select>
+                            <select id="select-tambah-posisi" style="width: 55%;">
+                                <option value="0">Belakang (Default)</option>
+                                <option value="1">Urutan Ke-1</option>
+                                <option value="2">Urutan Ke-2</option>
+                                <option value="3">Urutan Ke-3</option>
+                                <option value="4">Urutan Ke-4</option>
+                                <option value="5">Urutan Ke-5</option>
+                            </select>
+                        </div>
                     </div>
                     <button type="button" class="btn-action btn-success" onclick="aksiTambahAntrianSPV()">+ Masukkan Antrian</button>
                 </div>
 
                 <!-- 2. PAKSA BAWA CUSTOMER -->
                 <div class="control-group">
-                    <label>Paksa Bawa Customer (Ambil Giliran)</label>
-                    <select id="select-paksa-sales">
-                        <option value="">-- Pilih Promotor Standby --</option>
-                    </select>
+                    <div>
+                        <label>Paksa Bawa Customer (Ambil Giliran)</label>
+                        <select id="select-paksa-sales" style="margin-top: 6px;">
+                            <option value="">-- Pilih Promotor Standby --</option>
+                        </select>
+                    </div>
                     <button type="button" class="btn-action btn-primary" style="background: #0284c7;" onclick="aksiPaksaBawaCustomerSPV()">⚡ Paksa Bawa Customer</button>
                 </div>
 
                 <!-- 3. PAKSA SELESAI MELAYANI -->
                 <div class="control-group">
-                    <label>Paksa Selesai Melayani Customer</label>
-                    <select id="select-selesai-sales">
-                        <option value="">-- Pilih Promotor Sedang Melayani --</option>
-                    </select>
+                    <div>
+                        <label>Paksa Selesai Melayani Customer</label>
+                        <select id="select-selesai-sales" style="margin-top: 6px;">
+                            <option value="">-- Pilih Promotor Sedang Melayani --</option>
+                        </select>
+                    </div>
                     <button type="button" class="btn-action btn-warning" onclick="aksiPaksaSelesaiMelayaniSPV()">✅ Paksa Selesai Melayani</button>
                 </div>
 
                 <!-- 4. KELUARKAN / HAPUS DARI ANTRIAN -->
                 <div class="control-group">
-                    <label>Keluarkan dari Antrian Standby</label>
-                    <select id="select-hapus-sales">
-                        <option value="">-- Pilih Promotor Standby / CS --</option>
-                    </select>
+                    <div>
+                        <label>Keluarkan dari Antrian Standby</label>
+                        <select id="select-hapus-sales" style="margin-top: 6px;">
+                            <option value="">-- Pilih Promotor Standby / CS --</option>
+                        </select>
+                    </div>
                     <button type="button" class="btn-action btn-danger" onclick="aksiHapusAntrianSPV()">🗑️ Keluarkan dari Antrian</button>
                 </div>
 
@@ -437,6 +471,7 @@
         </div>
     </div>
 
+    <!-- MODAL POPUP DIALOG -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-icon" class="modal-icon">⏱️</div>
@@ -549,7 +584,6 @@
             .catch(err => console.log("Gagal menyinkronkan data"));
         }
 
-        /* PERBAIKAN DROPDOWN: Dikelompokkan dengan Jelas Sesuai Status */
         function updateDropdownSPV() {
             // 1. Promotor Standby
             let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
@@ -715,7 +749,6 @@
             });
         }
 
-        /* AKSI 1: PAKSA BAWA CUSTOMER */
         function aksiPaksaBawaCustomerSPV() {
             const namaSales = document.getElementById('select-paksa-sales').value;
             if(!namaSales) return alert("Pilih promotor standby terlebih dahulu!");
@@ -742,7 +775,6 @@
             });
         }
 
-        /* AKSI 2: PAKSA SELESAI MELAYANI */
         function aksiPaksaSelesaiMelayaniSPV() {
             const namaSales = document.getElementById('select-selesai-sales').value;
             if(!namaSales) return alert("Pilih promotor yang sedang melayani!");
@@ -769,7 +801,6 @@
             });
         }
 
-        /* AKSI 3: KELUARKAN DARI ANTRIAN (STANDBY / CS) */
         function aksiHapusAntrianSPV() {
             const namaSales = document.getElementById('select-hapus-sales').value;
             if(!namaSales) return alert("Pilih promotor yang ingin dikeluarkan!");
