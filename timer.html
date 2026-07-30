@@ -62,6 +62,7 @@
             margin-bottom: 24px;
             width: 100%;
             max-width: 960px;
+            position: relative;
         }
 
         .header-app h1 {
@@ -168,16 +169,45 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
         }
 
+        .panel-header-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
         .spv-control-card h3 {
             font-size: 18px;
             font-weight: 800;
             color: #ffffff;
-            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 8px;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 12px;
+            margin: 0;
+        }
+
+        .btn-logout {
+            background: #334155;
+            color: #f8fafc;
+            border: 1px solid var(--card-border);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-logout:hover {
+            background: var(--danger);
+            color: #ffffff;
+            border-color: var(--danger);
         }
 
         .control-grid {
@@ -330,15 +360,17 @@
 </head>
 <body>
 
+    <!-- OVERLAY LAYAR PIN -->
     <div id="pin-overlay">
         <div class="pin-box">
             <h2>🔒 DASHBOARD ANTRIAN</h2>
             <p>Masukkan PIN untuk membuka aplikasi timer & kontrol SPV.</p>
-            <input type="password" id="input-pin-panel" placeholder="PIN" autofocus>
+            <input type="password" id="input-pin-panel" placeholder="PIN" autofocus onkeydown="if(event.key === 'Enter') validasiPinPanel()">
             <button onclick="validasiPinPanel()">Buka Panel</button>
         </div>
     </div>
 
+    <!-- BLOCKER MOBILE -->
     <div id="mobile-blocker">
         <div class="icon">🚫</div>
         <h2>AKSES DITOLAK</h2>
@@ -351,7 +383,7 @@
     </div>
 
     <div class="main-container">
-        <!-- MONITOR DISPLAY TIMER NO 1 (MURNI DISPLAY) -->
+        <!-- MONITOR DISPLAY TIMER NO 1 -->
         <div class="cards-grid">
             <div class="timer-card ha">
                 <div class="badge-kategori">URUTAN NO 1 HA</div>
@@ -368,7 +400,12 @@
 
         <!-- PANEL ANTRIAN KONTROL SPV -->
         <div class="spv-control-card">
-            <h3>⚙️ PANEL ANTRIAN SPV</h3>
+            <div class="panel-header-wrapper">
+                <h3>⚙️ PANEL ANTRIAN SPV</h3>
+                <!-- TOMBOL KELUAR / KUNCI PANEL -->
+                <button type="button" class="btn-logout" onclick="kunciPanelSPV()">🔒 Kunci Panel</button>
+            </div>
+
             <div class="control-grid">
                 
                 <!-- 1. MASUKKAN PROMOTOR -->
@@ -396,7 +433,7 @@
                     <button type="button" class="btn-action btn-success" onclick="aksiTambahAntrianSPV()">Masukkan Antrian</button>
                 </div>
 
-                <!-- 2. TAMBAH TIMER URUTAN 1 (TANPA DROPDOWN HA/AV) -->
+                <!-- 2. TAMBAH TIMER URUTAN 1 -->
                 <div class="control-group">
                     <div>
                         <label>Tambah Timer Standby Urutan 1</label>
@@ -473,10 +510,18 @@
             if (pinInput === PIN_PANEL_RAHASIA) {
                 sessionStorage.setItem('panel_unlocked', "true");
                 document.getElementById('pin-overlay').style.display = 'none';
+                document.getElementById('input-pin-panel').value = "";
             } else {
                 alert("PIN Salah!");
                 document.getElementById('input-pin-panel').value = "";
             }
+        }
+
+        // FUNGSI UNTUK KELUAR & MENGUNCI PANEL
+        function kunciPanelSPV() {
+            sessionStorage.removeItem('panel_unlocked');
+            document.getElementById('input-pin-panel').value = "";
+            document.getElementById('pin-overlay').style.display = 'flex';
         }
 
         function cekPerangkatMutlak() {
@@ -657,7 +702,7 @@
             }
         }
 
-        /* AKSI TAMBAH TIMER URUTAN 1 (SEKALIGUS HA & AV) */
+        /* AKSI TAMBAH TIMER URUTAN 1 */
         function aksiTambahTimerSPV() {
             if (!promotorHA && !promotorAV) {
                 return alert("Tidak ada antrian promotor aktif pada HA maupun AV!");
@@ -683,7 +728,6 @@
                 icon: "⏳", title: "Memproses...", desc: "Memperbarui waktu timer ke server...", actions: ""
             });
 
-            // Panggil API reset timer untuk HA dan AV
             let janjiHA = promotorHA ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(promotorHA.nama)}&kategori=HA`) : Promise.resolve();
             let janjiAV = promotorAV ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(promotorAV.nama)}&kategori=AV`) : Promise.resolve();
 
