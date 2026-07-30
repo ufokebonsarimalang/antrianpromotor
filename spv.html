@@ -158,8 +158,7 @@
             letter-spacing: 0.8px; margin: 18px 0 8px 0; text-align: left; border-bottom: 2px dashed var(--border); padding-bottom: 4px;
         }
 
-        .spv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .spv-grid .full-width { grid-column: span 2; }
+        .spv-grid { display: flex; flex-direction: column; gap: 10px; }
 
         .list-section-wrapper { margin-top: 24px; text-align: left; }
         .list-box-title { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
@@ -200,7 +199,7 @@
     <div class="spv-container">
         <div class="header-spv">
             <h2>🔑 Control Panel SPV</h2>
-            <p>Antrian Promotor UFO Kebonsari</p>
+            <p>Antrian UFO Kebonsari</p>
             <div id="badge-status-sistem" class="status-badge status-open">
                 STATUS: OPEN
             </div>
@@ -251,19 +250,19 @@
             </div>
 
             <!-- SEKSI 2: MANAJEMEN URUTAN -->
-            <div class="section-title">2. Manajemen Urutan & Waktu</div>
+            <div class="section-title">2. Manajemen Urutan</div>
             <div class="spv-grid">
                 <button type="button" class="btn-success" onclick="bukaModalTambahAntriSpv()">+ Masukkan Antrian</button>
-                <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan Antrian</button>
-                <button type="button" class="btn-primary full-width" style="background: #0284c7;" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
+                <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
             </div>
 
-            <!-- SEKSI 3: PERANGKAT & RESET -->
+            <!-- SEKSI 3: TINDAKAN KHUSUS & EMERGENCY -->
             <div class="section-title">3. Tindakan Khusus & Emergency</div>
             <div class="spv-grid">
-                <button type="button" class="btn-danger full-width" onclick="bukaModalFormSPVKategori('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
-                <button type="button" class="btn-danger full-width" style="background: #b91c1c;" onclick="bukaModalFormSPVKategori('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Promotor</button>
-                <button type="button" class="btn-danger full-width" style="background: #7f1d1d;" onclick="bukaModalResetTotal()">RESET SEMUA ANTRIAN (Toko Tutup)</button>
+                <button type="button" class="btn-primary" style="background: #0284c7;" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">🙋‍♂️ Paksa Bawa Customer</button>
+                <button type="button" class="btn-danger" onclick="bukaModalFormSPVKategori('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
+                <button type="button" class="btn-danger" style="background: #b91c1c;" onclick="bukaModalFormSPVKategori('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Promotor</button>
+                <button type="button" class="btn-danger" style="background: #7f1d1d;" onclick="bukaModalResetTotal()">🗑️ RESET SEMUA ANTRIAN (Toko Tutup)</button>
             </div>
 
             <button type="button" class="btn-cancel" style="margin-top: 20px; font-weight: 800;" onclick="logoutSPV()">🔒 Kunci Panel SPV</button>
@@ -435,7 +434,6 @@
             modal.classList.add('active');
         }
 
-        /* PERBAIKAN: TIMER DIISOLASI STRICT SESUAI KATEGORI (HA / AV) */
         function eksekusiPowerONSPV(targetKat, namaSales) {
             const pin = document.getElementById('spv-power-pin').value;
             if(!pin) return alert("Masukkan PIN SPV!");
