@@ -251,6 +251,7 @@
         .btn-success { background: var(--power-green); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-warning { background: var(--warning); color: white; }
+        .btn-primary { background: var(--primary); color: white; }
         .btn-action:active { transform: scale(0.98); }
 
         .modal-overlay {
@@ -298,7 +299,6 @@
         .modal-btn-confirm { background: var(--power-green); color: white; }
         .modal-btn-ok { background: var(--primary); color: white; width: 100%; }
 
-        /* KOTAK LOGIN PIN KHUSUS PANEL */
         #pin-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -334,7 +334,6 @@
 </head>
 <body>
 
-    <!-- KOTAK PIN KEAMANAN PANEL UTAMA -->
     <div id="pin-overlay">
         <div class="pin-box">
             <h2>🔒 DASHBOARD ANTRIAN</h2>
@@ -383,6 +382,8 @@
         <div class="spv-control-card">
             <h3>⚙️ MANAJEMEN ANTRIAN SPV</h3>
             <div class="control-grid">
+                
+                <!-- 1. MASUKKAN PROMOTOR -->
                 <div class="control-group">
                     <label>Masukkan Promotor ke Antrian</label>
                     <select id="select-tambah-sales" style="margin-bottom: 8px;">
@@ -405,21 +406,33 @@
                     <button type="button" class="btn-action btn-success" onclick="aksiTambahAntrianSPV()">+ Masukkan Antrian</button>
                 </div>
 
+                <!-- 2. PAKSA BAWA CUSTOMER -->
                 <div class="control-group">
                     <label>Paksa Bawa Customer (Ambil Giliran)</label>
                     <select id="select-paksa-sales">
                         <option value="">-- Pilih Promotor Standby --</option>
                     </select>
-                    <button type="button" class="btn-action btn-warning" onclick="aksiPaksaBawaCustomerSPV()">⚡ Paksa Bawa Customer</button>
+                    <button type="button" class="btn-action btn-primary" style="background: #0284c7;" onclick="aksiPaksaBawaCustomerSPV()">⚡ Paksa Bawa Customer</button>
                 </div>
 
-                <div class="control-group" style="grid-column: 1 / -1;">
-                    <label>Keluarkan / Hapus dari Antrian</label>
+                <!-- 3. PAKSA SELESAI MELAYANI -->
+                <div class="control-group">
+                    <label>Paksa Selesai Melayani Customer</label>
+                    <select id="select-selesai-sales">
+                        <option value="">-- Pilih Promotor Sedang Melayani --</option>
+                    </select>
+                    <button type="button" class="btn-action btn-warning" onclick="aksiPaksaSelesaiMelayaniSPV()">✅ Paksa Selesai Melayani</button>
+                </div>
+
+                <!-- 4. KELUARKAN / HAPUS DARI ANTRIAN -->
+                <div class="control-group">
+                    <label>Keluarkan dari Antrian Standby</label>
                     <select id="select-hapus-sales">
-                        <option value="">-- Pilih Promotor yang Aktif di Antrian --</option>
+                        <option value="">-- Pilih Promotor Standby / CS --</option>
                     </select>
                     <button type="button" class="btn-action btn-danger" onclick="aksiHapusAntrianSPV()">🗑️ Keluarkan dari Antrian</button>
                 </div>
+
             </div>
         </div>
     </div>
@@ -436,7 +449,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         const BATAS_MENIT = 60;
-        const PIN_PANEL_RAHASIA = "7730"; // PIN untuk verifikasi SPV ke server backend
+        const PIN_PANEL_RAHASIA = "7730";
         
         let promotorHA = null;
         let promotorAV = null;
@@ -536,7 +549,9 @@
             .catch(err => console.log("Gagal menyinkronkan data"));
         }
 
+        /* PERBAIKAN DROPDOWN: Dikelompokkan dengan Jelas Sesuai Status */
         function updateDropdownSPV() {
+            // 1. Promotor Standby
             let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
             let htmlPaksa = '<option value="">-- Pilih Promotor Standby --</option>';
             listStandby.forEach(item => {
@@ -544,8 +559,18 @@
             });
             document.getElementById('select-paksa-sales').innerHTML = htmlPaksa;
 
-            let htmlHapus = '<option value="">-- Pilih Promotor yang Aktif di Antrian --</option>';
-            daftarAntrianGlobal.forEach(item => {
+            // 2. Promotor Melayani
+            let listMelayani = daftarAntrianGlobal.filter(item => item.status === "Melayani");
+            let htmlSelesai = '<option value="">-- Pilih Promotor Sedang Melayani --</option>';
+            listMelayani.forEach(item => {
+                htmlSelesai += `<option value="${item.nama}">${item.nama} (${item.kategori || 'HA'})</option>`;
+            });
+            document.getElementById('select-selesai-sales').innerHTML = htmlSelesai;
+
+            // 3. Promotor Aktif di Antrian (Standby / CS)
+            let listAntrianStandbyCS = daftarAntrianGlobal.filter(item => item.status !== "Melayani");
+            let htmlHapus = '<option value="">-- Pilih Promotor Standby / CS --</option>';
+            listAntrianStandbyCS.forEach(item => {
                 htmlHapus += `<option value="${item.nama}">${item.nama} - ${item.status} (${item.kategori || 'HA'})</option>`;
             });
             document.getElementById('select-hapus-sales').innerHTML = htmlHapus;
@@ -645,10 +670,7 @@
             if (!promotor) return;
 
             bukaModal({
-                icon: "⏳",
-                title: "Memproses...",
-                desc: "Memperbarui waktu timer ke server...",
-                actions: ""
+                icon: "⏳", title: "Memproses...", desc: "Memperbarui waktu timer ke server...", actions: ""
             });
 
             const urlAksi = `${SCRIPT_URL}?aksi=spvTambahTimer&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(promotor.nama)}&kategori=${encodeURIComponent(targetKategoriAktif)}`;
@@ -656,30 +678,13 @@
             fetch(urlAksi, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
-                if (res.status === "sukses") {
-                    bukaModal({
-                        icon: "✅",
-                        title: "Berhasil!",
-                        desc: res.pesan,
-                        actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">Selesai</button>`
-                    });
-                    muatDataAntrianDanTimer();
-                } else {
-                    bukaModal({
-                        icon: "⚠️",
-                        title: "Gagal",
-                        desc: res.pesan,
-                        actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">Tutup</button>`
-                    });
-                }
-            })
-            .catch(err => {
                 bukaModal({
-                    icon: "❌",
-                    title: "Koneksi Terganggu",
-                    desc: "Gagal terhubung ke server.",
+                    icon: res.status === "sukses" ? "✅" : "⚠️",
+                    title: res.status === "sukses" ? "Berhasil!" : "Gagal",
+                    desc: res.pesan,
                     actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">Tutup</button>`
                 });
+                muatDataAntrianDanTimer();
             });
         }
 
@@ -710,12 +715,11 @@
             });
         }
 
-        /* METODE DIPERBAIKI: Menggunakan API SPV "spvAmbilAntrianBebas" */
+        /* AKSI 1: PAKSA BAWA CUSTOMER */
         function aksiPaksaBawaCustomerSPV() {
             const namaSales = document.getElementById('select-paksa-sales').value;
             if(!namaSales) return alert("Pilih promotor standby terlebih dahulu!");
 
-            // Cari data kategori sales dari daftar antrian global
             const itemSales = daftarAntrianGlobal.find(i => i.nama === namaSales);
             const kategoriSales = itemSales ? (itemSales.kategori || "HA") : "HA";
 
@@ -738,7 +742,34 @@
             });
         }
 
-        /* METODE DIPERBAIKI: Menggunakan API SPV "spvKeluarkanAntrian" */
+        /* AKSI 2: PAKSA SELESAI MELAYANI */
+        function aksiPaksaSelesaiMelayaniSPV() {
+            const namaSales = document.getElementById('select-selesai-sales').value;
+            if(!namaSales) return alert("Pilih promotor yang sedang melayani!");
+
+            const itemSales = daftarAntrianGlobal.find(i => i.nama === namaSales);
+            const kategoriSales = itemSales ? (itemSales.kategori || "HA") : "HA";
+
+            bukaModal({
+                icon: "⏳", title: "Memproses...", desc: `Menyelesaikan pelayanan ${namaSales}...`, actions: ""
+            });
+
+            let url = `${SCRIPT_URL}?aksi=selesaiMelayani&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriSales)}`;
+
+            fetch(url, { method: 'GET', redirect: 'follow' })
+            .then(res => res.json())
+            .then(res => {
+                bukaModal({
+                    icon: res.status === "sukses" ? "✅" : "⚠️",
+                    title: res.status === "sukses" ? "Berhasil" : "Perhatian",
+                    desc: res.pesan || "Berhasil diproses",
+                    actions: `<button class="modal-btn modal-btn-ok" onclick="tutupModal()">OK</button>`
+                });
+                muatDataAntrianDanTimer();
+            });
+        }
+
+        /* AKSI 3: KELUARKAN DARI ANTRIAN (STANDBY / CS) */
         function aksiHapusAntrianSPV() {
             const namaSales = document.getElementById('select-hapus-sales').value;
             if(!namaSales) return alert("Pilih promotor yang ingin dikeluarkan!");
