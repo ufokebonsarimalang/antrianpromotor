@@ -146,12 +146,12 @@
 
         .section-title {
             font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;
-            letter-spacing: 0.8px; margin: 18px 0 8px 0; text-align: left; border-bottom: 2px dashed var(--border); padding-bottom: 4px;
+            letter-spacing: 0.8px; margin: 20px 0 10px 0; text-align: left; border-bottom: 2px dashed var(--border); padding-bottom: 4px;
         }
 
         .spv-grid { display: flex; flex-direction: column; gap: 10px; }
 
-        .list-section-wrapper { margin-top: 24px; text-align: left; }
+        .list-section-wrapper { margin-bottom: 20px; text-align: left; }
         .list-box-title { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
         
         .list-antrian { list-style: none; padding: 0; margin: 0 0 16px 0; }
@@ -208,7 +208,7 @@
         <!-- MENU KONTROL SPV TERSTRUKTUR -->
         <div id="controls-spv-box" style="display: none;">
             
-            <!-- LIVE BOX MONITOR URUTAN NO 1 (HA & AV) -->
+            <!-- 1. LIVE BOX MONITOR URUTAN NO 1 (HA & AV) -->
             <div class="timer-box-wrapper">
                 <div class="timer-card-spv ha">
                     <div>
@@ -231,6 +231,23 @@
                 </div>
             </div>
 
+            <!-- 2. LIVE LIST TERPISAH HA DAN AV (DIPINDAHKAN KE ATAS SEBELUM SEKSI KONTROL) -->
+            <div class="list-section-wrapper">
+                <div>
+                    <div class="list-box-title">Live Urutan HA (Home Appliance)</div>
+                    <ul id="item-antrian-list-ha" class="list-antrian">
+                        <li><span>Memuat data...</span></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <div class="list-box-title">Live Urutan AV (Audio Video)</div>
+                    <ul id="item-antrian-list-av" class="list-antrian">
+                        <li><span>Memuat data...</span></li>
+                    </ul>
+                </div>
+            </div>
+
             <!-- SEKSI 1: STATUS SISTEM -->
             <div class="section-title">1. Kontrol Sistem Antrian</div>
             <div class="spv-grid">
@@ -243,7 +260,8 @@
             <div class="spv-grid">
                 <button type="button" class="btn-success" onclick="bukaModalTambahAntriSpv()">+ Masukkan Antrian</button>
                 <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
-                <button type="button" class="btn-warning" onclick="bukaModalFormSPVKategori('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">⏱️ Tambah Waktu Urutan 1</button>
+                <!-- TOMBOL HIJAU TANPA DROPDOWN -->
+                <button type="button" class="btn-success" style="background: #10b981;" onclick="bukaModalTambahTimerInstan()">⏱️ Tambah Timer Urutan 1</button>
             </div>
 
             <!-- SEKSI 3: TINDAKAN KHUSUS & EMERGENCY -->
@@ -256,23 +274,6 @@
             </div>
 
             <button type="button" class="btn-cancel" style="margin-top: 20px; font-weight: 800;" onclick="logoutSPV()">🔒 Kunci Panel SPV</button>
-        </div>
-
-        <!-- LIVE LIST TERPISAH HA DAN AV UNTUK SPV -->
-        <div class="list-section-wrapper">
-            <div>
-                <div class="list-box-title">Live Urutan HA (Home Appliance)</div>
-                <ul id="item-antrian-list-ha" class="list-antrian">
-                    <li><span>Memuat data...</span></li>
-                </ul>
-            </div>
-
-            <div>
-                <div class="list-box-title">Live Urutan AV (Audio Video)</div>
-                <ul id="item-antrian-list-av" class="list-antrian">
-                    <li><span>Memuat data...</span></li>
-                </ul>
-            </div>
         </div>
     </div>
 
@@ -543,6 +544,55 @@
                     tutupModal();
                     sedangProsesAksiSPV = false;
                     tampilkanModal("Status SPV", res.pesan);
+                    muatDataAntrian();
+                }, 800);
+            })
+            .catch(() => {
+                sedangProsesAksiSPV = false;
+                tutupModal();
+            });
+        }
+
+        function bukaModalTambahTimerInstan() {
+            const modal = document.getElementById('custom-modal');
+            const pinLogin = document.getElementById('input-pin-spv').value;
+            document.getElementById('modal-title').innerText = "Tambah Timer Urutan 1";
+            
+            let infoPromotor = "";
+            if (promotorHA) infoPromotor += `<br>• HA: <b>${promotorHA.nama}</b>`;
+            if (promotorAV) infoPromotor += `<br>• AV: <b>${promotorAV.nama}</b>`;
+            if (!infoPromotor) infoPromotor = "<br><i>Tidak ada antrian di Urutan 1</i>";
+
+            document.getElementById('modal-desc').innerHTML = `
+                Reset/Tambah waktu standby 60 menit untuk:${infoPromotor}<br><br>
+                Masukkan PIN SPV:<br>
+                <input type="password" id="spv-timer-pin" value="${pinLogin}" placeholder="PIN SPV" style="text-align:center;">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" id="btn-modal-proses-timer" class="btn-success" onclick="eksekusiTambahTimerInstan()">Proses</button>
+            `;
+            modal.classList.add('active');
+        }
+
+        function eksekusiTambahTimerInstan() {
+            const pin = document.getElementById('spv-timer-pin').value;
+            if(!pin) return alert("Masukkan PIN SPV!");
+
+            sedangProsesAksiSPV = true;
+            const btnProses = document.getElementById('btn-modal-proses-timer');
+            btnProses.disabled = true;
+            btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+            let reqHA = promotorHA ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(promotorHA.nama)}&kategori=HA`) : Promise.resolve();
+            let reqAV = promotorAV ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(promotorAV.nama)}&kategori=AV`) : Promise.resolve();
+
+            Promise.all([reqHA, reqAV])
+            .then(() => {
+                setTimeout(() => {
+                    tutupModal();
+                    sedangProsesAksiSPV = false;
+                    tampilkanModal("Status SPV", "Waktu timer urutan 1 berhasil diperbarui.");
                     muatDataAntrian();
                 }, 800);
             })
