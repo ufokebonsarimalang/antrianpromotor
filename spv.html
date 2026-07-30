@@ -15,7 +15,7 @@
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --border: #e2e8f0;
+            --border: #cbd5e1;
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
@@ -31,47 +31,49 @@
             background: var(--bg); 
             color: var(--text-main);
             margin: 0; padding: 16px;
-            display: flex; justify-content: center;
+            display: flex; justify-content: center; min-height: 100vh;
         }
 
         .spv-container {
             width: 100%; max-width: 600px;
             background: var(--card-bg);
-            border-radius: 20px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border-radius: 24px; padding: 24px;
+            border: 2px solid var(--border);
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.08);
         }
 
         .header-spv {
             background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%);
-            border-radius: 16px;
-            padding: 22px; color: white;
+            border-radius: 18px; padding: 22px; color: white;
             text-align: center; margin-bottom: 20px;
+            box-shadow: 0 8px 20px -4px rgba(124, 58, 237, 0.3);
         }
-        .header-spv h2 { margin: 0 0 6px 0; font-size: 24px; font-weight: 800; }
-        .header-spv p { margin: 0; font-size: 14px; opacity: 0.9; }
+        .header-spv h2 { margin: 0 0 6px 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+        .header-spv p { margin: 0; font-size: 13px; opacity: 0.9; font-weight: 600; }
 
         .status-badge {
             display: inline-block; padding: 8px 16px; border-radius: 20px;
-            font-size: 13px; font-weight: 800; margin-top: 12px; text-transform: uppercase;
+            font-size: 12px; font-weight: 800; margin-top: 12px; text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .status-open { background: #dcfce7; color: #15803d; }
-        .status-closed { background: #fee2e2; color: #b91c1c; }
+        .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
+        .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
 
         .input-group { margin-bottom: 16px; text-align: left; }
-        .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
 
         select, input[type="text"], input[type="password"], input[type="number"] { 
-            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border);
-            background: #ffffff; font-size: 15px; color: var(--text-main); outline: none;
+            width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--border);
+            background: #ffffff; font-size: 15px; font-weight: 600; color: var(--text-main); outline: none;
         }
+        select:focus, input:focus { border-color: var(--spv-purple); box-shadow: 0 0 0 3px rgba(124,58,237,0.15); }
 
         button { 
             width: 100%; padding: 14px; border-radius: 12px; 
-            font-size: 14px; font-weight: 700; cursor: pointer; border: none;
+            font-size: 13px; font-weight: 800; cursor: pointer; border: none;
             text-transform: uppercase; transition: all 0.2s;
             display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+            letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         button:active { transform: scale(0.98); }
 
@@ -80,52 +82,50 @@
         .btn-warning { background: var(--warning); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-cancel { background: #f1f5f9; color: #475569; font-size: 13px; }
+        .btn-cancel { background: #e2e8f0; color: #475569; }
 
         .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #ffffff;
-            animation: spin 0.8s linear infinite;
-            display: inline-block;
+            width: 16px; height: 16px; border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* KONTROL GRID DENGAN HEADER SEKSI */
+        .section-title {
+            font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.8px; margin: 18px 0 8px 0; text-align: left; border-bottom: 2px dashed var(--border); padding-bottom: 4px;
         }
 
-        .spv-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;
-        }
+        .spv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .spv-grid .full-width { grid-column: span 2; }
-        .spv-grid button { padding: 14px 10px; font-size: 13px; }
 
-        .list-box {
-            background: #f8fafc; border: 1px solid var(--border);
-            border-radius: 16px; padding: 16px; margin-top: 20px;
-        }
-        .list-box h4 { margin: 0 0 12px 0; font-size: 15px; text-transform: uppercase; color: var(--text-muted); font-weight: 800; }
-        .list-box ul { list-style: none; padding: 0; margin: 0; }
+        /* STYLING LIST ANTRIAN TERPISAH HA & AV */
+        .list-section-wrapper { margin-top: 24px; text-align: left; }
+        .list-box-title { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
         
-        .list-box li { 
-            padding: 18px; background: white; border-radius: 14px; margin-bottom: 12px; 
-            border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; align-items: flex-start; 
+        .list-antrian { list-style: none; padding: 0; margin: 0 0 16px 0; }
+        .list-antrian li { 
+            padding: 12px 14px; background: #ffffff; border-radius: 12px; margin-bottom: 8px; 
+            border: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; 
+            font-size: 14px; font-weight: 700;
         }
-        .list-box li b { font-size: 20px; font-weight: 800; color: var(--text-main); }
-        .list-box li span { font-size: 17px; font-weight: 700; color: var(--spv-purple); }
+
+        .badge-status-item { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+        .badge-standby { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+        .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
             display: flex; justify-content: center; align-items: center;
             z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-box { background: white; width: 100%; max-width: 380px; padding: 24px; border-radius: 20px; text-align: center; }
+        .modal-box { background: white; width: 100%; max-width: 380px; padding: 24px; border-radius: 20px; text-align: center; border: 2px solid var(--border); }
         .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
-        .modal-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; text-align: left; }
-        .modal-desc select, .modal-desc input { font-size: 14px; padding: 12px; }
+        .modal-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; text-align: left; font-weight: 600; }
+        .modal-desc select, .modal-desc input { font-size: 14px; padding: 12px; margin-top: 4px; }
         .modal-actions { display: flex; gap: 10px; }
         .modal-actions button { flex: 1; padding: 12px; font-size: 13px; }
     </style>
@@ -150,37 +150,51 @@
             <button type="button" id="btn-login-spv" class="btn-purple" onclick="prosesLoginSPV()">Masuk Panel Kontrol</button>
         </div>
 
-        <!-- MENU KONTROL LENGKAP -->
+        <!-- MENU KONTROL SPV TERSTRUKTUR -->
         <div id="controls-spv-box" style="display: none;">
+            
+            <!-- SEKSI 1: STATUS SISTEM -->
+            <div class="section-title">1. Kontrol Sistem Antrian</div>
             <div class="spv-grid">
-                <button type="button" class="btn-success full-width" onclick="bukaModalToggleSistem('BUKA')">▶ START / BUKA ANTRIAN</button>
-                <button type="button" class="btn-danger full-width" onclick="bukaModalToggleSistem('TUTUP')">⏹ STOP / TUTUP ANTRIAN</button>
-
-                <button type="button" class="btn-warning full-width" onclick="bukaModalFormSPVKategori('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">⏱ Tambah Waktu Standby Urutan 1</button>
-
-                <button type="button" class="btn-primary" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Customer Janjian', true)">Cust. Janjian</button>
-                <button type="button" class="btn-primary" style="background: #0284c7;" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Cust.</button>
-
-                <!-- TOMBOL TAMBAH ANTRIAN DENGAN POSISI -->
-                <button type="button" class="btn-success" onclick="bukaModalTambahAntriSpv()">+ Masukkan Antri</button>
-                <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan Antri</button>
-
-                <button type="button" class="btn-danger full-width" onclick="bukaModalFormSPVKategori('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
-                <button type="button" class="btn-danger full-width" style="background: #b91c1c;" onclick="bukaModalFormSPVKategori('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Sales</button>
-
-                <!-- RESET TOTAL -->
-                <button type="button" class="btn-danger full-width" style="background: #7f1d1d; margin-top: 6px;" onclick="bukaModalResetTotal()">🗑️ RESET SEMUA ANTRIAN (Toko Tutup)</button>
+                <button type="button" class="btn-success" onclick="bukaModalToggleSistem('BUKA')">▶ BUKA ANTRIAN</button>
+                <button type="button" class="btn-danger" onclick="bukaModalToggleSistem('TUTUP')">⏹ TUTUP ANTRIAN</button>
             </div>
 
-            <button type="button" class="btn-cancel" style="margin-top: 18px;" onclick="logoutSPV()">Kunci Panel SPV</button>
+            <!-- SEKSI 2: MANAJEMEN URUTAN -->
+            <div class="section-title">2. Manajemen Urutan & Waktu</div>
+            <div class="spv-grid">
+                <button type="button" class="btn-success" onclick="bukaModalTambahAntriSpv()">+ Masukkan Antrian</button>
+                <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan Antrian</button>
+                <button type="button" class="btn-primary full-width" style="background: #0284c7;" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">🙋‍♂️ Paksa Bawa Customer</button>
+                <button type="button" class="btn-warning full-width" onclick="bukaModalFormSPVKategori('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">⏱️ Tambah Waktu Urutan 1</button>
+            </div>
+
+            <!-- SEKSI 3: PERANGKAT & RESET -->
+            <div class="section-title">3. Tindakan Khusus & Emergency</div>
+            <div class="spv-grid">
+                <button type="button" class="btn-danger full-width" onclick="bukaModalFormSPVKategori('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
+                <button type="button" class="btn-danger full-width" style="background: #b91c1c;" onclick="bukaModalFormSPVKategori('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Sales</button>
+                <button type="button" class="btn-danger full-width" style="background: #7f1d1d;" onclick="bukaModalResetTotal()">🗑️ RESET SEMUA ANTRIAN (Toko Tutup)</button>
+            </div>
+
+            <button type="button" class="btn-cancel" style="margin-top: 20px; font-weight: 800;" onclick="logoutSPV()">🔒 Kunci Panel SPV</button>
         </div>
 
-        <!-- LIVE LIST UNTUK SPV -->
-        <div class="list-box">
-            <h4>Live Urutan Antrian Realtime</h4>
-            <ul id="item-antrian-list">
-                <li><span>Memuat data...</span></li>
-            </ul>
+        <!-- LIVE LIST TERPISAH HA DAN AV UNTUK SPV -->
+        <div class="list-section-wrapper">
+            <div>
+                <div class="list-box-title">Live Urutan HA (Home Appliance)</div>
+                <ul id="item-antrian-list-ha" class="list-antrian">
+                    <li><span>Memuat data...</span></li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="list-box-title">Live Urutan AV (Audio Video)</div>
+                <ul id="item-antrian-list-av" class="list-antrian">
+                    <li><span>Memuat data...</span></li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -203,7 +217,7 @@
         window.onload = function() {
             muatMasterSales();
             muatDataAntrian();
-            setInterval(muatDataAntrian, 4000);
+            setInterval(muatDataAntrian, 3000);
         };
 
         function prosesLoginSPV() {
@@ -246,7 +260,7 @@
             document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
             document.getElementById('modal-desc').innerHTML = `
                 Status baru: <b>${targetStatus}</b><br><br>
-                Masukkan PIN SPV:<br><br>
+                Masukkan PIN SPV:<br>
                 <input type="password" id="spv-toggle-pin" placeholder="PIN SPV" style="text-align:center;">
             `;
             document.getElementById('modal-actions').innerHTML = `
@@ -274,14 +288,14 @@
                     sedangProsesAksiSPV = false;
                     tampilkanModal("Status Sistem", res.pesan);
                     muatDataAntrian();
-                }, 1200);
+                }, 1000);
             })
             .catch(() => {
                 setTimeout(() => {
                     btnProses.disabled = false;
                     btnProses.innerHTML = textAsli;
                     sedangProsesAksiSPV = false;
-                }, 1200);
+                }, 1000);
             });
         }
 
@@ -289,9 +303,9 @@
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = 'Reset Semua Antrian';
             document.getElementById('modal-desc').innerHTML = `
-                ⚠️ PERINGATAN:<br>
-                Semua antrian (Standby & Melayani) akan dihapus total dari awal.<br><br>
-                Masukkan PIN SPV:<br><br>
+                ⚠️ <b>PERINGATAN:</b><br>
+                Semua antrian (Standby & Melayani) akan dihapus total.<br><br>
+                Masukkan PIN SPV:<br>
                 <input type="password" id="spv-reset-pin" placeholder="PIN SPV" style="text-align:center;">
             `;
             document.getElementById('modal-actions').innerHTML = `
@@ -319,18 +333,17 @@
                     sedangProsesAksiSPV = false;
                     tampilkanModal("Status Reset Total", res.pesan);
                     muatDataAntrian();
-                }, 1200);
+                }, 1000);
             })
             .catch(() => {
                 setTimeout(() => {
                     btnProses.disabled = false;
                     btnProses.innerHTML = textAsli;
                     sedangProsesAksiSPV = false;
-                }, 1200);
+                }, 1000);
             });
         }
 
-        /* MODAL KHUSUS MEMASUKKAN SALES DENGAN PILIHAN POSISI ANTRIAN */
         function bukaModalTambahAntriSpv() {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = "Masukkan Promotor ke Antrian";
@@ -340,26 +353,26 @@
 
             let htmlContent = `
                 Kategori:<br>
-                <select id="spv-select-kategori" style="margin-bottom: 12px; margin-top: 6px;">
+                <select id="spv-select-kategori">
                     <option value="HA">Home Appliance (HA)</option>
                     <option value="AV">Audio Video (AV)</option>
-                </select><br>
+                </select><br><br>
 
                 Promotor:<br>
-                <select id="spv-select-sales" style="margin-bottom: 12px; margin-top: 6px;">${optionsSales}</select><br>
+                <select id="spv-select-sales">${optionsSales}</select><br><br>
 
                 Posisi Urutan Antrian:<br>
-                <select id="spv-select-posisi" style="margin-bottom: 12px; margin-top: 6px;">
+                <select id="spv-select-posisi">
                     <option value="0">Paling Belakang (Default)</option>
                     <option value="1">Urutan Ke-1 (Paling Depan)</option>
                     <option value="2">Urutan Ke-2</option>
                     <option value="3">Urutan Ke-3</option>
                     <option value="4">Urutan Ke-4</option>
                     <option value="5">Urutan Ke-5</option>
-                </select><br>
+                </select><br><br>
 
                 PIN SPV:<br>
-                <input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center; margin-top: 6px;">
+                <input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center;">
             `;
 
             document.getElementById('modal-desc').innerHTML = htmlContent;
@@ -393,14 +406,14 @@
                     sedangProsesAksiSPV = false;
                     tampilkanModal("Status SPV", res.pesan);
                     muatDataAntrian();
-                }, 1200);
+                }, 1000);
             })
             .catch(() => {
                 setTimeout(() => {
                     btnProses.disabled = false;
                     btnProses.innerHTML = textAsli;
                     sedangProsesAksiSPV = false;
-                }, 1200);
+                }, 1000);
             });
         }
 
@@ -413,22 +426,22 @@
 
             let htmlContent = `
                 Kategori:<br>
-                <select id="spv-select-kategori" style="margin-bottom: 12px; margin-top: 6px;">
+                <select id="spv-select-kategori">
                     <option value="HA">Home Appliance (HA)</option>
                     <option value="AV">Audio Video (AV)</option>
-                </select><br>
+                </select><br><br>
             `;
 
             if (butuhPilihPromotor) {
                 htmlContent += `
                     Promotor:<br>
-                    <select id="spv-select-sales" style="margin-bottom: 12px; margin-top: 6px;">${optionsSales}</select><br>
+                    <select id="spv-select-sales">${optionsSales}</select><br><br>
                 `;
             }
 
             htmlContent += `
                 PIN SPV:<br>
-                <input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center; margin-top: 6px;">
+                <input type="password" id="spv-input-pin" placeholder="PIN SPV" style="text-align:center;">
             `;
 
             document.getElementById('modal-desc').innerHTML = htmlContent;
@@ -461,14 +474,14 @@
                     sedangProsesAksiSPV = false;
                     tampilkanModal("Status SPV", res.pesan);
                     muatDataAntrian();
-                }, 1200);
+                }, 1000);
             })
             .catch(() => {
                 setTimeout(() => {
                     btnProses.disabled = false;
                     btnProses.innerHTML = textAsli;
                     sedangProsesAksiSPV = false;
-                }, 1200);
+                }, 1000);
             });
         }
 
@@ -480,6 +493,7 @@
             });
         }
 
+        /* METODE PEMISAHAN LIST DENGAN LOGIKA BADGE SEPERTI PROMOTOR */
         function muatDataAntrian() {
             if(sedangProsesAksiSPV) return; 
 
@@ -492,22 +506,36 @@
                     badge.innerText = statusSistem === "BUKA" ? "STATUS: OPEN" : "STATUS: CLOSED";
                     badge.className = statusSistem === "BUKA" ? "status-badge status-open" : "status-badge status-closed";
 
-                    let listHtml = "";
+                    let listHtmlHA = "";
+                    let listHtmlAV = "";
                     const data = res.data || [];
+
                     if(data.length > 0) {
-                        data.forEach((item, index) => {
-                            let timerVal = item.timer !== undefined && item.timer !== null ? item.timer : (item.sisaWaktu !== undefined ? item.sisaWaktu : (item.status || "00:00"));
-                            let katLabel = item.kategori ? ` (${item.kategori})` : '';
-                            
-                            listHtml += `<li>
-                                <b>${index + 1}. ${item.nama}${katLabel}</b> 
-                                <span>Status / Waktu: ${timerVal}</span>
-                            </li>`;
+                        let urutHA = 1, urutAV = 1;
+                        data.forEach((item) => {
+                            const kategoriItem = item.kategori ? item.kategori : "HA"; 
+                            let itemHtml = "";
+
+                            if (item.status === "Standby") {
+                                let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
+                                itemHtml = `<li><b>${urut}. ${item.nama}</b> <span class="badge-status-item badge-standby">Standby</span></li>`;
+                            } else if (item.status === "Melayani") {
+                                itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
+                            } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
+                                let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
+                                itemHtml = `<li><b>${urut}. ${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/GUDANG</span></li>`;
+                            }
+
+                            if (kategoriItem === "AV") listHtmlAV += itemHtml;
+                            else listHtmlHA += itemHtml;
                         });
-                    } else {
-                        listHtml = "<li><span>Belum ada promotor aktif</span></li>";
                     }
-                    document.getElementById('item-antrian-list').innerHTML = listHtml;
+
+                    if(!listHtmlHA) listHtmlHA = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian HA</span></li>";
+                    if(!listHtmlAV) listHtmlAV = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian AV</span></li>";
+
+                    document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
+                    document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
                 }
             });
         }
