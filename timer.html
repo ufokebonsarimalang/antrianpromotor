@@ -461,10 +461,10 @@
                     <div>
                         <label>Keluarkan dari Antrian Standby</label>
                         <select id="select-hapus-sales" style="margin-top: 6px;">
-                            <option value="">-- Pilih Promotor Standby / CS --</option>
+                            <option value="">-- Pilih Promotor Standby --</option>
                         </select>
                     </div>
-                    <button type="button" class="btn-action btn-danger" onclick="aksiHapusAntrianSPV()">🗑️ Keluarkan dari Antrian</button>
+                    <button type="button" class="btn-action btn-danger" onclick="aksiHapusAntrianSPV()">Keluarkan dari Antrian</button>
                 </div>
 
             </div>
@@ -595,7 +595,7 @@
 
             // 2. Promotor Melayani
             let listMelayani = daftarAntrianGlobal.filter(item => item.status === "Melayani");
-            let htmlSelesai = '<option value="">-- Pilih Promotor Sedang Melayani --</option>';
+            let htmlSelesai = '<option value="">-- Pilih Promotor --</option>';
             listMelayani.forEach(item => {
                 htmlSelesai += `<option value="${item.nama}">${item.nama} (${item.kategori || 'HA'})</option>`;
             });
@@ -603,7 +603,7 @@
 
             // 3. Promotor Aktif di Antrian (Standby / CS)
             let listAntrianStandbyCS = daftarAntrianGlobal.filter(item => item.status !== "Melayani");
-            let htmlHapus = '<option value="">-- Pilih Promotor Standby / CS --</option>';
+            let htmlHapus = '<option value="">-- Pilih Promotor Standby --</option>';
             listAntrianStandbyCS.forEach(item => {
                 htmlHapus += `<option value="${item.nama}">${item.nama} - ${item.status} (${item.kategori || 'HA'})</option>`;
             });
