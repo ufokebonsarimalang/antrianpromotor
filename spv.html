@@ -61,7 +61,7 @@
         .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
 
-        /* KOTAK TIMER DUAL URUTAN 1 (HA & AV) */
+        /* KOTAK DISPLAY MONITORING DUAL URUTAN 1 (HA & AV) */
         .timer-box-wrapper {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -72,14 +72,14 @@
         .timer-card-spv {
             background: #0f172a;
             border-radius: 18px;
-            padding: 16px 14px;
+            padding: 18px 14px;
             color: #ffffff;
             text-align: center;
             border: 2px solid var(--card-bg);
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             position: relative;
             overflow: hidden;
         }
@@ -98,29 +98,20 @@
         .av .timer-badge-title { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
 
         .spv-nama-promotor {
-            font-size: 16px; font-weight: 800; color: #ffffff; margin-bottom: 6px;
-            line-height: 1.3; min-height: 42px; display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: 800; color: #ffffff; margin-bottom: 4px;
+            line-height: 1.3; min-height: 38px; display: flex; align-items: center; justify-content: center;
             word-break: break-word;
         }
 
         .spv-timer-display {
             font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums;
-            margin: 4px 0 12px 0; letter-spacing: -0.5px;
+            margin: 4px 0 0 0; letter-spacing: -0.5px;
         }
         .ha .spv-timer-display { color: #93c5fd; }
         .av .spv-timer-display { color: #e9d5ff; }
         .spv-timer-display.habis { color: var(--danger) !important; animation: blink 1s infinite; }
 
         @keyframes blink { 50% { opacity: 0.4; } }
-
-        .btn-power-spv {
-            width: 100%; padding: 10px; border-radius: 10px; border: none;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white; font-size: 11px; font-weight: 800; text-transform: uppercase;
-            cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
-        }
-        .btn-power-spv:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-power-spv:disabled { background: #475569; cursor: not-allowed; opacity: 0.5; }
 
         .input-group { margin-bottom: 16px; text-align: left; }
         .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
@@ -217,7 +208,7 @@
         <!-- MENU KONTROL SPV TERSTRUKTUR -->
         <div id="controls-spv-box" style="display: none;">
             
-            <!-- LIVE BOX GILIRAN & TIMER URUTAN NO 1 -->
+            <!-- LIVE BOX MONITOR URUTAN NO 1 (HA & AV) -->
             <div class="timer-box-wrapper">
                 <div class="timer-card-spv ha">
                     <div>
@@ -226,7 +217,6 @@
                     </div>
                     <div>
                         <div id="spv-timer-ha" class="spv-timer-display">--:--</div>
-                        <button id="spv-btn-power-ha" class="btn-power-spv" onclick="mintaKonfirmasiPowerSPV('HA')">⏻ Power On</button>
                     </div>
                 </div>
 
@@ -237,7 +227,6 @@
                     </div>
                     <div>
                         <div id="spv-timer-av" class="spv-timer-display">--:--</div>
-                        <button id="spv-btn-power-av" class="btn-power-spv" onclick="mintaKonfirmasiPowerSPV('AV')">⏻ Power On</button>
                     </div>
                 </div>
             </div>
@@ -249,11 +238,12 @@
                 <button type="button" class="btn-danger" onclick="bukaModalToggleSistem('TUTUP')">⏹ TUTUP ANTRIAN</button>
             </div>
 
-            <!-- SEKSI 2: MANAJEMEN URUTAN -->
-            <div class="section-title">2. Manajemen Urutan</div>
+            <!-- SEKSI 2: MANAJEMEN URUTAN & WAKTU -->
+            <div class="section-title">2. Manajemen Urutan & Waktu</div>
             <div class="spv-grid">
                 <button type="button" class="btn-success" onclick="bukaModalTambahAntriSpv()">+ Masukkan Antrian</button>
                 <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
+                <button type="button" class="btn-warning" onclick="bukaModalFormSPVKategori('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">⏱️ Tambah Waktu Urutan 1</button>
             </div>
 
             <!-- SEKSI 3: TINDAKAN KHUSUS & EMERGENCY -->
@@ -359,11 +349,9 @@
             // RENDER HA
             const namaHaEl = document.getElementById('spv-nama-ha');
             const timerHaEl = document.getElementById('spv-timer-ha');
-            const btnHaEl = document.getElementById('spv-btn-power-ha');
 
             if (promotorHA) {
                 namaHaEl.textContent = promotorHA.nama;
-                btnHaEl.disabled = false;
                 let sisaStr = hitungSisaWaktu(waktuServerHA, now);
                 timerHaEl.textContent = sisaStr;
                 if(sisaStr === "HABIS!") timerHaEl.classList.add('habis');
@@ -372,17 +360,14 @@
                 namaHaEl.textContent = "Kosong";
                 timerHaEl.textContent = "--:--";
                 timerHaEl.classList.remove('habis');
-                btnHaEl.disabled = true;
             }
 
             // RENDER AV
             const namaAvEl = document.getElementById('spv-nama-av');
             const timerAvEl = document.getElementById('spv-timer-av');
-            const btnAvEl = document.getElementById('spv-btn-power-av');
 
             if (promotorAV) {
                 namaAvEl.textContent = promotorAV.nama;
-                btnAvEl.disabled = false;
                 let sisaStr = hitungSisaWaktu(waktuServerAV, now);
                 timerAvEl.textContent = sisaStr;
                 if(sisaStr === "HABIS!") timerAvEl.classList.add('habis');
@@ -391,7 +376,6 @@
                 namaAvEl.textContent = "Kosong";
                 timerAvEl.textContent = "--:--";
                 timerAvEl.classList.remove('habis');
-                btnAvEl.disabled = true;
             }
         }
 
@@ -411,53 +395,6 @@
             } else {
                 return "HABIS!";
             }
-        }
-
-        function mintaKonfirmasiPowerSPV(kategori) {
-            const promotor = (kategori === "HA") ? promotorHA : promotorAV;
-            if (!promotor) return;
-
-            const pinLogin = document.getElementById('input-pin-spv').value;
-
-            const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').innerText = `POWER ON TIMER (${kategori})`;
-            document.getElementById('modal-desc').innerHTML = `
-                Reset/Tambah waktu timer 60 menit khusus Kategori <b>${kategori}</b>:<br>
-                <b style="color: #0f172a; font-size: 16px;">${promotor.nama}</b><br><br>
-                Masukkan PIN SPV:<br>
-                <input type="password" id="spv-power-pin" value="${pinLogin}" placeholder="PIN SPV" style="text-align:center;">
-            `;
-            document.getElementById('modal-actions').innerHTML = `
-                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" id="btn-modal-power" class="btn-success" onclick="eksekusiPowerONSPV('${kategori}', '${promotor.nama}')">Ya, Tambah Waktu</button>
-            `;
-            modal.classList.add('active');
-        }
-
-        function eksekusiPowerONSPV(targetKat, namaSales) {
-            const pin = document.getElementById('spv-power-pin').value;
-            if(!pin) return alert("Masukkan PIN SPV!");
-
-            sedangProsesAksiSPV = true;
-            const btn = document.getElementById('btn-modal-power');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-            fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(targetKat)}`)
-            .then(res => res.json())
-            .then(res => {
-                setTimeout(() => {
-                    tutupModal();
-                    sedangProsesAksiSPV = false;
-                    tampilkanModal("Status Timer", res.pesan);
-                    muatDataAntrian();
-                }, 800);
-            })
-            .catch(() => {
-                sedangProsesAksiSPV = false;
-                tutupModal();
-                tampilkanModal("Gagal", "Gagal memperbarui timer.");
-            });
         }
 
         function bukaModalToggleSistem(targetStatus) {
