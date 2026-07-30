@@ -436,7 +436,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         const BATAS_MENIT = 60;
-        const PIN_PANEL_RAHASIA = "7730"; // PIN untuk membuka panel utama
+        const PIN_PANEL_RAHASIA = "7730"; // PIN untuk verifikasi SPV ke server backend
         
         let promotorHA = null;
         let promotorAV = null;
@@ -651,8 +651,7 @@
                 actions: ""
             });
 
-            // Menggunakan fungsi asli di GAS: tambahWaktuAdmin
-            const urlAksi = `${SCRIPT_URL}?aksi=tambahWaktuAdmin&namaSales=${encodeURIComponent(promotor.nama)}&kategori=${encodeURIComponent(targetKategoriAktif)}`;
+            const urlAksi = `${SCRIPT_URL}?aksi=spvTambahTimer&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(promotor.nama)}&kategori=${encodeURIComponent(targetKategoriAktif)}`;
 
             fetch(urlAksi, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -687,6 +686,7 @@
         function aksiTambahAntrianSPV() {
             const namaSales = document.getElementById('select-tambah-sales').value;
             const kategori = document.getElementById('select-tambah-kategori').value;
+            const posisi = document.getElementById('select-tambah-posisi').value;
 
             if(!namaSales) return alert("Pilih promotor terlebih dahulu!");
 
@@ -694,8 +694,7 @@
                 icon: "⏳", title: "Memproses...", desc: `Memasukkan ${namaSales} ke antrian...`, actions: ""
             });
 
-            // Menggunakan fungsi asli di GAS: daftarAntri (tanpa PIN khusus, persis seperti promotor)
-            let url = `${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`;
+            let url = `${SCRIPT_URL}?aksi=spvDaftarAntri&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -711,16 +710,20 @@
             });
         }
 
+        /* METODE DIPERBAIKI: Menggunakan API SPV "spvAmbilAntrianBebas" */
         function aksiPaksaBawaCustomerSPV() {
             const namaSales = document.getElementById('select-paksa-sales').value;
             if(!namaSales) return alert("Pilih promotor standby terlebih dahulu!");
+
+            // Cari data kategori sales dari daftar antrian global
+            const itemSales = daftarAntrianGlobal.find(i => i.nama === namaSales);
+            const kategoriSales = itemSales ? (itemSales.kategori || "HA") : "HA";
 
             bukaModal({
                 icon: "⏳", title: "Memproses...", desc: `Memaksa ${namaSales} membawa customer...`, actions: ""
             });
 
-            // Menggunakan fungsi asli di GAS: ambilAntrian
-            let url = `${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`;
+            let url = `${SCRIPT_URL}?aksi=spvAmbilAntrianBebas&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriSales)}`;
 
             fetch(url, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -735,17 +738,20 @@
             });
         }
 
+        /* METODE DIPERBAIKI: Menggunakan API SPV "spvKeluarkanAntrian" */
         function aksiHapusAntrianSPV() {
             const namaSales = document.getElementById('select-hapus-sales').value;
             if(!namaSales) return alert("Pilih promotor yang ingin dikeluarkan!");
+
+            const itemSales = daftarAntrianGlobal.find(i => i.nama === namaSales);
+            const kategoriSales = itemSales ? (itemSales.kategori || "HA") : "HA";
 
             if(confirm(`Yakin ingin mengeluarkan ${namaSales} dari antrian?`)) {
                 bukaModal({
                     icon: "⏳", title: "Memproses...", desc: `Mengeluarkan ${namaSales}...`, actions: ""
                 });
 
-                // Menggunakan fungsi asli di GAS: selesaiMelayani
-                let url = `${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`;
+                let url = `${SCRIPT_URL}?aksi=spvKeluarkanAntrian&pin=${PIN_PANEL_RAHASIA}&namaSales=${encodeURIComponent(namaSales)}&namaPromotor=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriSales)}`;
 
                 fetch(url, { method: 'GET', redirect: 'follow' })
                 .then(res => res.json())
