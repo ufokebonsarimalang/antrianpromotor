@@ -127,12 +127,6 @@
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
         .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
 
-        .spv-link-btn {
-            margin-top: 24px; background: #faf5ff; border: 2px solid #e9d5ff; color: #7c3aed;
-            font-size: 13px; padding: 14px; border-radius: 12px; text-decoration: none; display: block; font-weight: 800;
-            letter-spacing: 0.5px;
-        }
-
         .wa-report-btn {
             margin-top: 12px; background: #25d366; border: 2px solid #1ebe57; color: white;
             font-size: 13px; padding: 14px; border-radius: 12px; text-decoration: none; 
@@ -209,8 +203,8 @@
             
             <button type="button" id="btn-utama-customer" class="btn-primary" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
             
-            <!-- TOMBOL BARU: CUMA LIHAT-LIHAT (KEMBALI KE URUTAN ATAS / KE-2) -->
-            <button type="button" id="btn-cuma-lihat" class="btn-warning" onclick="aksiSelesaiLihatLihat()" style="display: none; margin-top: 10px;">👀 Cuma Lihat-Lihat (Kembali Urutan Atas)</button>
+            <!-- TOMBOL CUMA LIHAT-LIHAT DENGAN TIMER PENGAMAN -->
+            <button type="button" id="btn-cuma-lihat" class="btn-warning btn-disabled" disabled onclick="aksiSelesaiLihatLihat()" style="display: none; margin-top: 10px;">👀 Cuma Lihat-Lihat (Tunggu <span id="label-countdown-lihat">05:00</span>)</button>
 
             <!-- TOMBOL DIPANGGIL CS/GUDANG & SELESAI CS -->
             <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 12px;">DIPANGGIL CS/GUDANG (KUNCI POSISI)</button>
@@ -267,12 +261,17 @@
         const BATAS_MENIT = 60;
         let sedangProsesAksi = false;
 
+        // VARIABEL TIMER PENGAMAN CUMA LIHAT-LIHAT (Misal: 5 Menit = 300 detik)
+        const DURASI_MINIMAL_MELAYANI_DETIK = 5 * 60; 
+        let waktuMulaiMelayaniMs = null;
+
         window.onload = function() {
             muatMasterSalesInstant();
             cekAkunKeServer();
             muatMasterSales();
             setInterval(muatDataAntrian, 3000); 
             setInterval(hitungMundurLokal, 1000); 
+            setInterval(hitungMundurPelayanan, 1000); // Timer pengaman aktif
         };
 
         function getDeviceId() {
@@ -413,6 +412,42 @@
             }
         }
 
+        // --- FUNGSI HITUNG MUNDUR PENGAMAN TOMBOL LIHAT-LIHAT ---
+        function hitungMundurPelayanan() {
+            if (statusSayaGlobal !== "Melayani") return;
+            
+            if (!waktuMulaiMelayaniMs) {
+                waktuMulaiMelayaniMs = localStorage.getItem('ufo_waktu_mulai_melayani');
+                if (!waktuMulaiMelayaniMs) {
+                    waktuMulaiMelayaniMs = new Date().getTime();
+                    localStorage.setItem('ufo_waktu_mulai_melayani', waktuMulaiMelayaniMs);
+                }
+            }
+
+            const now = new Date().getTime();
+            const selisihDetik = Math.floor((now - parseInt(waktuMulaiMelayaniMs)) / 1000);
+            const sisaDetik = DURASI_MINIMAL_MELAYANI_DETIK - selisihDetik;
+
+            const btnCumaLihat = document.getElementById('btn-cuma-lihat');
+            const labelCountdown = document.getElementById('label-countdown-lihat');
+
+            if (sisaDetik > 0) {
+                const m = Math.floor(sisaDetik / 60);
+                const s = sisaDetik % 60;
+                if (labelCountdown) labelCountdown.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                if (btnCumaLihat) {
+                    btnCumaLihat.disabled = true;
+                    btnCumaLihat.className = "btn-warning btn-disabled";
+                }
+            } else {
+                if (labelCountdown) labelCountdown.innerText = `SIAP`;
+                if (btnCumaLihat) {
+                    btnCumaLihat.disabled = false;
+                    btnCumaLihat.className = "btn-warning";
+                }
+            }
+        }
+
         function muatMasterSalesInstant() {
             const cachedSales = localStorage.getItem('ufo_master_sales_cache');
             if (cachedSales) {
@@ -516,17 +551,16 @@
                 btnAntri.disabled = true;
 
                 btnCustomer.style.display = "block";
-                btnCustomer.innerText = "✅ SELESAI (DEAL / CLOSING)";
+                btnCustomer.innerText = "SELESAI (DEAL / CLOSING)";
                 btnCustomer.className = "btn-danger";
                 btnCustomer.disabled = false;
 
                 btnCumaLihat.style.display = "block";
-                btnCumaLihat.disabled = false;
-
-                btnCS.style.display = "none";
-                btnKeluar.style.display = "none";
                 selectKategori.disabled = true;
             } else if (statusSayaGlobal === "Standby") {
+                waktuMulaiMelayaniMs = null;
+                localStorage.removeItem('ufo_waktu_mulai_melayani');
+
                 btnAntri.innerText = "Anda Sudah Di Antrian";
                 btnAntri.className = "btn-success btn-disabled";
                 btnAntri.disabled = true;
@@ -563,6 +597,9 @@
                 btnKeluar.style.display = "none";
                 selectKategori.disabled = true;
             } else { 
+                waktuMulaiMelayaniMs = null;
+                localStorage.removeItem('ufo_waktu_mulai_melayani');
+
                 btnAntri.innerText = statusSistemGlobal === "TUTUP" ? "Antrian Ditutup Oleh SPV" : "Daftar Antrian";
                 btnAntri.className = statusSistemGlobal === "TUTUP" ? "btn-danger btn-disabled" : "btn-success";
                 btnAntri.disabled = (statusSistemGlobal === "TUTUP");
@@ -622,6 +659,9 @@
             if (statusSayaGlobal === "Standby") {
                 tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
                     statusSayaGlobal = "Melayani";
+                    waktuMulaiMelayaniMs = new Date().getTime();
+                    localStorage.setItem('ufo_waktu_mulai_melayani', waktuMulaiMelayaniMs);
+                    
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
@@ -632,6 +672,9 @@
                 });
             } else if (statusSayaGlobal === "Melayani") {
                 tampilkanModalKonfirmasi("Konfirmasi Closing", "Selesai melayani customer (Deal/Closing)? Anda akan masuk ke urutan paling belakang.", function() {
+                    waktuMulaiMelayaniMs = null;
+                    localStorage.removeItem('ufo_waktu_mulai_melayani');
+
                     daftarAntrianGlobal = daftarAntrianGlobal.filter(item => item.nama.trim().toLowerCase() !== namaSales.trim().toLowerCase());
                     statusSayaGlobal = "belum_ada";
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
@@ -645,7 +688,6 @@
             }
         }
 
-        // --- FUNGSI BARU: CUMA LIHAT-LIHAT ---
         function aksiSelesaiLihatLihat() {
             const namaSales = getAkunAktif();
             const kategoriPilih = document.getElementById('pilih-kategori').value || "HA";
@@ -653,12 +695,12 @@
 
             tampilkanModalKonfirmasi("Customer Cuma Lihat-Lihat", "Customer hanya lihat-lihat? Anda akan dikembalikan ke Urutan Ke-2 Standby.", function() {
                 sedangProsesAksi = true;
+                waktuMulaiMelayaniMs = null;
+                localStorage.removeItem('ufo_waktu_mulai_melayani');
                 
-                // Optimistic UI Update: Ubah status ke Standby dan posisikan di atas lokal
                 statusSayaGlobal = "Standby";
                 daftarAntrianGlobal = daftarAntrianGlobal.filter(item => item.nama.trim().toLowerCase() !== namaSales.trim().toLowerCase());
                 
-                // Sisipkan di posisi 2 lokal agar responsif
                 if (daftarAntrianGlobal.length > 0) {
                     daftarAntrianGlobal.splice(1, 0, { nama: namaSales, status: "Standby", waktuStandby: "", kategori: kategoriPilih });
                 } else {
@@ -714,6 +756,9 @@
                 if (!namaSales) return;
 
                 sedangProsesAksi = true;
+                waktuMulaiMelayaniMs = null;
+                localStorage.removeItem('ufo_waktu_mulai_melayani');
+
                 const btnKeluar = document.getElementById('btn-keluar-istirahat');
                 if (btnKeluar) {
                     btnKeluar.disabled = true;
