@@ -256,7 +256,6 @@
                 <button type="button" class="btn-success" onclick="bukaModalTambahAntriSpv()">+ Masukkan Antrian</button>
                 <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan Antrian</button>
                 <button type="button" class="btn-primary full-width" style="background: #0284c7;" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
-                <button type="button" class="btn-warning full-width" onclick="bukaModalFormSPVKategori('spvTambahTimer', 'Tambah Waktu Standby Urutan 1', false)">⏱️ Tambah Waktu Urutan 1</button>
             </div>
 
             <!-- SEKSI 3: PERANGKAT & RESET -->
@@ -424,7 +423,7 @@
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = `POWER ON TIMER (${kategori})`;
             document.getElementById('modal-desc').innerHTML = `
-                Reset/Tambah waktu timer 60 menit untuk:<br>
+                Reset/Tambah waktu timer 60 menit khusus Kategori <b>${kategori}</b>:<br>
                 <b style="color: #0f172a; font-size: 16px;">${promotor.nama}</b><br><br>
                 Masukkan PIN SPV:<br>
                 <input type="password" id="spv-power-pin" value="${pinLogin}" placeholder="PIN SPV" style="text-align:center;">
@@ -436,7 +435,8 @@
             modal.classList.add('active');
         }
 
-        function eksekusiPowerONSPV(kategori, namaSales) {
+        /* PERBAIKAN: TIMER DIISOLASI STRICT SESUAI KATEGORI (HA / AV) */
+        function eksekusiPowerONSPV(targetKat, namaSales) {
             const pin = document.getElementById('spv-power-pin').value;
             if(!pin) return alert("Masukkan PIN SPV!");
 
@@ -445,7 +445,7 @@
             btn.disabled = true;
             btn.innerHTML = `<span class="spinner"></span> Memproses...`;
 
-            fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}`)
+            fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(targetKat)}`)
             .then(res => res.json())
             .then(res => {
                 setTimeout(() => {
@@ -707,7 +707,7 @@
                     const data = res.data || [];
                     daftarAntrianGlobal = data;
 
-                    // FILTER DAN BINDING TIMER
+                    // FILTER DAN BINDING TIMER SECARA SPESIFIK HA / AV
                     const dataStandby = data.filter(item => item.status === "Standby");
                     promotorHA = dataStandby.find(item => (item.kategori || "HA") === "HA") || null;
                     promotorAV = dataStandby.find(item => item.kategori === "AV") || null;
