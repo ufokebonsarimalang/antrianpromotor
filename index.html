@@ -694,13 +694,21 @@
             });
         }
 
-        function aksiToggleCS() {
+    function aksiToggleCS() {
             const namaSales = getAkunAktif();
             if(!namaSales) return;
+
+            const btnCS = document.getElementById('btn-utama-cs');
 
             if (statusSayaGlobal === "Standby") {
                 tampilkanModalKonfirmasi("Status Dipanggil CS/GUDANG", "Dipanggil oleh CS/GUDANG? Posisi antrian Anda akan dikunci.", function() {
                     sedangProsesAksi = true; // Kunci Auto Refresh
+
+                    if (btnCS) {
+                        btnCS.disabled = true;
+                        btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
+                    }
+
                     statusSayaGlobal = "Dipanggil CS/GUDANG";
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
@@ -717,6 +725,12 @@
             } else if (statusSayaGlobal === "Dipanggil CS/GUDANG" || statusSayaGlobal === "Dipanggil CS") {
                 tampilkanModalKonfirmasi("Selesai Urusan CS/GUDANG", "Urusan CS/GUDANG sudah selesai? Kembali aktif di antrian.", function() {
                     sedangProsesAksi = true; // Kunci Auto Refresh
+
+                    if (btnCS) {
+                        btnCS.disabled = true;
+                        btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
+                    }
+
                     statusSayaGlobal = "Standby";
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
@@ -732,7 +746,6 @@
                 });
             }
         }
-
         function bukaModalKeluarIstirahat() {
             tampilkanModalKonfirmasi("Keluar Antrian", "Apakah Anda yakin ingin keluar dari antrian untuk istirahat / ada keperluan?", function() {
                 const namaSales = getAkunAktif();
