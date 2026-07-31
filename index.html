@@ -270,9 +270,6 @@
             setInterval(hitungMundurLokal, 1000); 
         };
 
-        // =========================================================================
-        // HARDWARE + SALT + CANVAS FINGERPRINT (DEVICE ID UNIK)
-        // =========================================================================
         function getDeviceId() {
             let localSalt = localStorage.getItem('ufo_device_salt');
             if (!localSalt) {
@@ -291,8 +288,8 @@
             const hardwareConcurrency = nav.hardwareConcurrency || "unknown";
             const platform = nav.platform || "";
             const timezone = (typeof Intl !== "undefined" && Intl.DateTimeFormat) 
-                            ? Intl.DateTimeFormat().resolvedOptions().timeZone || "" 
-                            : "";
+                        ? Intl.DateTimeFormat().resolvedOptions().timeZone || "" 
+                        : "";
 
             let canvasData = "";
             try {
@@ -324,7 +321,6 @@
             const deviceId = getDeviceId();
             const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
             
-            // Buka UI secara instant jika nama sudah tersimpan di HP
             if (cachedNama) {
                 namaSalesAktifGlobal = cachedNama;
                 document.getElementById('panel-login').style.display = 'none';
@@ -332,7 +328,6 @@
                 document.getElementById('label-user-aktif').innerText = cachedNama;
             }
 
-            // Jalankan verifikasi ke server di latar belakang (Background Process)
             fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
@@ -344,14 +339,12 @@
                     document.getElementById('panel-menu-utama').style.display = 'block';
                     document.getElementById('label-user-aktif').innerText = res.nama;
                 } else if (res.status === "bebas") {
-                    // Hanya jika server mengonfirmasi HP belum terikat
                     localStorage.removeItem('ufo_nama_sales_aktif');
                     document.getElementById('panel-login').style.display = 'block';
                     document.getElementById('panel-menu-utama').style.display = 'none';
                 }
                 muatDataAntrian(true);
             }).catch(() => {
-                // Jika internet jelek/error, tetap pakai data lokal agar tidak blank/loading terus
                 muatDataAntrian();
             });
         }
@@ -624,7 +617,7 @@
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
             
-            sedangProsesAksi = true; // Kunci Auto Refresh
+            sedangProsesAksi = true; 
 
             const btnAntri = document.getElementById('btn-utama-antri');
             btnAntri.disabled = true;
@@ -640,7 +633,7 @@
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
-                sedangProsesAksi = false; // Buka Kunci
+                sedangProsesAksi = false; 
                 muatDataAntrian(true);
             }).catch(() => {
                 sedangProsesAksi = false;
@@ -654,14 +647,14 @@
 
             if (statusSayaGlobal === "Standby") {
                 tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
-                    sedangProsesAksi = true; // Kunci Auto Refresh
+                    sedangProsesAksi = true; 
                     statusSayaGlobal = "Melayani";
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
 
                     fetch(`${SCRIPT_URL}?aksi=ambilAntrian&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                     .then(res => res.json())
                     .then(res => {
-                        sedangProsesAksi = false; // Buka Kunci
+                        sedangProsesAksi = false; 
                         muatDataAntrian(true);
                     }).catch(() => {
                         sedangProsesAksi = false;
@@ -671,13 +664,12 @@
             }
         }
 
-        // AKSI: SELESAI MELAYANI (SELESAI / CLOSING)
         function aksiSelesaiClosing() {
             const namaSales = getAkunAktif();
             if(!namaSales) return;
 
             tampilkanModalKonfirmasi("Konfirmasi Selesai", "Selesai melayani customer? Anda akan dikeluarkan dari antrian.", function() {
-                sedangProsesAksi = true; // Kunci Auto Refresh
+                sedangProsesAksi = true; 
                 daftarAntrianGlobal = daftarAntrianGlobal.filter(item => item.nama.trim().toLowerCase() !== namaSales.trim().toLowerCase());
                 statusSayaGlobal = "belum_ada";
                 renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
@@ -685,7 +677,7 @@
                 fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                 .then(res => res.json())
                 .then(res => {
-                    sedangProsesAksi = false; // Buka Kunci
+                    sedangProsesAksi = false; 
                     muatDataAntrian(true);
                 }).catch(() => {
                     sedangProsesAksi = false;
@@ -694,684 +686,60 @@
             });
         }
 
-function doGet(e) {
-  var aksi = e.parameter.aksi;
-  var namaSales = e.parameter.namaSales;
-  var pin = e.parameter.pin;
-  var deviceId = e.parameter.deviceId;
-  var statusBaru = e.parameter.statusBaru;
-  var kategori = e.parameter.kategori || "HA";
-  var posisi = e.parameter.posisi || "0";
+        // AKSI TOMBOL DIPANGGIL CS / GUDANG DENGAN SPINNER AKTIF
+        function aksiToggleCS() {
+            const namaSales = getAkunAktif();
+            if(!namaSales) return;
 
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("AntrianWalkIn");
-  if (!sheet) {
-    sheet = ss.insertSheet("AntrianWalkIn");
-    sheet.appendRow(["Nama", "Status", "Waktu Standby", "Kategori"]);
-  }
+            const btnCS = document.getElementById('btn-utama-cs');
 
-  var logSheet = ss.getSheetByName("LogMelayani");
-  if (!logSheet) {
-    logSheet = ss.insertSheet("LogMelayani");
-    logSheet.appendRow(["Nama Promotor", "Waktu Mulai Melayani"]);
-  }
+            if (statusSayaGlobal === "Standby") {
+                tampilkanModalKonfirmasi("Status Dipanggil CS/GUDANG", "Dipanggil oleh CS/GUDANG? Posisi antrian Anda akan dikunci.", function() {
+                    sedangProsesAksi = true; 
 
-  var hasil = { status: "gagal", pesan: "Aksi tidak dikenali" };
+                    if (btnCS) {
+                        btnCS.disabled = true;
+                        btnCS.className = "btn-purple btn-disabled";
+                        btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
+                    }
 
-  if (aksi === "getMasterSales") {
-    hasil = getMasterSales(ss);
-  } else if (aksi === "getAntrian") {
-    hasil = getAntrian(sheet);
-  } else if (aksi === "daftarAntri") {
-    hasil = daftarAntri(sheet, namaSales, kategori);
-  } else if (aksi === "ambilAntrian") {
-    hasil = ambilAntrian(sheet, logSheet, namaSales);
-  } else if (aksi === "selesaiMelayani") {
-    hasil = selesaiMelayani(sheet, namaSales);
-  } 
-  
-  // --- FITUR BARU: SELESAI CUMA LIHAT-LIHAT (KEMBALI KE URUTAN ATAS / URUTAN KE-2) ---
-  else if (aksi === "selesaiLihatLihat") {
-    hasil = selesaiLihatLihat(sheet, namaSales, kategori);
-  }
+                    statusSayaGlobal = "Dipanggil CS/GUDANG";
 
-  else if (aksi === "loginSPV") {
-    hasil = loginSPV(ss, pin);
-  } else if (aksi === "kunciPerangkat") {
-    hasil = kunciPerangkat(ss, namaSales, deviceId);
-  } else if (aksi === "cekBinding") {
-    hasil = cekBindingPerangkat(ss, deviceId);
-  } 
-  
-  // --- FITUR STATUS CS (FREEZE POSISI) ---
-  else if (aksi === "panggilCS") {
-    hasil = ubahStatusCS(sheet, namaSales, "Dipanggil CS");
-  } else if (aksi === "selesaiCS") {
-    hasil = ubahStatusCS(sheet, namaSales, "Standby");
-  }
+                    fetch(`${SCRIPT_URL}?aksi=panggilCS&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
+                    .then(res => res.json())
+                    .then(res => {
+                        sedangProsesAksi = false; 
+                        muatDataAntrian(true);
+                    }).catch(() => {
+                        sedangProsesAksi = false;
+                        muatDataAntrian(true);
+                    });
+                });
+            } else if (statusSayaGlobal === "Dipanggil CS/GUDANG" || statusSayaGlobal === "Dipanggil CS") {
+                tampilkanModalKonfirmasi("Selesai Urusan CS/GUDANG", "Urusan CS/GUDANG sudah selesai? Kembali aktif di antrian.", function() {
+                    sedangProsesAksi = true; 
 
-  // --- FITUR TANPA PIN KHUSUS PANEL TIMER ---
-  else if (aksi === "tambahWaktuAdmin") {
-    hasil = tambahWaktuAdminSpesifik(sheet, namaSales, kategori);
-  }
+                    if (btnCS) {
+                        btnCS.disabled = true;
+                        btnCS.className = "btn-success btn-disabled";
+                        btnCS.innerHTML = `<span class="spinner"></span> Memproses...`;
+                    }
 
-  // --- FITUR KONTROL SPV LENGKAP ---
-  else if (aksi === "spvSetStatusAntrian") {
-    hasil = spvSetStatusAntrian(ss, pin, statusBaru);
-  } else if (aksi === "spvResetDevice") {
-    hasil = spvResetDevice(ss, pin, namaSales, deviceId);
-  } else if (aksi === "spvResetAntrian") {
-    hasil = spvResetAntrian(ss, pin, sheet);
-  } else if (aksi === "spvTambahTimer") {
-    hasil = spvTambahTimer(ss, pin, sheet);
-  } else if (aksi === "spvAmbilAntrianBebas") {
-    hasil = spvAmbilAntrianBebas(ss, pin, sheet, logSheet, namaSales, kategori);
-  } else if (aksi === "spvSelesaiMelayani" || aksi === "spvKeluarkanAntrian") {
-    hasil = spvSelesaiMelayani(ss, pin, sheet, namaSales);
-  } else if (aksi === "spvDaftarAntri") {
-    hasil = spvDaftarAntriPosisi(ss, pin, sheet, namaSales, kategori, posisi);
-  }
+                    statusSayaGlobal = "Standby";
 
-  return ContentService.createTextOutput(JSON.stringify(hasil))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-// ================= FUNGSI UTAMA =================
-
-function getMasterSales(ss) {
-  var sheet = ss.getSheetByName("MasterSales");
-  if (!sheet) return { status: "gagal", pesan: "Sheet MasterSales tidak ada" };
-  var data = sheet.getDataRange().getValues();
-  var sales = [];
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][0]) sales.push(data[i][0]);
-  }
-  return { status: "sukses", data: sales };
-}
-
-function getAntrian(sheet) {
-  cekDanGeserOtomatis(sheet);
-  var data = sheet.getDataRange().getValues();
-  var antrian = [];
-  
-  var waktuHA = null;
-  var sisaDetikHA = null;
-  var waktuAV = null;
-  var sisaDetikAV = null;
-
-  var barisStandbyHA = -1;
-  var barisStandbyAV = -1;
-
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][1] === "Standby") {
-      var kat = data[i][3] ? String(data[i][3]).trim() : "HA";
-      if (kat === "AV" && barisStandbyAV === -1) {
-        barisStandbyAV = i;
-      } else if (kat !== "AV" && barisStandbyHA === -1) {
-        barisStandbyHA = i;
-      }
-    }
-  }
-
-  var sekarangMs = new Date().getTime();
-  var batasDetik = 60 * 60; // 1 Jam (3600 detik)
-
-  if (barisStandbyHA !== -1) {
-    if (!data[barisStandbyHA][2]) {
-      var sekarang = new Date();
-      sheet.getRange(barisStandbyHA + 1, 3).setValue(sekarang);
-      SpreadsheetApp.flush();
-      waktuHA = sekarang;
-    } else {
-      waktuHA = data[barisStandbyHA][2];
-    }
-    var mulaiHA = new Date(waktuHA).getTime();
-    var berjalanHA = Math.floor((sekarangMs - mulaiHA) / 1000);
-    sisaDetikHA = batasDetik - berjalanHA;
-    if (sisaDetikHA < 0) sisaDetikHA = 0;
-  }
-
-  if (barisStandbyAV !== -1) {
-    if (!data[barisStandbyAV][2]) {
-      var sekarang = new Date();
-      sheet.getRange(barisStandbyAV + 1, 3).setValue(sekarang);
-      SpreadsheetApp.flush();
-      waktuAV = sekarang;
-    } else {
-      waktuAV = data[barisStandbyAV][2];
-    }
-    var mulaiAV = new Date(waktuAV).getTime();
-    var berjalanAV = Math.floor((sekarangMs - mulaiAV) / 1000);
-    sisaDetikAV = batasDetik - berjalanAV;
-    if (sisaDetikAV < 0) sisaDetikAV = 0;
-  }
-
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][0]) {
-      antrian.push({
-        nama: data[i][0],
-        status: data[i][1],
-        waktuStandby: data[i][2] || "",
-        kategori: data[i][3] || "HA"
-      });
-    }
-  }
-
-  var statusAntrianSistem = getStatusSistemAntrian(sheet.getParent());
-
-  return {
-    status: "sukses",
-    data: antrian,
-    waktuStandbyHA: waktuHA,
-    sisaDetikHA: sisaDetikHA,
-    waktuStandbyAV: waktuAV,
-    sisaDetikAV: sisaDetikAV,
-    waktuStandbyPertama: waktuHA,
-    sisaDetik: sisaDetikHA,
-    statusAntrian: statusAntrianSistem
-  };
-}
-
-function daftarAntri(sheet, namaSales, kategori) {
-  if (getStatusSistemAntrian(sheet.getParent()) === "TUTUP") {
-    return { status: "gagal", pesan: "Sistem antrian sedang ditutup oleh SPV!" };
-  }
-  
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toLowerCase() === String(namaSales).toLowerCase()) {
-      return { status: "gagal", pesan: "Anda sudah terdaftar di antrian atau sedang melayani!" };
-    }
-  }
-
-  var adaStandbyKategori = false;
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][1] === "Standby") {
-      var katItem = data[i][3] ? String(data[i][3]).trim() : "HA";
-      if (katItem === kategori) {
-        adaStandbyKategori = true;
-        break;
-      }
-    }
-  }
-
-  var waktuStandbyBaru = !adaStandbyKategori ? new Date() : "";
-  sheet.appendRow([namaSales, "Standby", waktuStandbyBaru, kategori]);
-  SpreadsheetApp.flush();
-  return { status: "sukses", pesan: "Berhasil masuk antrian" };
-}
-
-function ambilAntrian(sheet, logSheet, namaSales) {
-  var data = sheet.getDataRange().getValues();
-  var rowIndex = -1;
-  var kategoriSales = "HA";
-
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toLowerCase() === String(namaSales).toLowerCase()) {
-      rowIndex = i + 1;
-      kategoriSales = data[i][3] ? String(data[i][3]).trim() : "HA";
-      break;
-    }
-  }
-
-  if (rowIndex === -1) return { status: "gagal", pesan: "Nama tidak ditemukan di antrian" };
-
-  logSheet.appendRow([namaSales, new Date()]);
-  sheet.getRange(rowIndex, 2).setValue("Melayani");
-  sheet.getRange(rowIndex, 3).setValue("");
-
-  var dataBaru = sheet.getDataRange().getValues();
-  for (var j = 1; j < dataBaru.length; j++) {
-    if (dataBaru[j][1] === "Standby") {
-      var katJ = dataBaru[j][3] ? String(dataBaru[j][3]).trim() : "HA";
-      if (katJ === kategoriSales) {
-        sheet.getRange(j + 1, 3).setValue(new Date());
-        break;
-      }
-    }
-  }
-
-  SpreadsheetApp.flush();
-  return { status: "sukses", pesan: "Status diubah menjadi Melayani" };
-}
-
-function selesaiMelayani(sheet, namaSales) {
-  var data = sheet.getDataRange().getValues();
-  var rowIndex = -1;
-  var kategoriSales = "HA";
-
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toLowerCase() === String(namaSales).toLowerCase()) {
-      rowIndex = i + 1;
-      kategoriSales = data[i][3] ? String(data[i][3]).trim() : "HA";
-      break;
-    }
-  }
-
-  if (rowIndex === -1) return { status: "gagal", pesan: "Nama tidak ditemukan" };
-
-  sheet.deleteRow(rowIndex);
-
-  var dataBaru = sheet.getDataRange().getValues();
-  for (var j = 1; j < dataBaru.length; j++) {
-    if (dataBaru[j][1] === "Standby") {
-      var katJ = dataBaru[j][3] ? String(dataBaru[j][3]).trim() : "HA";
-      if (katJ === kategoriSales) {
-        sheet.getRange(j + 1, 3).setValue(new Date());
-        break;
-      }
-    }
-  }
-
-  SpreadsheetApp.flush();
-  return { status: "sukses", pesan: "Selesai melayani" };
-}
-
-// --- FUNGSI BARU: SELESAI CUMA LIHAT-LIHAT (SISIPKAN KE URUTAN KE-2 STANDBY) ---
-function selesaiLihatLihat(sheet, namaSales, kategoriInput) {
-  var data = sheet.getDataRange().getValues();
-  var rowIndex = -1;
-  var kategoriSales = kategoriInput || "HA";
-
-  // 1. Cari promotor di sheet antrian
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toLowerCase() === String(namaSales).toLowerCase()) {
-      rowIndex = i + 1;
-      kategoriSales = data[i][3] ? String(data[i][3]).trim() : kategoriSales;
-      break;
-    }
-  }
-
-  if (rowIndex === -1) {
-    return { status: "gagal", pesan: "Nama tidak ditemukan di antrian" };
-  }
-
-  // 2. Hapus baris lama (status 'Melayani')
-  sheet.deleteRow(rowIndex);
-  SpreadsheetApp.flush();
-
-  // 3. Cari posisi untuk menyisipkan ke Urutan Ke-2 Standby
-  var dataBaru = sheet.getDataRange().getValues();
-  var targetPosisi = 2; // Disisipkan ke urutan ke-2
-  var barisTarget = sheet.getLastRow() + 1;
-  var hitungKategori = 0;
-
-  for (var j = 1; j < dataBaru.length; j++) {
-    var katRow = dataBaru[j][3] ? String(dataBaru[j][3]).trim() : "HA";
-    var statusRow = dataBaru[j][1];
-    
-    if (katRow === kategoriSales && (statusRow === "Standby" || statusRow === "Dipanggil CS")) {
-      hitungKategori++;
-      if (hitungKategori === targetPosisi) {
-        barisTarget = j + 1;
-        break;
-      }
-    }
-  }
-
-  // Sisipkan di posisi ke-2 jika ada minimal 1 promotor standby, jika tidak sisipkan di paling atas/akhir
-  if (hitungKategori >= 1 && barisTarget <= sheet.getLastRow()) {
-    sheet.insertRowBefore(barisTarget);
-    sheet.getRange(barisTarget, 1, 1, 4).setValues([[namaSales, "Standby", "", kategoriSales]]);
-  } else {
-    sheet.appendRow([namaSales, "Standby", "", kategoriSales]);
-  }
-
-  // Refresh timer untuk urutan 1 standby jika belum terisi
-  var dataFinal = sheet.getDataRange().getValues();
-  for (var k = 1; k < dataFinal.length; k++) {
-    if (dataFinal[k][1] === "Standby") {
-      var katK = dataFinal[k][3] ? String(dataFinal[k][3]).trim() : "HA";
-      if (katK === kategoriSales && !dataFinal[k][2]) {
-        sheet.getRange(k + 1, 3).setValue(new Date());
-        break;
-      }
-    }
-  }
-
-  SpreadsheetApp.flush();
-  return { 
-    status: "sukses", 
-    pesan: namaSales + " dikembalikan ke urutan atas (Status: Cuma Lihat-Lihat)." 
-  };
-}
-
-// FUNGSI KHUSUS DIPANGGIL CS (FREEZE POSISI)
-function ubahStatusCS(sheet, namaSales, statusBaru) {
-  var data = sheet.getDataRange().getValues();
-  var rowIndex = -1;
-  var kategoriSales = "HA";
-
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toLowerCase() === String(namaSales).toLowerCase()) {
-      rowIndex = i + 1;
-      kategoriSales = data[i][3] ? String(data[i][3]).trim() : "HA";
-      break;
-    }
-  }
-
-  if (rowIndex === -1) return { status: "gagal", pesan: "Nama tidak ditemukan di antrian" };
-
-  sheet.getRange(rowIndex, 2).setValue(statusBaru);
-  sheet.getRange(rowIndex, 3).setValue(""); // Kosongkan timer waktu standby
-
-  // Jika kembali ke Standby, refresh waktu standby untuk urutan standby teratas
-  if (statusBaru === "Standby") {
-    var dataBaru = sheet.getDataRange().getValues();
-    for (var j = 1; j < dataBaru.length; j++) {
-      if (dataBaru[j][1] === "Standby") {
-        var katJ = dataBaru[j][3] ? String(dataBaru[j][3]).trim() : "HA";
-        if (katJ === kategoriSales && !dataBaru[j][2]) {
-          sheet.getRange(j + 1, 3).setValue(new Date());
-          break;
-        }
-      }
-    }
-  }
-
-  SpreadsheetApp.flush();
-  var pesanRes = statusBaru === "Dipanggil CS" 
-    ? "Status diubah: Dipanggil CS (Posisi Antrian Dikunci)" 
-    : "Status diubah: Kembali ke Standby Antrian";
-  return { status: "sukses", pesan: pesanRes };
-}
-
-function cekDanGeserOtomatis(sheet) {
-  var data = sheet.getDataRange().getValues();
-  if (data.length <= 1) return;
-
-  var sekarang = new Date().getTime();
-  var batasMenit = 60; // 60 Menit (1 Jam)
-  var adaPerubahan = false;
-
-  var kategoriDihandle = [];
-  for (var i = 1; i < data.length; i++) {
-    // Hanya periksa timer jika statusnya "Standby" (Status "Dipanggil CS" diabaikan sehingga tidak akan terhapus)
-    if (data[i][1] === "Standby" && data[i][2]) {
-      var kat = data[i][3] ? String(data[i][3]).trim() : "HA";
-      if (kategoriDihandle.indexOf(kat) === -1) {
-        kategoriDihandle.push(kat);
-        var waktuStandby = new Date(data[i][2]).getTime();
-        var selisihMenit = (sekarang - waktuStandby) / (1000 * 60);
-
-        if (selisihMenit >= batasMenit) {
-          var kategoriHapus = kat;
-          sheet.deleteRow(i + 1);
-          adaPerubahan = true;
-          
-          var dataBaru = sheet.getDataRange().getValues();
-          for (var j = 1; j < dataBaru.length; j++) {
-            if (dataBaru[j][1] === "Standby") {
-              var katJ = dataBaru[j][3] ? String(dataBaru[j][3]).trim() : "HA";
-              if (katJ === kategoriHapus) {
-                sheet.getRange(j + 1, 3).setValue(new Date());
-                break;
-              }
+                    fetch(`${SCRIPT_URL}?aksi=selesaiCS&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
+                    .then(res => res.json())
+                    .then(res => {
+                        sedangProsesAksi = false; 
+                        muatDataAntrian(true);
+                    }).catch(() => {
+                        sedangProsesAksi = false;
+                        muatDataAntrian(true);
+                    });
+                });
             }
-          }
-          break;
         }
-      }
-    }
-  }
 
-  if (adaPerubahan) {
-    SpreadsheetApp.flush();
-  }
-}
-
-// ================= BINDING & SPV =================
-
-function loginSPV(ss, pin) {
-  var pinAktif = getPinSPVSheet(ss);
-  if (String(pin).trim() === String(pinAktif).trim()) {
-    return { status: "sukses", pesan: "Login SPV Berhasil" };
-  }
-  return { status: "gagal", pesan: "PIN SPV Salah!" };
-}
-
-function getPinSPVSheet(ss) {
-  var sheet = ss.getSheetByName("Setting") || ss.insertSheet("Setting");
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["PIN_SPV", "123456", "BUKA"]);
-  }
-  return sheet.getRange("B1").getValue();
-}
-
-function getStatusSistemAntrian(ss) {
-  var sheet = ss.getSheetByName("Setting");
-  if (!sheet) return "BUKA";
-  var status = sheet.getRange("C1").getValue();
-  return status ? String(status).trim().toUpperCase() : "BUKA";
-}
-
-function kunciPerangkat(ss, namaSales, deviceId) {
-  var sheet = ss.getSheetByName("DeviceBinding") || ss.insertSheet("DeviceBinding");
-  if (sheet.getLastRow() === 0) sheet.appendRow(["Nama Sales", "Device ID"]);
-  
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toLowerCase() === String(namaSales).toLowerCase()) {
-      if (String(data[i][1]) !== String(deviceId)) {
-        return { status: "gagal", pesan: "Akun ini sudah terikat di perangkat lain!" };
-      }
-      return { status: "sukses", pesan: "Perangkat dikenali" };
-    }
-  }
-  
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][1]) === String(deviceId)) {
-      return { status: "gagal", pesan: "HP ini sudah dikunci dengan nama lain: " + data[i][0] };
-    }
-  }
-
-  sheet.appendRow([namaSales, deviceId]);
-  SpreadsheetApp.flush();
-  return { status: "sukses", pesan: "Perangkat berhasil dikunci" };
-}
-
-function cekBindingPerangkat(ss, deviceId) {
-  var sheet = ss.getSheetByName("DeviceBinding");
-  if (!sheet) return { status: "bebas" };
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][1]) === String(deviceId)) {
-      return { status: "terkunci", nama: data[i][0] };
-    }
-  }
-  return { status: "bebas" };
-}
-
-function validasiSPV(ss, pin) {
-  var pinAktif = getPinSPVSheet(ss);
-  return String(pin).trim() === String(pinAktif).trim();
-}
-
-function spvSetStatusAntrian(ss, pin, statusBaru) {
-  if (!validasiSPV(ss, pin)) return { status: "gagal", pesan: "PIN SPV Salah!" };
-  var sheet = ss.getSheetByName("Setting") || ss.insertSheet("Setting");
-  sheet.getRange("C1").setValue(statusBaru);
-  SpreadsheetApp.flush();
-  return { status: "sukses", pesan: "Status antrian diubah menjadi " + statusBaru };
-}
-
-function spvResetDevice(ss, pin, namaSales, deviceId) {
-  if (!validasiSPV(ss, pin)) return { status: "gagal", pesan: "PIN SPV Salah!" };
-  var sheet = ss.getSheetByName("DeviceBinding");
-  if (!sheet) return { status: "gagal", pesan: "Data binding kosong" };
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toLowerCase() === String(namaSales).toLowerCase() || String(data[i][1]) === String(deviceId)) {
-      sheet.deleteRow(i + 1);
-      SpreadsheetApp.flush();
-      return { status: "sukses", pesan: "Perangkat berhasil direset" };
-    }
-  }
-  return { status: "gagal", pesan: "Data promotor/perangkat tidak ditemukan" };
-}
-
-function spvResetAntrian(ss, pin, sheet) {
-  if (!validasiSPV(ss, pin)) return { status: "gagal", pesan: "PIN SPV Salah!" };
-  
-  if (sheet.getLastRow() > 1) {
-    sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).clearContent();
-    SpreadsheetApp.flush();
-  }
-  
-  return { status: "sukses", pesan: "Semua antrian berhasil direset total dan dimulai dari awal!" };
-}
-
-function spvTambahTimer(ss, pin, sheet) {
-  if (!validasiSPV(ss, pin)) return { status: "gagal", pesan: "PIN SPV Salah!" };
-  var data = sheet.getDataRange().getValues();
-  
-  var kategoriDicek = [];
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][1] === "Standby") {
-      var kat = data[i][3] ? String(data[i][3]).trim() : "HA";
-      if (kategoriDicek.indexOf(kat) === -1) {
-        kategoriDicek.push(kat);
-        sheet.getRange(i + 1, 3).setValue(new Date());
-      }
-    }
-  }
-  SpreadsheetApp.flush();
-  return { status: "sukses", pesan: "Timer standby berhasil direfresh" };
-}
-
-function spvAmbilAntrianBebas(ss, pin, sheet, logSheet, namaSales, kategori) {
-  if (!validasiSPV(ss, pin)) return { status: "gagal", pesan: "PIN SPV Salah!" };
-  var data = sheet.getDataRange().getValues();
-  var rowIndex = -1;
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toLowerCase() === String(namaSales).toLowerCase()) {
-      rowIndex = i + 1;
-      break;
-    }
-  }
-  if (rowIndex === -1) {
-    sheet.appendRow([namaSales, "Standby", "", kategori]);
-    rowIndex = sheet.getLastRow();
-  }
-  logSheet.appendRow([namaSales, new Date()]);
-  sheet.getRange(rowIndex, 2).setValue("Melayani");
-  sheet.getRange(rowIndex, 3).setValue("");
-  
-  var katTarget = sheet.getRange(rowIndex, 4).getValue() || "HA";
-  var dataBaru = sheet.getDataRange().getValues();
-  for (var j = 1; j < dataBaru.length; j++) {
-    if (dataBaru[j][1] === "Standby") {
-      var katJ = dataBaru[j][3] ? String(dataBaru[j][3]).trim() : "HA";
-      if (katJ === katTarget) {
-        sheet.getRange(j + 1, 3).setValue(new Date());
-        break;
-      }
-    }
-  }
-  SpreadsheetApp.flush();
-  return { status: "sukses", pesan: "Promotor diset melayani" };
-}
-
-function spvSelesaiMelayani(ss, pin, sheet, namaSales) {
-  if (!validasiSPV(ss, pin)) return { status: "gagal", pesan: "PIN SPV Salah!" };
-  return selesaiMelayani(sheet, namaSales);
-}
-
-// FUNGSI DAFTAR ANTRI SPV DENGAN PILIHAN POSISI URUTAN
-function spvDaftarAntriPosisi(ss, pin, sheet, namaSales, kategori, posisiInput) {
-  if (!validasiSPV(ss, pin)) return { status: "gagal", pesan: "PIN SPV Salah!" };
-  
-  var data = sheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toLowerCase() === String(namaSales).toLowerCase()) {
-      return { status: "gagal", pesan: "Promotor sudah terdaftar di antrian!" };
-    }
-  }
-
-  var targetPosisi = parseInt(posisiInput) || 0;
-  var barisTarget = sheet.getLastRow() + 1; // Default posisi paling belakang
-
-  if (targetPosisi > 0) {
-    var hitungKategori = 0;
-    for (var j = 1; j < data.length; j++) {
-      var katRow = data[j][3] ? String(data[j][3]).trim() : "HA";
-      var statusRow = data[j][1];
-      
-      if (katRow === kategori && (statusRow === "Standby" || statusRow === "Dipanggil CS")) {
-        hitungKategori++;
-        if (hitungKategori === targetPosisi) {
-          barisTarget = j + 1;
-          break;
-        }
-      }
-    }
-  }
-
-  // Jika posisi di tengah/atas, sisipkan baris baru
-  if (targetPosisi > 0 && barisTarget <= sheet.getLastRow()) {
-    sheet.insertRowBefore(barisTarget);
-    sheet.getRange(barisTarget, 1, 1, 4).setValues([[namaSales, "Standby", "", kategori]]);
-  } else {
-    sheet.appendRow([namaSales, "Standby", "", kategori]);
-  }
-
-  // Refresh timer untuk urutan 1 standby pada kategori tersebut
-  var dataBaru = sheet.getDataRange().getValues();
-  for (var k = 1; k < dataBaru.length; k++) {
-    if (dataBaru[k][1] === "Standby") {
-      var katK = dataBaru[k][3] ? String(dataBaru[k][3]).trim() : "HA";
-      if (katK === kategori && !dataBaru[k][2]) {
-        sheet.getRange(k + 1, 3).setValue(new Date());
-        break;
-      }
-    }
-  }
-
-  SpreadsheetApp.flush();
-  return { 
-    status: "sukses", 
-    pesan: "Berhasil memasukkan " + namaSales + " ke urutan ke-" + (targetPosisi > 0 ? targetPosisi : "terakhir") 
-  };
-}
-
-// --- FUNGSI TAMBAH WAKTU TANPA PIN (UNTUK PANEL TIMER POWER ON) ---
-function tambahWaktuAdminSpesifik(sheet, namaSales, kategori) {
-  var data = sheet.getDataRange().getValues();
-  var ditemukan = false;
-  var targetKat = kategori ? String(kategori).trim().toUpperCase() : "HA";
-  
-  for (var i = 1; i < data.length; i++) {
-    var namaDiSheet = String(data[i][0]).trim();
-    var statusDiSheet = String(data[i][1]).trim();
-    
-    if (namaDiSheet.toLowerCase() === String(namaSales).trim().toLowerCase() && statusDiSheet === "Standby") {
-      sheet.getRange(i + 1, 3).setValue(new Date());
-      ditemukan = true;
-      break;
-    }
-  }
-  
-  if (!ditemukan) {
-    for (var j = 1; j < data.length; j++) {
-      var statusJ = String(data[j][1]).trim();
-      var katJ = data[j][3] ? String(data[j][3]).trim().toUpperCase() : "HA";
-      
-      if (statusJ === "Standby" && katJ === targetKat) {
-        sheet.getRange(j + 1, 3).setValue(new Date());
-        namaSales = data[j][0];
-        ditemukan = true;
-        break;
-      }
-    }
-  }
-  
-  if (ditemukan) {
-    SpreadsheetApp.flush();
-    return { status: "sukses", pesan: "Waktu timer (" + targetKat + ") untuk " + namaSales + " berhasil di-reset!" };
-  } else {
-    return { status: "gagal", pesan: "Tidak ada promotor status Standby di kategori " + targetKat };
-  }
-}
         function bukaModalKeluarIstirahat() {
             tampilkanModalKonfirmasi("Keluar Antrian", "Apakah Anda yakin ingin keluar dari antrian untuk istirahat / ada keperluan?", function() {
                 const namaSales = getAkunAktif();
@@ -1384,8 +752,6 @@ function tambahWaktuAdminSpesifik(sheet, namaSales, kategori) {
                     btnKeluar.disabled = true;
                     btnKeluar.innerHTML = `<span class="spinner"></span> Memproses...`;
                 }
-
-                tampilkanModal("Memproses...", "Sedang keluar dari antrian...");
 
                 fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}`, { method: 'GET', redirect: 'follow' })
                 .then(res => res.json())
