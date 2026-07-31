@@ -274,16 +274,32 @@
             setInterval(hitungMundurPelayanan, 1000); // Timer pengaman aktif
         };
 
+        // =========================================================
+        // HARDWARE FINGERPRINT DEVICE ID (STABIL WALAU CLEAR CACHE)
+        // =========================================================
         function getDeviceId() {
-            let devId = localStorage.getItem('ufo_device_perm_id');
-            if (!devId) {
-                devId = 'ufo-dev-' + 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                    return v.toString(16);
-                });
-                localStorage.setItem('ufo_device_perm_id', devId);
+            const nav = navigator;
+            const screen = window.screen;
+            
+            const userAgent = nav.userAgent || "";
+            const language = nav.language || "";
+            const screenRes = `${screen.width}x${screen.height}x${screen.colorDepth}`;
+            const hardwareConcurrency = nav.hardwareConcurrency || "unknown";
+            const platform = nav.platform || "";
+            const timezone = (typeof Intl !== "undefined" && Intl.DateTimeFormat) 
+                             ? Intl.DateTimeFormat().resolvedOptions().timeZone || "" 
+                             : "";
+
+            const rawFingerprint = `${userAgent}|${language}|${screenRes}|${hardwareConcurrency}|${platform}|${timezone}`;
+
+            let hash = 0;
+            for (let i = 0; i < rawFingerprint.length; i++) {
+                const char = rawFingerprint.charCodeAt(i);
+                hash = (hash << 5) - hash + char;
+                hash |= 0; 
             }
-            return devId;
+
+            return "DEV-" + Math.abs(hash);
         }
 
         function cekAkunKeServer() {
