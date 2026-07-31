@@ -274,24 +274,41 @@
             setInterval(hitungMundurPelayanan, 1000); // Timer pengaman aktif
         };
 
-        // =========================================================
-        // HARDWARE FINGERPRINT DEVICE ID (STABIL WALAU CLEAR CACHE)
-        // =========================================================
+        // =========================================================================
+        // HARDWARE & CANVAS FINGERPRINT DEVICE ID (KONSISTEN & UNIK PER TIAP UNIT HP)
+        // =========================================================================
         function getDeviceId() {
             const nav = navigator;
             const screen = window.screen;
             
+            // 1. Parameter Fisik & Sistem Browser
             const userAgent = nav.userAgent || "";
             const language = nav.language || "";
             const screenRes = `${screen.width}x${screen.height}x${screen.colorDepth}`;
-            const hardwareConcurrency = nav.hardwareConcurrency || "unknown";
+            const hardwareConcurrency = nav.hardwareConcurrency || "unknown"; // Core CPU
             const platform = nav.platform || "";
             const timezone = (typeof Intl !== "undefined" && Intl.DateTimeFormat) 
                              ? Intl.DateTimeFormat().resolvedOptions().timeZone || "" 
                              : "";
 
-            const rawFingerprint = `${userAgent}|${language}|${screenRes}|${hardwareConcurrency}|${platform}|${timezone}`;
+            // 2. Canvas Fingerprint (Unik untuk Chip Grafik GPU Perangkat)
+            let canvasData = "";
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = "top";
+                ctx.font = "14px 'Arial'";
+                ctx.fillStyle = "#f60";
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = "#069";
+                ctx.fillText("UFO-Kebonsari", 2, 15);
+                canvasData = canvas.toDataURL();
+            } catch(e) {}
 
+            // Combined String
+            const rawFingerprint = `${userAgent}|${language}|${screenRes}|${hardwareConcurrency}|${platform}|${timezone}|${canvasData.substring(0, 50)}`;
+
+            // 3. Hashing ke Integer 32-bit Unik
             let hash = 0;
             for (let i = 0; i < rawFingerprint.length; i++) {
                 const char = rawFingerprint.charCodeAt(i);
