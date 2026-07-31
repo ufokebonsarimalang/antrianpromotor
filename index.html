@@ -261,7 +261,7 @@
         const BATAS_MENIT = 60;
         let sedangProsesAksi = false;
 
-        // VARIABEL TIMER PENGAMAN CUMA LIHAT-LIHAT (Misal: 5 Menit = 300 detik)
+        // VARIABEL TIMER PENGAMAN CUMA LIHAT-LIHAT (5 Menit = 300 detik)
         const DURASI_MINIMAL_MELAYANI_DETIK = 5 * 60; 
         let waktuMulaiMelayaniMs = null;
 
@@ -271,27 +271,36 @@
             muatMasterSales();
             setInterval(muatDataAntrian, 3000); 
             setInterval(hitungMundurLokal, 1000); 
-            setInterval(hitungMundurPelayanan, 1000); // Timer pengaman aktif
+            setInterval(hitungMundurPelayanan, 1000); 
         };
 
         // =========================================================================
-        // HARDWARE & CANVAS FINGERPRINT DEVICE ID (KONSISTEN & UNIK PER TIAP UNIT HP)
+        // HARDWARE + SALT + CANVAS FINGERPRINT (UNTUK CEK PERANGKAT SAMA TIPE)
         // =========================================================================
         function getDeviceId() {
+            // 1. Buat Salt Unik di LocalStorage jika belum ada
+            let localSalt = localStorage.getItem('ufo_device_salt');
+            if (!localSalt) {
+                localSalt = typeof crypto.randomUUID === 'function' 
+                    ? crypto.randomUUID() 
+                    : Math.random().toString(36).substring(2) + Date.now().toString(36);
+                localStorage.setItem('ufo_device_salt', localSalt);
+            }
+
             const nav = navigator;
             const screen = window.screen;
             
-            // 1. Parameter Fisik & Sistem Browser
+            // 2. Parameter Fisik & Sistem Browser
             const userAgent = nav.userAgent || "";
             const language = nav.language || "";
             const screenRes = `${screen.width}x${screen.height}x${screen.colorDepth}`;
-            const hardwareConcurrency = nav.hardwareConcurrency || "unknown"; // Core CPU
+            const hardwareConcurrency = nav.hardwareConcurrency || "unknown";
             const platform = nav.platform || "";
             const timezone = (typeof Intl !== "undefined" && Intl.DateTimeFormat) 
-                             ? Intl.DateTimeFormat().resolvedOptions().timeZone || "" 
-                             : "";
+                            ? Intl.DateTimeFormat().resolvedOptions().timeZone || "" 
+                            : "";
 
-            // 2. Canvas Fingerprint (Unik untuk Chip Grafik GPU Perangkat)
+            // 3. Canvas Fingerprint
             let canvasData = "";
             try {
                 const canvas = document.createElement('canvas');
@@ -305,10 +314,10 @@
                 canvasData = canvas.toDataURL();
             } catch(e) {}
 
-            // Combined String
-            const rawFingerprint = `${userAgent}|${language}|${screenRes}|${hardwareConcurrency}|${platform}|${timezone}|${canvasData.substring(0, 50)}`;
+            // 4. Combined String dengan Salt
+            const rawFingerprint = `${localSalt}|${userAgent}|${language}|${screenRes}|${hardwareConcurrency}|${platform}|${timezone}|${canvasData.substring(0, 50)}`;
 
-            // 3. Hashing ke Integer 32-bit Unik
+            // 5. Hashing Integer Unik (DEV-XXXXXXXXX)
             let hash = 0;
             for (let i = 0; i < rawFingerprint.length; i++) {
                 const char = rawFingerprint.charCodeAt(i);
@@ -316,7 +325,8 @@
                 hash |= 0; 
             }
 
-            return "DEV-" + Math.abs(hash);
+            const finalHash = Math.abs(hash).toString().padStart(9, '0').substring(0, 9);
+            return "DEV-" + finalHash;
         }
 
         function cekAkunKeServer() {
@@ -445,7 +455,6 @@
             }
         }
 
-        // --- FUNGSI HITUNG MUNDUR PENGAMAN TOMBOL LIHAT-LIHAT ---
         function hitungMundurPelayanan() {
             if (statusSayaGlobal !== "Melayani") return;
             
