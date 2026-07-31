@@ -320,39 +320,41 @@
             return "DEV-" + finalHash;
         }
 
-        function cekAkunKeServer() {
-            const deviceId = getDeviceId();
-            
-            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, { method: 'GET', redirect: 'follow' })
-            .then(res => res.json())
-            .then(res => {
-                if (res.status === "terkunci" && res.nama) {
-                    namaSalesAktifGlobal = res.nama;
-                    localStorage.setItem('ufo_nama_sales_aktif', res.nama);
-                    
-                    document.getElementById('panel-login').style.display = 'none';
-                    document.getElementById('panel-menu-utama').style.display = 'block';
-                    document.getElementById('label-user-aktif').innerText = res.nama;
-                } else {
-                    document.getElementById('panel-login').style.display = 'block';
-                    document.getElementById('panel-menu-utama').style.display = 'none';
-                }
-                muatDataAntrian();
-            }).catch(() => {
-                const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
-                if (cachedNama) {
-                    namaSalesAktifGlobal = cachedNama;
-                    document.getElementById('panel-login').style.display = 'none';
-                    document.getElementById('panel-menu-utama').style.display = 'block';
-                    document.getElementById('label-user-aktif').innerText = cachedNama;
-                } else {
-                    document.getElementById('panel-login').style.display = 'block';
-                    document.getElementById('panel-menu-utama').style.display = 'none';
-                }
-                muatDataAntrian();
-            });
-        }
+       function cekAkunKeServer() {
+    const deviceId = getDeviceId();
+    const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
+    
+    // Buka UI secara instant jika nama sudah tersimpan di HP
+    if (cachedNama) {
+        namaSalesAktifGlobal = cachedNama;
+        document.getElementById('panel-login').style.display = 'none';
+        document.getElementById('panel-menu-utama').style.display = 'block';
+        document.getElementById('label-user-aktif').innerText = cachedNama;
+    }
 
+    // Jalankan verifikasi ke server di latar belakang (Background Process)
+    fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, { method: 'GET', redirect: 'follow' })
+    .then(res => res.json())
+    .then(res => {
+        if (res.status === "terkunci" && res.nama) {
+            namaSalesAktifGlobal = res.nama;
+            localStorage.setItem('ufo_nama_sales_aktif', res.nama);
+            
+            document.getElementById('panel-login').style.display = 'none';
+            document.getElementById('panel-menu-utama').style.display = 'block';
+            document.getElementById('label-user-aktif').innerText = res.nama;
+        } else if (res.status === "bebas") {
+            // Hanya jika server mengonfirmasi HP belum terikat
+            localStorage.removeItem('ufo_nama_sales_aktif');
+            document.getElementById('panel-login').style.display = 'block';
+            document.getElementById('panel-menu-utama').style.display = 'none';
+        }
+        muatDataAntrian(true);
+    }).catch(() => {
+        // Jika internet jelek/error, tetap pakai data lokal agar tidak blank/loading terus
+        muatDataAntrian();
+    });
+}
         function simpanAkunHP() {
             const namaPilih = document.getElementById('pilih-sales').value;
             const deviceId = getDeviceId();
