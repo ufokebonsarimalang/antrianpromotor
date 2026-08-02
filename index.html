@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+v<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -75,11 +75,11 @@
             border-color: #334155 !important;
         }
         body.dark-mode .announcement-box {
-            background: #1e293b !important;
-            border-color: #334155 !important;
+            background: #2a1f10 !important;
+            border-color: #d97706 !important;
         }
         body.dark-mode .announcement-text {
-            color: #f8fafc !important;
+            color: #fef3c7 !important;
         }
 
         *, body, button, select, input {
@@ -105,7 +105,6 @@
             transition: background 0.3s ease, border-color 0.3s ease;
         }
 
-        /* KONTROL ATAS (TOMBOL TEMA DI LUAR HEADER) */
         .top-controls {
             display: flex;
             justify-content: flex-end;
@@ -144,20 +143,42 @@
         .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
 
-        /* KOTAK PENGUMUMAN SPV */
+        /* KOTAK PENGUMUMAN SPV ULTRA MENCOLOK & BERDENYUT */
+        @keyframes pulseAnnouncement {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); border-color: #f59e0b; }
+            70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); border-color: #d97706; }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); border-color: #f59e0b; }
+        }
+
         .announcement-box {
-            background: #fffbeb; border: 2px solid #fde68a;
-            border-radius: 16px; padding: 14px 16px; margin-bottom: 18px;
-            text-align: left; display: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08);
+            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); 
+            border: 3px solid #f59e0b;
+            border-radius: 18px; padding: 18px; margin-bottom: 20px;
+            text-align: left; display: none; 
+            animation: pulseAnnouncement 2.5s infinite;
+        }
+        .announcement-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
         }
         .announcement-title {
-            font-size: 11px; font-weight: 800; color: #d97706;
-            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
-            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 900; color: #b45309;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            display: flex; align-items: center; gap: 8px;
         }
         .announcement-text {
-            font-size: 13px; font-weight: 600; color: var(--text-main); line-height: 1.4;
+            font-size: 15px; font-weight: 800; color: #78350f; line-height: 1.5;
+            background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 12px;
+            border: 1.5px solid #fde68a; margin-bottom: 12px;
         }
+        .btn-baca-pengumuman {
+            background: #d97706; color: white; width: 100%; padding: 10px; font-size: 12px;
+            font-weight: 800; border-radius: 10px; border: none; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3); transition: background 0.2s;
+        }
+        .btn-baca-pengumuman:hover { background: #b45309; }
 
         .card-giliran-wrapper {
             display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;
@@ -188,7 +209,6 @@
         }
         select:focus, input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
 
-        /* ANIMASI EFEK MENYALA (GLOWING PULSE) PADA TOMBOL */
         @keyframes glowSuccess {
             0% { box-shadow: 0 0 5px rgba(5, 150, 105, 0.4), 0 4px 12px rgba(0,0,0,0.08); }
             50% { box-shadow: 0 0 16px rgba(5, 150, 105, 0.9), 0 4px 12px rgba(0,0,0,0.08); }
@@ -229,7 +249,6 @@
         }
         button:active { transform: scale(0.98); }
 
-        /* KELAS WARNA & EFEK MENYALA BERBEDA-BEDA */
         .btn-success { background: var(--success); color: white; animation: glowSuccess 2.5s infinite ease-in-out; }
         .btn-customer { background: var(--customer-blue); color: white; animation: glowCustomer 2.5s infinite ease-in-out; }
         .btn-closing { background: var(--closing-red); color: white; animation: glowClosing 2.5s infinite ease-in-out; }
@@ -264,7 +283,6 @@
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
         .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
 
-        /* ANIMASI BERKEDIP PADA TOMBOL WHATSAPP */
         @keyframes blinkWhatsApp {
             0% { opacity: 1; transform: scale(1); box-shadow: 0 0 5px rgba(37, 211, 102, 0.4); }
             50% { opacity: 0.7; transform: scale(0.97); box-shadow: 0 0 16px rgba(37, 211, 102, 0.9); }
@@ -296,7 +314,7 @@
 <body>
 
     <div class="app-container">
-        <!-- TOMBOL TEMA DI LUAR HEADER (POSISI SEBELAH KANAN ATAS) -->
+        <!-- TOMBOL TEMA DI LUAR HEADER -->
         <div class="top-controls">
             <button type="button" class="dark-mode-btn" id="btn-toggle-dark" onclick="toggleDarkMode()">🌙 Gelap</button>
         </div>
@@ -310,10 +328,13 @@
             STATUS ANTRIAN: OPEN
         </div>
 
-        <!-- KOTAK PENGUMUMAN SPV -->
+        <!-- KOTAK PENGUMUMAN SPV ULTRA MENCOLOK -->
         <div id="box-pengumuman-spv" class="announcement-box">
-            <div class="announcement-title">📢 Pengumuman </div>
+            <div class="announcement-header-row">
+                <div class="announcement-title">🚨 PENGUMUMAN PENTING SPV</div>
+            </div>
             <div id="teks-pengumuman-spv" class="announcement-text">-</div>
+            <button type="button" class="btn-baca-pengumuman" onclick="konfirmasiSudahBacaPengumuman()">✅ Saya Mengerti & Mengikuti</button>
         </div>
 
         <!-- KARTU GILIRAN UTAMA HA & AV -->
@@ -414,6 +435,7 @@
         let statusSayaGlobal = "belum_ada"; 
         let statusSistemGlobal = "BUKA";
         let namaSalesAktifGlobal = "";
+        let pengumumanTerakhirGlobal = "";
         const BATAS_MENIT = 60;
         let sedangProsesAksi = false;
         let lockStatusLokalExpiry = 0;
@@ -421,7 +443,6 @@
         window.onload = function() {
             initDarkMode();
             
-            // 1. TAMPILKAN UI LOKAL SECARA INSTAN (< 0.1 detik)
             muatMasterSalesInstant();
             muatCacheAntrianInstan();
             
@@ -436,7 +457,6 @@
                 document.getElementById('panel-menu-utama').style.display = 'none';
             }
 
-            // 2. SINKRONISASI SERVER DI LATAR BELAKANG
             cekServerBg();
             muatMasterSales();
             
@@ -474,10 +494,8 @@
                     : Math.random().toString(36).substring(2) + Date.now().toString(36);
                 localStorage.setItem('ufo_device_salt', localSalt);
             }
-
             const nav = navigator;
             const screen = window.screen;
-            
             const userAgent = nav.userAgent || "";
             const language = nav.language || "";
             const screenRes = `${screen.width}x${screen.height}x${screen.colorDepth}`;
@@ -508,7 +526,6 @@
                 hash = (hash << 5) - hash + char;
                 hash |= 0; 
             }
-
             const finalHash = Math.abs(hash).toString().padStart(9, '0').substring(0, 9);
             return "DEV-" + finalHash;
         }
@@ -525,8 +542,6 @@
 
         function cekServerBg() {
             const deviceId = getDeviceId();
-            
-            // Panggil cek binding dan getAntrian secara paralel agar super cepat
             Promise.all([
                 fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`, { method: 'GET', redirect: 'follow' }).then(r => r.json()).catch(() => null),
                 fetch(`${SCRIPT_URL}?aksi=getAntrian`, { method: 'GET', redirect: 'follow' }).then(r => r.json()).catch(() => null)
@@ -544,7 +559,6 @@
                         document.getElementById('panel-menu-utama').style.display = 'none';
                     }
                 }
-
                 if (resAntrian && resAntrian.status === "sukses") {
                     localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
                     renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.waktuStandbyHA, resAntrian.waktuStandbyAV, resAntrian.pengumumanSPV);
@@ -683,12 +697,21 @@
             badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
             badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
 
-            // MENAMPILKAN / MENYEMBUNYIKAN KOTAK PENGUMUMAN SPV
+            // LOGIKA PENGUMUMAN SPV DENGAN LOCALSTORAGE UNTUK VALIDASI BACA
             const boxPengumuman = document.getElementById('box-pengumuman-spv');
             const teksPengumuman = document.getElementById('teks-pengumuman-spv');
+            
             if (pengumumanSPV && pengumumanSPV.trim() !== "") {
                 teksPengumuman.innerText = pengumumanSPV;
-                boxPengumuman.style.display = "block";
+                
+                // Cek apakah pengumuman ini sudah dibaca oleh user sebelumnya
+                const lastReadAnnouncement = localStorage.getItem('ufo_last_read_announcement');
+                if (lastReadAnnouncement !== pengumumanSPV) {
+                    boxPengumuman.style.display = "block"; // Munculkan jika belum dikonfirmasi baca
+                } else {
+                    boxPengumuman.style.display = "none"; // Sembunyikan jika sudah dikonfirmasi
+                }
+                pengumumanTerakhirGlobal = pengumumanSPV;
             } else {
                 boxPengumuman.style.display = "none";
             }
@@ -785,7 +808,6 @@
 
                 btnCS.style.display = "none";
                 btnKeluar.style.display = "none";
-
                 selectKategori.disabled = true;
             } else if (statusSayaGlobal === "Standby") {
                 btnAntri.innerText = "Anda Sudah Di Antrian";
@@ -807,7 +829,6 @@
                 btnKeluar.style.display = "block";
                 btnKeluar.disabled = false;
                 btnKeluar.className = "btn-amber";
-
                 selectKategori.disabled = true;
             } else if (statusSayaGlobal === "Dipanggil CS/GUDANG" || statusSayaGlobal === "Dipanggil CS") {
                 btnAntri.innerText = "Posisi Antrian Dikunci (Di CS/GUDANG)";
@@ -841,6 +862,14 @@
             document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
 
+        function konfirmasiSudahBacaPengumuman() {
+            if (pengumumanTerakhirGlobal) {
+                localStorage.setItem('ufo_last_read_announcement', pengumumanTerakhirGlobal);
+                document.getElementById('box-pengumuman-spv').style.display = "none";
+                tampilkanModal("Terima Kasih", "Anda telah mengonfirmasi telah membaca pengumuman SPV.");
+            }
+        }
+
         function muatDataAntrian(paksaTarik = false) {
             if (sedangProsesAksi && !paksaTarik) return;
             fetch(`${SCRIPT_URL}?aksi=getAntrian`, { method: 'GET', redirect: 'follow' })
@@ -870,7 +899,7 @@
             if (!adaAkun) {
                 daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
             }
-            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal);
+            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal, pengumumanTerakhirGlobal);
 
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
@@ -916,11 +945,7 @@
 
             tampilkanModalKonfirmasi("Konfirmasi Selesai", "Selesai melayani customer? Anda akan dikeluarkan dari antrian.", function() {
                 if (typeof confetti === 'function') {
-                    confetti({
-                        particleCount: 150,
-                        spread: 90,
-                        origin: { y: 0.6 }
-                    });
+                    confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
                 }
 
                 sedangProsesAksi = true; 
