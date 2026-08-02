@@ -1,4 +1,4 @@
-v<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -52,6 +52,7 @@ v<!DOCTYPE html>
             background: #1a2744 !important;
             border-color: #293548 !important;
         }
+        /* PERBAIKAN: Background box list antrian di mode gelap */
         body.dark-mode .list-antrian li {
             background: #1a2744 !important;
             border-color: #293548 !important;
@@ -73,13 +74,6 @@ v<!DOCTYPE html>
             background: #1e293b !important;
             color: #f8fafc !important;
             border-color: #334155 !important;
-        }
-        body.dark-mode .announcement-box {
-            background: #2a1f10 !important;
-            border-color: #d97706 !important;
-        }
-        body.dark-mode .announcement-text {
-            color: #fef3c7 !important;
         }
 
         *, body, button, select, input {
@@ -142,43 +136,6 @@ v<!DOCTYPE html>
         }
         .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
-
-        /* KOTAK PENGUMUMAN SPV ULTRA MENCOLOK & BERDENYUT */
-        @keyframes pulseAnnouncement {
-            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); border-color: #f59e0b; }
-            70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); border-color: #d97706; }
-            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); border-color: #f59e0b; }
-        }
-
-        .announcement-box {
-            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); 
-            border: 3px solid #f59e0b;
-            border-radius: 18px; padding: 18px; margin-bottom: 20px;
-            text-align: left; display: none; 
-            animation: pulseAnnouncement 2.5s infinite;
-        }
-        .announcement-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .announcement-title {
-            font-size: 13px; font-weight: 900; color: #b45309;
-            text-transform: uppercase; letter-spacing: 0.8px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .announcement-text {
-            font-size: 15px; font-weight: 800; color: #78350f; line-height: 1.5;
-            background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 12px;
-            border: 1.5px solid #fde68a; margin-bottom: 12px;
-        }
-        .btn-baca-pengumuman {
-            background: #d97706; color: white; width: 100%; padding: 10px; font-size: 12px;
-            font-weight: 800; border-radius: 10px; border: none; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3); transition: background 0.2s;
-        }
-        .btn-baca-pengumuman:hover { background: #b45309; }
 
         .card-giliran-wrapper {
             display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;
@@ -271,6 +228,7 @@ v<!DOCTYPE html>
             padding: 14px; margin-bottom: 18px; text-align: left; font-size: 14px; font-weight: 600;
         }
 
+        /* PERBAIKAN: Mengembalikan Styling Kotak List Antrian */
         .list-antrian { list-style: none; padding: 0; margin: 8px 0 0 0; text-align: left; }
         .list-antrian li {
             padding: 12px 14px; background: #ffffff; border-radius: 10px; margin-bottom: 8px;
@@ -299,16 +257,36 @@ v<!DOCTYPE html>
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(6px);
             display: flex; justify-content: center; align-items: center;
             z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-box { background: white; width: 100%; max-width: 360px; padding: 24px; border-radius: 20px; text-align: center; border: 2px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .modal-box { background: white; width: 100%; max-width: 380px; padding: 24px; border-radius: 20px; text-align: center; border: 2px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; color: var(--text-main); }
         .modal-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; font-weight: 600; }
         .modal-actions { display: flex; gap: 10px; }
         .modal-actions button { flex: 1; padding: 12px; font-size: 13px; }
+
+        /* KHUSUS MODAL POPUP PENGUMUMAN Wajib */
+        .announcement-popup-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+            border: 4px solid #f59e0b;
+        }
+        body.dark-mode .announcement-popup-box {
+            background: #2a1f10 !important;
+            border-color: #d97706 !important;
+        }
+        .announcement-popup-text {
+            font-size: 16px; font-weight: 800; color: #78350f; line-height: 1.6;
+            background: rgba(255, 255, 255, 0.9); padding: 16px; border-radius: 12px;
+            border: 2px solid #fde68a; margin-bottom: 20px; text-align: left; max-height: 250px; overflow-y: auto;
+        }
+        body.dark-mode .announcement-popup-text {
+            color: #fef3c7 !important;
+            background: #1e150a !important;
+            border-color: #78350f !important;
+        }
     </style>
 </head>
 <body>
@@ -326,15 +304,6 @@ v<!DOCTYPE html>
 
         <div id="badge-status-sistem" class="status-badge-sistem status-open">
             STATUS ANTRIAN: OPEN
-        </div>
-
-        <!-- KOTAK PENGUMUMAN SPV ULTRA MENCOLOK -->
-        <div id="box-pengumuman-spv" class="announcement-box">
-            <div class="announcement-header-row">
-                <div class="announcement-title">🚨 PENGUMUMAN PENTING</div>
-            </div>
-            <div id="teks-pengumuman-spv" class="announcement-text">-</div>
-            <button type="button" class="btn-baca-pengumuman" onclick="konfirmasiSudahBacaPengumuman()">Saya Mengerti & Mengikuti</button>
         </div>
 
         <!-- KARTU GILIRAN UTAMA HA & AV -->
@@ -414,13 +383,24 @@ v<!DOCTYPE html>
         </a>
     </div>
 
-    <!-- MODAL POPUP -->
+    <!-- MODAL POPUP UMUM -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
             <div id="modal-desc" class="modal-desc">Isi pesan...</div>
             <div id="modal-actions" class="modal-actions">
                 <button type="button" class="btn-customer" onclick="tutupModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP PENGUMUMAN SPV (MENUTUPI LAYAR SECARA WAJIB) -->
+    <div id="modal-pengumuman-spv" class="modal-overlay">
+        <div class="modal-box announcement-popup-box">
+            <div class="modal-title" style="color: #b45309;">🚨 PENGUMUMAN PENTING SPV</div>
+            <div id="teks-pengumuman-popup" class="announcement-popup-text">-</div>
+            <div class="modal-actions">
+                <button type="button" class="btn-customer" style="background: #d97706;" onclick="konfirmasiSudahBacaPengumuman()">Saya Mengerti & Mengikuti</button>
             </div>
         </div>
     </div>
@@ -697,23 +677,22 @@ v<!DOCTYPE html>
             badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
             badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
 
-            // LOGIKA PENGUMUMAN SPV DENGAN LOCALSTORAGE UNTUK VALIDASI BACA
-            const boxPengumuman = document.getElementById('box-pengumuman-spv');
-            const teksPengumuman = document.getElementById('teks-pengumuman-spv');
+            // LOGIKA POPUP PENGUMUMAN Wajib Menutupi Layar
+            const modalPopupPengumuman = document.getElementById('modal-pengumuman-spv');
+            const teksPopupPengumuman = document.getElementById('teks-pengumuman-popup');
             
             if (pengumumanSPV && pengumumanSPV.trim() !== "") {
-                teksPengumuman.innerText = pengumumanSPV;
+                teksPopupPengumuman.innerText = pengumumanSPV;
                 
-                // Cek apakah pengumuman ini sudah dibaca oleh user sebelumnya
                 const lastReadAnnouncement = localStorage.getItem('ufo_last_read_announcement');
                 if (lastReadAnnouncement !== pengumumanSPV) {
-                    boxPengumuman.style.display = "block"; // Munculkan jika belum dikonfirmasi baca
+                    modalPopupPengumuman.classList.add('active'); // Munculkan pop-up wajib menutup layar
                 } else {
-                    boxPengumuman.style.display = "none"; // Sembunyikan jika sudah dikonfirmasi
+                    modalPopupPengumuman.classList.remove('active'); 
                 }
                 pengumumanTerakhirGlobal = pengumumanSPV;
             } else {
-                boxPengumuman.style.display = "none";
+                modalPopupPengumuman.classList.remove('active');
             }
 
             let listHtmlHA = "";
@@ -865,8 +844,7 @@ v<!DOCTYPE html>
         function konfirmasiSudahBacaPengumuman() {
             if (pengumumanTerakhirGlobal) {
                 localStorage.setItem('ufo_last_read_announcement', pengumumanTerakhirGlobal);
-                document.getElementById('box-pengumuman-spv').style.display = "none";
-                tampilkanModal("Terima Kasih", "Anda telah mengonfirmasi telah membaca pengumuman SPV.");
+                document.getElementById('modal-pengumuman-spv').classList.remove('active');
             }
         }
 
