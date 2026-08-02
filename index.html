@@ -1025,55 +1025,67 @@
             });
         }
 
-        function aksiUtamaAntri() {
-            const namaSales = getAkunAktif().trim();
-            const kategoriPilih = document.getElementById('pilih-kategori').value;
-            if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
+      function aksiUtamaAntri() {
+    const namaSales = getAkunAktif().trim();
+    const kategoriPilih = document.getElementById('pilih-kategori').value;
+    if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
 
-            if (waktuPenaltiSelesaiGlobal > 0) {
-                tampilkanModal("🚨 Peringatan Sanksi Penalti", "Anda masih dalam masa penalti sanksi SPV! Silakan tunggu hingga timer sanksi selesai.");
-                return;
-            }
+    if (waktuPenaltiSelesaiGlobal > 0) {
+        tampilkanModal("🚨 Peringatan Sanksi Penalti", "Anda masih dalam masa penalti sanksi SPV! Silakan tunggu hingga timer sanksi selesai.");
+        return;
+    }
 
-            const akunSaya = namaSales.toLowerCase();
-            const dataSales = masterSalesGlobal || [];
-            const sayaObj = dataSales.find(item => String(typeof item === 'object' ? item.nama : item).trim().toLowerCase() === akunSaya);
-            
-            if (sayaObj && typeof sayaObj === 'object' && sayaObj.sanksiMenit && parseInt(sayaObj.sanksiMenit) > 0) {
-                const menitHukum = parseInt(sayaObj.sanksiMenit);
-                const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan / tidak klik selesai melayani.`;
-                
-                waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
-                localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
-                
-                tampilkanModal("🚨 Peringatan Sanksi Penalti", pesanSanksi);
-                return; 
-            }
-
-            sedangProsesAksi = true; 
-            lockStatusLokalExpiry = Date.now() + 6000;
-
-            const btnAntri = document.getElementById('btn-utama-antri');
-            btnAntri.disabled = true;
-            btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-            statusSayaGlobal = "Standby";
-            const adaAkun = daftarAntrianGlobal.some(item => item.nama.trim().toLowerCase() === akunSaya);
-            if (!adaAkun) {
-                daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
-            }
-            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal, pengumumanTerakhirGlobal);
-
-            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
-            .then(res => res.json())
-            .then(res => {
-                sedangProsesAksi = false; 
-                muatDataAntrian(true);
-            }).catch(() => {
-                sedangProsesAksi = false;
-                muatDataAntrian(true);
-            });
+    const akunSaya = namaSales.toLowerCase();
+    const dataSales = masterSalesGlobal || [];
+    
+    // Pencarian data promotor yang aman (mendukung format objek atau string)
+    const sayaObj = dataSales.find(item => {
+        let n = "";
+        if (typeof item === 'object' && item !== null) {
+            n = item.nama || item.name || Object.values(item)[0] || "";
+        } else {
+            n = String(item);
         }
+        return String(n).trim().toLowerCase() === akunSaya;
+    });
+    
+    if (sayaObj && typeof sayaObj === 'object') {
+        let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
+        if (menitHukum > 0) {
+            const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan / tidak klik selesai melayani.`;
+            
+            waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
+            localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
+            
+            tampilkanModal("🚨 Peringatan Sanksi Penalti", pesanSanksi);
+            return; 
+        }
+    }
+
+    sedangProsesAksi = true; 
+    lockStatusLokalExpiry = Date.now() + 6000;
+
+    const btnAntri = document.getElementById('btn-utama-antri');
+    btnAntri.disabled = true;
+    btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+    statusSayaGlobal = "Standby";
+    const adaAkun = daftarAntrianGlobal.some(item => String(item.nama).trim().toLowerCase() === akunSaya);
+    if (!adaAkun) {
+        daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
+    }
+    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal, pengumumanTerakhirGlobal);
+
+    fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
+    .then(res => res.json())
+    .then(res => {
+        sedangProsesAksi = false; 
+        muatDataAntrian(true);
+    }).catch(() => {
+        sedangProsesAksi = false;
+        muatDataAntrian(true);
+    });
+}
 
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
