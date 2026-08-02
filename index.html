@@ -29,15 +29,15 @@
             --card-giliran-border: #93c5fd;
         }
 
-        /* TEMA MODE GELAP YANG LEBIH ELEGAN & PROFESIONAL */
+        /* TEMA MODE GELAP (NAVY ELEGAN & KONTRAS TINGGI) */
         body.dark-mode {
-            --bg-color: #0b132b;          /* Navy gelap elegan, bukan hitam pekat */
-            --card-bg: #141e3a;           /* Lapisan card sedikit lebih terang dari background */
-            --text-main: #f8fafc;         /* Putih bersih tapi lembut untuk teks utama */
-            --text-muted: #94a3b8;        /* Abu-abu terang untuk teks sekunder */
-            --border: #233554;            /* Garis tepi senada dengan nuansa navy */
-            --card-giliran-bg: #1b2a4a;   /* Warna kotak giliran aktif yang kontras pas */
-            --card-giliran-border: #3b82f6;
+            --bg-color: #0b132b !important;
+            --card-bg: #141e3a !important;
+            --text-main: #f8fafc !important;
+            --text-muted: #94a3b8 !important;
+            --border: #233554 !important;
+            --card-giliran-bg: #1b2a4a !important;
+            --card-giliran-border: #3b82f6 !important;
         }
         body.dark-mode select, body.dark-mode input[type="text"] {
             background: #1b2a4a !important;
@@ -51,6 +51,7 @@
         body.dark-mode .user-badge {
             background: #1b2a4a !important;
             border-color: #233554 !important;
+            color: #f8fafc !important;
         }
         body.dark-mode .list-antrian li {
             background: #1b2a4a !important;
@@ -395,7 +396,7 @@
     <!-- MODAL POPUP PENGUMUMAN SPV (MENUTUPI LAYAR SECARA WAJIB) -->
     <div id="modal-pengumuman-spv" class="modal-overlay">
         <div class="modal-box announcement-popup-box">
-            <div class="modal-title" style="color: #b45309;">🚨 PENGUMUMAN PENTING</div>
+            <div class="modal-title" style="color: #b45309;">🚨 PENGUMUMAN PENTING SPV</div>
             <div id="teks-pengumuman-popup" class="announcement-popup-text">-</div>
             <div class="modal-actions">
                 <button type="button" class="btn-customer" style="background: #d97706;" onclick="konfirmasiSudahBacaPengumuman()">Saya Mengerti & Mengikuti</button>
