@@ -506,6 +506,12 @@
         let lockStatusLokalExpiry = 0;
         let waktuPenaltiSelesaiGlobal = 0; 
 
+        // Variabel pengunci acuan waktu lokal timer agar stabil
+        let waktuMulaiLokalHA = null;
+        let waktuMulaiLokalAV = null;
+        let namaHASebelumnya = "";
+        let namaAVSebelumnya = "";
+
         window.onload = function() {
             initDarkMode();
             muatSanksiLokal();
@@ -681,6 +687,7 @@
             const labelTimerAV = document.getElementById('timer-mundur-av');
             const now = new Date().getTime();
 
+            // Penanganan Sanksi Penalti
             if (waktuPenaltiSelesaiGlobal > 0) {
                 const sisaMsPenalti = waktuPenaltiSelesaiGlobal - now;
                 const btnAntri = document.getElementById('btn-utama-antri');
@@ -705,10 +712,22 @@
                 }
             }
 
-            if (waktuStandbyHAGlobal) {
-                const waktuHA = new Date(waktuStandbyHAGlobal).getTime();
-                if (!isNaN(waktuHA)) {
-                    const selisihMs = now - waktuHA;
+            // === TIMER HA STABIL (TIDAK LONCAT-LONCAT) ===
+            let standbyHAObj = daftarAntrianGlobal.find(item => item.status === "Standby" && (item.kategori || "HA") === "HA");
+            let namaHANow = standbyHAObj ? standbyHAObj.nama : "-";
+
+            if (waktuStandbyHAGlobal && standbyHAObj) {
+                let waktuServerHA = new Date(waktuStandbyHAGlobal).getTime();
+                
+                if (namaHANow !== namaHASebelumnya || !waktuMulaiLokalHA) {
+                    namaHASebelumnya = namaHANow;
+                    waktuMulaiLokalHA = waktuServerHA;
+                } else if (Math.abs(waktuServerHA - waktuMulaiLokalHA) > 5000) {
+                    waktuMulaiLokalHA = waktuServerHA;
+                }
+
+                if (!isNaN(waktuMulaiLokalHA)) {
+                    const selisihMs = now - waktuMulaiLokalHA;
                     const sisaMs = (BATAS_MENIT * 60 * 1000) - selisihMs;
                     if (sisaMs > 0) {
                         const totalDetik = Math.floor(sisaMs / 1000);
@@ -726,14 +745,28 @@
                     }
                 }
             } else {
+                waktuMulaiLokalHA = null;
+                namaHASebelumnya = "";
                 labelTimerHA.innerText = "00:00";
                 labelTimerHA.classList.remove('timer-warning-merah');
             }
 
-            if (waktuStandbyAVGlobal) {
-                const waktuAV = new Date(waktuStandbyAVGlobal).getTime();
-                if (!isNaN(waktuAV)) {
-                    const selisihMs = now - waktuAV;
+            // === TIMER AV STABIL (TIDAK LONCAT-LONCAT) ===
+            let standbyAVObj = daftarAntrianGlobal.find(item => item.status === "Standby" && item.kategori === "AV");
+            let namaAVNow = standbyAVObj ? standbyAVObj.nama : "-";
+
+            if (waktuStandbyAVGlobal && standbyAVObj) {
+                let waktuServerAV = new Date(waktuStandbyAVGlobal).getTime();
+                
+                if (namaAVNow !== namaAVSebelumnya || !waktuMulaiLokalAV) {
+                    namaAVSebelumnya = namaAVNow;
+                    waktuMulaiLokalAV = waktuServerAV;
+                } else if (Math.abs(waktuServerAV - waktuMulaiLokalAV) > 5000) {
+                    waktuMulaiLokalAV = waktuServerAV;
+                }
+
+                if (!isNaN(waktuMulaiLokalAV)) {
+                    const selisihMs = now - waktuMulaiLokalAV;
                     const sisaMs = (BATAS_MENIT * 60 * 1000) - selisihMs;
                     if (sisaMs > 0) {
                         const totalDetik = Math.floor(sisaMs / 1000);
@@ -751,6 +784,8 @@
                     }
                 }
             } else {
+                waktuMulaiLokalAV = null;
+                namaAVSebelumnya = "";
                 labelTimerAV.innerText = "00:00";
                 labelTimerAV.classList.remove('timer-warning-merah');
             }
