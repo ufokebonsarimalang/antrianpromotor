@@ -29,51 +29,62 @@
             --card-giliran-border: #93c5fd;
         }
 
-        /* TEMA MODE GELAP (NAVY ELEGAN & KONTRAS TINGGI) */
+        /* TEMA MODE GELAP: PREMIUM MODERN NAVY & GLOW EFFECT */
         body.dark-mode {
-            --bg-color: #0b132b !important;
-            --card-bg: #141e3a !important;
+            --bg-color: #050b14 !important;
+            --card-bg: #0e1726 !important;
             --text-main: #f8fafc !important;
             --text-muted: #94a3b8 !important;
-            --border: #233554 !important;
-            --card-giliran-bg: #1b2a4a !important;
+            --border: #1e293b !important;
+            --card-giliran-bg: #132238 !important;
             --card-giliran-border: #3b82f6 !important;
         }
+        body.dark-mode {
+            background: radial-gradient(circle at top, #0f1c3f 0%, #050b14 70%) !important;
+        }
+        body.dark-mode .app-container {
+            background: #0e1726 !important;
+            border-color: #1e293b !important;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(37, 99, 235, 0.15) !important;
+        }
         body.dark-mode select, body.dark-mode input[type="text"] {
-            background: #1b2a4a !important;
+            background: #132238 !important;
             color: #f8fafc !important;
-            border-color: #334155 !important;
+            border-color: #2a3b58 !important;
         }
         body.dark-mode select:disabled {
-            background-color: #0f172a !important;
+            background-color: #0a111c !important;
             color: #64748b !important;
         }
         body.dark-mode .user-badge {
-            background: #1b2a4a !important;
-            border-color: #233554 !important;
+            background: #132238 !important;
+            border-color: #1e293b !important;
             color: #f8fafc !important;
         }
         body.dark-mode .list-antrian li {
-            background: #1b2a4a !important;
-            border-color: #233554 !important;
+            background: #132238 !important;
+            border-color: #1e293b !important;
             color: #f8fafc !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
         }
         body.dark-mode .modal-box {
-            background: #141e3a !important;
-            border-color: #334155 !important;
+            background: #0e1726 !important;
+            border-color: #2a3b58 !important;
             color: #f8fafc !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
         }
         body.dark-mode .modal-desc {
             color: #94a3b8 !important;
         }
         body.dark-mode .btn-cancel {
-            background: #233554 !important;
+            background: #1e293b !important;
             color: #f8fafc !important;
+            border: 1px solid #334155;
         }
         body.dark-mode .dark-mode-btn {
-            background: #1b2a4a !important;
+            background: #132238 !important;
             color: #f8fafc !important;
-            border-color: #334155 !important;
+            border-color: #2a3b58 !important;
         }
 
         *, body, button, select, input {
@@ -96,7 +107,7 @@
             border: 2px solid var(--border);
             box-shadow: 0 15px 35px -5px rgba(0,0,0,0.1);
             text-align: center;
-            transition: background 0.3s ease, border-color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .top-controls {
@@ -147,7 +158,7 @@
         }
         .label-giliran { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; }
         .nama-giliran-aktif { font-size: 20px; font-weight: 800; color: #1e3a8a; margin: 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        body.dark-mode .nama-giliran-aktif { color: #60a5fa !important; }
+        body.dark-mode .nama-giliran-aktif { color: #60a5fa !important; text-shadow: 0 0 10px rgba(96, 165, 250, 0.4); }
         
         .timer-mundur { 
             font-size: 18px; font-weight: 800; margin-top: 4px; display: block; 
@@ -215,7 +226,7 @@
         
         .btn-cancel { background: #e2e8f0; color: var(--text-main); }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; animation: none !important; }
-        body.dark-mode .btn-disabled { background: #233554 !important; color: #64748b !important; }
+        body.dark-mode .btn-disabled { background: #1a273e !important; color: #475569 !important; }
 
         .spinner {
             width: 16px; height: 16px; border: 3px solid rgba(255, 255, 255, 0.3);
@@ -256,7 +267,7 @@
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(6px);
+            background: rgba(5, 11, 20, 0.85); backdrop-filter: blur(8px);
             display: flex; justify-content: center; align-items: center;
             z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px;
         }
@@ -273,7 +284,7 @@
             border: 4px solid #f59e0b;
         }
         body.dark-mode .announcement-popup-box {
-            background: #1e1b12 !important;
+            background: linear-gradient(135deg, #231b0e 0%, #151108 100%) !important;
             border-color: #d97706 !important;
         }
         .announcement-popup-text {
@@ -283,7 +294,7 @@
         }
         body.dark-mode .announcement-popup-text {
             color: #fef3c7 !important;
-            background: #141e3a !important;
+            background: #132238 !important;
             border-color: #78350f !important;
         }
     </style>
@@ -396,7 +407,7 @@
     <!-- MODAL POPUP PENGUMUMAN SPV (MENUTUPI LAYAR SECARA WAJIB) -->
     <div id="modal-pengumuman-spv" class="modal-overlay">
         <div class="modal-box announcement-popup-box">
-            <div class="modal-title" style="color: #b45309;">🚨 PENGUMUMAN PENTING SPV</div>
+            <div class="modal-title" style="color: #b45309;">🚨 PENGUMUMAN PENTING</div>
             <div id="teks-pengumuman-popup" class="announcement-popup-text">-</div>
             <div class="modal-actions">
                 <button type="button" class="btn-customer" style="background: #d97706;" onclick="konfirmasiSudahBacaPengumuman()">Saya Mengerti & Mengikuti</button>
