@@ -122,20 +122,60 @@
         }
         select:focus, input:focus { border-color: var(--spv-purple); box-shadow: 0 0 0 3px rgba(124,58,237,0.15); }
 
+        /* ANIMASI EFEK MENYALA (GLOWING PULSE) UNTUK SEMUA TOMBOL */
+        @keyframes glowSuccess {
+            0% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+            50% { box-shadow: 0 0 16px rgba(16, 185, 129, 0.9), 0 4px 10px rgba(0,0,0,0.05); }
+            100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+        }
+        @keyframes glowDanger {
+            0% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+            50% { box-shadow: 0 0 16px rgba(239, 68, 68, 0.9), 0 4px 10px rgba(0,0,0,0.05); }
+            100% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+        }
+        @keyframes glowWarning {
+            0% { box-shadow: 0 0 5px rgba(245, 158, 11, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+            50% { box-shadow: 0 0 16px rgba(245, 158, 11, 0.9), 0 4px 10px rgba(0,0,0,0.05); }
+            100% { box-shadow: 0 0 5px rgba(245, 158, 11, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+        }
+        @keyframes glowPrimary {
+            0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+            50% { box-shadow: 0 0 16px rgba(59, 130, 246, 0.9), 0 4px 10px rgba(0,0,0,0.05); }
+            100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+        }
+        @keyframes glowPurple {
+            0% { box-shadow: 0 0 5px rgba(124, 58, 237, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+            50% { box-shadow: 0 0 16px rgba(124, 58, 237, 0.9), 0 4px 10px rgba(0,0,0,0.05); }
+            100% { box-shadow: 0 0 5px rgba(124, 58, 237, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+        }
+        @keyframes glowTeal {
+            0% { box-shadow: 0 0 5px rgba(13, 148, 136, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+            50% { box-shadow: 0 0 16px rgba(13, 148, 136, 0.9), 0 4px 10px rgba(0,0,0,0.05); }
+            100% { box-shadow: 0 0 5px rgba(13, 148, 136, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+        }
+        @keyframes glowDarkRed {
+            0% { box-shadow: 0 0 5px rgba(185, 28, 28, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+            50% { box-shadow: 0 0 16px rgba(185, 28, 28, 0.9), 0 4px 10px rgba(0,0,0,0.05); }
+            100% { box-shadow: 0 0 5px rgba(185, 28, 28, 0.4), 0 4px 10px rgba(0,0,0,0.05); }
+        }
+
         button { 
             width: 100%; padding: 14px; border-radius: 12px; 
             font-size: 13px; font-weight: 800; cursor: pointer; border: none;
             text-transform: uppercase; transition: all 0.2s;
             display: inline-flex; justify-content: center; align-items: center; gap: 8px;
-            letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            letter-spacing: 0.5px;
         }
         button:active { transform: scale(0.98); }
 
-        .btn-purple { background: var(--spv-purple); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-warning { background: var(--warning); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-primary { background: var(--primary); color: white; }
+        /* KELAS WARNA DENGAN EFEK MENYALA MASING-MASING */
+        .btn-purple { background: var(--spv-purple); color: white; animation: glowPurple 2.5s infinite ease-in-out; }
+        .btn-success { background: var(--success); color: white; animation: glowSuccess 2.5s infinite ease-in-out; }
+        .btn-warning { background: #ea580c; color: white; animation: glowWarning 2.5s infinite ease-in-out; }
+        .btn-danger { background: var(--danger); color: white; animation: glowDanger 2.5s infinite ease-in-out; }
+        .btn-primary { background: var(--primary); color: white; animation: glowPrimary 2.5s infinite ease-in-out; }
+        .btn-teal { background: #0d9488; color: white; animation: glowTeal 2.5s infinite ease-in-out; }
+        .btn-darkred { background: #b91c1c; color: white; animation: glowDarkRed 2.5s infinite ease-in-out; }
         .btn-cancel { background: #e2e8f0; color: #475569; }
 
         .spinner {
@@ -258,18 +298,18 @@
             <!-- SEKSI 2: MANAJEMEN URUTAN & WAKTU -->
             <div class="section-title">2. Manajemen Urutan & Waktu</div>
             <div class="spv-grid">
-                <button type="button" class="btn-success" onclick="bukaModalTambahAntriSpv()">+ Masukkan Antrian</button>
-                <button type="button" class="btn-warning" style="background: #ea580c;" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
-                <button type="button" class="btn-success" style="background: #10b981;" onclick="bukaModalTambahTimerInstan()">⏱️ Tambah Timer Urutan 1</button>
+                <button type="button" class="btn-teal" onclick="bukaModalTambahAntriSpv()">+ Masukkan Antrian</button>
+                <button type="button" class="btn-warning" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
+                <button type="button" class="btn-purple" onclick="bukaModalTambahTimerInstan()">⏱️ Tambah Timer Urutan 1</button>
             </div>
 
             <!-- SEKSI 3: TINDAKAN KHUSUS & EMERGENCY -->
             <div class="section-title">3. Tindakan Khusus & Emergency</div>
             <div class="spv-grid">
-                <button type="button" class="btn-primary" style="background: #0284c7;" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
-                <button type="button" class="btn-danger" onclick="bukaModalFormSPVKategori('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
-                <button type="button" class="btn-danger" style="background: #b91c1c;" onclick="bukaModalFormSPVKategori('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Promotor</button>
-                <button type="button" class="btn-danger" style="background: #7f1d1d;" onclick="bukaModalResetTotal()">RESET SEMUA ANTRIAN</button>
+                <button type="button" class="btn-primary" onclick="bukaModalFormSPVKategori('spvAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
+                <button type="button" class="btn-warning" style="background: #d97706;" onclick="bukaModalFormSPVKategori('selesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
+                <button type="button" class="btn-darkred" onclick="bukaModalFormSPVKategori('spvResetDevice', 'Reset Perangkat Sales', true)">Reset Perangkat Promotor</button>
+                <button type="button" class="btn-danger" style="background: #991b1b;" onclick="bukaModalResetTotal()">RESET SEMUA ANTRIAN</button>
             </div>
 
             <button type="button" class="btn-cancel" style="margin-top: 20px; font-weight: 800;" onclick="logoutSPV()">🔒 Kunci Panel SPV</button>
@@ -302,11 +342,9 @@
         let savedPinSPV = "";
 
         window.onload = function() {
-            // 1. Dapatkan cache lokal instan
             muatMasterSalesInstant();
             muatCacheAntrianInstan();
 
-            // 2. Cek Sesi Login PIN SPV dari LocalStorage
             savedPinSPV = localStorage.getItem('ufo_spv_pin') || "";
             if (savedPinSPV) {
                 document.getElementById('input-pin-spv').value = savedPinSPV;
@@ -317,7 +355,6 @@
                 document.getElementById('controls-spv-box').style.display = 'none';
             }
 
-            // 3. Sinkronisasi Data Server di latar belakang
             muatMasterSales();
             muatDataAntrian();
             
@@ -346,7 +383,7 @@
 
                 if(res.status === "sukses") {
                     savedPinSPV = pin;
-                    localStorage.setItem('ufo_spv_pin', pin); // Simpan PIN di browser agar tidak perlu ketik lagi
+                    localStorage.setItem('ufo_spv_pin', pin);
                     document.getElementById('login-spv-box').style.display = 'none';
                     document.getElementById('controls-spv-box').style.display = 'block';
                 } else {
@@ -435,11 +472,9 @@
             document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
 
-        /* PERHITUNGAN DAN RENDER TIMER STREAM */
         function renderTampilanTimerSPV() {
             const now = new Date().getTime();
 
-            // RENDER HA
             const namaHaEl = document.getElementById('spv-nama-ha');
             const timerHaEl = document.getElementById('spv-timer-ha');
 
@@ -455,7 +490,6 @@
                 timerHaEl.classList.remove('habis');
             }
 
-            // RENDER AV
             const namaAvEl = document.getElementById('spv-nama-av');
             const timerAvEl = document.getElementById('spv-timer-av');
 
