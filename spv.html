@@ -530,21 +530,25 @@
             if(tbody) tbody.innerHTML = html || `<tr><td colspan="4" style="text-align: center;">Tidak ada data</td></tr>`;
         }
 
-        function lepasPenalti(namaSales) {
-            const pin = getActivePinSPV();
-            if(!pin) return alert("PIN SPV tidak ditemukan!");
+     function lepasPenalti(namaSales) {
+    const pin = getActivePinSPV();
+    if(!pin) return alert("PIN SPV tidak ditemukan!");
 
-            tampilkanModalKonfirmasi("Lepas Sanksi Penalti", `Yakin ingin melepaskan sanksi penalti untuk promotor (${namaSales})?`, function() {
-                fetch(`${SCRIPT_URL}?aksi=lepasPenalti&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}`)
-                .then(res => res.json())
-                .then(res => {
-                    tampilkanModal("Berhasil", `Sanksi penalti untuk ${namaSales} berhasil dilepaskan.`);
-                    muatMasterSales();
-                }).catch(() => {
-                    tampilkanModal("Gagal", "Gagal terhubung ke server.");
-                });
-            });
-        }
+    tampilkanModalKonfirmasi("Lepas Sanksi Penalti", `Yakin ingin melepaskan sanksi penalti untuk promotor (${namaSales})?`, function() {
+        fetch(`${SCRIPT_URL}?aksi=lepasPenalti&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}`)
+        .then(res => res.json())
+        .then(res => {
+            tampilkanModal("Berhasil", `Sanksi penalti untuk ${namaSales} berhasil dilepaskan.`);
+            
+            // 🔥 TAMBAHKAN INI AGAR LANGSUNG UPDATE DETIK ITU JUGA
+            muatMasterSales();
+            muatDataAntrian();
+            
+        }).catch(() => {
+            tampilkanModal("Gagal", "Gagal terhubung ke server.");
+        });
+    });
+}
 
         function renderTampilanTimerSPV() {
             const now = new Date().getTime();
