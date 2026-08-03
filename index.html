@@ -99,6 +99,7 @@
         body.dark-mode .modal-desc { color: #d4d4d8 !important; }
         body.dark-mode .btn-cancel { background: #18181b !important; color: #ffffff !important; border: 1px solid #52525b; }
         body.dark-mode .dark-mode-btn { background: #09090b !important; color: #ffffff !important; border-color: #52525b !important; box-shadow: 0 0 8px rgba(255, 255, 255, 0.1); }
+        body.dark-mode #keterangan-lock-box { background: #18181b !important; border-color: #7f1d1d !important; color: #fca5a5 !important; }
 
         *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
         body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
@@ -236,6 +237,13 @@
             </div>
 
             <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Daftar Antrian</button>
+            
+            <!-- Kotak Keterangan Alasan Lock SPV -->
+            <div id="keterangan-lock-box" style="display: none; margin-top: 10px; padding: 12px 14px; background: #fee2e2; border: 2px solid #fca5a5; color: #b91c1c; border-radius: 12px; font-size: 12px; font-weight: 700; text-align: left;">
+                🔒 <b>Akun Di-lock oleh SPV</b><br>
+                <span id="teks-alasan-lock" style="font-weight: 600; font-size: 11px; opacity: 0.95; display: block; margin-top: 4px;">-</span>
+            </div>
+
             <button type="button" id="btn-utama-customer" class="btn-customer" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
             <button type="button" id="btn-selesai-closing" class="btn-closing" onclick="aksiSelesaiClosing()" style="display: none; margin-top: 10px;">SELESAI MELAYANI (DEAL / CLOSING)</button>
             <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 12px;">DIPANGGIL CS/GUDANG (KUNCI POSISI)</button>
@@ -551,11 +559,15 @@
             if(!listHtmlHA) listHtmlHA = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian HA</span></li>";
             if(!listHtmlAV) listHtmlAV = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian AV</span></li>";
 
-            // CEK STATUS LOCK DARI MASTER SALES
+            // CEK STATUS LOCK & ALASAN DARI MASTER SALES
             let isLocked = false;
+            let alasanLockSPV = "";
             if (akunSaya && masterSalesGlobal.length > 0) {
                 const sayaObj = masterSalesGlobal.find(item => String(item.nama).trim().toLowerCase() === akunSaya.toLowerCase());
-                if (sayaObj && String(sayaObj.statusLock).toUpperCase() === "LOCKED") isLocked = true;
+                if (sayaObj && String(sayaObj.statusLock).toUpperCase() === "LOCKED") {
+                    isLocked = true;
+                    alasanLockSPV = sayaObj.alasanLock ? sayaObj.alasanLock : "Tidak ada keterangan dari SPV.";
+                }
             }
 
             const btnAntri = document.getElementById('btn-utama-antri');
@@ -564,6 +576,8 @@
             const btnCS = document.getElementById('btn-utama-cs');
             const btnKeluar = document.getElementById('btn-keluar-istirahat');
             const selectKategori = document.getElementById('pilih-kategori');
+            const lockBoxEl = document.getElementById('keterangan-lock-box');
+            const teksAlasanEl = document.getElementById('teks-alasan-lock');
 
             if (!sedangProsesAksi) {
                 btnAntri.innerHTML = "Daftar Antrian"; btnAntri.className = "btn-success";
@@ -573,49 +587,60 @@
                 btnKeluar.innerHTML = "KELUAR ANTRIAN (ISTIRAHAT)"; btnKeluar.className = "btn-amber";
             }
 
-            // Atur tombol berdasarkan status Lock SPV (Server)
+            // ATUR TAMPILAN JIKA AKUN DI-LOCK SPV
             if (isLocked) {
-                btnAntri.innerText = "Akun Anda Terkunci";
+                btnAntri.innerText = "Akun Di-lock SPV";
                 btnAntri.className = "btn-closing btn-disabled";
                 btnAntri.disabled = true;
                 
+                // Tampilkan kotak alasan lock di bawah tombol
+                if (lockBoxEl && teksAlasanEl) {
+                    lockBoxEl.style.display = "block";
+                    teksAlasanEl.innerText = `Alasan: "${alasanLockSPV}"`;
+                }
+
                 btnCustomer.style.display = "none";
                 btnClosing.style.display = "none";
                 btnCS.style.display = "none";
                 btnKeluar.style.display = "none";
                 selectKategori.disabled = true;
-            } else if (statusSayaGlobal === "Melayani") {
-                btnAntri.innerText = "Sedang Melayani Customer";
-                btnAntri.className = "btn-customer btn-disabled"; btnAntri.disabled = true;
-                btnCustomer.style.display = "none"; btnClosing.style.display = "block";
-                btnClosing.disabled = false; btnClosing.className = "btn-closing";
-                btnCS.style.display = "none"; btnKeluar.style.display = "none"; selectKategori.disabled = true;
-            } else if (statusSayaGlobal === "Standby") {
-                btnAntri.innerText = "Anda Sudah Di Antrian";
-                btnAntri.className = "btn-success btn-disabled"; btnAntri.disabled = true;
-                btnCustomer.style.display = "block"; btnClosing.style.display = "none";
-                
-                let kategoriSaya = selectKategori.value;
-                let bisaAmbil = (kategoriSaya === "AV" && apakahSayaUrutanPertamaAV) || (kategoriSaya !== "AV" && apakahSayaUrutanPertamaHA);
-                btnCustomer.disabled = !bisaAmbil;
-                btnCustomer.className = bisaAmbil ? "btn-customer" : "btn-customer btn-disabled";
+            } else {
+                // Sembunyikan kotak keterangan jika akun aman
+                if (lockBoxEl) lockBoxEl.style.display = "none";
 
-                btnCS.style.display = "block"; btnCS.className = "btn-purple"; btnCS.disabled = false;
-                btnKeluar.style.display = "block"; btnKeluar.disabled = false; btnKeluar.className = "btn-amber";
-                selectKategori.disabled = true;
-            } else if (statusSayaGlobal === "Dipanggil CS/GUDANG" || statusSayaGlobal === "Dipanggil CS") {
-                btnAntri.innerText = "Posisi Antrian Dikunci (Di CS/GUDANG)";
-                btnAntri.className = "btn-purple btn-disabled"; btnAntri.disabled = true;
-                btnCustomer.style.display = "none"; btnClosing.style.display = "none";
-                btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)";
-                btnCS.className = "btn-teal"; btnCS.disabled = false;
-                btnKeluar.style.display = "none"; selectKategori.disabled = true;
-            } else { 
-                btnAntri.innerText = statusSistemGlobal === "TUTUP" ? "Antrian Ditutup Oleh SPV" : "Daftar Antrian";
-                btnAntri.className = statusSistemGlobal === "TUTUP" ? "btn-closing btn-disabled" : "btn-success";
-                btnAntri.disabled = (statusSistemGlobal === "TUTUP");
-                btnCustomer.style.display = "none"; btnClosing.style.display = "none";
-                btnCS.style.display = "none"; btnKeluar.style.display = "none"; selectKategori.disabled = false;
+                if (statusSayaGlobal === "Melayani") {
+                    btnAntri.innerText = "Sedang Melayani Customer";
+                    btnAntri.className = "btn-customer btn-disabled"; btnAntri.disabled = true;
+                    btnCustomer.style.display = "none"; btnClosing.style.display = "block";
+                    btnClosing.disabled = false; btnClosing.className = "btn-closing";
+                    btnCS.style.display = "none"; btnKeluar.style.display = "none"; selectKategori.disabled = true;
+                } else if (statusSayaGlobal === "Standby") {
+                    btnAntri.innerText = "Anda Sudah Di Antrian";
+                    btnAntri.className = "btn-success btn-disabled"; btnAntri.disabled = true;
+                    btnCustomer.style.display = "block"; btnClosing.style.display = "none";
+                    
+                    let kategoriSaya = selectKategori.value;
+                    let bisaAmbil = (kategoriSaya === "AV" && apakahSayaUrutanPertamaAV) || (kategoriSaya !== "AV" && apakahSayaUrutanPertamaHA);
+                    btnCustomer.disabled = !bisaAmbil;
+                    btnCustomer.className = bisaAmbil ? "btn-customer" : "btn-customer btn-disabled";
+
+                    btnCS.style.display = "block"; btnCS.className = "btn-purple"; btnCS.disabled = false;
+                    btnKeluar.style.display = "block"; btnKeluar.disabled = false; btnKeluar.className = "btn-amber";
+                    selectKategori.disabled = true;
+                } else if (statusSayaGlobal === "Dipanggil CS/GUDANG" || statusSayaGlobal === "Dipanggil CS") {
+                    btnAntri.innerText = "Posisi Antrian Dikunci (Di CS/GUDANG)";
+                    btnAntri.className = "btn-purple btn-disabled"; btnAntri.disabled = true;
+                    btnCustomer.style.display = "none"; btnClosing.style.display = "none";
+                    btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)";
+                    btnCS.className = "btn-teal"; btnCS.disabled = false;
+                    btnKeluar.style.display = "none"; selectKategori.disabled = true;
+                } else { 
+                    btnAntri.innerText = statusSistemGlobal === "TUTUP" ? "Antrian Ditutup Oleh SPV" : "Daftar Antrian";
+                    btnAntri.className = statusSistemGlobal === "TUTUP" ? "btn-closing btn-disabled" : "btn-success";
+                    btnAntri.disabled = (statusSistemGlobal === "TUTUP");
+                    btnCustomer.style.display = "none"; btnClosing.style.display = "none";
+                    btnCS.style.display = "none"; btnKeluar.style.display = "none"; selectKategori.disabled = false;
+                }
             }
 
             document.getElementById('nama-aktif-ha').innerText = namaHANow;
@@ -656,7 +681,8 @@
             // VALIDASI LOCK SEBELUM DAFTAR
             const sayaObj = masterSalesGlobal.find(item => String(item.nama).trim().toLowerCase() === namaSales.toLowerCase());
             if (sayaObj && String(sayaObj.statusLock).toUpperCase() === "LOCKED") {
-                tampilkanModal("🚨 Akses Ditolak", "Akun Anda sedang di-lock oleh SPV sehingga tidak bisa mendaftar antrian.");
+                const alasan = sayaObj.alasanLock ? `\n\nAlasan: "${sayaObj.alasanLock}"` : "";
+                tampilkanModal("🚨 Akses Ditolak", `Akun Anda sedang di-lock oleh SPV sehingga tidak bisa mendaftar antrian.${alasan}`);
                 return;
             }
 
