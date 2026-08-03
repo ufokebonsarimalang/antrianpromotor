@@ -417,11 +417,32 @@
         }
 
         // FUNGSI LOCK DENGAN SPINNER SPESIFIK DI TOMBOLNYA
+       // FUNGSI LOCK DENGAN INPUT ALASAN
         function lockPromotor(namaSales) {
             const pin = getActivePinSPV();
             if(!pin) return alert("PIN SPV tidak ditemukan!");
             
-            tampilkanModalKonfirmasi("Lock Akun Promotor", `Yakin ingin mengunci akun (${namaSales}) agar tidak bisa antri?`, function() {
+            // Buat popup modal kustom yang ada kolom ketik alasannya
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = "Lock Akun Promotor";
+            document.getElementById('modal-desc').innerHTML = `
+                Yakin ingin mengunci akun <b>(${namaSales})</b>?<br><br>
+                Masukkan Alasan / Keterangan Lock:<br>
+                <input type="text" id="input-alasan-lock" placeholder="Contoh: Belum bersih-bersih / Tidak ada di area" style="width:100%; padding:12px; border-radius:12px; border:2px solid var(--border); font-size:14px; margin-top:6px;">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-danger" id="btn-modal-konfirmasi-lock">Ya, Lock Akun</button>
+            `;
+            modal.classList.add('active');
+
+            // Eksekusi saat tombol "Ya, Lock Akun" diklik
+            document.getElementById('btn-modal-konfirmasi-lock').onclick = function() {
+                const alasan = document.getElementById('input-alasan-lock').value.trim();
+                if(!alasan) return alert("Harap masukkan alasan kenapa akun ini di-lock!");
+
+                tutupModal();
+                
                 const btnId = `btn-lock-${safeId(namaSales)}`;
                 const btnEl = document.getElementById(btnId);
                 let textAsli = "";
@@ -433,7 +454,8 @@
                     btnEl.innerHTML = `<span class="spinner" style="width:12px; height:12px; border-width:2px;"></span> Memproses...`;
                 }
 
-                fetch(`${SCRIPT_URL}?aksi=spvLockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
+                // Kirim data alasan ke server
+                fetch(`${SCRIPT_URL}?aksi=spvLockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
                     if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
@@ -443,7 +465,7 @@
                     if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
                     tampilkanModal("Gagal", "Gagal terhubung ke server."); 
                 });
-            });
+            };
         }
 
         // FUNGSI UNLOCK DENGAN SPINNER SPESIFIK DI TOMBOLNYA
