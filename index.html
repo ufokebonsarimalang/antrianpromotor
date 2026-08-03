@@ -428,7 +428,7 @@
                 </select>
             </div>
 
-            <!-- TOMBOL-TOMBOL AKSI PROMOTOR (DIPERBAIKI KE aksiUtamaAntri) -->
+            <!-- TOMBOL-TOMBOL AKSI PROMOTOR -->
             <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Daftar Antrian</button>
             
             <button type="button" id="btn-utama-customer" class="btn-customer" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
@@ -1035,13 +1035,12 @@
             });
         }
 
-// FUNGSI UTAMA ANTRI (AMAN, ANTI-SPAM, TANPA MENGGANGGU FITUR LAIN)
+        // FUNGSI UTAMA ANTRI (AMAN, ANTI-SPAM, RESPONSAN INSTAN)
         async function aksiUtamaAntri() {
             const namaSales = getAkunAktif().trim();
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
 
-            // 1. Cek Sanksi Lokal Waktu Penalti Berjalan
             if (waktuPenaltiSelesaiGlobal > 0 && waktuPenaltiSelesaiGlobal <= Date.now()) {
                 waktuPenaltiSelesaiGlobal = 0;
                 localStorage.removeItem('ufo_waktu_penalti_selesai');
@@ -1052,7 +1051,6 @@
                 return;
             }
 
-            // 2. Cek Sanksi Berdasarkan Master Sales Lokal yang Selalu Update Real-Time
             const akunSaya = namaSales.toLowerCase();
             const dataSales = masterSalesGlobal || [];
             
@@ -1070,24 +1068,20 @@
                 let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
                 if (menitHukum > 0) {
                     const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan klik tombol.`;
-                    
                     waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
                     localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
-                    
                     tampilkanModal("🚨 Peringatan Sanksi Penalti", pesanSanksi);
-                    return; // Gagal masuk antrian karena sanksi aktif
+                    return; 
                 }
             }
 
             const btnAntri = document.getElementById('btn-utama-antri');
-            
-            // 🔒 KUNCI TOMBOL SEKETIKA (ANTI SPAM KLIK & TAMPILKAN SPINNER)
             btnAntri.disabled = true;
             btnAntri.className = "btn-success btn-disabled";
             btnAntri.innerHTML = `<span class="spinner"></span> Mendaftarkan Antrian...`;
 
             sedangProsesAksi = true; 
-            lockStatusLokalExpiry = Date.now() + 6000;
+            lockStatusLokalExpiry = Date.now() + 4000;
 
             statusSayaGlobal = "Standby";
             const adaAkun = daftarAntrianGlobal.some(item => String(item.nama).trim().toLowerCase() === akunSaya);
@@ -1096,7 +1090,6 @@
             }
             renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal, pengumumanTerakhirGlobal);
 
-            // Kirim ke server di latar belakang tanpa mengganggu fungsi lain
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
@@ -1107,6 +1100,7 @@
                 muatDataAntrian(true);
             });
         }
+
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
             if(!namaSales) return;
@@ -1114,6 +1108,8 @@
             if (statusSayaGlobal === "Standby") {
                 tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
                     sedangProsesAksi = true; 
+                    lockStatusLokalExpiry = Date.now() + 4000;
+                    
                     const btnCustomer = document.getElementById('btn-utama-customer');
                     if (btnCustomer) {
                         btnCustomer.disabled = true;
@@ -1144,6 +1140,8 @@
                 }
 
                 sedangProsesAksi = true; 
+                lockStatusLokalExpiry = Date.now() + 4000;
+
                 const btnClosing = document.getElementById('btn-selesai-closing');
                 if (btnClosing) {
                     btnClosing.disabled = true;
@@ -1172,6 +1170,7 @@
             if (statusSayaGlobal === "Standby") {
                 tampilkanModalKonfirmasi("Status Dipanggil CS/GUDANG", "Dipanggil oleh CS/GUDANG? Posisi antrian Anda akan dikunci.", function() {
                     sedangProsesAksi = true; 
+                    lockStatusLokalExpiry = Date.now() + 4000;
                     if (btnCS) {
                         btnCS.disabled = true;
                         btnCS.className = "btn-purple btn-disabled";
@@ -1191,6 +1190,7 @@
             } else if (statusSayaGlobal === "Dipanggil CS/GUDANG" || statusSayaGlobal === "Dipanggil CS") {
                 tampilkanModalKonfirmasi("Selesai Urusan CS/GUDANG", "Urusan CS/GUDANG sudah selesai? Kembali aktif di antrian.", function() {
                     sedangProsesAksi = true; 
+                    lockStatusLokalExpiry = Date.now() + 4000;
                     if (btnCS) {
                         btnCS.disabled = true;
                         btnCS.className = "btn-teal btn-disabled";
@@ -1216,6 +1216,8 @@
                 if (!namaSales) return;
 
                 sedangProsesAksi = true;
+                lockStatusLokalExpiry = Date.now() + 4000;
+
                 const btnKeluar = document.getElementById('btn-keluar-istirahat');
                 if (btnKeluar) {
                     btnKeluar.disabled = true;
