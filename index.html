@@ -653,10 +653,10 @@
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
 
-            // VALIDASI LOCK LOKAL SEBELUM FETCH
+            // VALIDASI LOCK SEBELUM DAFTAR
             const sayaObj = masterSalesGlobal.find(item => String(item.nama).trim().toLowerCase() === namaSales.toLowerCase());
             if (sayaObj && String(sayaObj.statusLock).toUpperCase() === "LOCKED") {
-                tampilkanModal("🚨 Akses Ditolak", "Akun Anda sedang di-lock oleh SPV. Anda tidak bisa mendaftar antrian.");
+                tampilkanModal("🚨 Akses Ditolak", "Akun Anda sedang di-lock oleh SPV sehingga tidak bisa mendaftar antrian.");
                 return;
             }
 
