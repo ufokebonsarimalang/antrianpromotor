@@ -1036,12 +1036,12 @@
         }
 
         // FUNGSI UTAMA ANTRIS DENGAN PENGECEKAN SANKSI REAL-TIME SEKALIGUS
-      async function aksiUtamaAntri() {
+     async function aksiUtamaAntri() {
             const namaSales = getAkunAktif().trim();
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
 
-            // Paksa hapus penalti lokal jika waktu sistem sudah melewati batas
+            // Bersihkan penalti lokal jika sudah kedaluwarsa
             if (waktuPenaltiSelesaiGlobal > 0 && waktuPenaltiSelesaiGlobal <= Date.now()) {
                 waktuPenaltiSelesaiGlobal = 0;
                 localStorage.removeItem('ufo_waktu_penalti_selesai');
@@ -1053,68 +1053,25 @@
             }
 
             const btnAntri = document.getElementById('btn-utama-antri');
+            
+            // 🔒 KUNCI TOTAL TOMBOL AGAR TIDAK BISA DIKLIK DOUBLE/SPAM
             btnAntri.disabled = true;
-            btnAntri.innerHTML = `<span class="spinner"></span> Memeriksa Status...`;
-
-            // Hapus cache lama agar memaksa ambil data master sales terbaru dari server
-            localStorage.removeItem('ufo_master_sales_cache');
-
-            try {
-                const response = await fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' });
-                const resJson = await response.json();
-                
-                if (resJson.status === "sukses" && resJson.data) {
-                    masterSalesGlobal = resJson.data;
-                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resJson.data));
-                }
-            } catch (e) {}
-
-            const akunSaya = namaSales.toLowerCase();
-            const dataSales = masterSalesGlobal || [];
-            
-            const sayaObj = dataSales.find(item => {
-                let n = "";
-                if (typeof item === 'object' && item !== null) {
-                    n = item.nama || item.name || Object.values(item)[0] || "";
-                } else {
-                    n = String(item);
-                }
-                return String(n).trim().toLowerCase() === akunSaya;
-            });
-            
-            if (sayaObj && typeof sayaObj === 'object') {
-                let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
-                if (menitHukum > 0) {
-                    const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan / tidak klik selesai melayani.`;
-                    
-                    waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
-                    localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
-                    
-                    tampilkanModal("🚨 Peringatan Sanksi Penalti", pesanSanksi);
-                    
-                    btnAntri.disabled = false;
-                    btnAntri.className = "btn-success";
-                    btnAntri.innerText = "Daftar Antrian";
-                    return; 
-                } else {
-                    // Jika di server nilai sanksinya sudah 0, pastikan penalti lokal bersih total
-                    waktuPenaltiSelesaiGlobal = 0;
-                    localStorage.removeItem('ufo_waktu_penalti_selesai');
-                }
-            }
+            btnAntri.className = "btn-success btn-disabled";
+            btnAntri.innerHTML = `<span class="spinner"></span> Mendaftarkan Antrian...`;
 
             sedangProsesAksi = true; 
             lockStatusLokalExpiry = Date.now() + 6000;
 
-            btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
-
+            // Langsung ubah status lokal agar UI merespons instan tanpa menunggu fetch lama
             statusSayaGlobal = "Standby";
+            const akunSaya = namaSales.toLowerCase();
             const adaAkun = daftarAntrianGlobal.some(item => String(item.nama).trim().toLowerCase() === akunSaya);
             if (!adaAkun) {
                 daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
             }
             renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal, pengumumanTerakhirGlobal);
 
+            // Kirim perintah ke server di latar belakang
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
@@ -1125,7 +1082,6 @@
                 muatDataAntrian(true);
             });
         }
-
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
             if(!namaSales) return;
