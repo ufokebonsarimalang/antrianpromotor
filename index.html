@@ -1009,7 +1009,7 @@
             }
         }
 
-        function muatDataAntrian(paksaTarik = false) {
+       function muatDataAntrian(paksaTarik = false) {
             if (sedangProsesAksi && !paksaTarik) return;
             Promise.all([
                 fetch(`${SCRIPT_URL}?aksi=getAntrian`, { method: 'GET', redirect: 'follow' }).then(r => r.json()).catch(() => null),
@@ -1022,93 +1022,25 @@
                 if (resSales && resSales.status === "sukses" && resSales.data) {
                     masterSalesGlobal = resSales.data;
                     localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resSales.data));
+
+                    // 🔥 TAMBAHAN: Cek apakah sanksi di server sudah dilepas (0/kosong)
+                    const akunSaya = getAkunAktif().trim().toLowerCase();
+                    const sayaObj = masterSalesGlobal.find(item => {
+                        let n = typeof item === 'object' && item !== null ? (item.nama || item.name || "") : String(item);
+                        return String(n).trim().toLowerCase() === akunSaya;
+                    });
+
+                    if (sayaObj && typeof sayaObj === 'object') {
+                        let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
+                        if (menitHukum <= 0 && waktuPenaltiSelesaiGlobal > 0) {
+                            // Jika SPV sudah klik "Lepas" di panel, hapus sanksi lokal seketika!
+                            waktuPenaltiSelesaiGlobal = 0;
+                            localStorage.removeItem('ufo_waktu_penalti_selesai');
+                        }
+                    }
                 }
             });
         }
-
-    async function aksiUtamaAntri() {
-    const namaSales = getAkunAktif().trim();
-    const kategoriPilih = document.getElementById('pilih-kategori').value;
-    if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
-
-    // Cek penalti lokal terlebih dahulu
-    if (waktuPenaltiSelesaiGlobal > 0 && waktuPenaltiSelesaiGlobal > Date.now()) {
-        tampilkanModal("🚨 Peringatan Sanksi Penalti", "Anda masih dalam masa penalti sanksi SPV! Silakan tunggu hingga timer sanksi selesai.");
-        return;
-    }
-
-    // 🔥 PAKSA AMBIL DATA MASTER SALES TERBARU DARI SERVER SEBELUM CEK SANKSI
-    const btnAntri = document.getElementById('btn-utama-antri');
-    btnAntri.disabled = true;
-    btnAntri.innerHTML = `<span class="spinner"></span> Memeriksa Status...`;
-
-    try {
-        const response = await fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' });
-        const resJson = await response.json();
-        
-        if (resJson.status === "sukses" && resJson.data) {
-            masterSalesGlobal = resJson.data;
-            localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resJson.data));
-        }
-    } catch (e) {
-        // Lanjutkan dengan data lokal jika offline
-    }
-
-    const akunSaya = namaSales.toLowerCase();
-    const dataSales = masterSalesGlobal || [];
-    
-    // Cari data promotor terbaru dari server
-    const sayaObj = dataSales.find(item => {
-        let n = "";
-        if (typeof item === 'object' && item !== null) {
-            n = item.nama || item.name || Object.values(item)[0] || "";
-        } else {
-            n = String(item);
-        }
-        return String(n).trim().toLowerCase() === akunSaya;
-    });
-    
-    // Jika dari server ternyata ada sanksi aktif, cegah masuk antrian!
-    if (sayaObj && typeof sayaObj === 'object') {
-        let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
-        if (menitHukum > 0) {
-            const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan / tidak klik selesai melayani.`;
-            
-            waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
-            localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
-            
-            tampilkanModal("🚨 Peringatan Sanksi Penalti", pesanSanksi);
-            
-            // Kembalikan tombol ke semula
-            btnAntri.disabled = false;
-            btnAntri.className = "btn-success";
-            btnAntri.innerText = "Daftar Antrian";
-            return; 
-        }
-    }
-
-    sedangProsesAksi = true; 
-    lockStatusLokalExpiry = Date.now() + 6000;
-
-    btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
-
-    statusSayaGlobal = "Standby";
-    const adaAkun = daftarAntrianGlobal.some(item => String(item.nama).trim().toLowerCase() === akunSaya);
-    if (!adaAkun) {
-        daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
-    }
-    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal, pengumumanTerakhirGlobal);
-
-    fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
-    .then(res => res.json())
-    .then(res => {
-        sedangProsesAksi = false; 
-        muatDataAntrian(true);
-    }).catch(() => {
-        sedangProsesAksi = false;
-        muatDataAntrian(true);
-    });
-}
 
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
