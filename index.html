@@ -682,12 +682,12 @@
             return namaSalesAktifGlobal;
         }
 
-        function hitungMundurLokal() {
+      function hitungMundurLokal() {
             const labelTimerHA = document.getElementById('timer-mundur-ha');
             const labelTimerAV = document.getElementById('timer-mundur-av');
             const now = new Date().getTime();
 
-            // Penanganan Sanksi Penalti
+            // Penanganan Sanksi Penalti yang Akurat & Otomatis Terbuka
             if (waktuPenaltiSelesaiGlobal > 0) {
                 const sisaMsPenalti = waktuPenaltiSelesaiGlobal - now;
                 const btnAntri = document.getElementById('btn-utama-antri');
@@ -701,6 +701,7 @@
                         btnAntri.innerText = `Sanksi Penalti: ${mP}:${sP < 10 ? '0' : ''}${sP}`;
                     }
                 } else {
+                    // Timer Habis: Reset total penalti lokal agar bisa daftar antri lagi
                     waktuPenaltiSelesaiGlobal = 0; 
                     localStorage.removeItem('ufo_waktu_penalti_selesai');
                     
@@ -712,7 +713,7 @@
                 }
             }
 
-            // === TIMER HA STABIL (TIDAK LONCAT-LONCAT) ===
+            // === TIMER HA STABIL ===
             let standbyHAObj = daftarAntrianGlobal.find(item => item.status === "Standby" && (item.kategori || "HA") === "HA");
             let namaHANow = standbyHAObj ? standbyHAObj.nama : "-";
 
@@ -751,7 +752,7 @@
                 labelTimerHA.classList.remove('timer-warning-merah');
             }
 
-            // === TIMER AV STABIL (TIDAK LONCAT-LONCAT) ===
+            // === TIMER AV STABIL ===
             let standbyAVObj = daftarAntrianGlobal.find(item => item.status === "Standby" && item.kategori === "AV");
             let namaAVNow = standbyAVObj ? standbyAVObj.nama : "-";
 
