@@ -428,10 +428,10 @@
                 </select>
             </div>
 
-            <!-- TOMBOL-TOMBOL AKSI PROMOTOR -->
-            <button type="button" id="btn-utama-antri" class="btn-success" onclick="Antri()">Daftar Antrian</button>
+            <!-- TOMBOL-TOMBOL AKSI PROMOTOR (DIPERBAIKI KE aksiUtamaAntri) -->
+            <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Daftar Antrian</button>
             
-            <button type="button" id="btn-utama-customer" class="btn-customer" onclick="Customer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
+            <button type="button" id="btn-utama-customer" class="btn-customer" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
             
             <button type="button" id="btn-selesai-closing" class="btn-closing" onclick="aksiSelesaiClosing()" style="display: none; margin-top: 10px;">
                 SELESAI MELAYANI (DEAL / CLOSING)
@@ -506,7 +506,6 @@
         let lockStatusLokalExpiry = 0;
         let waktuPenaltiSelesaiGlobal = 0; 
 
-        // Variabel pengunci acuan waktu lokal timer agar stabil
         let waktuMulaiLokalHA = null;
         let waktuMulaiLokalAV = null;
         let namaHASebelumnya = "";
@@ -682,12 +681,11 @@
             return namaSalesAktifGlobal;
         }
 
-      function hitungMundurLokal() {
+        function hitungMundurLokal() {
             const labelTimerHA = document.getElementById('timer-mundur-ha');
             const labelTimerAV = document.getElementById('timer-mundur-av');
             const now = new Date().getTime();
 
-            // Penanganan Sanksi Penalti yang Akurat & Otomatis Terbuka
             if (waktuPenaltiSelesaiGlobal > 0) {
                 const sisaMsPenalti = waktuPenaltiSelesaiGlobal - now;
                 const btnAntri = document.getElementById('btn-utama-antri');
@@ -701,7 +699,6 @@
                         btnAntri.innerText = `Sanksi Penalti: ${mP}:${sP < 10 ? '0' : ''}${sP}`;
                     }
                 } else {
-                    // Timer Habis: Reset total penalti lokal agar bisa daftar antri lagi
                     waktuPenaltiSelesaiGlobal = 0; 
                     localStorage.removeItem('ufo_waktu_penalti_selesai');
                     
@@ -713,7 +710,6 @@
                 }
             }
 
-            // === TIMER HA STABIL ===
             let standbyHAObj = daftarAntrianGlobal.find(item => item.status === "Standby" && (item.kategori || "HA") === "HA");
             let namaHANow = standbyHAObj ? standbyHAObj.nama : "-";
 
@@ -752,7 +748,6 @@
                 labelTimerHA.classList.remove('timer-warning-merah');
             }
 
-            // === TIMER AV STABIL ===
             let standbyAVObj = daftarAntrianGlobal.find(item => item.status === "Standby" && item.kategori === "AV");
             let namaAVNow = standbyAVObj ? standbyAVObj.nama : "-";
 
@@ -1009,7 +1004,7 @@
             }
         }
 
-       function muatDataAntrian(paksaTarik = false) {
+        function muatDataAntrian(paksaTarik = false) {
             if (sedangProsesAksi && !paksaTarik) return;
             Promise.all([
                 fetch(`${SCRIPT_URL}?aksi=getAntrian`, { method: 'GET', redirect: 'follow' }).then(r => r.json()).catch(() => null),
@@ -1023,7 +1018,6 @@
                     masterSalesGlobal = resSales.data;
                     localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resSales.data));
 
-                    // 🔥 TAMBAHAN: Cek apakah sanksi di server sudah dilepas (0/kosong)
                     const akunSaya = getAkunAktif().trim().toLowerCase();
                     const sayaObj = masterSalesGlobal.find(item => {
                         let n = typeof item === 'object' && item !== null ? (item.nama || item.name || "") : String(item);
@@ -1033,12 +1027,89 @@
                     if (sayaObj && typeof sayaObj === 'object') {
                         let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
                         if (menitHukum <= 0 && waktuPenaltiSelesaiGlobal > 0) {
-                            // Jika SPV sudah klik "Lepas" di panel, hapus sanksi lokal seketika!
                             waktuPenaltiSelesaiGlobal = 0;
                             localStorage.removeItem('ufo_waktu_penalti_selesai');
                         }
                     }
                 }
+            });
+        }
+
+        // FUNGSI UTAMA ANTRIS DENGAN PENGECEKAN SANKSI REAL-TIME SEKALIGUS
+        async function aksiUtamaAntri() {
+            const namaSales = getAkunAktif().trim();
+            const kategoriPilih = document.getElementById('pilih-kategori').value;
+            if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
+
+            if (waktuPenaltiSelesaiGlobal > 0 && waktuPenaltiSelesaiGlobal > Date.now()) {
+                tampilkanModal("🚨 Peringatan Sanksi Penalti", "Anda masih dalam masa penalti sanksi SPV! Silakan tunggu hingga timer sanksi selesai.");
+                return;
+            }
+
+            const btnAntri = document.getElementById('btn-utama-antri');
+            btnAntri.disabled = true;
+            btnAntri.innerHTML = `<span class="spinner"></span> Memeriksa Status...`;
+
+            try {
+                const response = await fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' });
+                const resJson = await response.json();
+                
+                if (resJson.status === "sukses" && resJson.data) {
+                    masterSalesGlobal = resJson.data;
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resJson.data));
+                }
+            } catch (e) {}
+
+            const akunSaya = namaSales.toLowerCase();
+            const dataSales = masterSalesGlobal || [];
+            
+            const sayaObj = dataSales.find(item => {
+                let n = "";
+                if (typeof item === 'object' && item !== null) {
+                    n = item.nama || item.name || Object.values(item)[0] || "";
+                } else {
+                    n = String(item);
+                }
+                return String(n).trim().toLowerCase() === akunSaya;
+            });
+            
+            if (sayaObj && typeof sayaObj === 'object') {
+                let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
+                if (menitHukum > 0) {
+                    const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan / tidak klik selesai melayani.`;
+                    
+                    waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
+                    localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
+                    
+                    tampilkanModal("🚨 Peringatan Sanksi Penalti", pesanSanksi);
+                    
+                    btnAntri.disabled = false;
+                    btnAntri.className = "btn-success";
+                    btnAntri.innerText = "Daftar Antrian";
+                    return; 
+                }
+            }
+
+            sedangProsesAksi = true; 
+            lockStatusLokalExpiry = Date.now() + 6000;
+
+            btnAntri.innerHTML = `<span class="spinner"></span> Memproses...`;
+
+            statusSayaGlobal = "Standby";
+            const adaAkun = daftarAntrianGlobal.some(item => String(item.nama).trim().toLowerCase() === akunSaya);
+            if (!adaAkun) {
+                daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
+            }
+            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal, pengumumanTerakhirGlobal);
+
+            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
+            .then(res => res.json())
+            .then(res => {
+                sedangProsesAksi = false; 
+                muatDataAntrian(true);
+            }).catch(() => {
+                sedangProsesAksi = false;
+                muatDataAntrian(true);
             });
         }
 
