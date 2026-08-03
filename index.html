@@ -1004,7 +1004,7 @@
             }
         }
 
-       function muatDataAntrian(paksaTarik = false) {
+        function muatDataAntrian(paksaTarik = false) {
             if (sedangProsesAksi && !paksaTarik) return;
             Promise.all([
                 fetch(`${SCRIPT_URL}?aksi=getAntrian`, { method: 'GET', redirect: 'follow' }).then(r => r.json()).catch(() => null),
@@ -1017,36 +1017,16 @@
                 if (resSales && resSales.status === "sukses" && resSales.data) {
                     masterSalesGlobal = resSales.data;
                     localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resSales.data));
-
-                    const akunSaya = getAkunAktif().trim().toLowerCase();
-                    const sayaObj = masterSalesGlobal.find(item => {
-                        let n = typeof item === 'object' && item !== null ? (item.nama || item.name || "") : String(item);
-                        return String(n).trim().toLowerCase() === akunSaya;
-                    });
-
-                    if (sayaObj && typeof sayaObj === 'object') {
-                        let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
-                        if (menitHukum > 0) {
-                            if (waktuPenaltiSelesaiGlobal <= Date.now()) {
-                                waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
-                                localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
-                            }
-                        } else if (menitHukum <= 0 && waktuPenaltiSelesaiGlobal > 0) {
-                            waktuPenaltiSelesaiGlobal = 0;
-                            localStorage.removeItem('ufo_waktu_penalti_selesai');
-                        }
-                    }
                 }
             });
         }
 
-  // FUNGSI UTAMA ANTRI (MUNCUL POPUP PESAN SANKSI DULU, BARU TIMER JALAN SETELAH OK)
+        // FUNGSI UTAMA ANTRI (MURNI BERDASARKAN KLIK, MUNCUL POPUP DULU, BARU TIMER JALAN SETELAH KLIK OK)
         async function aksiUtamaAntri() {
             const namaSales = getAkunAktif().trim();
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
 
-            // 1. Cek Sanksi Lokal Terlebih Dahulu
             if (waktuPenaltiSelesaiGlobal > 0 && waktuPenaltiSelesaiGlobal <= Date.now()) {
                 waktuPenaltiSelesaiGlobal = 0;
                 localStorage.removeItem('ufo_waktu_penalti_selesai');
@@ -1059,7 +1039,6 @@
 
             const btnAntri = document.getElementById('btn-utama-antri');
             
-            // 🔒 KUNCI TOMBOL SEMENTARA SAAT MENGECEK STATUS
             btnAntri.disabled = true;
             btnAntri.className = "btn-success btn-disabled";
             btnAntri.innerHTML = `<span class="spinner"></span> Memeriksa Status...`;
@@ -1067,7 +1046,6 @@
             sedangProsesAksi = true; 
             lockStatusLokalExpiry = Date.now() + 8000;
 
-            // 2. TARIK DATA TERBARU KE SERVER (DENGAN ANTI-CACHE)
             let adaSanksi = false;
             let pesanSanksiCustom = "";
             let menitHukumGlobal = 0;
@@ -1102,14 +1080,12 @@
                 }
             } catch (e) {}
 
-            // 3. JIKA TERKENA SANKSI: TAMPILKAN POPUP DULU, BARU TIMER AKTIF SETELAH KLIK OK
             if (adaSanksi) {
                 sedangProsesAksi = false;
                 lockStatusLokalExpiry = 0;
                 btnAntri.disabled = false;
                 renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal, pengumumanTerakhirGlobal);
                 
-                // Tampilkan popup, dan pasang aksi saat tombol OK ditekan, barulah timer berjalan
                 document.getElementById('modal-title').innerText = "🚨 Peringatan Sanksi Penalti";
                 document.getElementById('modal-desc').innerText = pesanSanksiCustom;
                 document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-customer" id="btn-ok-sanksi">OK</button>`;
@@ -1117,14 +1093,12 @@
 
                 document.getElementById('btn-ok-sanksi').onclick = function() {
                     tutupModal();
-                    // Set timer aktif setelah promotor klik OK pada popup
                     waktuPenaltiSelesaiGlobal = Date.now() + (menitHukumGlobal * 60 * 1000);
                     localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
                 };
                 return;
             }
 
-            // 4. JIKA AMAN, LANJUTKAN PROSES MASUK ANTRIAN
             btnAntri.innerHTML = `<span class="spinner"></span> Mendaftarkan Antrian...`;
 
             statusSayaGlobal = "Standby";
@@ -1147,6 +1121,7 @@
                 muatDataAntrian(true);
             });
         }
+
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
             if(!namaSales) return;
