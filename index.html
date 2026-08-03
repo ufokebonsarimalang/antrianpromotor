@@ -1035,8 +1035,8 @@
             });
         }
 
-        // FUNGSI UTAMA ANTRIS DENGAN PENGECEKAN SANKSI REAL-TIME SEKALIGUS
-async function aksiUtamaAntri() {
+// FUNGSI UTAMA ANTRI (AMAN, ANTI-SPAM, TANPA MENGGANGGU FITUR LAIN)
+        async function aksiUtamaAntri() {
             const namaSales = getAkunAktif().trim();
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
@@ -1052,75 +1052,51 @@ async function aksiUtamaAntri() {
                 return;
             }
 
-            const btnAntri = document.getElementById('btn-utama-antri');
+            // 2. Cek Sanksi Berdasarkan Master Sales Lokal yang Selalu Update Real-Time
+            const akunSaya = namaSales.toLowerCase();
+            const dataSales = masterSalesGlobal || [];
             
-            // 🔒 KUNCI TOMBOL SEKALIGUS (ANTI SPAM KLIK & TAMPILKAN STATUS)
-            btnAntri.disabled = true;
-            btnAntri.className = "btn-success btn-disabled";
-            btnAntri.innerHTML = `<span class="spinner"></span> Memeriksa Status Terbaru...`;
-
-            // 2. ⚡ CEK PAKSA KE SERVER (LIVE FETCH) UNTUK AMBIL DATA SANKSI TERBARU
-            let adaSanksiServer = false;
-            try {
-                const response = await fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' });
-                const resJson = await response.json();
-                
-                if (resJson.status === "sukses" && resJson.data) {
-                    masterSalesGlobal = resJson.data;
-                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resJson.data));
-
-                    const akunSaya = namaSales.toLowerCase();
-                    const sayaObj = resJson.data.find(item => {
-                        let n = "";
-                        if (typeof item === 'object' && item !== null) {
-                            n = item.nama || item.name || Object.values(item)[0] || "";
-                        } else {
-                            n = String(item);
-                        }
-                        return String(n).trim().toLowerCase() === akunSaya;
-                    });
-
-                    if (sayaObj && typeof sayaObj === 'object') {
-                        let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
-                        if (menitHukum > 0) {
-                            adaSanksiServer = true;
-                            const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan / tidak klik selesai melayani.`;
-                            
-                            waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
-                            localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
-                            
-                            tampilkanModal("🚨 Peringatan Sanksi Penalti", pesanSanksi);
-                            
-                            // Kembalikan tombol seperti semula agar bisa dicoba lagi nanti saat sanksi habis
-                            btnAntri.disabled = false;
-                            btnAntri.className = "btn-success";
-                            btnAntri.innerText = "Daftar Antrian";
-                            return; // ⛔ BATALKAN PENDAFTARAN ANTRIAN KARENA ADA SANKSI
-                        }
-                    }
+            const sayaObj = dataSales.find(item => {
+                let n = "";
+                if (typeof item === 'object' && item !== null) {
+                    n = item.nama || item.name || Object.values(item)[0] || "";
+                } else {
+                    n = String(item);
                 }
-            } catch (e) {
-                // Jika jaringan gangguan, abaikan agar promotor tetap bisa lanjut jika sebelumnya tidak ada sanksi
+                return String(n).trim().toLowerCase() === akunSaya;
+            });
+            
+            if (sayaObj && typeof sayaObj === 'object') {
+                let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
+                if (menitHukum > 0) {
+                    const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan / tidak klik selesai melayani.`;
+                    
+                    waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
+                    localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
+                    
+                    tampilkanModal("🚨 Peringatan Sanksi Penalti", pesanSanksi);
+                    return; // Gagal masuk antrian karena sanksi aktif
+                }
             }
 
-            // Jika terdeteksi ada sanksi dari server, hentikan fungsi di sini
-            if (adaSanksiServer) return;
+            const btnAntri = document.getElementById('btn-utama-antri');
+            
+            // 🔒 KUNCI TOMBOL SEKETIKA (ANTI SPAM KLIK & TAMPILKAN SPINNER)
+            btnAntri.disabled = true;
+            btnAntri.className = "btn-success btn-disabled";
+            btnAntri.innerHTML = `<span class="spinner"></span> Mendaftarkan Antrian...`;
 
-            // 3. JIKA AMAN (TIDAK ADA SANKSI), LANJUTKAN PROSES DAFTAR ANTRIAN
             sedangProsesAksi = true; 
             lockStatusLokalExpiry = Date.now() + 6000;
 
-            btnAntri.innerHTML = `<span class="spinner"></span> Mendaftarkan Antrian...`;
-
             statusSayaGlobal = "Standby";
-            const akunSayaStr = namaSales.toLowerCase();
-            const adaAkun = daftarAntrianGlobal.some(item => String(item.nama).trim().toLowerCase() === akunSayaStr);
+            const adaAkun = daftarAntrianGlobal.some(item => String(item.nama).trim().toLowerCase() === akunSaya);
             if (!adaAkun) {
                 daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
             }
             renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal, pengumumanTerakhirGlobal);
 
-            // Kirim Perintah ke Server
+            // Kirim ke server di latar belakang tanpa mengganggu fungsi lain
             fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}`, { method: 'GET', redirect: 'follow' })
             .then(res => res.json())
             .then(res => {
