@@ -1069,7 +1069,7 @@
             if (sayaObj && typeof sayaObj === 'object') {
                 let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
                 if (menitHukum > 0) {
-                    const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan / tidak klik selesai melayani.`;
+                    const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan klik tombol.`;
                     
                     waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
                     localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
