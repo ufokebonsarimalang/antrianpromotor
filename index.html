@@ -1036,10 +1036,16 @@
         }
 
         // FUNGSI UTAMA ANTRIS DENGAN PENGECEKAN SANKSI REAL-TIME SEKALIGUS
-        async function aksiUtamaAntri() {
+      async function aksiUtamaAntri() {
             const namaSales = getAkunAktif().trim();
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
+
+            // Paksa hapus penalti lokal jika waktu sistem sudah melewati batas
+            if (waktuPenaltiSelesaiGlobal > 0 && waktuPenaltiSelesaiGlobal <= Date.now()) {
+                waktuPenaltiSelesaiGlobal = 0;
+                localStorage.removeItem('ufo_waktu_penalti_selesai');
+            }
 
             if (waktuPenaltiSelesaiGlobal > 0 && waktuPenaltiSelesaiGlobal > Date.now()) {
                 tampilkanModal("🚨 Peringatan Sanksi Penalti", "Anda masih dalam masa penalti sanksi SPV! Silakan tunggu hingga timer sanksi selesai.");
@@ -1049,6 +1055,9 @@
             const btnAntri = document.getElementById('btn-utama-antri');
             btnAntri.disabled = true;
             btnAntri.innerHTML = `<span class="spinner"></span> Memeriksa Status...`;
+
+            // Hapus cache lama agar memaksa ambil data master sales terbaru dari server
+            localStorage.removeItem('ufo_master_sales_cache');
 
             try {
                 const response = await fetch(`${SCRIPT_URL}?aksi=getMasterSales`, { method: 'GET', redirect: 'follow' });
@@ -1087,6 +1096,10 @@
                     btnAntri.className = "btn-success";
                     btnAntri.innerText = "Daftar Antrian";
                     return; 
+                } else {
+                    // Jika di server nilai sanksinya sudah 0, pastikan penalti lokal bersih total
+                    waktuPenaltiSelesaiGlobal = 0;
+                    localStorage.removeItem('ufo_waktu_penalti_selesai');
                 }
             }
 
