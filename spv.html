@@ -61,7 +61,6 @@
         .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
 
-        /* KOTAK DISPLAY MONITORING DUAL URUTAN 1 (HA & AV) */
         .timer-box-wrapper {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -205,7 +204,6 @@
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
         .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
 
-        /* TABEL PEMANTAUAN SANKSI PENALTI TAMBAHAN */
         .table-responsive {
             width: 100%; overflow-x: auto; margin-top: 10px; border-radius: 12px; border: 2px solid var(--border);
         }
@@ -259,7 +257,6 @@
         <!-- MENU KONTROL SPV TERSTRUKTUR -->
         <div id="controls-spv-box" style="display: none;">
             
-            <!-- 1. LIVE BOX MONITOR URUTAN NO 1 (HA & AV) -->
             <div class="timer-box-wrapper">
                 <div class="timer-card-spv ha">
                     <div>
@@ -282,7 +279,6 @@
                 </div>
             </div>
 
-            <!-- 2. LIVE LIST TERPISAH HA DAN AV -->
             <div class="list-section-wrapper">
                 <div>
                     <div class="list-box-title">Live Urutan HA (Home Appliance)</div>
@@ -323,7 +319,7 @@
                 <button type="button" class="btn-danger" style="background: #991b1b;" onclick="bukaModalResetTotal()">RESET SEMUA ANTRIAN</button>
             </div>
 
-            <!-- SEKSI 4: PEMANTAUAN SANKSI PENALTI (TAMBAHAN SESUAI PERINTAH) -->
+            <!-- SEKSI 4: PEMANTAUAN SANKSI PENALTI -->
             <div class="section-title">4. Pemantauan Sanksi Penalti Promotor</div>
             <div class="table-responsive">
                 <table>
@@ -530,25 +526,42 @@
             if(tbody) tbody.innerHTML = html || `<tr><td colspan="4" style="text-align: center;">Tidak ada data</td></tr>`;
         }
 
-     function lepasPenalti(namaSales) {
-    const pin = getActivePinSPV();
-    if(!pin) return alert("PIN SPV tidak ditemukan!");
+        function tampilkanModalKonfirmasi(judul, desc, callbackYa) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerHTML = String(desc).replace(/\n/g, '<br>');
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-primary" id="btn-modal-konfirmasi-ya">Ya</button>
+            `;
+            modal.classList.add('active');
+            
+            document.getElementById('btn-modal-konfirmasi-ya').onclick = function() {
+                tutupModal();
+                if (typeof callbackYa === 'function') callbackYa();
+            };
+        }
 
-    tampilkanModalKonfirmasi("Lepas Sanksi Penalti", `Yakin ingin melepaskan sanksi penalti untuk promotor (${namaSales})?`, function() {
-        fetch(`${SCRIPT_URL}?aksi=lepasPenalti&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}`)
-        .then(res => res.json())
-        .then(res => {
-            tampilkanModal("Berhasil", `Sanksi penalti untuk ${namaSales} berhasil dilepaskan.`);
-            
-            // 🔥 TAMBAHKAN INI AGAR LANGSUNG UPDATE DETIK ITU JUGA
-            muatMasterSales();
-            muatDataAntrian();
-            
-        }).catch(() => {
-            tampilkanModal("Gagal", "Gagal terhubung ke server.");
-        });
-    });
-}
+        function lepasPenalti(namaSales) {
+            const pin = getActivePinSPV();
+            if(!pin) return alert("PIN SPV tidak ditemukan!");
+
+            tampilkanModalKonfirmasi("Lepas Sanksi Penalti", `Yakin ingin melepaskan sanksi penalti untuk promotor (${namaSales})?`, function() {
+                fetch(`${SCRIPT_URL}?aksi=lepasPenalti&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}`)
+                .then(res => res.json())
+                .then(res => {
+                    if(res.status === "sukses") {
+                        tampilkanModal("Berhasil", `Sanksi penalti untuk ${namaSales} berhasil dilepaskan.`);
+                    } else {
+                        tampilkanModal("Perhatian", res.pesan);
+                    }
+                    muatMasterSales();
+                    muatDataAntrian();
+                }).catch(() => {
+                    tampilkanModal("Gagal", "Gagal terhubung ke server.");
+                });
+            });
+        }
 
         function renderTampilanTimerSPV() {
             const now = new Date().getTime();
