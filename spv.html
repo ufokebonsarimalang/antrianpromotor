@@ -447,18 +447,71 @@
             .catch(() => { sedangProsesAksiSPV = false; tutupModal(); });
         }
 
-        function bukaModalTambahAntriSpv() {
+     function bukaModalTambahAntriSpv() {
             const currentPin = getActivePinSPV();
             document.getElementById('modal-title').innerText = "Masukkan Promotor ke Antrian";
+            
             let optionsSales = '<option value="">-- Pilih Promotor --</option>';
-            masterSalesGlobal.forEach(n => { let nama = typeof n === 'object' ? n.nama : n; optionsSales += `<option value="${nama}">${nama}</option>`; });
-            let htmlContent = `Kategori:<br><select id="spv-select-kategori"><option value="HA">Home Appliance (HA)</option><option value="AV">Audio Video (AV)</option></select><br><br>
-                               Promotor:<br><select id="spv-select-sales">${optionsSales}</select><br><br>
-                               Posisi Urutan Antrian:<br><select id="spv-select-posisi"><option value="0">Paling Belakang (Default)</option><option value="1">Urutan Ke-1 (Paling Depan)</option><option value="2">Urutan Ke-2</option><option value="3">Urutan Ke-3</option><option value="4">Urutan Ke-4</option><option value="5">Urutan Ke-5</option></select>
-                               <input type="hidden" id="spv-input-pin" value="${currentPin}">`;
+            masterSalesGlobal.forEach(n => { 
+                let nama = typeof n === 'object' ? n.nama : n; 
+                optionsSales += `<option value="${nama}">${nama}</option>`; 
+            });
+
+            // Ubah dari <select> angka kaku menjadi input angka bebas (type="number")
+            let htmlContent = `
+                Kategori:<br>
+                <select id="spv-select-kategori">
+                    <option value="HA">Home Appliance (HA)</option>
+                    <option value="AV">Audio Video (AV)</option>
+                </select><br><br>
+                
+                Promotor:<br>
+                <select id="spv-select-sales">${optionsSales}</select><br><br>
+                
+                Posisi Urutan Antrian:<br>
+                <input type="number" id="spv-input-posisi" value="1" min="1" placeholder="Masukkan nomor urut (Cth: 1, 10, dst)" style="width:100%; padding:12px; border-radius:12px; border:2px solid var(--border); font-size:15px; font-weight:600;"><br>
+                <small style="color: var(--text-muted); font-size: 11px;">*Ketik angka 1 untuk paling depan, atau angka besar untuk ditaruh di bawah.</small>
+                
+                <input type="hidden" id="spv-input-pin" value="${currentPin}">
+            `;
+            
             document.getElementById('modal-desc').innerHTML = htmlContent;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-proses-aksi" class="btn-primary" onclick="eksekusiTambahAntriSpv()">Proses</button>`;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" id="btn-modal-proses-aksi" class="btn-primary" onclick="eksekusiTambahAntriSpv()">Proses</button>
+            `;
             document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function eksekusiTambahAntriSpv() {
+            const kategori = document.getElementById('spv-select-kategori').value; 
+            const namaSales = document.getElementById('spv-select-sales').value; 
+            // Ambil nilai dari input angka bebas
+            const posisi = document.getElementById('spv-input-posisi').value || "1"; 
+            const pin = getActivePinSPV();
+            
+            if(!namaSales) return alert("Pilih promotor terlebih dahulu!"); 
+            if(!pin) return alert("PIN SPV tidak valid!");
+            
+            sedangProsesAksiSPV = true; 
+            const btnProses = document.getElementById('btn-modal-proses-aksi');
+            btnProses.disabled = true; 
+            btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
+            
+            fetch(`${SCRIPT_URL}?aksi=spvDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => { 
+                setTimeout(() => { 
+                    tutupModal(); 
+                    sedangProsesAksiSPV = false; 
+                    tampilkanModal("Status SPV", res.pesan); 
+                    muatDataAntrian(); 
+                }, 400); 
+            })
+            .catch(() => { 
+                sedangProsesAksiSPV = false; 
+                tutupModal(); 
+            });
         }
 
         function eksekusiTambahAntriSpv() {
