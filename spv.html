@@ -383,7 +383,7 @@
             muatMasterSales();
             muatDataAntrian();
             
-            setInterval(muatDataAntrian, 3000); 
+            setInterval(muatDataAntrian, 1000); 
             setInterval(renderTampilanTimerSPV, 1000);
         };
 
@@ -882,31 +882,32 @@
             });
         }
 
-        function muatMasterSales() {
-            fetch(`${SCRIPT_URL}?aksi=getMasterSales`)
-            .then(res => res.json())
-            .then(res => {
-                if(res.status === "sukses") {
-                    masterSalesGlobal = res.data || [];
-                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
-                    renderTabelPenaltiSPV(masterSalesGlobal);
-                }
-            }).catch(() => {});
+     function muatMasterSales() {
+    const antiCache = `&t=${Date.now()}`;
+    fetch(`${SCRIPT_URL}?aksi=getMasterSales${antiCache}`)
+    .then(res => res.json())
+    .then(res => {
+        if(res.status === "sukses") {
+            masterSalesGlobal = res.data || [];
+            localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+            renderTabelPenaltiSPV(masterSalesGlobal);
         }
+    }).catch(() => {});
+}
 
-        function muatDataAntrian() {
-            if(sedangProsesAksiSPV) return; 
+function muatDataAntrian() {
+    if(sedangProsesAksiSPV) return; 
 
-            fetch(`${SCRIPT_URL}?aksi=getAntrian`)
-            .then(res => res.json())
-            .then(res => {
-                if(!sedangProsesAksiSPV && res.status === "sukses") {
-                    localStorage.setItem('ufo_spv_antrian_cache', JSON.stringify(res));
-                    renderUIWithData(res);
-                }
-            }).catch(() => {});
+    const antiCache = `&t=${Date.now()}`;
+    fetch(`${SCRIPT_URL}?aksi=getAntrian${antiCache}`)
+    .then(res => res.json())
+    .then(res => {
+        if(!sedangProsesAksiSPV && res.status === "sukses") {
+            localStorage.setItem('ufo_spv_antrian_cache', JSON.stringify(res));
+            renderUIWithData(res);
         }
-
+    }).catch(() => {});
+}
         function tampilkanModal(judul, pesan) {
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judul;
