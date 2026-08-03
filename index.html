@@ -1041,31 +1041,84 @@
         }
 
         // FUNGSI UTAMA ANTRI (AMAN, ANTI-SPAM, RESPONSAN INSTAN)
-       async function aksiUtamaAntri() {
+    // FUNGSI UTAMA ANTRI (MUNCUL POPUP SANKSI SAAT DIKLIK, TANPA DELAY)
+        async function aksiUtamaAntri() {
             const namaSales = getAkunAktif().trim();
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
 
+            // 1. Cek Penalti Lokal yang Sedang Berjalan
             if (waktuPenaltiSelesaiGlobal > 0 && waktuPenaltiSelesaiGlobal <= Date.now()) {
                 waktuPenaltiSelesaiGlobal = 0;
                 localStorage.removeItem('ufo_waktu_penalti_selesai');
             }
 
             if (waktuPenaltiSelesaiGlobal > 0 && waktuPenaltiSelesaiGlobal > Date.now()) {
-                tampilkanModal("🚨 Peringatan Sanksi Penalti", "Anda masih dalam masa penalti sanksi dari SPV! Silakan tunggu hingga timer sanksi selesai.");
+                tampilkanModal("🚨 Peringatan Sanksi Penalti", "Anda masih dalam masa penalti sanksi SPV! Silakan tunggu hingga timer sanksi selesai.");
                 return;
             }
 
             const btnAntri = document.getElementById('btn-utama-antri');
             btnAntri.disabled = true;
             btnAntri.className = "btn-success btn-disabled";
-            btnAntri.innerHTML = `<span class="spinner"></span> Mendaftarkan Antrian...`;
+            btnAntri.innerHTML = `<span class="spinner"></span> Mengecek Status Sanksi...`;
 
+            sedangProsesAksi = true; 
+
+            // 2. TARIK DATA MASTER SALES TERBARU DETIK ITU JUGA (ANTI CACHE & ANTI DELAY)
+            try {
+                const antiCache = `&t=${Date.now()}`;
+                const res = await fetch(`${SCRIPT_URL}?aksi=getMasterSales${antiCache}`, { method: 'GET', redirect: 'follow' });
+                const json = await res.json();
+
+                if (json.status === "sukses" && json.data) {
+                    masterSalesGlobal = json.data;
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(json.data));
+                }
+            } catch (e) {}
+
+            sedangProsesAksi = false;
+
+            // 3. CEK APAKAH AKUN INI TERKENA SANKSI DI DATA TERBARU
+            const akunSaya = namaSales.toLowerCase();
+            const dataSales = masterSalesGlobal || [];
+            
+            const sayaObj = dataSales.find(item => {
+                let n = "";
+                if (typeof item === 'object' && item !== null) {
+                    n = item.nama || item.name || Object.values(item)[0] || "";
+                } else {
+                    n = String(item);
+                }
+                return String(n).trim().toLowerCase() === akunSaya;
+            });
+            
+            if (sayaObj && typeof sayaObj === 'object') {
+                let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
+                if (menitHukum > 0) {
+                    const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan / tidak klik selesai melayani.`;
+                    
+                    waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
+                    localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
+                    
+                    // Kembalikan tombol ke posisi normal agar bisa menampilkan timer penalti
+                    btnAntri.disabled = false;
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, waktuStandbyHAGlobal, waktuStandbyAVGlobal, pengumumanTerakhirGlobal);
+                    
+                    // MUNCULKAN POPUP SANKSI
+                    tampilkanModal("🚨 Peringatan Sanksi Penalti", pesanSanksi);
+                    return; // Gagal masuk antrian karena sanksi aktif
+                }
+            }
+
+            // 4. JIKA AMAN DARI SANKSI, LANJUT DAFTAR ANTRIAN
+            btnAntri.disabled = true;
+            btnAntri.className = "btn-success btn-disabled";
+            btnAntri.innerHTML = `<span class="spinner"></span> Mendaftarkan Antrian...`;
             sedangProsesAksi = true; 
             lockStatusLokalExpiry = Date.now() + 4000;
 
             statusSayaGlobal = "Standby";
-            const akunSaya = namaSales.toLowerCase();
             const adaAkun = daftarAntrianGlobal.some(item => String(item.nama).trim().toLowerCase() === akunSaya);
             if (!adaAkun) {
                 daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
