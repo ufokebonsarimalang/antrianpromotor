@@ -498,32 +498,37 @@
             document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
 
-        function renderTabelPenaltiSPV(dataSales) {
-            let html = "";
-            dataSales.forEach(item => {
-                const nama = typeof item === 'object' ? item.nama : item;
+       function renderTabelPenaltiSPV(dataSales) {
+            // Filter: HANYA ambil sales yang memiliki sanksiMenit > 0
+            const salesDisanksi = dataSales.filter(item => {
                 const sanksiMenit = item.sanksiMenit ? parseInt(item.sanksiMenit) : 0;
+                return sanksiMenit > 0;
+            });
+
+            let html = "";
+            salesDisanksi.forEach(item => {
+                const nama = typeof item === 'object' ? item.nama : item;
+                const sanksiMenit = parseInt(item.sanksiMenit);
                 const pesanSanksi = item.pesanSanksi || "-";
 
-                let badgeHtml = `<span class="badge-status-sanksi badge-normal">Normal</span>`;
-                let aksiHtml = `-`;
-
-                if (sanksiMenit > 0) {
-                    badgeHtml = `<span class="badge-status-sanksi badge-penalti">Penalti (${sanksiMenit}m)</span>`;
-                    aksiHtml = `<button type="button" class="btn-action btn-danger" onclick="lepasPenalti('${nama}')">Lepas</button>`;
-                }
+                let badgeHtml = `<span class="badge-status-sanksi badge-penalti">Penalti (${sanksiMenit}m)</span>`;
+                let aksiHtml = `<button type="button" class="btn-action btn-danger" onclick="lepasPenalti('${nama}')">Lepas</button>`;
 
                 html += `
                     <tr>
                         <td><b>${nama}</b></td>
                         <td>${badgeHtml}</td>
-                        <td style="font-size: 11px; color: var(--text-muted);">${sanksiMenit > 0 ? pesanSanksi : 'Aman'}</td>
+                        <td style="font-size: 11px; color: var(--text-muted);">${pesanSanksi}</td>
                         <td>${aksiHtml}</td>
                     </tr>
                 `;
             });
+
             const tbody = document.getElementById('tabel-penalti-spv');
-            if(tbody) tbody.innerHTML = html || `<tr><td colspan="4" style="text-align: center;">Tidak ada data</td></tr>`;
+            if(tbody) {
+                // Jika tidak ada yang disanksi, tampilkan keterangan bersih
+                tbody.innerHTML = html || `<tr><td colspan="4" style="text-align: center; color: var(--success); font-weight: 700;">✅ Semua promotor aman (Tidak ada sanksi aktif)</td></tr>`;
+            }
         }
 
         function tampilkanModalKonfirmasi(judul, desc, callbackYa) {
