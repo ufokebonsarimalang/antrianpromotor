@@ -53,7 +53,7 @@
 
         .input-group { margin-bottom: 16px; text-align: left; }
         .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
-        select, input[type="text"], input[type="password"] { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--border); background: #ffffff; font-size: 15px; font-weight: 600; outline: none; }
+        select, input[type="text"], input[type="password"], input[type="number"] { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--border); background: #ffffff; font-size: 15px; font-weight: 600; outline: none; }
         select:focus, input:focus { border-color: var(--spv-purple); box-shadow: 0 0 0 3px rgba(124,58,237,0.15); }
 
         button { width: 100%; padding: 14px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s; display: inline-flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.5px; }
@@ -66,9 +66,11 @@
         .btn-teal { background: #0d9488; color: white; }
         .btn-darkred { background: #b91c1c; color: white; }
         .btn-cancel { background: #e2e8f0; color: #475569; }
-        .btn-action { padding: 6px 10px; font-size: 11px; border-radius: 8px; width: auto; }
+        
+        /* Tombol aksi khusus tabel yang rapi */
+        .btn-action { padding: 8px 14px; font-size: 11px; border-radius: 8px; width: auto; font-weight: 800; cursor: pointer; border: none; text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 
-        .spinner { width: 16px; height: 16px; border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block; }
+        .spinner { width: 16px; height: 16px; border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block; flex-shrink: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .section-title { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 20px 0 10px 0; text-align: left; border-bottom: 2px dashed var(--border); padding-bottom: 4px; }
@@ -83,12 +85,14 @@
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
         .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
 
-        .table-responsive { width: 100%; overflow-x: auto; margin-top: 10px; border-radius: 12px; border: 2px solid var(--border); }
+        /* Tabel Manajemen Status Akun yang Bersih & Profesional */
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 10px; border-radius: 12px; border: 2px solid var(--border); background: #ffffff; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-        th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-        th { background: #f8fafc; font-weight: 800; color: var(--text-muted); text-transform: uppercase; font-size: 11px; }
+        th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { background: #f8fafc; font-weight: 800; color: var(--text-muted); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
         tr:last-child td { border-bottom: none; }
-        .badge-status-sanksi { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; display: inline-block; }
+        
+        .badge-status-sanksi { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block; letter-spacing: 0.3px; }
         .badge-penalti { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
         .badge-normal { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
 
@@ -311,30 +315,39 @@
             document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
 
-       function renderTabelStatusAkunSPV(dataSales) {
+        // FUNGSI RENDER TABEL AKUN DENGAN DESAIN RAPI & AMAN
+        function renderTabelStatusAkunSPV(dataSales) {
             let html = "";
-            dataSales.forEach(item => {
-                const nama = typeof item === 'object' ? item.nama : item;
-                const statusLock = String(item.statusLock || "").trim().toUpperCase();
-                
-                let badgeHtml = "", aksiHtml = "";
-                if (statusLock === "LOCKED") {
-                    badgeHtml = `<span class="badge-status-sanksi badge-penalti">LOCKED</span>`;
-                    aksiHtml = `<button type="button" class="btn-action btn-success" onclick="unlockPromotor('${nama}')">Buka Kunci</button>`;
-                } else {
-                    badgeHtml = `<span class="badge-status-sanksi badge-normal">AMAN</span>`;
-                    aksiHtml = `<button type="button" class="btn-action btn-danger" onclick="lockPromotor('${nama}')">Lock Akun</button>`;
-                }
+            if (!dataSales || dataSales.length === 0) {
+                html = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">Belum ada data promotor</td></tr>`;
+            } else {
+                dataSales.forEach(item => {
+                    const nama = typeof item === 'object' ? item.nama : item;
+                    const statusLock = String(item.statusLock || "").trim().toUpperCase();
+                    
+                    let badgeHtml = "", aksiHtml = "";
+                    if (statusLock === "LOCKED") {
+                        badgeHtml = `<span class="badge-status-sanksi badge-penalti">🔒 LOCKED</span>`;
+                        aksiHtml = `<button type="button" id="btn-lock-${safeId(nama)}" class="btn-action btn-success" onclick="unlockPromotor('${nama}')">Buka Kunci</button>`;
+                    } else {
+                        badgeHtml = `<span class="badge-status-sanksi badge-normal">✅ AMAN</span>`;
+                        aksiHtml = `<button type="button" id="btn-lock-${safeId(nama)}" class="btn-action btn-danger" onclick="lockPromotor('${nama}')">Lock Akun</button>`;
+                    }
 
-                html += `<tr>
-                            <td><b>${nama}</b></td>
-                            <td>${badgeHtml}</td>
-                            <td>${aksiHtml}</td>
-                        </tr>`;
-            });
+                    html += `<tr>
+                                <td><b style="font-size: 14px; color: var(--text-main);">${nama}</b></td>
+                                <td>${badgeHtml}</td>
+                                <td>${aksiHtml}</td>
+                            </tr>`;
+                });
+            }
 
             const tbody = document.getElementById('tabel-penalti-spv');
-            if(tbody) tbody.innerHTML = html || `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Belum ada data promotor</td></tr>`;
+            if(tbody) tbody.innerHTML = html;
+        }
+
+        function safeId(str) {
+            return String(str).replace(/[^a-zA-Z0-9]/g, '_');
         }
 
         function tampilkanModalKonfirmasi(judul, desc, callbackYa) {
@@ -349,31 +362,63 @@
             document.getElementById('btn-modal-konfirmasi-ya').onclick = function() { tutupModal(); if (typeof callbackYa === 'function') callbackYa(); };
         }
 
-        // FUNGSI LOCK BARU
+        // FUNGSI LOCK DENGAN SPINNER DI TOMBOL SPESIFIK
         function lockPromotor(namaSales) {
             const pin = getActivePinSPV();
             if(!pin) return alert("PIN SPV tidak ditemukan!");
+            
             tampilkanModalKonfirmasi("Lock Akun Promotor", `Yakin ingin mengunci akun (${namaSales}) agar tidak bisa antri?`, function() {
+                const btnId = `btn-lock-${safeId(namaSales)}`;
+                const btnEl = document.getElementById(btnId);
+                let textAsli = "";
+                
+                if (btnEl) {
+                    textAsli = btnEl.innerHTML;
+                    btnEl.disabled = true;
+                    btnEl.className = "btn-action btn-danger";
+                    btnEl.innerHTML = `<span class="spinner" style="width:12px; height:12px; border-width:2px;"></span> Memproses...`;
+                }
+
                 fetch(`${SCRIPT_URL}?aksi=spvLockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
+                    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
                     tampilkanModal(res.status === "sukses" ? "Berhasil" : "Perhatian", res.pesan);
                     muatMasterSales();
-                }).catch(() => { tampilkanModal("Gagal", "Gagal terhubung ke server."); });
+                }).catch(() => { 
+                    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
+                    tampilkanModal("Gagal", "Gagal terhubung ke server."); 
+                });
             });
         }
 
-        // FUNGSI UNLOCK BARU
+        // FUNGSI UNLOCK DENGAN SPINNER DI TOMBOL SPESIFIK
         function unlockPromotor(namaSales) {
             const pin = getActivePinSPV();
             if(!pin) return alert("PIN SPV tidak ditemukan!");
+            
             tampilkanModalKonfirmasi("Buka Kunci Promotor", `Buka kunci akun (${namaSales}) agar bisa antri kembali?`, function() {
+                const btnId = `btn-lock-${safeId(namaSales)}`;
+                const btnEl = document.getElementById(btnId);
+                let textAsli = "";
+                
+                if (btnEl) {
+                    textAsli = btnEl.innerHTML;
+                    btnEl.disabled = true;
+                    btnEl.className = "btn-action btn-success";
+                    btnEl.innerHTML = `<span class="spinner" style="width:12px; height:12px; border-width:2px;"></span> Memproses...`;
+                }
+
                 fetch(`${SCRIPT_URL}?aksi=spvUnlockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
+                    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
                     tampilkanModal(res.status === "sukses" ? "Berhasil" : "Perhatian", res.pesan);
                     muatMasterSales();
-                }).catch(() => { tampilkanModal("Gagal", "Gagal terhubung ke server."); });
+                }).catch(() => { 
+                    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
+                    tampilkanModal("Gagal", "Gagal terhubung ke server."); 
+                });
             });
         }
 
@@ -447,7 +492,8 @@
             .catch(() => { sedangProsesAksiSPV = false; tutupModal(); });
         }
 
-     function bukaModalTambahAntriSpv() {
+        // MODAL TAMBAH ANTRIAN MENGGUNAKAN INPUT ANGKA BEBAS (TANPA BATAS 5)
+        function bukaModalTambahAntriSpv() {
             const currentPin = getActivePinSPV();
             document.getElementById('modal-title').innerText = "Masukkan Promotor ke Antrian";
             
@@ -457,7 +503,6 @@
                 optionsSales += `<option value="${nama}">${nama}</option>`; 
             });
 
-            // Ubah dari <select> angka kaku menjadi input angka bebas (type="number")
             let htmlContent = `
                 Kategori:<br>
                 <select id="spv-select-kategori">
@@ -469,7 +514,7 @@
                 <select id="spv-select-sales">${optionsSales}</select><br><br>
                 
                 Posisi Urutan Antrian:<br>
-                <input type="number" id="spv-input-posisi" value="1" min="1" placeholder="Masukkan nomor urut (Cth: 1, 10, dst)" style="width:100%; padding:12px; border-radius:12px; border:2px solid var(--border); font-size:15px; font-weight:600;"><br>
+                <input type="number" id="spv-input-posisi" value="1" min="1" placeholder="Masukkan nomor urut (Cth: 1, 10, dst)"><br>
                 <small style="color: var(--text-muted); font-size: 11px;">*Ketik angka 1 untuk paling depan, atau angka besar untuk ditaruh di bawah.</small>
                 
                 <input type="hidden" id="spv-input-pin" value="${currentPin}">
@@ -486,7 +531,6 @@
         function eksekusiTambahAntriSpv() {
             const kategori = document.getElementById('spv-select-kategori').value; 
             const namaSales = document.getElementById('spv-select-sales').value; 
-            // Ambil nilai dari input angka bebas
             const posisi = document.getElementById('spv-input-posisi').value || "1"; 
             const pin = getActivePinSPV();
             
@@ -512,17 +556,6 @@
                 sedangProsesAksiSPV = false; 
                 tutupModal(); 
             });
-        }
-
-        function eksekusiTambahAntriSpv() {
-            const kategori = document.getElementById('spv-select-kategori').value; const namaSales = document.getElementById('spv-select-sales').value; const posisi = document.getElementById('spv-select-posisi').value; const pin = getActivePinSPV();
-            if(!namaSales) return alert("Pilih promotor terlebih dahulu!"); if(!pin) return alert("PIN SPV tidak valid!");
-            sedangProsesAksiSPV = true; const btnProses = document.getElementById('btn-modal-proses-aksi');
-            btnProses.disabled = true; btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
-            fetch(`${SCRIPT_URL}?aksi=spvDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status SPV", res.pesan); muatDataAntrian(); }, 400); })
-            .catch(() => { sedangProsesAksiSPV = false; tutupModal(); });
         }
 
         function bukaModalTambahTimerInstan() {
