@@ -1004,7 +1004,7 @@
             }
         }
 
-        function muatDataAntrian(paksaTarik = false) {
+       function muatDataAntrian(paksaTarik = false) {
             if (sedangProsesAksi && !paksaTarik) return;
             Promise.all([
                 fetch(`${SCRIPT_URL}?aksi=getAntrian`, { method: 'GET', redirect: 'follow' }).then(r => r.json()).catch(() => null),
@@ -1026,7 +1026,12 @@
 
                     if (sayaObj && typeof sayaObj === 'object') {
                         let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
-                        if (menitHukum <= 0 && waktuPenaltiSelesaiGlobal > 0) {
+                        if (menitHukum > 0) {
+                            if (waktuPenaltiSelesaiGlobal <= Date.now()) {
+                                waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
+                                localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
+                            }
+                        } else if (menitHukum <= 0 && waktuPenaltiSelesaiGlobal > 0) {
                             waktuPenaltiSelesaiGlobal = 0;
                             localStorage.removeItem('ufo_waktu_penalti_selesai');
                         }
@@ -1036,7 +1041,7 @@
         }
 
         // FUNGSI UTAMA ANTRI (AMAN, ANTI-SPAM, RESPONSAN INSTAN)
-        async function aksiUtamaAntri() {
+       async function aksiUtamaAntri() {
             const namaSales = getAkunAktif().trim();
             const kategoriPilih = document.getElementById('pilih-kategori').value;
             if(!namaSales) return tampilkanModal("Perhatian", "Akun belum terikat dengan benar.");
@@ -1047,32 +1052,8 @@
             }
 
             if (waktuPenaltiSelesaiGlobal > 0 && waktuPenaltiSelesaiGlobal > Date.now()) {
-                tampilkanModal("🚨 Peringatan Sanksi Penalti", "Anda masih dalam masa penalti sanksi SPV! Silakan tunggu hingga timer sanksi selesai.");
+                tampilkanModal("🚨 Peringatan Sanksi Penalti", "Anda masih dalam masa penalti sanksi dari SPV! Silakan tunggu hingga timer sanksi selesai.");
                 return;
-            }
-
-            const akunSaya = namaSales.toLowerCase();
-            const dataSales = masterSalesGlobal || [];
-            
-            const sayaObj = dataSales.find(item => {
-                let n = "";
-                if (typeof item === 'object' && item !== null) {
-                    n = item.nama || item.name || Object.values(item)[0] || "";
-                } else {
-                    n = String(item);
-                }
-                return String(n).trim().toLowerCase() === akunSaya;
-            });
-            
-            if (sayaObj && typeof sayaObj === 'object') {
-                let menitHukum = parseInt(sayaObj.sanksiMenit || 0);
-                if (menitHukum > 0) {
-                    const pesanSanksi = sayaObj.pesanSanksi || `Anda terkena penalti sanksi ${menitHukum} menit karena tidak taat aturan klik tombol.`;
-                    waktuPenaltiSelesaiGlobal = Date.now() + (menitHukum * 60 * 1000);
-                    localStorage.setItem('ufo_waktu_penalti_selesai', waktuPenaltiSelesaiGlobal);
-                    tampilkanModal("🚨 Peringatan Sanksi Penalti", pesanSanksi);
-                    return; 
-                }
             }
 
             const btnAntri = document.getElementById('btn-utama-antri');
@@ -1084,6 +1065,7 @@
             lockStatusLokalExpiry = Date.now() + 4000;
 
             statusSayaGlobal = "Standby";
+            const akunSaya = namaSales.toLowerCase();
             const adaAkun = daftarAntrianGlobal.some(item => String(item.nama).trim().toLowerCase() === akunSaya);
             if (!adaAkun) {
                 daftarAntrianGlobal.push({ nama: namaSales, status: "Standby", waktuStandby: new Date(), kategori: kategoriPilih });
@@ -1100,7 +1082,6 @@
                 muatDataAntrian(true);
             });
         }
-
         function aksiUtamaCustomer() {
             const namaSales = getAkunAktif();
             if(!namaSales) return;
