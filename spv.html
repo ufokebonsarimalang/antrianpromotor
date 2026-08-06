@@ -67,7 +67,6 @@
         .btn-darkred { background: #b91c1c; color: white; }
         .btn-cancel { background: #e2e8f0; color: #475569; }
         
-        /* Desain Tombol Aksi Tabel Modern */
         .btn-action { 
             padding: 8px 14px; 
             font-size: 11px; 
@@ -104,7 +103,6 @@
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
         .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
 
-        /* Tabel Manajemen Status Akun Modern & Profesional */
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 10px; border-radius: 12px; border: 2px solid var(--border); background: #ffffff; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
         th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
@@ -277,7 +275,7 @@
             muatMasterSales();
             muatDataAntrian();
             
-            setInterval(muatDataAntrian, 1000); 
+            setInterval(muatDataAntrian, 2000); 
             setInterval(renderTampilanTimerSPV, 1000);
         };
 
@@ -321,6 +319,8 @@
         }
 
         function renderUIWithData(res) {
+            if (sedangProsesAksiSPV) return;
+
             const statusSistem = res.statusAntrian || "BUKA";
             const badge = document.getElementById('badge-status-sistem');
             badge.innerText = statusSistem === "BUKA" ? "STATUS: OPEN" : "STATUS: CLOSED";
@@ -361,7 +361,6 @@
             document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
 
-        // FUNGSI RENDER TABEL AKUN DENGAN DESAIN MODERN & IKON SVG
         function renderTabelStatusAkunSPV(dataSales) {
             let html = "";
             if (!dataSales || dataSales.length === 0) {
@@ -389,10 +388,10 @@
                     }
 
                     html += `<tr>
-                                <td><b style="font-size: 14px; color: var(--text-main);">${nama}</b></td>
-                                <td>${badgeHtml}</td>
-                                <td>${aksiHtml}</td>
-                            </tr>`;
+                            <td><b style="font-size: 14px; color: var(--text-main);">${nama}</b></td>
+                            <td>${badgeHtml}</td>
+                            <td>${aksiHtml}</td>
+                        </tr>`;
                 });
             }
 
@@ -404,25 +403,10 @@
             return String(str).replace(/[^a-zA-Z0-9]/g, '_');
         }
 
-        function tampilkanModalKonfirmasi(judul, desc, callbackYa) {
-            const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').innerText = judul;
-            document.getElementById('modal-desc').innerHTML = String(desc).replace(/\n/g, '<br>');
-            document.getElementById('modal-actions').innerHTML = `
-                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-primary" id="btn-modal-konfirmasi-ya">Ya</button>
-            `;
-            modal.classList.add('active');
-            document.getElementById('btn-modal-konfirmasi-ya').onclick = function() { tutupModal(); if (typeof callbackYa === 'function') callbackYa(); };
-        }
-
-        // FUNGSI LOCK DENGAN SPINNER SPESIFIK DI TOMBOLNYA
-       // FUNGSI LOCK DENGAN INPUT ALASAN
         function lockPromotor(namaSales) {
             const pin = getActivePinSPV();
             if(!pin) return alert("PIN SPV tidak ditemukan!");
             
-            // Buat popup modal kustom yang ada kolom ketik alasannya
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = "Lock Akun Promotor";
             document.getElementById('modal-desc').innerHTML = `
@@ -436,12 +420,12 @@
             `;
             modal.classList.add('active');
 
-            // Eksekusi saat tombol "Ya, Lock Akun" diklik
             document.getElementById('btn-modal-konfirmasi-lock').onclick = function() {
                 const alasan = document.getElementById('input-alasan-lock').value.trim();
                 if(!alasan) return alert("Harap masukkan alasan kenapa akun ini di-lock!");
 
                 tutupModal();
+                sedangProsesAksiSPV = true;
                 
                 const btnId = `btn-lock-${safeId(namaSales)}`;
                 const btnEl = document.getElementById(btnId);
@@ -454,26 +438,31 @@
                     btnEl.innerHTML = `<span class="spinner" style="width:12px; height:12px; border-width:2px;"></span> Memproses...`;
                 }
 
-                // Kirim data alasan ke server
                 fetch(`${SCRIPT_URL}?aksi=spvLockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
-                    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
-                    tampilkanModal(res.status === "sukses" ? "Berhasil" : "Perhatian", res.pesan);
-                    muatMasterSales();
+                    setTimeout(() => {
+                        sedangProsesAksiSPV = false;
+                        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
+                        tampilkanModal(res.status === "sukses" ? "Berhasil" : "Perhatian", res.pesan);
+                        muatMasterSales();
+                    }, 800);
                 }).catch(() => { 
-                    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
-                    tampilkanModal("Gagal", "Gagal terhubung ke server."); 
+                    setTimeout(() => {
+                        sedangProsesAksiSPV = false;
+                        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
+                        tampilkanModal("Gagal", "Gagal terhubung ke server."); 
+                    }, 800);
                 });
             };
         }
 
-        // FUNGSI UNLOCK DENGAN SPINNER SPESIFIK DI TOMBOLNYA
         function unlockPromotor(namaSales) {
             const pin = getActivePinSPV();
             if(!pin) return alert("PIN SPV tidak ditemukan!");
             
             tampilkanModalKonfirmasi("Buka Kunci Promotor", `Buka kunci akun (${namaSales}) agar bisa antri kembali?`, function() {
+                sedangProsesAksiSPV = true;
                 const btnId = `btn-lock-${safeId(namaSales)}`;
                 const btnEl = document.getElementById(btnId);
                 let textAsli = "";
@@ -488,12 +477,18 @@
                 fetch(`${SCRIPT_URL}?aksi=spvUnlockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
-                    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
-                    tampilkanModal(res.status === "sukses" ? "Berhasil" : "Perhatian", res.pesan);
-                    muatMasterSales();
+                    setTimeout(() => {
+                        sedangProsesAksiSPV = false;
+                        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
+                        tampilkanModal(res.status === "sukses" ? "Berhasil" : "Perhatian", res.pesan);
+                        muatMasterSales();
+                    }, 800);
                 }).catch(() => { 
-                    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
-                    tampilkanModal("Gagal", "Gagal terhubung ke server."); 
+                    setTimeout(() => {
+                        sedangProsesAksiSPV = false;
+                        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
+                        tampilkanModal("Gagal", "Gagal terhubung ke server."); 
+                    }, 800);
                 });
             });
         }
@@ -545,7 +540,7 @@
             fetch(`${SCRIPT_URL}?aksi=spvSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}&t=${Date.now()}`)
             .then(res => res.json())
             .then(res => {
-                setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status Sistem", res.pesan); muatDataAntrian(); }, 400);
+                setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status Sistem", res.pesan); muatDataAntrian(); }, 800);
             }).catch(() => { btnProses.disabled = false; btnProses.innerHTML = textAsli; sedangProsesAksiSPV = false; });
         }
 
@@ -564,11 +559,10 @@
             btnProses.disabled = true; btnProses.innerHTML = `<span class="spinner"></span> Mereset...`;
             fetch(`${SCRIPT_URL}?aksi=spvResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
             .then(res => res.json())
-            .then(res => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status Reset Total", res.pesan); muatDataAntrian(); }, 400); })
+            .then(res => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status Reset Total", res.pesan); muatDataAntrian(); }, 800); })
             .catch(() => { sedangProsesAksiSPV = false; tutupModal(); });
         }
 
-        // MODAL MASUKKAN ANTRIAN DENGAN INPUT ANGKA BEBAS (TANPA BATAS 5)
         function bukaModalTambahAntriSpv() {
             const currentPin = getActivePinSPV();
             document.getElementById('modal-title').innerText = "Masukkan Promotor ke Antrian";
@@ -626,7 +620,7 @@
                     sedangProsesAksiSPV = false; 
                     tampilkanModal("Status SPV", res.pesan); 
                     muatDataAntrian(); 
-                }, 400); 
+                }, 800); 
             })
             .catch(() => { 
                 sedangProsesAksiSPV = false; 
@@ -653,7 +647,7 @@
             btnProses.disabled = true; btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
             let reqHA = promotorHA ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(promotorHA.nama)}&kategori=HA&t=${Date.now()}`) : Promise.resolve();
             let reqAV = promotorAV ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(promotorAV.nama)}&kategori=AV&t=${Date.now()}`) : Promise.resolve();
-            Promise.all([reqHA, reqAV]).then(() => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status SPV", "Waktu timer urutan 1 berhasil diperbarui."); muatDataAntrian(); }, 400); })
+            Promise.all([reqHA, reqAV]).then(() => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status SPV", "Waktu timer urutan 1 berhasil diperbarui."); muatDataAntrian(); }, 800); })
             .catch(() => { sedangProsesAksiSPV = false; tutupModal(); });
         }
 
@@ -676,7 +670,7 @@
             btnProses.disabled = true; btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
             fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&t=${Date.now()}`)
             .then(res => res.json())
-            .then(res => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status SPV", res.pesan); muatDataAntrian(); }, 400); })
+            .then(res => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status SPV", res.pesan); muatDataAntrian(); }, 800); })
             .catch(() => { sedangProsesAksiSPV = false; tutupModal(); });
         }
 
