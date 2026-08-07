@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -787,6 +787,13 @@
             tampilkanModalKonfirmasi("Keluar Antrian", "Apakah Anda yakin ingin keluar dari antrian untuk istirahat / ada keperluan?", function() {
                 eksekusiAksiMutlak('btn-keluar-istirahat', 'Memproses...', 'selesaiMelayani', 'belum_ada');
             });
+        }
+
+        function konfirmasiSudahBacaPengumuman() {
+            if (pengumumanTerakhirGlobal) {
+                localStorage.setItem('ufo_last_read_announcement', pengumumanTerakhirGlobal);
+            }
+            document.getElementById('modal-pengumuman-spv').classList.remove('active');
         }
 
         function tampilkanModal(judul, desc) {
