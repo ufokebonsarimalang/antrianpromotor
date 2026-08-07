@@ -34,6 +34,18 @@
         .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
 
+        .timer-box-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+        .timer-card-spv { background: #0f172a; border-radius: 18px; padding: 16px 14px; color: #ffffff; text-align: center; border: 2px solid var(--card-bg); box-shadow: 0 10px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; }
+        .timer-card-spv::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+        .timer-card-spv.ha::before { background: #3b82f6; }
+        .timer-card-spv.av::before { background: #a855f7; }
+
+        .timer-badge-title { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: inline-block; }
+        .ha .timer-badge-title { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .av .timer-badge-title { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+
+        .spv-nama-promotor { font-size: 15px; font-weight: 800; color: #ffffff; margin-top: 2px; line-height: 1.3; min-height: 36px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
+
         .input-group { margin-bottom: 16px; text-align: left; }
         .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
         select, input[type="text"], input[type="password"], input[type="number"] { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--border); background: #ffffff; font-size: 15px; font-weight: 600; outline: none; }
@@ -121,6 +133,8 @@
         .modal-desc select, .modal-desc input { font-size: 14px; padding: 12px; margin-top: 4px; }
         .modal-actions { display: flex; gap: 10px; }
         .modal-actions button { flex: 1; padding: 12px; font-size: 13px; }
+
+        @media (max-width: 480px) { .timer-box-wrapper { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -141,6 +155,15 @@
         </div>
 
         <div id="controls-spv-box" style="display: none;">
+            <div class="timer-box-wrapper">
+                <div class="timer-card-spv ha">
+                    <div><span class="timer-badge-title">Giliran HA</span><div id="spv-nama-ha" class="spv-nama-promotor">Memuat...</div></div>
+                </div>
+                <div class="timer-card-spv av">
+                    <div><span class="timer-badge-title">Giliran AV</span><div id="spv-nama-av" class="spv-nama-promotor">Memuat...</div></div>
+                </div>
+            </div>
+
             <div class="list-section-wrapper">
                 <div>
                     <div class="list-box-title">Live Urutan HA (Home Appliance)</div>
@@ -282,6 +305,13 @@
             const data = res.data || [];
             daftarAntrianGlobal = data;
 
+            const dataStandby = data.filter(item => item.status === "Standby");
+            const promotorHA = dataStandby.find(item => (item.kategori || "HA") === "HA") || null;
+            const promotorAV = dataStandby.find(item => item.kategori === "AV") || null;
+
+            document.getElementById('spv-nama-ha').textContent = promotorHA ? promotorHA.nama : "Belum Ada";
+            document.getElementById('spv-nama-av').textContent = promotorAV ? promotorAV.nama : "Belum Ada";
+
             if(data.length > 0) {
                 let urutHA = 1, urutAV = 1;
                 data.forEach((item) => {
@@ -322,14 +352,14 @@
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                                 LOCKED
                             </span>`;
-                        aksiHtml = `<button type="button" class="btn-action btn-success" onclick="unlockPromotor('${nama.replace(/'/g, "\\'")}')">Buka Kunci</button>`;
+                        aksiHtml = `<button type="button" id="btn-unlock-${nama.replace(/[^a-zA-Z0-9]/g, '_')}" class="btn-action btn-success" onclick="unlockPromotor('${nama.replace(/'/g, "\\'")}')">Buka Kunci</button>`;
                     } else {
                         badgeHtml = `
                             <span class="badge-status-sanksi badge-normal">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                 AMAN
                             </span>`;
-                        aksiHtml = `<button type="button" class="btn-action btn-danger" onclick="lockPromotor('${nama.replace(/'/g, "\\'")}')">Lock Akun</button>`;
+                        aksiHtml = `<button type="button" id="btn-lock-${nama.replace(/[^a-zA-Z0-9]/g, '_')}" class="btn-action btn-danger" onclick="lockPromotor('${nama.replace(/'/g, "\\'")}')">Lock Akun</button>`;
                     }
 
                     html += `<tr>
@@ -368,6 +398,9 @@
                 tutupModal();
                 sedangProsesAksiSPV = true;
 
+                const btnEl = document.getElementById(`btn-lock-${namaSales.replace(/[^a-zA-Z0-9]/g, '_')}`);
+                if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = `<span class="spinner" style="width:12px;height:12px;border-width:2px;"></span> Memproses...`; }
+
                 fetch(`${SCRIPT_URL}?aksi=spvLockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
@@ -380,6 +413,7 @@
                 }).catch(() => { 
                     setTimeout(() => {
                         sedangProsesAksiSPV = false;
+                        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = `Lock Akun`; }
                         tampilkanModal("Gagal", "Gagal terhubung ke server."); 
                     }, 500);
                 });
@@ -393,6 +427,9 @@
             tampilkanModalKonfirmasi("Buka Kunci Promotor", `Buka kunci akun (${namaSales}) agar bisa antri kembali?`, function() {
                 sedangProsesAksiSPV = true;
 
+                const btnEl = document.getElementById(`btn-unlock-${namaSales.replace(/[^a-zA-Z0-9]/g, '_')}`);
+                if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = `<span class="spinner" style="width:12px;height:12px;border-width:2px;"></span> Memproses...`; }
+
                 fetch(`${SCRIPT_URL}?aksi=spvUnlockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
@@ -405,6 +442,7 @@
                 }).catch(() => { 
                     setTimeout(() => {
                         sedangProsesAksiSPV = false;
+                        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = `Buka Kunci`; }
                         tampilkanModal("Gagal", "Gagal terhubung ke server."); 
                     }, 500);
                 });
