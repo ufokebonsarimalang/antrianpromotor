@@ -669,6 +669,18 @@
             document.getElementById('custom-modal').classList.add('active');
         }
 
+        function tampilkanModalKonfirmasi(judul, desc, callbackYa) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerHTML = String(desc).replace(/\n/g, '<br>');
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-primary" id="btn-modal-konfirmasi-ya">Ya</button>
+            `;
+            modal.classList.add('active');
+            document.getElementById('btn-modal-konfirmasi-ya').onclick = function() { tutupModal(); if (typeof callbackYa === 'function') callbackYa(); };
+        }
+
         function tutupModal() { document.getElementById('custom-modal').classList.remove('active'); }
     </script>
 </body>
