@@ -34,23 +34,6 @@
         .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
 
-        .timer-box-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
-        .timer-card-spv { background: #0f172a; border-radius: 18px; padding: 18px 14px; color: #ffffff; text-align: center; border: 2px solid var(--card-bg); box-shadow: 0 10px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; }
-        .timer-card-spv::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; }
-        .timer-card-spv.ha::before { background: #3b82f6; }
-        .timer-card-spv.av::before { background: #a855f7; }
-
-        .timer-badge-title { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: inline-block; }
-        .ha .timer-badge-title { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
-        .av .timer-badge-title { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
-
-        .spv-nama-promotor { font-size: 16px; font-weight: 800; color: #ffffff; margin-bottom: 4px; line-height: 1.3; min-height: 38px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
-        .spv-timer-display { font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums; margin: 4px 0 0 0; letter-spacing: -0.5px; }
-        .ha .spv-timer-display { color: #93c5fd; }
-        .av .spv-timer-display { color: #e9d5ff; }
-        .spv-timer-display.habis { color: var(--danger) !important; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.4; } }
-
         .input-group { margin-bottom: 16px; text-align: left; }
         .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
         select, input[type="text"], input[type="password"], input[type="number"] { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--border); background: #ffffff; font-size: 15px; font-weight: 600; outline: none; }
@@ -121,18 +104,8 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         }
         
-        .badge-normal { 
-            background: #ecfdf5; 
-            color: #047857; 
-            border: 1px solid #a7f3d0; 
-        }
-        
-        .badge-penalti { 
-            background: #fef2f2; 
-            color: #dc2626; 
-            border: 1px solid #fecaca; 
-            animation: pulseGlow 2s infinite;
-        }
+        .badge-normal { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .badge-penalti { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; animation: pulseGlow 2s infinite; }
 
         @keyframes pulseGlow {
             0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.2); }
@@ -148,8 +121,6 @@
         .modal-desc select, .modal-desc input { font-size: 14px; padding: 12px; margin-top: 4px; }
         .modal-actions { display: flex; gap: 10px; }
         .modal-actions button { flex: 1; padding: 12px; font-size: 13px; }
-
-        @media (max-width: 480px) { .timer-box-wrapper { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -170,17 +141,6 @@
         </div>
 
         <div id="controls-spv-box" style="display: none;">
-            <div class="timer-box-wrapper">
-                <div class="timer-card-spv ha">
-                    <div><span class="timer-badge-title">Urutan 1 HA</span><div id="spv-nama-ha" class="spv-nama-promotor">Memuat...</div></div>
-                    <div><div id="spv-timer-ha" class="spv-timer-display">--:--</div></div>
-                </div>
-                <div class="timer-card-spv av">
-                    <div><span class="timer-badge-title">Urutan 1 AV</span><div id="spv-nama-av" class="spv-nama-promotor">Memuat...</div></div>
-                    <div><div id="spv-timer-av" class="spv-timer-display">--:--</div></div>
-                </div>
-            </div>
-
             <div class="list-section-wrapper">
                 <div>
                     <div class="list-box-title">Live Urutan HA (Home Appliance)</div>
@@ -202,7 +162,6 @@
             <div class="spv-grid">
                 <button type="button" class="btn-teal" onclick="bukaModalTambahAntriSpv()">+ Masukkan Antrian</button>
                 <button type="button" class="btn-warning" onclick="bukaModalFormSPVKategori('spvKeluarkanAntrian', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
-                <button type="button" class="btn-purple" onclick="bukaModalTambahTimerInstan()">⏱️ Tambah Timer Urutan 1</button>
             </div>
 
             <div class="section-title">3. Tindakan Khusus & Emergency</div>
@@ -246,16 +205,10 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
-        const BATAS_MENIT = 60;
         
         let masterSalesGlobal = [];
         let daftarAntrianGlobal = [];
         let sedangProsesAksiSPV = false; 
-
-        let promotorHA = null;
-        let promotorAV = null;
-        let waktuServerHA = null;
-        let waktuServerAV = null;
         let savedPinSPV = "";
 
         window.onload = function() {
@@ -276,7 +229,6 @@
             muatDataAntrian();
             
             setInterval(muatDataAntrian, 3000); 
-            setInterval(renderTampilanTimerSPV, 1000);
         };
 
         function getActivePinSPV() { return savedPinSPV || document.getElementById('input-pin-spv').value || localStorage.getItem('ufo_spv_pin') || ""; }
@@ -329,13 +281,6 @@
             let listHtmlHA = "", listHtmlAV = "";
             const data = res.data || [];
             daftarAntrianGlobal = data;
-
-            const dataStandby = data.filter(item => item.status === "Standby");
-            promotorHA = dataStandby.find(item => (item.kategori || "HA") === "HA") || null;
-            promotorAV = dataStandby.find(item => item.kategori === "AV") || null;
-            waktuServerHA = res.waktuStandbyHA || res.waktuStandbyPertama;
-            waktuServerAV = res.waktuStandbyAV;
-            renderTampilanTimerSPV();
 
             if(data.length > 0) {
                 let urutHA = 1, urutAV = 1;
@@ -466,35 +411,6 @@
             });
         }
 
-        function renderTampilanTimerSPV() {
-            const now = new Date().getTime();
-            const namaHaEl = document.getElementById('spv-nama-ha'); const timerHaEl = document.getElementById('spv-timer-ha');
-            if (promotorHA) {
-                namaHaEl.textContent = promotorHA.nama;
-                let sisaStr = hitungSisaWaktu(waktuServerHA, now); timerHaEl.textContent = sisaStr;
-                if(sisaStr === "HABIS!") timerHaEl.classList.add('habis'); else timerHaEl.classList.remove('habis');
-            } else { namaHaEl.textContent = "Kosong"; timerHaEl.textContent = "--:--"; timerHaEl.classList.remove('habis'); }
-
-            const namaAvEl = document.getElementById('spv-nama-av'); const timerAvEl = document.getElementById('spv-timer-av');
-            if (promotorAV) {
-                namaAvEl.textContent = promotorAV.nama;
-                let sisaStr = hitungSisaWaktu(waktuServerAV, now); timerAvEl.textContent = sisaStr;
-                if(sisaStr === "HABIS!") timerAvEl.classList.add('habis'); else timerAvEl.classList.remove('habis');
-            } else { namaAvEl.textContent = "Kosong"; timerAvEl.textContent = "--:--"; timerAvEl.classList.remove('habis'); }
-        }
-
-        function hitungSisaWaktu(waktuStandbyTarget, now) {
-            if (!waktuStandbyTarget) return "60:00";
-            const waktuMulai = new Date(waktuStandbyTarget).getTime();
-            if (isNaN(waktuMulai)) return "60:00";
-            const selisihMs = now - waktuMulai;
-            const sisaMs = (BATAS_MENIT * 60 * 1000) - selisihMs;
-            if (sisaMs > 0) {
-                const totalDetik = Math.floor(sisaMs / 1000); const menit = Math.floor(totalDetik / 60); const detik = totalDetik % 60;
-                return `${menit}:${detik < 10 ? '0' : ''}${detik}`;
-            } else { return "HABIS!"; }
-        }
-
         function bukaModalToggleSistem(targetStatus) {
             const currentPin = getActivePinSPV();
             document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
@@ -599,29 +515,6 @@
                 sedangProsesAksiSPV = false; 
                 tutupModal(); 
             });
-        }
-
-        function bukaModalTambahTimerInstan() {
-            const currentPin = getActivePinSPV();
-            document.getElementById('modal-title').innerText = "Tambah Timer Urutan 1";
-            let infoPromotor = "";
-            if (promotorHA) infoPromotor += `<br>• HA: <b>${promotorHA.nama}</b>`;
-            if (promotorAV) infoPromotor += `<br>• AV: <b>${promotorAV.nama}</b>`;
-            if (!infoPromotor) infoPromotor = "<br><i>Tidak ada antrian di Urutan 1</i>";
-            document.getElementById('modal-desc').innerHTML = `Reset/Tambah waktu standby 60 menit untuk:${infoPromotor}<input type="hidden" id="spv-timer-pin" value="${currentPin}">`;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-proses-timer" class="btn-success" onclick="eksekusiTambahTimerInstan()">Proses</button>`;
-            document.getElementById('custom-modal').classList.add('active');
-        }
-
-        function eksekusiTambahTimerInstan() {
-            const pin = getActivePinSPV();
-            if(!pin) return alert("PIN SPV tidak valid!");
-            sedangProsesAksiSPV = true; const btnProses = document.getElementById('btn-modal-proses-timer');
-            btnProses.disabled = true; btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
-            let reqHA = promotorHA ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(promotorHA.nama)}&kategori=HA&t=${Date.now()}`) : Promise.resolve();
-            let reqAV = promotorAV ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(promotorAV.nama)}&kategori=AV&t=${Date.now()}`) : Promise.resolve();
-            Promise.all([reqHA, reqAV]).then(() => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status SPV", "Waktu timer urutan 1 berhasil diperbarui."); muatDataAntrian(); }, 500); })
-            .catch(() => { sedangProsesAksiSPV = false; tutupModal(); });
         }
 
         function bukaModalFormSPVKategori(aksiName, judulAksi, butuhPilihPromotor = true) {
