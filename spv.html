@@ -275,7 +275,7 @@
             muatMasterSales();
             muatDataAntrian();
             
-            setInterval(muatDataAntrian, 2000); 
+            setInterval(muatDataAntrian, 3000); 
             setInterval(renderTampilanTimerSPV, 1000);
         };
 
@@ -377,14 +377,14 @@
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                                 LOCKED
                             </span>`;
-                        aksiHtml = `<button type="button" id="btn-lock-${safeId(nama)}" class="btn-action btn-success" onclick="unlockPromotor('${nama}')">Buka Kunci</button>`;
+                        aksiHtml = `<button type="button" class="btn-action btn-success" onclick="unlockPromotor('${nama.replace(/'/g, "\\'")}')">Buka Kunci</button>`;
                     } else {
                         badgeHtml = `
                             <span class="badge-status-sanksi badge-normal">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                 AMAN
                             </span>`;
-                        aksiHtml = `<button type="button" id="btn-lock-${safeId(nama)}" class="btn-action btn-danger" onclick="lockPromotor('${nama}')">Lock Akun</button>`;
+                        aksiHtml = `<button type="button" class="btn-action btn-danger" onclick="lockPromotor('${nama.replace(/'/g, "\\'")}')">Lock Akun</button>`;
                     }
 
                     html += `<tr>
@@ -397,10 +397,6 @@
 
             const tbody = document.getElementById('tabel-penalti-spv');
             if(tbody) tbody.innerHTML = html;
-        }
-
-        function safeId(str) {
-            return String(str).replace(/[^a-zA-Z0-9]/g, '_');
         }
 
         function lockPromotor(namaSales) {
@@ -426,33 +422,21 @@
 
                 tutupModal();
                 sedangProsesAksiSPV = true;
-                
-                const btnId = `btn-lock-${safeId(namaSales)}`;
-                const btnEl = document.getElementById(btnId);
-                let textAsli = "";
-                
-                if (btnEl) {
-                    textAsli = btnEl.innerHTML;
-                    btnEl.disabled = true;
-                    btnEl.className = "btn-action btn-danger";
-                    btnEl.innerHTML = `<span class="spinner" style="width:12px; height:12px; border-width:2px;"></span> Memproses...`;
-                }
 
                 fetch(`${SCRIPT_URL}?aksi=spvLockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
                     setTimeout(() => {
                         sedangProsesAksiSPV = false;
-                        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
                         tampilkanModal(res.status === "sukses" ? "Berhasil" : "Perhatian", res.pesan);
                         muatMasterSales();
-                    }, 800);
+                        muatDataAntrian();
+                    }, 500);
                 }).catch(() => { 
                     setTimeout(() => {
                         sedangProsesAksiSPV = false;
-                        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
                         tampilkanModal("Gagal", "Gagal terhubung ke server."); 
-                    }, 800);
+                    }, 500);
                 });
             };
         }
@@ -463,32 +447,21 @@
             
             tampilkanModalKonfirmasi("Buka Kunci Promotor", `Buka kunci akun (${namaSales}) agar bisa antri kembali?`, function() {
                 sedangProsesAksiSPV = true;
-                const btnId = `btn-lock-${safeId(namaSales)}`;
-                const btnEl = document.getElementById(btnId);
-                let textAsli = "";
-                
-                if (btnEl) {
-                    textAsli = btnEl.innerHTML;
-                    btnEl.disabled = true;
-                    btnEl.className = "btn-action btn-success";
-                    btnEl.innerHTML = `<span class="spinner" style="width:12px; height:12px; border-width:2px;"></span> Memproses...`;
-                }
 
                 fetch(`${SCRIPT_URL}?aksi=spvUnlockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
                     setTimeout(() => {
                         sedangProsesAksiSPV = false;
-                        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
                         tampilkanModal(res.status === "sukses" ? "Berhasil" : "Perhatian", res.pesan);
                         muatMasterSales();
-                    }, 800);
+                        muatDataAntrian();
+                    }, 500);
                 }).catch(() => { 
                     setTimeout(() => {
                         sedangProsesAksiSPV = false;
-                        if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = textAsli; }
                         tampilkanModal("Gagal", "Gagal terhubung ke server."); 
-                    }, 800);
+                    }, 500);
                 });
             });
         }
@@ -540,7 +513,7 @@
             fetch(`${SCRIPT_URL}?aksi=spvSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}&t=${Date.now()}`)
             .then(res => res.json())
             .then(res => {
-                setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status Sistem", res.pesan); muatDataAntrian(); }, 800);
+                setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status Sistem", res.pesan); muatDataAntrian(); }, 500);
             }).catch(() => { btnProses.disabled = false; btnProses.innerHTML = textAsli; sedangProsesAksiSPV = false; });
         }
 
@@ -559,7 +532,7 @@
             btnProses.disabled = true; btnProses.innerHTML = `<span class="spinner"></span> Mereset...`;
             fetch(`${SCRIPT_URL}?aksi=spvResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
             .then(res => res.json())
-            .then(res => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status Reset Total", res.pesan); muatDataAntrian(); }, 800); })
+            .then(res => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status Reset Total", res.pesan); muatDataAntrian(); }, 500); })
             .catch(() => { sedangProsesAksiSPV = false; tutupModal(); });
         }
 
@@ -620,7 +593,7 @@
                     sedangProsesAksiSPV = false; 
                     tampilkanModal("Status SPV", res.pesan); 
                     muatDataAntrian(); 
-                }, 800); 
+                }, 500); 
             })
             .catch(() => { 
                 sedangProsesAksiSPV = false; 
@@ -647,7 +620,7 @@
             btnProses.disabled = true; btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
             let reqHA = promotorHA ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(promotorHA.nama)}&kategori=HA&t=${Date.now()}`) : Promise.resolve();
             let reqAV = promotorAV ? fetch(`${SCRIPT_URL}?aksi=spvTambahTimer&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(promotorAV.nama)}&kategori=AV&t=${Date.now()}`) : Promise.resolve();
-            Promise.all([reqHA, reqAV]).then(() => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status SPV", "Waktu timer urutan 1 berhasil diperbarui."); muatDataAntrian(); }, 800); })
+            Promise.all([reqHA, reqAV]).then(() => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status SPV", "Waktu timer urutan 1 berhasil diperbarui."); muatDataAntrian(); }, 500); })
             .catch(() => { sedangProsesAksiSPV = false; tutupModal(); });
         }
 
@@ -670,7 +643,7 @@
             btnProses.disabled = true; btnProses.innerHTML = `<span class="spinner"></span> Memproses...`;
             fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&t=${Date.now()}`)
             .then(res => res.json())
-            .then(res => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status SPV", res.pesan); muatDataAntrian(); }, 800); })
+            .then(res => { setTimeout(() => { tutupModal(); sedangProsesAksiSPV = false; tampilkanModal("Status SPV", res.pesan); muatDataAntrian(); }, 500); })
             .catch(() => { sedangProsesAksiSPV = false; tutupModal(); });
         }
 
