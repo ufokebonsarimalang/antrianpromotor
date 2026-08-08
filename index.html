@@ -1,4 +1,4 @@
-<!DOCTYPE html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,10 @@
     <link rel="shortcut icon" href="#">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- Leaflet CSS untuk Peta Visual -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         :root {
             --primary: #2563eb;
@@ -17,187 +21,271 @@
             --purple-cs: #7c3aed;
             --teal-cs: #0d9488;
             --amber-rest: #d97706;
+            --indigo-ibadah: #4f46e5;
             --bg-color: #f1f5f9;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #475569;
             --border: #cbd5e1;
-            
-            --ha-bg: #eab308;        
-            --ha-border: #ca8a04;
-            --av-bg: #10b981;        
-            --av-border: #059669;
         }
 
+        /* STYLING MODE GELAP */
         body.dark-mode {
-            --bg-color: #000000 !important;
-            --card-bg: #050507 !important;
+            --bg-color: #080203 !important;
+            --card-bg: #140406 !important;
             --text-main: #ffffff !important;
-            --text-muted: #a1a1aa !important;
-            --border: #3f3f46 !important;
+            --text-muted: #fca5a5 !important;
+            --border: #ef4444 !important;
         }
 
-        body.dark-mode { background: #000000 !important; }
+        body.dark-mode { background: #080203 !important; }
         
-        body.dark-mode .app-container {
-            background: #050507 !important;
-            border: 2px solid #3f3f46 !important;
-            box-shadow: 0 0 35px rgba(255, 255, 255, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.02) !important;
+        body.dark-mode .app-container { 
+            background: #140406 !important; 
+            border: 2px solid #ef4444 !important; 
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.45) !important; 
         }
 
-        body.dark-mode .gradient-header {
-            background: #09090b !important;
-            border: 2px solid #ef4444 !important;
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), inset 0 0 10px rgba(239, 68, 68, 0.3) !important;
+        /* HEADER MERAH MENYALA DI MODE GELAP */
+        body.dark-mode .gradient-header { 
+            background: linear-gradient(135deg, #450a0a 0%, #1f0505 100%) !important; 
+            border: 2px solid #ef4444 !important; 
+            box-shadow: 0 0 35px rgba(239, 68, 68, 0.6) !important;
         }
         body.dark-mode .gradient-header h2 {
-            color: #f87171 !important;
-            text-shadow: 0 0 10px rgba(239, 68, 68, 0.8), 0 0 20px rgba(239, 68, 68, 0.5) !important;
+            color: #fca5a5 !important;
+            text-shadow: 0 0 15px rgba(239, 68, 68, 0.9) !important;
         }
         body.dark-mode .gradient-header p {
-            color: #ffffff !important;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6) !important;
+            color: #f87171 !important;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.7) !important;
         }
 
-        body.dark-mode .card-giliran-ha {
-            background: #09090b !important;
-            border: 2px solid #facc15 !important;
-            box-shadow: 0 0 18px rgba(250, 204, 21, 0.5), inset 0 0 8px rgba(250, 204, 21, 0.2) !important;
-        }
-        body.dark-mode .card-giliran-ha .label-giliran {
-            color: #fef08a !important; text-shadow: 0 0 6px rgba(250, 204, 21, 0.6);
-        }
-        body.dark-mode .card-giliran-ha .nama-giliran-aktif {
-            color: #facc15 !important; text-shadow: 0 0 12px rgba(250, 204, 21, 0.9), 0 0 20px rgba(250, 204, 21, 0.5);
+        .dark-mode-btn { background: #ffffff; border: 2px solid var(--border); color: var(--text-main); padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        body.dark-mode .dark-mode-btn { background: #450a0a !important; color: #ffffff !important; border: 2px solid #f87171 !important; box-shadow: 0 0 20px rgba(248, 113, 113, 0.6); }
+
+        body.dark-mode .status-badge-sistem {
+            background: #450a0a !important;
+            color: #fca5a5 !important;
+            border: 2px solid #ef4444 !important;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.7) !important;
         }
 
-        body.dark-mode .card-giliran-av {
-            background: #09090b !important;
-            border: 2px solid #22c55e !important;
-            box-shadow: 0 0 18px rgba(34, 197, 94, 0.5), inset 0 0 8px rgba(34, 197, 94, 0.2) !important;
-        }
-        body.dark-mode .card-giliran-av .label-giliran {
-            color: #bbf7d0 !important; text-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
-        }
-        body.dark-mode .card-giliran-av .nama-giliran-aktif {
-            color: #22c55e !important; text-shadow: 0 0 12px rgba(34, 197, 94, 0.9), 0 0 20px rgba(34, 197, 94, 0.5);
-        }
-
-        body.dark-mode select, 
-        body.dark-mode input[type="text"] {
-            background: #09090b !important; 
+        /* STYLING MODERN CUSTOM SELECT & INPUT */
+        body.dark-mode select, body.dark-mode input[type="text"] { 
+            background: #1f0505 !important; 
             color: #ffffff !important; 
-            border: 2px solid #3b82f6 !important; 
-            box-shadow: 0 0 12px rgba(59, 130, 246, 0.35), inset 0 0 6px rgba(59, 130, 246, 0.1) !important;
+            border: 2px solid #ef4444 !important; 
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5) !important;
         }
-        body.dark-mode select:disabled { background-color: #18181b !important; color: #71717a !important; border-color: #27272a !important; box-shadow: none !important; }
+
+        body.dark-mode select:disabled { 
+            background-color: #18181b !important; 
+            color: #71717a !important; 
+            border-color: #27272a !important; 
+            box-shadow: none !important;
+        }
 
         body.dark-mode .user-badge { 
-            background: #09090b !important; 
-            border: 2px solid #8b5cf6 !important; 
+            background: #2b0a0d !important; 
+            border: 2px solid #f87171 !important; 
             color: #ffffff !important; 
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4), inset 0 0 6px rgba(139, 92, 246, 0.15) !important; 
+            box-shadow: 0 0 25px rgba(248, 113, 113, 0.6) !important;
         }
+
+        /* KOTAK GILIRAN HA & AV DISUSUN ATAS-BAWAH (VERTIKAL) */
+        .timer-box-wrapper { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+        .timer-card-admin { background: #f8fafc; border-radius: 14px; padding: 16px; text-align: center; border: 2px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; }
+        
+        /* EFEK NEON PERSIS GAMBAR (ATAS-BAWAH) KHUSUS MODE GELAP */
+        body.dark-mode .timer-card-admin.ha {
+            background: #000000 !important;
+            border: 3px solid #facc15 !important;
+            border-radius: 20px !important;
+            box-shadow: 0 0 25px rgba(250, 204, 21, 0.6), inset 0 0 15px rgba(250, 204, 21, 0.2) !important;
+        }
+        body.dark-mode .timer-card-admin.av {
+            background: #000000 !important;
+            border: 3px solid #22c55e !important;
+            border-radius: 20px !important;
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.6), inset 0 0 15px rgba(34, 197, 94, 0.2) !important;
+        }
+
+        .timer-badge-title { font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .ha .timer-badge-title { color: #2563eb; }
+        .av .timer-badge-title { color: #7c3aed; }
+
+        /* TEKS & GLOW JUDUL & NAMA DI MODE GELAP */
+        body.dark-mode .timer-card-admin.ha .timer-badge-title { color: #fde047 !important; text-shadow: 0 0 10px rgba(253, 224, 71, 0.8); }
+        body.dark-mode .timer-card-admin.av .timer-badge-title { color: #86efac !important; text-shadow: 0 0 10px rgba(134, 239, 172, 0.8); }
+
+        .promotor-nama-aktif { font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 36px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
+        
+        body.dark-mode .timer-card-admin.ha .promotor-nama-aktif { color: #fef08a !important; text-shadow: 0 0 15px rgba(254, 240, 138, 0.9); }
+        body.dark-mode .timer-card-admin.av .promotor-nama-aktif { color: #bbf7d0 !important; text-shadow: 0 0 15px rgba(187, 247, 208, 0.9); }
 
         body.dark-mode .list-antrian li { 
-            background: #09090b !important; 
-            border: 2px solid #06b6d4 !important; 
+            background: #1f0505 !important; 
+            border: 2px solid #f87171 !important; 
             color: #ffffff !important; 
-            box-shadow: 0 0 12px rgba(6, 182, 212, 0.3), inset 0 0 5px rgba(6, 182, 212, 0.1) !important; 
+            box-shadow: 0 0 20px rgba(248, 113, 113, 0.5) !important;
         }
 
-        body.dark-mode .modal-box { background: #09090b !important; border: 2px solid #52525b !important; color: #ffffff !important; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 255, 255, 0.1) !important; }
-        body.dark-mode .modal-desc { color: #d4d4d8 !important; }
-        body.dark-mode .btn-cancel { background: #18181b !important; color: #ffffff !important; border: 1px solid #52525b; }
-        body.dark-mode .dark-mode-btn { background: #09090b !important; color: #ffffff !important; border-color: #52525b !important; box-shadow: 0 0 8px rgba(255, 255, 255, 0.1); }
-        
-        body.dark-mode #keterangan-lock-box { 
-            background: #09090b !important; 
+        body.dark-mode .modal-box { 
+            background: #2b0a0d !important; 
             border: 2px solid #ef4444 !important; 
-            color: #fca5a5 !important; 
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4), inset 0 0 6px rgba(239, 68, 68, 0.15) !important;
+            color: #ffffff !important; 
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.6) !important;
         }
+
+        body.dark-mode .btn-cancel {
+            background: #27272a !important;
+            color: #ffffff !important;
+            border: 2px solid #71717a !important;
+            box-shadow: 0 0 15px rgba(113, 113, 122, 0.5) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL DAFTAR ANTRIAN & HADIR (WARNA BIRU) */
+        body.dark-mode .btn-success,
+        body.dark-mode .btn-customer {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border: 2px solid #3b82f6 !important;
+            box-shadow: 0 0 25px rgba(37, 99, 235, 0.7) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL SELESAI / CLOSING (WARNA MERAH ASLI) */
+        body.dark-mode .btn-closing {
+            background: #dc2626 !important;
+            color: #ffffff !important;
+            border: 2px solid #f87171 !important;
+            box-shadow: 0 0 25px rgba(220, 38, 38, 0.7) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL CS (WARNA UNGU ASLI) */
+        body.dark-mode .btn-purple {
+            background: #7c3aed !important;
+            color: #ffffff !important;
+            border: 2px solid #a78bfa !important;
+            box-shadow: 0 0 25px rgba(124, 58, 237, 0.7) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL TEAL (WARNA HIJAU TOSCA ASLI) */
+        body.dark-mode .btn-teal {
+            background: #0d9488 !important;
+            color: #ffffff !important;
+            border: 2px solid #2dd4bf !important;
+            box-shadow: 0 0 25px rgba(13, 148, 136, 0.7) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL IBADAH (WARNA INDIGO ASLI) */
+        body.dark-mode .btn-indigo {
+            background: #4f46e5 !important;
+            color: #ffffff !important;
+            border: 2px solid #818cf8 !important;
+            box-shadow: 0 0 25px rgba(79, 70, 229, 0.7) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL KELUAR / AMBER ASLI */
+        body.dark-mode .btn-amber {
+            background: #d97706 !important;
+            color: #ffffff !important;
+            border: 2px solid #fbbf24 !important;
+            box-shadow: 0 0 25px rgba(217, 119, 6, 0.7) !important;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        .btn-pulse { animation: pulseGlow 2s infinite; }
+
+        @keyframes pulseGreen {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 12px rgba(37, 211, 102, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+        .wa-pulse { animation: pulseGreen 2s infinite; }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s ease-in-out infinite; vertical-align: middle; margin-right: 6px; }
 
         *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
-        body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
-        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); border-radius: 24px; padding: 24px; border: 2px solid var(--border); box-shadow: 0 15px 35px -5px rgba(0,0,0,0.1); text-align: center; transition: all 0.3s ease; }
+        body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); border-radius: 24px; padding: 24px; border: 2px solid var(--border); box-shadow: 0 15px 35px -5px rgba(0,0,0,0.1); text-align: center; }
 
         .top-controls { display: flex; justify-content: flex-end; margin-bottom: 12px; }
-        .dark-mode-btn { background: #ffffff; border: 2px solid var(--border); color: var(--text-main); padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); transition: all 0.2s ease; }
-        .dark-mode-btn:hover { transform: translateY(-1px); }
 
         .gradient-header { background: linear-gradient(135deg, #dc2626 0%, #ffffff 100%); border-radius: 18px; padding: 22px; color: white; margin-bottom: 18px; box-shadow: 0 8px 20px -4px rgba(220, 38, 38, 0.3); }
-        .gradient-header h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
-        .gradient-header p { margin: 6px 0 0 0; opacity: 0.95; font-size: 13px; font-weight: 700; text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
+        .gradient-header h2 { margin: 0; font-size: 22px; font-weight: 800; text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
+        .gradient-header p { margin: 6px 0 0 0; font-size: 13px; font-weight: 700; text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
 
         .status-badge-sistem { display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 18px; letter-spacing: 0.5px; }
         .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
         .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
 
-        .card-giliran-wrapper { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        .card-giliran-ha { background: var(--ha-bg); border: 2px solid var(--ha-border); border-radius: 16px; padding: 16px 12px; text-align: center; color: #ffffff; box-shadow: 0 4px 12px rgba(234, 179, 8, 0.25); }
-        .card-giliran-ha .label-giliran { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #fefce8; letter-spacing: 0.5px; }
-        .card-giliran-ha .nama-giliran-aktif { font-size: 20px; font-weight: 800; color: #ffffff; margin: 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        
-        .card-giliran-av { background: var(--av-bg); border: 2px solid var(--av-border); border-radius: 16px; padding: 16px 12px; text-align: center; color: #ffffff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
-        .card-giliran-av .label-giliran { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #ecfdf5; letter-spacing: 0.5px; }
-        .card-giliran-av .nama-giliran-aktif { font-size: 20px; font-weight: 800; color: #ffffff; margin: 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-
         .input-group { margin-bottom: 16px; text-align: left; }
-        .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
 
-        select, input[type="text"] { width: 100%; padding: 14px 16px; border-radius: 12px; border: 2px solid var(--border); background: #ffffff; font-size: 15px; font-weight: 600; color: var(--text-main); outline: none; transition: all 0.2s ease; }
-        select:focus, input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        select, input[type="text"] { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border-radius: 14px; 
+            border: 2px solid var(--border); 
+            background: #ffffff; 
+            font-size: 15px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            outline: none; 
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-        @keyframes glowBlue { 0%, 100% { box-shadow: 0 0 5px rgba(37, 99, 235, 0.4); } 50% { box-shadow: 0 0 16px rgba(37, 99, 235, 0.9); } }
-        @keyframes glowClosing { 0%, 100% { box-shadow: 0 0 5px rgba(220, 38, 38, 0.4); } 50% { box-shadow: 0 0 16px rgba(220, 38, 38, 0.9); } }
-        @keyframes glowPurple { 0%, 100% { box-shadow: 0 0 5px rgba(124, 58, 237, 0.4); } 50% { box-shadow: 0 0 16px rgba(124, 58, 237, 0.9); } }
-        @keyframes glowTeal { 0%, 100% { box-shadow: 0 0 5px rgba(13, 148, 136, 0.4); } 50% { box-shadow: 0 0 16px rgba(13, 148, 136, 0.9); } }
-        @keyframes glowAmber { 0%, 100% { box-shadow: 0 0 5px rgba(217, 119, 6, 0.4); } 50% { box-shadow: 0 0 16px rgba(217, 119, 6, 0.9); } }
-
-        button { width: 100%; padding: 14px 12px; border-radius: 14px; font-size: 13px; font-weight: 800; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.3px; line-height: 1.3; text-align: center; white-space: normal; word-break: break-word; }
+        select:focus, input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+        
+        button { width: 100%; padding: 14px 12px; border-radius: 14px; font-size: 13px; font-weight: 800; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; }
         button:active { transform: scale(0.98); }
 
-        .btn-success { background: var(--customer-blue); color: white; animation: glowBlue 2.5s infinite ease-in-out; }
-        .btn-customer { background: var(--customer-blue); color: white; animation: glowBlue 2.5s infinite ease-in-out; }
-        .btn-closing { background: var(--closing-red); color: white; animation: glowClosing 2.5s infinite ease-in-out; }
-        .btn-purple { background: var(--purple-cs); color: white; animation: glowPurple 2.5s infinite ease-in-out; }
-        .btn-teal { background: var(--teal-cs); color: white; animation: glowTeal 2.5s infinite ease-in-out; }
-        .btn-amber { background: var(--amber-rest); color: white; animation: glowAmber 2.5s infinite ease-in-out; }
-        
-        .btn-cancel { background: #e2e8f0; color: var(--text-main); }
+        .btn-success { background: #2563eb; color: white; }
+        .btn-customer { background: #2563eb; color: white; }
+        .btn-closing { background: var(--closing-red); color: white; }
+        .btn-purple { background: #7c3aed; color: white; }
+        .btn-teal { background: #0d9488; color: white; }
+        .btn-amber { background: #d97706; color: white; }
+        .btn-indigo { background: var(--indigo-ibadah); color: white; }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; animation: none !important; }
-        body.dark-mode .btn-disabled { background: #18181b !important; color: #52525b !important; border: 1px solid #27272a; }
-
-        .spinner { width: 16px; height: 16px; border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block; flex-shrink: 0; }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
         .user-badge { background: #f8fafc; border: 2px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 18px; text-align: left; font-size: 14px; font-weight: 600; }
         .list-antrian { list-style: none; padding: 0; margin: 8px 0 0 0; text-align: left; }
-        .list-antrian li { padding: 12px 14px; background: #ffffff; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--border); font-size: 14px; font-weight: 700; transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+        .list-antrian li { padding: 12px 14px; background: #ffffff; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--border); font-size: 14px; font-weight: 700; }
         
         .badge-status-item { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
         .badge-giliran-anda { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
         .badge-standby { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
         .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+        .badge-ibadah { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
 
-        @keyframes blinkWhatsApp { 0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 5px rgba(37, 211, 102, 0.4); } 50% { opacity: 0.7; transform: scale(0.97); box-shadow: 0 0 16px rgba(37, 211, 102, 0.9); } }
-        .wa-report-btn { margin-top: 12px; background: #25d366; border: 2px solid #1ebe57; color: white; font-size: 13px; padding: 14px; border-radius: 12px; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.5px; animation: blinkWhatsApp 2s infinite ease-in-out; }
-        .wa-report-btn:hover { background: #20ba5a; animation: none; }
+        .wa-report-btn { margin-top: 16px; background: #25d366; border: 2px solid #1ebe57; color: white; font-size: 13px; padding: 14px; border-radius: 12px; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 10px; font-weight: 800; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 11, 20, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-box { background: white; width: 100%; max-width: 380px; padding: 24px; border-radius: 20px; text-align: center; border: 2px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .modal-box { background: white; width: 100%; max-width: 380px; padding: 24px; border-radius: 20px; text-align: center; border: 2px solid var(--border); }
         .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; color: var(--text-main); }
-        .modal-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; font-weight: 600; }
+        .modal-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; font-weight: 600; text-align: left; }
         .modal-actions { display: flex; gap: 10px; }
         .modal-actions button { flex: 1; padding: 12px; font-size: 13px; }
-
-        .announcement-popup-box { background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border: 4px solid #f59e0b; }
-        body.dark-mode .announcement-popup-box { background: #09090b !important; border-color: #f59e0b !important; box-shadow: 0 0 25px rgba(245, 158, 11, 0.4) !important; }
-        .announcement-popup-text { font-size: 16px; font-weight: 800; color: #78350f; line-height: 1.6; background: rgba(255, 255, 255, 0.9); padding: 16px; border-radius: 12px; border: 2px solid #fde68a; margin-bottom: 20px; text-align: left; max-height: 250px; overflow-y: auto; }
-        body.dark-mode .announcement-popup-text { color: #fef3c7 !important; background: #18181b !important; border-color: #d97706 !important; }
     </style>
 </head>
 <body>
@@ -207,6 +295,7 @@
             <button type="button" class="dark-mode-btn" id="btn-toggle-dark" onclick="toggleDarkMode()">🌙 Gelap</button>
         </div>
 
+        <!-- HEADER DENGAN WARNA MERAH MENYALA DI MODE GELAP -->
         <div class="gradient-header">
             <h2>Antrian Walk-In Promotor</h2>
             <p>UFO Kebonsari</p>
@@ -216,64 +305,88 @@
             STATUS ANTRIAN: OPEN
         </div>
 
-        <div class="card-giliran-wrapper">
-            <div class="card-giliran-ha">
-                <div class="label-giliran">Giliran HA Saat Ini</div>
-                <div id="nama-aktif-ha" class="nama-giliran-aktif">-</div>
-            </div>
-            <div class="card-giliran-av">
-                <div class="label-giliran">Giliran AV Saat Ini</div>
-                <div id="nama-aktif-av" class="nama-giliran-aktif">-</div>
-            </div>
-        </div>
-
+        <!-- PANEL LOGIN -->
         <div id="panel-login" style="display: none;">
             <div class="input-group">
                 <label>Pilih Nama Anda (Kunci Perangkat)</label>
                 <select id="pilih-sales"><option value="">-- Pilih Nama Anda --</option></select>
             </div>
-            <button type="button" id="btn-simpan-hp" class="btn-customer" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
+            <button type="button" id="btn-simpan-hp" class="btn-customer btn-pulse" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
         </div>
 
+        <!-- PANEL MENU UTAMA -->
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <span style="color: var(--text-muted);">Promotor:</span> <strong id="label-user-aktif" style="color:var(--primary-dark); font-size: 15px;">-</strong>
             </div>
 
-            <div class="input-group">
-                <label>Pilih Kategori Antrian</label>
-                <select id="pilih-kategori">
-                    <option value="HA">HA (Home Appliance)</option>
-                    <option value="AV">AV (Audio Video)</option>
-                </select>
+            <!-- PETA MINI VISUALISASI POSISI -->
+            <div class="input-group" id="section-peta-gps">
+                <label>Peta Posisi Anda & Radius Toko</label>
+                <div id="map-promotor" style="width: 100%; height: 180px; border-radius: 14px; border: 2px solid var(--border); z-index: 1;"></div>
             </div>
 
-            <button type="button" id="btn-utama-antri" class="btn-success" onclick="aksiUtamaAntri()">Daftar Antrian</button>
-            
-            <div id="keterangan-lock-box" style="display: none; margin-top: 10px; padding: 12px 14px; background: #fee2e2; border: 2px solid #fca5a5; color: #b91c1c; border-radius: 12px; font-size: 12px; font-weight: 700; text-align: left;">
-                🔒 <b>LOCK (Silahkan Lapor Untuk Membuka)</b><br>
-                <span id="teks-alasan-lock" style="font-weight: 600; font-size: 11px; opacity: 0.95; display: block; margin-top: 4px;">-</span>
+            <!-- KOTAK GILIRAN HA & AV -->
+            <div class="timer-box-wrapper">
+                <div class="timer-card-admin ha">
+                    <div>
+                        <span class="timer-badge-title">GILIRAN HA SAAT INI</span>
+                        <div id="promotor-nama-ha" class="promotor-nama-aktif">Memuat...</div>
+                    </div>
+                </div>
+                <div class="timer-card-admin av">
+                    <div>
+                        <span class="timer-badge-title">GILIRAN AV SAAT INI</span>
+                        <div id="promotor-nama-av" class="promotor-nama-aktif">Memuat...</div>
+                    </div>
+                </div>
             </div>
 
-            <button type="button" id="btn-utama-customer" class="btn-customer" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
-            <button type="button" id="btn-selesai-closing" class="btn-closing" onclick="aksiSelesaiClosing()" style="display: none; margin-top: 10px;">SELESAI MELAYANI (DEAL / CLOSING)</button>
-            <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 12px;">DIPANGGIL CS/GUDANG (KUNCI POSISI)</button>
-            <button type="button" id="btn-keluar-istirahat" class="btn-amber" onclick="bukaModalKeluarIstirahat()" style="display: none; margin-top: 12px;">KELUAR ANTRIAN (ISTIRAHAT)</button>
+            <!-- CHECK-IN KEDATANGAN -->
+            <div id="section-checkin-awal" style="display: none;">
+                <div class="input-group">
+                    <label>Check-in Kehadiran (Awal Masuk Kerja)</label>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 8px 0; text-align: left;">Silakan pilih kategori utama Anda untuk hari ini:</p>
+                    <select id="pilih-kategori-hadir">
+                        <option value="HA">HA (Home Appliance)</option>
+                        <option value="AV">AV (Audio Video)</option>
+                    </select>
+                </div>
+                <button type="button" id="btn-hadir" class="btn-success btn-pulse" onclick="aksiHadirKerja()">Konfirmasi Kehadiran & Masuk Antri</button>
+            </div>
+
+            <!-- SISTEM NORMAL -->
+            <div id="section-normal" style="display: none;">
+                <div class="input-group" id="group-pilih-kategori-normal">
+                    <label>Pilih Kategori Antrian</label>
+                    <select id="pilih-kategori-normal">
+                        <option value="HA">HA (Home Appliance)</option>
+                        <option value="AV">AV (Audio Video)</option>
+                    </select>
+                </div>
+
+                <button type="button" id="btn-daftar-antrian" class="btn-success btn-pulse" onclick="aksiDaftarAntrianNormal()" style="display: none; margin-top: 4px;">Daftar Antrian</button>
+                <button type="button" id="btn-utama-customer" class="btn-customer btn-pulse" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
+                <button type="button" id="btn-selesai-closing" class="btn-closing" onclick="aksiSelesaiClosing()" style="display: none; margin-top: 10px;">SELESAI MELAYANI (DEAL / CLOSING)</button>
+                <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 12px;">DIPANGGIL CS/GUDANG (KUNCI POSISI)</button>
+                
+                <button type="button" id="btn-utama-ibadah" class="btn-indigo" onclick="aksiToggleIbadah()" style="display: none; margin-top: 12px;">SEDANG IBADAH (KUNCI POSISI)</button>
+
+                <button type="button" id="btn-keluar-istirahat" class="btn-amber" onclick="bukaModalKeluarIstirahat()" style="display: none; margin-top: 12px;">KELUAR ANTRIAN (ISTIRAHAT)</button>
+            </div>
         </div>
 
+        <!-- LIVE URUTAN KATEGORI HA & AV -->
         <div style="margin-top: 24px; text-align: left;">
-            <div style="margin-bottom: 20px;">
-                <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Live Urutan HA</span>
-                <ul id="item-antrian-list-ha" class="list-antrian"><li><span>Memuat data...</span></li></ul>
-            </div>
-            <div>
-                <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Live Urutan AV</span>
-                <ul id="item-antrian-list-av" class="list-antrian"><li><span>Memuat data...</span></li></ul>
-            </div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 12px; text-transform: uppercase;">LIVE URUTAN KATEGORI HA</div>
+            <ul id="list-HA" class="list-antrian"><li><span>Memuat...</span></li></ul>
+
+            <div style="font-size: 14px; font-weight: 800; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-top: 24px; margin-bottom: 12px; text-transform: uppercase;">LIVE URUTAN KATEGORI AV</div>
+            <ul id="list-AV" class="list-antrian"><li><span>Memuat...</span></li></ul>
         </div>
 
-        <a href="https://wa.me/6289524391002" target="_blank" class="wa-report-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        <a href="https://wa.me/6289524391002" target="_blank" class="wa-report-btn wa-pulse">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="fill: #ffffff; stroke: none;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
             Laporkan via WhatsApp
         </a>
     </div>
@@ -288,12 +401,406 @@
         </div>
     </div>
 
-    <div id="modal-pengumuman-spv" class="modal-overlay">
-        <div class="modal-box announcement-popup-box">
-            <div class="modal-title" style="color: #b45309;">🚨 PENGUMUMAN PENTING</div>
-            <div id="teks-pengumuman-popup" class="announcement-popup-text">-</div>
-            <div class="modal-actions">
-                <button type="button" class="btn-customer" style="background: #d97706;" onclick="konfirmasiSudahBacaPengumuman()">Saya Mengerti & Mengikuti</button>
+    <script>
+        const SCRIPT_URL = "<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antrian Walk-In Promotor - UFO Kebonsari</title>
+    <link rel="shortcut icon" href="#">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS untuk Peta Visual -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #2563eb;
+            --customer-blue: #2563eb;
+            --closing-red: #dc2626;
+            --purple-cs: #7c3aed;
+            --teal-cs: #0d9488;
+            --amber-rest: #d97706;
+            --indigo-ibadah: #4f46e5;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #cbd5e1;
+        }
+
+        /* STYLING MODE GELAP */
+        body.dark-mode {
+            --bg-color: #080203 !important;
+            --card-bg: #140406 !important;
+            --text-main: #ffffff !important;
+            --text-muted: #fca5a5 !important;
+            --border: #ef4444 !important;
+        }
+
+        body.dark-mode { background: #080203 !important; }
+        
+        body.dark-mode .app-container { 
+            background: #140406 !important; 
+            border: 2px solid #ef4444 !important; 
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.45) !important; 
+        }
+
+        /* HEADER MERAH MENYALA DI MODE GELAP */
+        body.dark-mode .gradient-header { 
+            background: linear-gradient(135deg, #450a0a 0%, #1f0505 100%) !important; 
+            border: 2px solid #ef4444 !important; 
+            box-shadow: 0 0 35px rgba(239, 68, 68, 0.6) !important;
+        }
+        body.dark-mode .gradient-header h2 {
+            color: #fca5a5 !important;
+            text-shadow: 0 0 15px rgba(239, 68, 68, 0.9) !important;
+        }
+        body.dark-mode .gradient-header p {
+            color: #f87171 !important;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.7) !important;
+        }
+
+        .dark-mode-btn { background: #ffffff; border: 2px solid var(--border); color: var(--text-main); padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        body.dark-mode .dark-mode-btn { background: #450a0a !important; color: #ffffff !important; border: 2px solid #f87171 !important; box-shadow: 0 0 20px rgba(248, 113, 113, 0.6); }
+
+        body.dark-mode .status-badge-sistem {
+            background: #450a0a !important;
+            color: #fca5a5 !important;
+            border: 2px solid #ef4444 !important;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.7) !important;
+        }
+
+        /* STYLING MODERN CUSTOM SELECT & INPUT */
+        body.dark-mode select, body.dark-mode input[type="text"] { 
+            background: #1f0505 !important; 
+            color: #ffffff !important; 
+            border: 2px solid #ef4444 !important; 
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5) !important;
+        }
+
+        body.dark-mode select:disabled { 
+            background-color: #18181b !important; 
+            color: #71717a !important; 
+            border-color: #27272a !important; 
+            box-shadow: none !important;
+        }
+
+        body.dark-mode .user-badge { 
+            background: #2b0a0d !important; 
+            border: 2px solid #f87171 !important; 
+            color: #ffffff !important; 
+            box-shadow: 0 0 25px rgba(248, 113, 113, 0.6) !important;
+        }
+
+        /* KOTAK GILIRAN HA & AV DISUSUN ATAS-BAWAH (VERTIKAL) */
+        .timer-box-wrapper { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+        .timer-card-admin { background: #f8fafc; border-radius: 14px; padding: 16px; text-align: center; border: 2px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; }
+        
+        /* EFEK NEON PERSIS GAMBAR (ATAS-BAWAH) KHUSUS MODE GELAP */
+        body.dark-mode .timer-card-admin.ha {
+            background: #000000 !important;
+            border: 3px solid #facc15 !important;
+            border-radius: 20px !important;
+            box-shadow: 0 0 25px rgba(250, 204, 21, 0.6), inset 0 0 15px rgba(250, 204, 21, 0.2) !important;
+        }
+        body.dark-mode .timer-card-admin.av {
+            background: #000000 !important;
+            border: 3px solid #22c55e !important;
+            border-radius: 20px !important;
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.6), inset 0 0 15px rgba(34, 197, 94, 0.2) !important;
+        }
+
+        .timer-badge-title { font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .ha .timer-badge-title { color: #2563eb; }
+        .av .timer-badge-title { color: #7c3aed; }
+
+        /* TEKS & GLOW JUDUL & NAMA DI MODE GELAP */
+        body.dark-mode .timer-card-admin.ha .timer-badge-title { color: #fde047 !important; text-shadow: 0 0 10px rgba(253, 224, 71, 0.8); }
+        body.dark-mode .timer-card-admin.av .timer-badge-title { color: #86efac !important; text-shadow: 0 0 10px rgba(134, 239, 172, 0.8); }
+
+        .promotor-nama-aktif { font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 36px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
+        
+        body.dark-mode .timer-card-admin.ha .promotor-nama-aktif { color: #fef08a !important; text-shadow: 0 0 15px rgba(254, 240, 138, 0.9); }
+        body.dark-mode .timer-card-admin.av .promotor-nama-aktif { color: #bbf7d0 !important; text-shadow: 0 0 15px rgba(187, 247, 208, 0.9); }
+
+        body.dark-mode .list-antrian li { 
+            background: #1f0505 !important; 
+            border: 2px solid #f87171 !important; 
+            color: #ffffff !important; 
+            box-shadow: 0 0 20px rgba(248, 113, 113, 0.5) !important;
+        }
+
+        body.dark-mode .modal-box { 
+            background: #2b0a0d !important; 
+            border: 2px solid #ef4444 !important; 
+            color: #ffffff !important; 
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.6) !important;
+        }
+
+        body.dark-mode .btn-cancel {
+            background: #27272a !important;
+            color: #ffffff !important;
+            border: 2px solid #71717a !important;
+            box-shadow: 0 0 15px rgba(113, 113, 122, 0.5) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL DAFTAR ANTRIAN & HADIR (WARNA BIRU) */
+        body.dark-mode .btn-success,
+        body.dark-mode .btn-customer {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border: 2px solid #3b82f6 !important;
+            box-shadow: 0 0 25px rgba(37, 99, 235, 0.7) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL SELESAI / CLOSING (WARNA MERAH ASLI) */
+        body.dark-mode .btn-closing {
+            background: #dc2626 !important;
+            color: #ffffff !important;
+            border: 2px solid #f87171 !important;
+            box-shadow: 0 0 25px rgba(220, 38, 38, 0.7) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL CS (WARNA UNGU ASLI) */
+        body.dark-mode .btn-purple {
+            background: #7c3aed !important;
+            color: #ffffff !important;
+            border: 2px solid #a78bfa !important;
+            box-shadow: 0 0 25px rgba(124, 58, 237, 0.7) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL TEAL (WARNA HIJAU TOSCA ASLI) */
+        body.dark-mode .btn-teal {
+            background: #0d9488 !important;
+            color: #ffffff !important;
+            border: 2px solid #2dd4bf !important;
+            box-shadow: 0 0 25px rgba(13, 148, 136, 0.7) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL IBADAH (WARNA INDIGO ASLI) */
+        body.dark-mode .btn-indigo {
+            background: #4f46e5 !important;
+            color: #ffffff !important;
+            border: 2px solid #818cf8 !important;
+            box-shadow: 0 0 25px rgba(79, 70, 229, 0.7) !important;
+        }
+
+        /* EFEK MENYALA KHUSUS TOMBOL KELUAR / AMBER ASLI */
+        body.dark-mode .btn-amber {
+            background: #d97706 !important;
+            color: #ffffff !important;
+            border: 2px solid #fbbf24 !important;
+            box-shadow: 0 0 25px rgba(217, 119, 6, 0.7) !important;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        .btn-pulse { animation: pulseGlow 2s infinite; }
+
+        @keyframes pulseGreen {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 12px rgba(37, 211, 102, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+        .wa-pulse { animation: pulseGreen 2s infinite; }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s ease-in-out infinite; vertical-align: middle; margin-right: 6px; }
+
+        *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
+        body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); border-radius: 24px; padding: 24px; border: 2px solid var(--border); box-shadow: 0 15px 35px -5px rgba(0,0,0,0.1); text-align: center; }
+
+        .top-controls { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+
+        .gradient-header { background: linear-gradient(135deg, #dc2626 0%, #ffffff 100%); border-radius: 18px; padding: 22px; color: white; margin-bottom: 18px; box-shadow: 0 8px 20px -4px rgba(220, 38, 38, 0.3); }
+        .gradient-header h2 { margin: 0; font-size: 22px; font-weight: 800; text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
+        .gradient-header p { margin: 6px 0 0 0; font-size: 13px; font-weight: 700; text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
+
+        .status-badge-sistem { display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 18px; letter-spacing: 0.5px; }
+        .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
+        .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
+
+        .input-group { margin-bottom: 16px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+
+        select, input[type="text"] { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border-radius: 14px; 
+            border: 2px solid var(--border); 
+            background: #ffffff; 
+            font-size: 15px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            outline: none; 
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+        
+        button { width: 100%; padding: 14px 12px; border-radius: 14px; font-size: 13px; font-weight: 800; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; }
+        button:active { transform: scale(0.98); }
+
+        .btn-success { background: #2563eb; color: white; }
+        .btn-customer { background: #2563eb; color: white; }
+        .btn-closing { background: var(--closing-red); color: white; }
+        .btn-purple { background: #7c3aed; color: white; }
+        .btn-teal { background: #0d9488; color: white; }
+        .btn-amber { background: #d97706; color: white; }
+        .btn-indigo { background: var(--indigo-ibadah); color: white; }
+        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; animation: none !important; }
+
+        .user-badge { background: #f8fafc; border: 2px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 18px; text-align: left; font-size: 14px; font-weight: 600; }
+        .list-antrian { list-style: none; padding: 0; margin: 8px 0 0 0; text-align: left; }
+        .list-antrian li { padding: 12px 14px; background: #ffffff; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--border); font-size: 14px; font-weight: 700; }
+        
+        .badge-status-item { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+        .badge-giliran-anda { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        .badge-standby { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+        .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+        .badge-ibadah { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+
+        .wa-report-btn { margin-top: 16px; background: #25d366; border: 2px solid #1ebe57; color: white; font-size: 13px; padding: 14px; border-radius: 12px; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 10px; font-weight: 800; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 11, 20, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-box { background: white; width: 100%; max-width: 380px; padding: 24px; border-radius: 20px; text-align: center; border: 2px solid var(--border); }
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; color: var(--text-main); }
+        .modal-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; font-weight: 600; text-align: left; }
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-actions button { flex: 1; padding: 12px; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="top-controls">
+            <button type="button" class="dark-mode-btn" id="btn-toggle-dark" onclick="toggleDarkMode()">🌙 Gelap</button>
+        </div>
+
+        <!-- HEADER DENGAN WARNA MERAH MENYALA DI MODE GELAP -->
+        <div class="gradient-header">
+            <h2>Antrian Walk-In Promotor</h2>
+            <p>UFO Kebonsari</p>
+        </div>
+
+        <div id="badge-status-sistem" class="status-badge-sistem status-open">
+            STATUS ANTRIAN: OPEN
+        </div>
+
+        <!-- PANEL LOGIN -->
+        <div id="panel-login" style="display: none;">
+            <div class="input-group">
+                <label>Pilih Nama Anda (Kunci Perangkat)</label>
+                <select id="pilih-sales"><option value="">-- Pilih Nama Anda --</option></select>
+            </div>
+            <button type="button" id="btn-simpan-hp" class="btn-customer btn-pulse" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
+        </div>
+
+        <!-- PANEL MENU UTAMA -->
+        <div id="panel-menu-utama" style="display: none;">
+            <div class="user-badge">
+                <span style="color: var(--text-muted);">Promotor:</span> <strong id="label-user-aktif" style="color:var(--primary-dark); font-size: 15px;">-</strong>
+            </div>
+
+            <!-- PETA MINI VISUALISASI POSISI -->
+            <div class="input-group" id="section-peta-gps">
+                <label>Peta Posisi Anda & Radius Toko</label>
+                <div id="map-promotor" style="width: 100%; height: 180px; border-radius: 14px; border: 2px solid var(--border); z-index: 1;"></div>
+            </div>
+
+            <!-- KOTAK GILIRAN HA & AV -->
+            <div class="timer-box-wrapper">
+                <div class="timer-card-admin ha">
+                    <div>
+                        <span class="timer-badge-title">GILIRAN HA SAAT INI</span>
+                        <div id="promotor-nama-ha" class="promotor-nama-aktif">Memuat...</div>
+                    </div>
+                </div>
+                <div class="timer-card-admin av">
+                    <div>
+                        <span class="timer-badge-title">GILIRAN AV SAAT INI</span>
+                        <div id="promotor-nama-av" class="promotor-nama-aktif">Memuat...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHECK-IN KEDATANGAN -->
+            <div id="section-checkin-awal" style="display: none;">
+                <div class="input-group">
+                    <label>Check-in Kehadiran (Awal Masuk Kerja)</label>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 8px 0; text-align: left;">Silakan pilih kategori utama Anda untuk hari ini:</p>
+                    <select id="pilih-kategori-hadir">
+                        <option value="HA">HA (Home Appliance)</option>
+                        <option value="AV">AV (Audio Video)</option>
+                    </select>
+                </div>
+                <button type="button" id="btn-hadir" class="btn-success btn-pulse" onclick="aksiHadirKerja()">Konfirmasi Kehadiran & Masuk Antri</button>
+            </div>
+
+            <!-- SISTEM NORMAL -->
+            <div id="section-normal" style="display: none;">
+                <div class="input-group" id="group-pilih-kategori-normal">
+                    <label>Pilih Kategori Antrian</label>
+                    <select id="pilih-kategori-normal">
+                        <option value="HA">HA (Home Appliance)</option>
+                        <option value="AV">AV (Audio Video)</option>
+                    </select>
+                </div>
+
+                <button type="button" id="btn-daftar-antrian" class="btn-success btn-pulse" onclick="aksiDaftarAntrianNormal()" style="display: none; margin-top: 4px;">Daftar Antrian</button>
+                <button type="button" id="btn-utama-customer" class="btn-customer btn-pulse" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
+                <button type="button" id="btn-selesai-closing" class="btn-closing" onclick="aksiSelesaiClosing()" style="display: none; margin-top: 10px;">SELESAI MELAYANI (DEAL / CLOSING)</button>
+                <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 12px;">DIPANGGIL CS/GUDANG (KUNCI POSISI)</button>
+                
+                <button type="button" id="btn-utama-ibadah" class="btn-indigo" onclick="aksiToggleIbadah()" style="display: none; margin-top: 12px;">SEDANG IBADAH (KUNCI POSISI)</button>
+
+                <button type="button" id="btn-keluar-istirahat" class="btn-amber" onclick="bukaModalKeluarIstirahat()" style="display: none; margin-top: 12px;">KELUAR ANTRIAN (ISTIRAHAT)</button>
+            </div>
+        </div>
+
+        <!-- LIVE URUTAN KATEGORI HA & AV -->
+        <div style="margin-top: 24px; text-align: left;">
+            <div style="font-size: 14px; font-weight: 800; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 12px; text-transform: uppercase;">LIVE URUTAN KATEGORI HA</div>
+            <ul id="list-HA" class="list-antrian"><li><span>Memuat...</span></li></ul>
+
+            <div style="font-size: 14px; font-weight: 800; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-top: 24px; margin-bottom: 12px; text-transform: uppercase;">LIVE URUTAN KATEGORI AV</div>
+            <ul id="list-AV" class="list-antrian"><li><span>Memuat...</span></li></ul>
+        </div>
+
+        <a href="https://wa.me/6289524391002" target="_blank" class="wa-report-btn wa-pulse">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="fill: #ffffff; stroke: none;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            Laporkan via WhatsApp
+        </a>
+    </div>
+
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modal-title" class="modal-title">Pemberitahuan</div>
+            <div id="modal-desc" class="modal-desc">Isi pesan...</div>
+            <div id="modal-actions" class="modal-actions">
+                <button type="button" class="btn-customer" onclick="tutupModal()">OK</button>
             </div>
         </div>
     </div>
@@ -305,14 +812,46 @@
         let masterSalesGlobal = [];
         let statusSistemGlobal = "BUKA";
         let namaSalesAktifGlobal = "";
-        let pengumumanTerakhirGlobal = "";
-        
-        let sedangAdaAksiServer = false;
+        let koordinatToko = { lat: "", lng: "", radius: 50 }; 
+        let localActionActive = false;
+
+        let mapPromotor = null;
+        let markerTokoPeta = null;
+        let circleTokoPeta = null;
+        let markerSayaPeta = null;
+
+        function getTanggalIndo() {
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yyyy = now.getFullYear();
+            return `${dd}-${mm}-${yyyy}`;
+        }
 
         window.onload = function() {
             initDarkMode();
+            
+            const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
+            if (cachedKoordinat) {
+                try { 
+                    koordinatToko = JSON.parse(cachedKoordinat); 
+                    if (koordinatToko.lat && koordinatToko.lng) {
+                        setTimeout(() => {
+                            initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, null, null);
+                        }, 50);
+                    }
+                } catch(e) {}
+            }
+
             muatMasterSalesInstant();
             muatCacheAntrianInstan();
+            
+            const tanggalHariIni = getTanggalIndo();
+            const tanggalCheckinTerakhir = localStorage.getItem('ufo_checkin_tanggal') || "";
+            if (tanggalCheckinTerakhir !== tanggalHariIni) {
+                localStorage.removeItem('ufo_checkin_hari_ini');
+                localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
+            }
             
             const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
             if (cachedNama) {
@@ -327,8 +866,12 @@
 
             cekServerBg();
             muatMasterSales();
+            mulaiPemantauanGPS();
             
-            setInterval(muatDataAntrian, 3000); 
+            setInterval(() => {
+                muatDataAntrian();
+                cekStatusPerangkatSaya();
+            }, 3000); 
         };
 
         function toggleDarkMode() {
@@ -339,11 +882,11 @@
         }
 
         function initDarkMode() {
-            const savedDark = localStorage.getItem('ufo_dark_mode');
-            if (savedDark === 'true') {
+            const isDark = localStorage.getItem('ufo_dark_mode') === 'true';
+            if (isDark) {
                 document.body.classList.add('dark-mode');
-                updateDarkButtonText(true);
             }
+            updateDarkButtonText(isDark);
         }
 
         function updateDarkButtonText(isDark) {
@@ -354,7 +897,7 @@
         function getDeviceId() {
             let localSalt = localStorage.getItem('ufo_device_salt');
             if (!localSalt) {
-                localSalt = typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36);
+                localSalt = Math.random().toString(36).substring(2) + Date.now().toString(36);
                 localStorage.setItem('ufo_device_salt', localSalt);
             }
             let hash = 0;
@@ -367,75 +910,84 @@
             if (cachedAntrian) {
                 try {
                     const parsed = JSON.parse(cachedAntrian);
-                    renderUIRental(parsed.data, parsed.statusAntrian, parsed.pengumumanSPV);
+                    renderUIRental(parsed.data, parsed.statusAntrian, parsed.koordinatPusat);
                 } catch(e) {}
             }
         }
 
         function cekServerBg() {
-            if (sedangAdaAksiServer) return;
             const deviceId = getDeviceId();
             Promise.all([
                 fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`).then(r => r.json()).catch(() => null),
                 fetch(`${SCRIPT_URL}?aksi=getAntrian`).then(r => r.json()).catch(() => null)
             ]).then(([resBinding, resAntrian]) => {
-                if (sedangAdaAksiServer) return;
-                if (resBinding) {
-                    if (resBinding.status === "terkunci" && resBinding.nama) {
-                        namaSalesAktifGlobal = resBinding.nama;
-                        localStorage.setItem('ufo_nama_sales_aktif', resBinding.nama);
-                        document.getElementById('panel-login').style.display = 'none';
-                        document.getElementById('panel-menu-utama').style.display = 'block';
-                        document.getElementById('label-user-aktif').innerText = resBinding.nama;
-                    } else if (resBinding.status === "bebas") {
-                        localStorage.removeItem('ufo_nama_sales_aktif');
-                        document.getElementById('panel-login').style.display = 'block';
-                        document.getElementById('panel-menu-utama').style.display = 'none';
-                    }
+                if (resBinding && resBinding.status === "terkunci" && resBinding.nama) {
+                    namaSalesAktifGlobal = resBinding.nama;
+                    localStorage.setItem('ufo_nama_sales_aktif', resBinding.nama);
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = resBinding.nama;
                 }
                 if (resAntrian && resAntrian.status === "sukses") {
                     localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
-                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.pengumumanSPV);
+                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat);
                 }
             });
+        }
+
+        function cekStatusPerangkatSaya() {
+            const namaSaya = localStorage.getItem('ufo_nama_sales_aktif');
+            const deviceId = getDeviceId();
+            if (!namaSaya) return;
+
+            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.status !== "terkunci" || !res.nama || res.nama.trim().toLowerCase() !== namaSaya.trim().toLowerCase()) {
+                    localStorage.removeItem('ufo_nama_sales_aktif');
+                    localStorage.removeItem('ufo_checkin_hari_ini');
+                    alert("Perangkat Anda telah di-reset oleh Admin. Silakan pilih ulang nama Anda.");
+                    window.location.reload();
+                }
+            }).catch(() => {});
         }
 
         function simpanAkunHP() {
             const namaPilih = document.getElementById('pilih-sales').value;
             const deviceId = getDeviceId();
-            if(!namaPilih) return tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
-            
-            tampilkanModalKonfirmasi("Kunci Perangkat", `Kunci HP ini atas nama (${namaPilih})?`, function() {
-                const btnSimpan = document.getElementById('btn-simpan-hp');
-                btnSimpan.disabled = true;
-                btnSimpan.className = "btn-customer btn-disabled";
-                btnSimpan.innerHTML = `<span class="spinner"></span> Menyimpan & Mengunci...`;
+            if(!namaPilih) {
+                tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
+                return;
+            }
 
-                sedangAdaAksiServer = true;
-                fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}`)
-                .then(res => res.json())
-                .then(res => {
-                    sedangAdaAksiServer = false;
-                    btnSimpan.disabled = false;
-                    btnSimpan.className = "btn-customer";
-                    btnSimpan.innerHTML = "Simpan & Kunci di HP Ini";
+            const btn = document.getElementById('btn-simpan-hp');
+            setButtonLoading(btn, true, "Menyimpan Perangkat...");
 
-                    if(res.status === "sukses") {
-                        namaSalesAktifGlobal = namaPilih;
-                        localStorage.setItem('ufo_nama_sales_aktif', namaPilih);
-                        document.getElementById('panel-login').style.display = 'none';
-                        document.getElementById('panel-menu-utama').style.display = 'block';
-                        document.getElementById('label-user-aktif').innerText = namaPilih;
-                        tampilkanModal("Berhasil", `HP terikat untuk: ${namaPilih}`);
-                        muatDataAntrian(true);
-                    } else { tampilkanModal("Akses Ditolak", res.pesan); }
-                }).catch(() => {
-                    sedangAdaAksiServer = false;
-                    btnSimpan.disabled = false;
-                    btnSimpan.className = "btn-customer";
-                    btnSimpan.innerHTML = "Simpan & Kunci di HP Ini";
-                    tampilkanModal("Gagal", "Koneksi ke server bermasalah.");
-                });
+            validasiGpsDanJalankan(function() {
+                lanjutkanSimpanAkun(namaPilih, deviceId, btn);
+            }, function() {
+                setButtonLoading(btn, false, "Simpan & Kunci di HP Ini");
+            });
+        }
+
+        function lanjutkanSimpanAkun(namaPilih, deviceId, btnElement) {
+            fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                setButtonLoading(btnElement, false, "Simpan & Kunci di HP Ini");
+                if(res.status === "sukses") {
+                    namaSalesAktifGlobal = namaPilih;
+                    localStorage.setItem('ufo_nama_sales_aktif', namaPilih);
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = namaPilih;
+                    muatDataAntrian();
+                } else { 
+                    tampilkanModal("Akses Ditolak", res.pesan); 
+                }
+            }).catch(() => {
+                setButtonLoading(btnElement, false, "Simpan & Kunci di HP Ini");
+                tampilkanModal("Gagal", "Terjadi gangguan jaringan saat menyimpan perangkat.");
             });
         }
 
@@ -449,29 +1001,25 @@
             if (cachedSales) {
                 try {
                     masterSalesGlobal = JSON.parse(cachedSales);
-                    updateDaftarSales(masterSalesGlobal);
+                    let html = '<option value="">-- Pilih Nama Anda --</option>';
+                    masterSalesGlobal.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
+                    document.getElementById('pilih-sales').innerHTML = html;
                 } catch(e) {}
             }
         }
 
         function muatMasterSales() {
-            if (sedangAdaAksiServer) return;
             fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`)
             .then(res => res.json())
             .then(res => {
                 if(res.status === "sukses" && res.data) {
                     masterSalesGlobal = res.data;
                     localStorage.setItem('ufo_master_sales_cache', JSON.stringify(res.data));
-                    updateDaftarSales(res.data);
+                    let html = '<option value="">-- Pilih Nama Anda --</option>';
+                    res.data.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
+                    document.getElementById('pilih-sales').innerHTML = html;
                 }
-            }).catch(() => {});
-        }
-
-        function updateDaftarSales(dataSales) {
-            let html = '<option value="">-- Pilih Nama Anda --</option>';
-            dataSales.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
-            const selectEl = document.getElementById('pilih-sales');
-            if (selectEl) selectEl.innerHTML = html;
+            });
         }
 
         function cekStatusSayaDariArray(dataAntrian) {
@@ -481,161 +1029,187 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
-        function renderUIRental(dataAntrian, statusSistem, pengumumanSPV) {
-            if (sedangAdaAksiServer) return;
+        function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
+            if (localActionActive) return;
 
             daftarAntrianGlobal = dataAntrian || [];
             statusSistemGlobal = statusSistem || "BUKA";
-            const akunSaya = getAkunAktif().trim();
+            
+            if (koordinatServer) {
+                koordinatToko.lat = koordinatServer.lat || "";
+                koordinatToko.lng = koordinatServer.lng || "";
+                koordinatToko.radius = Number(koordinatServer.radius) || 50;
+                
+                localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
+            }
 
             const badge = document.getElementById('badge-status-sistem');
             badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
             badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
 
-            const modalPopupPengumuman = document.getElementById('modal-pengumuman-spv');
-            if (pengumumanSPV && pengumumanSPV.trim() !== "") {
-                document.getElementById('teks-pengumuman-popup').innerText = pengumumanSPV;
-                const lastReadAnnouncement = localStorage.getItem('ufo_last_read_announcement');
-                if (lastReadAnnouncement !== pengumumanSPV) modalPopupPengumuman.classList.add('active'); 
-                else modalPopupPengumuman.classList.remove('active'); 
-                pengumumanTerakhirGlobal = pengumumanSPV;
-            } else { modalPopupPengumuman.classList.remove('active'); }
+            let listHA = "", listAV = "";
+            let urutHA = 1, urutAV = 1;
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            let kategoriSayaAktif = "";
 
-            let listHtmlHA = "", listHtmlAV = "", namaHANow = "-", namaAVNow = "-";
-            let apakahSayaUrutanPertamaHA = false, apakahSayaUrutanPertamaAV = false;
+            const dataStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
+            const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
+            const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
 
-            let listStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
-            let standbyHA = listStandby.find(item => (item.kategori || "HA") === "HA");
-            let standbyAV = listStandby.find(item => item.kategori === "AV");
+            document.getElementById('promotor-nama-ha').textContent = promotorHA ? promotorHA.nama : "Belum Ada";
+            document.getElementById('promotor-nama-av').textContent = promotorAV ? promotorAV.nama : "Belum Ada";
 
-            if (standbyHA) { namaHANow = standbyHA.nama; if (akunSaya && standbyHA.nama.trim().toLowerCase() === akunSaya.toLowerCase()) apakahSayaUrutanPertamaHA = true; }
-            if (standbyAV) { namaAVNow = standbyAV.nama; if (akunSaya && standbyAV.nama.trim().toLowerCase() === akunSaya.toLowerCase()) apakahSayaUrutanPertamaAV = true; }
-
-            if(daftarAntrianGlobal.length > 0) {
-                let urutHA = 1, urutAV = 1;
+            if (daftarAntrianGlobal.length > 0) {
                 daftarAntrianGlobal.forEach((item) => {
-                    const kategoriItem = item.kategori ? item.kategori : "HA"; 
-                    let itemHtml = "";
+                    let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
+                    if (String(item.nama).trim().toLowerCase() === akunSaya) {
+                        kategoriSayaAktif = kat;
+                    }
 
+                    let itemHtml = "";
                     if (item.status === "Standby") {
-                        let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
-                        let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Anda</span>` : `<span class="badge-status-item badge-standby">Standby</span>`;
+                        let urut = 1;
+                        if (kat === "HA") urut = urutHA++;
+                        else if (kat === "AV") urut = urutAV++;
+
+                        let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
                     } else if (item.status === "Melayani") {
                         itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
                     } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
-                        let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
-                        let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Anda</span>` : `<span class="badge-status-item badge-cs">Dipanggil CS/GUDANG</span>`;
-                        itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/Gudang</span></li>`;
+                    } else if (item.status === "Ibadah") {
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-ibadah">Sedang Ibadah</span></li>`;
                     }
 
-                    if (kategoriItem === "AV") listHtmlAV += itemHtml;
-                    else listHtmlHA += itemHtml;
+                    if (kat === "HA") listHA += itemHtml;
+                    else if (kat === "AV") listAV += itemHtml;
                 });
             }
 
-            if(!listHtmlHA) listHtmlHA = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian HA</span></li>";
-            if(!listHtmlAV) listHtmlAV = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian AV</span></li>";
+            const kosongHtml = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian</span></li>";
+            document.getElementById('list-HA').innerHTML = listHA || kosongHtml;
+            document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
 
             let statusSayaNyata = cekStatusSayaDariArray(daftarAntrianGlobal);
-
-            let isLocked = false;
-            let alasanLockSPV = "";
-            if (akunSaya && masterSalesGlobal.length > 0) {
-                const sayaObj = masterSalesGlobal.find(item => String(item.nama).trim().toLowerCase() === akunSaya.toLowerCase());
-                if (sayaObj && String(sayaObj.statusLock).toUpperCase() === "LOCKED") {
-                    isLocked = true;
-                    alasanLockSPV = sayaObj.alasanLock ? sayaObj.alasanLock : "Tidak ada keterangan dari SPV.";
-                }
+            const sectionCheckinAwal = document.getElementById('section-checkin-awal');
+            const sectionNormal = document.getElementById('section-normal');
+            
+            const sectionPetaGps = document.getElementById('section-peta-gps');
+            if (statusSayaNyata === "belum_ada" || statusSayaNyata === "Standby") {
+                if (sectionPetaGps) sectionPetaGps.style.display = "block";
+                setTimeout(() => { 
+                    if (mapPromotor) mapPromotor.invalidateSize(); 
+                    else if (koordinatToko.lat && koordinatToko.lng) {
+                        initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, null, null);
+                    }
+                }, 100);
+            } else {
+                if (sectionPetaGps) sectionPetaGps.style.display = "none";
             }
 
-            const btnAntri = document.getElementById('btn-utama-antri');
+            let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
+
+            if (statusSayaNyata !== "belum_ada") {
+                sectionCheckinAwal.style.display = 'none';
+                sectionNormal.style.display = 'block';
+            } else if (!sudahCheckinPernahHariIni) {
+                sectionCheckinAwal.style.display = 'block';
+                sectionNormal.style.display = 'none';
+            } else {
+                sectionCheckinAwal.style.display = 'none';
+                sectionNormal.style.display = 'block';
+            }
+
+            const btnDaftar = document.getElementById('btn-daftar-antrian');
+            const groupPilihKat = document.getElementById('group-pilih-kategori-normal');
             const btnCustomer = document.getElementById('btn-utama-customer');
             const btnClosing = document.getElementById('btn-selesai-closing');
             const btnCS = document.getElementById('btn-utama-cs');
+            const btnIbadah = document.getElementById('btn-utama-ibadah');
             const btnKeluar = document.getElementById('btn-keluar-istirahat');
-            const selectKategori = document.getElementById('pilih-kategori');
-            const lockBoxEl = document.getElementById('keterangan-lock-box');
-            const teksAlasanEl = document.getElementById('teks-alasan-lock');
 
-            btnAntri.innerHTML = "Daftar Antrian"; btnAntri.className = "btn-success"; btnAntri.disabled = false;
-            btnCustomer.innerHTML = "Sudah Membawa Customer"; btnCustomer.className = "btn-customer"; btnCustomer.disabled = false;
-            btnClosing.innerHTML = "SELESAI MELAYANI (DEAL / CLOSING)"; btnClosing.className = "btn-closing"; btnClosing.disabled = false;
-            btnCS.innerHTML = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; btnCS.className = "btn-purple"; btnCS.disabled = false;
-            btnKeluar.innerHTML = "KELUAR ANTRIAN (ISTIRAHAT)"; btnKeluar.className = "btn-amber"; btnKeluar.disabled = false;
+            if (statusSayaNyata === "belum_ada") {
+                groupPilihKat.style.display = "block";
+                btnDaftar.style.display = "block";
+                btnCustomer.style.display = "none";
+                btnClosing.style.display = "none";
+                btnCS.style.display = "none";
+                btnIbadah.style.display = "none";
+                btnKeluar.style.display = "none";
 
-            if (isLocked) {
-                btnAntri.innerText = "Otomatis Terkunci"; btnAntri.className = "btn-closing btn-disabled"; btnAntri.disabled = true;
-                if (lockBoxEl && teksAlasanEl) {
-                    lockBoxEl.style.display = "block";
-                    teksAlasanEl.innerText = `Alasan: "${alasanLockSPV}"`;
+                if (statusSistemGlobal === "TUTUP") {
+                    btnDaftar.disabled = true; btnDaftar.className = "btn-success btn-disabled";
+                } else {
+                    btnDaftar.disabled = false; btnDaftar.className = "btn-success btn-pulse";
                 }
-                btnCustomer.style.display = "none"; btnClosing.style.display = "none";
-                btnCS.style.display = "none"; btnKeluar.style.display = "none"; selectKategori.disabled = true;
             } else {
-                if (lockBoxEl) lockBoxEl.style.display = "none";
+                groupPilihKat.style.display = "none";
+                btnDaftar.style.display = "none";
 
-                if (statusSayaNyata === "Melayani") {
-                    btnAntri.innerText = "Sedang Melayani Customer"; btnAntri.className = "btn-customer btn-disabled"; btnAntri.disabled = true;
-                    btnCustomer.style.display = "none"; btnClosing.style.display = "block"; btnClosing.className = "btn-closing";
-                    btnCS.style.display = "none"; btnKeluar.style.display = "none"; selectKategori.disabled = true;
-                } else if (statusSayaNyata === "Standby") {
-                    btnAntri.innerText = "Anda Sudah Di Antrian"; btnAntri.className = "btn-success btn-disabled"; btnAntri.disabled = true;
-                    btnCustomer.style.display = "block"; btnClosing.style.display = "none";
-                    
-                    let kategoriSaya = selectKategori.value;
-                    let bisaAmbil = (kategoriSaya === "AV" && apakahSayaUrutanPertamaAV) || (kategoriSaya !== "AV" && apakahSayaUrutanPertamaHA);
-                    btnCustomer.disabled = !bisaAmbil; btnCustomer.className = bisaAmbil ? "btn-customer" : "btn-customer btn-disabled";
+                if (statusSayaNyata === "Standby") {
+                    btnCustomer.style.display = "block"; 
+                    btnClosing.style.display = "none";
+                    btnCS.style.display = "block"; 
+                    btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
+                    btnKeluar.style.display = "block";
 
-                    btnCS.style.display = "block"; btnCS.className = "btn-purple";
-                    btnKeluar.style.display = "block"; btnKeluar.className = "btn-amber";
-                    selectKategori.disabled = true;
+                    if (statusSistemGlobal === "TUTUP") {
+                        btnCustomer.disabled = true; btnCustomer.className = "btn-customer btn-disabled";
+                        btnCS.disabled = true; btnCS.className = "btn-purple btn-disabled";
+                        btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
+                        btnKeluar.disabled = true; btnKeluar.className = "btn-amber btn-disabled";
+                    } else {
+                        let listSubStandby = daftarAntrianGlobal.filter(it => it.status === "Standby" && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
+                        let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
+                        let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
+
+                        btnCustomer.disabled = !apakahSayaBisaAmbil; 
+                        btnCustomer.className = apakahSayaBisaAmbil ? "btn-customer btn-pulse" : "btn-customer btn-disabled";
+                        btnCS.disabled = false; btnCS.className = "btn-purple";
+                        btnIbadah.disabled = false; btnIbadah.className = "btn-indigo";
+                        btnKeluar.disabled = false; btnKeluar.className = "btn-amber";
+                    }
+                } else if (statusSayaNyata === "Melayani") {
+                    btnCustomer.style.display = "none"; btnClosing.style.display = "block";
+                    btnCS.style.display = "none"; btnIbadah.style.display = "none"; btnKeluar.style.display = "none";
                 } else if (statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") {
-                    btnAntri.innerText = "Posisi Antrian Dikunci (Di CS/GUDANG)"; btnAntri.className = "btn-purple btn-disabled"; btnAntri.disabled = true;
                     btnCustomer.style.display = "none"; btnClosing.style.display = "none";
-                    btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal";
-                    btnKeluar.style.display = "none"; selectKategori.disabled = true;
-                } else { 
-                    btnAntri.innerText = statusSistemGlobal === "TUTUP" ? "Antrian Ditutup Oleh SPV" : "Daftar Antrian";
-                    btnAntri.className = statusSistemGlobal === "TUTUP" ? "btn-closing btn-disabled" : "btn-success";
-                    btnAntri.disabled = (statusSistemGlobal === "TUTUP");
-                    btnCustomer.style.display = "none"; btnClosing.style.display = "none";
-                    btnCS.style.display = "none"; btnKeluar.style.display = "none"; selectKategori.disabled = false;
+                    btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal"; btnCS.disabled = false;
+                    btnIbadah.style.display = "none";
+                    btnKeluar.style.display = "none";
+                } else if (statusSayaNyata === "Ibadah") {
+                    btnCustomer.style.display = "none";
+                    btnClosing.style.display = "none";
+                    btnCS.style.display = "none";
+                    btnKeluar.style.display = "none";
+                    
+                    btnIbadah.style.display = "block"; 
+                    btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)"; 
+                    btnIbadah.className = "btn-teal"; 
+                    btnIbadah.disabled = false;
                 }
             }
-
-            document.getElementById('nama-aktif-ha').innerText = namaHANow;
-            document.getElementById('nama-aktif-av').innerText = namaAVNow;
-            document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
-            document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
 
-        function muatDataAntrian(paksaTarik = false) {
-            if (sedangAdaAksiServer && !paksaTarik) return;
-
+        function muatDataAntrian() {
+            if (localActionActive) return;
             fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
-            .then(r => r.json())
+            .then(res => res.json())
             .then(res => {
-                if (sedangAdaAksiServer && !paksaTarik) return;
-                if (res && res.status === "sukses") {
+                if (res && res.status === "sukses" && !localActionActive) {
                     localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
-                    renderUIRental(res.data, res.statusAntrian, res.pengumumanSPV);
+                    renderUIRental(res.data, res.statusAntrian, res.koordinatPusat);
                 }
             }).catch(() => {});
         }
 
-        function eksekusiAksiMutlak(btnId, teksLoading, aksiServer, targetStatusSimulasi, kategoriBaru = null) {
+        function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
             const namaSales = getAkunAktif().trim();
             if (!namaSales) return;
 
-            sedangAdaAksiServer = true;
-
-            const btn = document.getElementById(btnId);
-            if (btn) {
-                btn.disabled = true;
-                btn.className += " btn-disabled";
-                btn.innerHTML = `<span class="spinner"></span> ${teksLoading}`;
-            }
+            localActionActive = true;
+            let katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
 
             if (targetStatusSimulasi === "belum_ada") {
                 daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
@@ -644,156 +1218,918 @@
                 daftarAntrianGlobal.forEach(item => {
                     if (String(item.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
                         item.status = targetStatusSimulasi;
-                        if (kategoriBaru) item.kategori = kategoriBaru;
+                        if (katBaru) item.kategori = katBaru;
                         ketemu = true;
                     }
                 });
                 if (!ketemu) {
-                    daftarAntrianGlobal.push({ nama: namaSales, status: targetStatusSimulasi, kategori: kategoriBaru || "HA" });
+                    daftarAntrianGlobal.push({ nama: namaSales, status: targetStatusSimulasi, kategori: katAktif });
                 }
             }
 
-            renderUIRentalPaksaManual(daftarAntrianGlobal, statusSistemGlobal, pengumumanTerakhirGlobal, targetStatusSimulasi, kategoriBaru);
+            localActionActive = false;
+            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+            localActionActive = true;
 
-            fetch(`${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}${kategoriBaru ? '&kategori='+encodeURIComponent(kategoriBaru) : ''}&t=${Date.now()}`)
+            fetch(`${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(katAktif)}&subkategori=${encodeURIComponent(katAktif)}&t=${Date.now()}`)
             .then(res => res.json())
             .then(res => {
-                setTimeout(() => {
-                    sedangAdaAksiServer = false;
-                    muatDataAntrian(true);
-                }, 1000);
-            }).catch(() => {
-                setTimeout(() => {
-                    sedangAdaAksiServer = false;
-                    muatDataAntrian(true);
-                }, 1000);
+                if (res && res.status === "sukses" && res.data) {
+                    daftarAntrianGlobal = res.data;
+                }
+                localActionActive = false;
+                renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+            }).catch(() => { 
+                localActionActive = false; 
             });
         }
 
-        function renderUIRentalPaksaManual(dataAntrian, statusSistem, pengumumanSPV, statusPaksa, kategoriPaksa) {
-            const akunSaya = getAkunAktif().trim();
-            statusSistemGlobal = statusSistem || "BUKA";
-
-            let listHtmlHA = "", listHtmlAV = "", namaHANow = "-", namaAVNow = "-";
-            let apakahSayaUrutanPertamaHA = false, apakahSayaUrutanPertamaAV = false;
-
-            let listStandby = dataAntrian.filter(item => item.status === "Standby");
-            let standbyHA = listStandby.find(item => (item.kategori || "HA") === "HA");
-            let standbyAV = listStandby.find(item => item.kategori === "AV");
-
-            if (standbyHA) { namaHANow = standbyHA.nama; if (akunSaya && standbyHA.nama.trim().toLowerCase() === akunSaya.toLowerCase()) apakahSayaUrutanPertamaHA = true; }
-            if (standbyAV) { namaAVNow = standbyAV.nama; if (akunSaya && standbyAV.nama.trim().toLowerCase() === akunSaya.toLowerCase()) apakahSayaUrutanPertamaAV = true; }
-
-            if(dataAntrian.length > 0) {
-                let urutHA = 1, urutAV = 1;
-                dataAntrian.forEach((item) => {
-                    const kategoriItem = item.kategori ? item.kategori : "HA"; 
-                    let itemHtml = "";
-
-                    if (item.status === "Standby") {
-                        let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
-                        let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Anda</span>` : `<span class="badge-status-item badge-standby">Standby</span>`;
-                        itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
-                    } else if (item.status === "Melayani") {
-                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
-                    } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
-                        let urut = kategoriItem === "AV" ? urutAV++ : urutHA++;
-                        let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Anda</span>` : `<span class="badge-status-item badge-cs">Dipanggil CS/GUDANG</span>`;
-                        itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
-                    }
-
-                    if (kategoriItem === "AV") listHtmlAV += itemHtml;
-                    else listHtmlHA += itemHtml;
-                });
-            }
-
-            if(!listHtmlHA) listHtmlHA = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian HA</span></li>";
-            if(!listHtmlAV) listHtmlAV = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian AV</span></li>";
-
-            const btnAntri = document.getElementById('btn-utama-antri');
-            const btnCustomer = document.getElementById('btn-utama-customer');
-            const btnClosing = document.getElementById('btn-selesai-closing');
-            const btnCS = document.getElementById('btn-utama-cs');
-            const btnKeluar = document.getElementById('btn-keluar-istirahat');
-            const selectKategori = document.getElementById('pilih-kategori');
-
-            btnAntri.innerHTML = "Daftar Antrian"; btnAntri.className = "btn-success"; btnAntri.disabled = false;
-            btnCustomer.innerHTML = "Sudah Membawa Customer"; btnCustomer.className = "btn-customer"; btnCustomer.disabled = false;
-            btnClosing.innerHTML = "SELESAI MELAYANI (DEAL / CLOSING)"; btnClosing.className = "btn-closing"; btnClosing.disabled = false;
-            btnCS.innerHTML = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; btnCS.className = "btn-purple"; btnCS.disabled = false;
-            btnKeluar.innerHTML = "KELUAR ANTRIAN (ISTIRAHAT)"; btnKeluar.className = "btn-amber"; btnKeluar.disabled = false;
-
-            if (statusPaksa === "Melayani") {
-                btnAntri.innerText = "Sedang Melayani Customer"; btnAntri.className = "btn-success btn-disabled"; btnAntri.disabled = true;
-                btnCustomer.style.display = "none"; btnClosing.style.display = "block"; btnClosing.className = "btn-closing";
-                btnCS.style.display = "none"; btnKeluar.style.display = "none"; selectKategori.disabled = true;
-            } else if (statusPaksa === "Standby") {
-                btnAntri.innerText = "Anda Sudah Di Antrian"; btnAntri.className = "btn-success btn-disabled"; btnAntri.disabled = true;
-                btnCustomer.style.display = "block"; btnClosing.style.display = "none";
-                let bisaAmbil = (kategoriPaksa === "AV" && apakahSayaUrutanPertamaAV) || (kategoriPaksa !== "AV" && apakahSayaUrutanPertamaHA);
-                btnCustomer.disabled = !bisaAmbil; btnCustomer.className = bisaAmbil ? "btn-customer" : "btn-customer btn-disabled";
-                btnCS.style.display = "block"; btnCS.className = "btn-purple";
-                btnKeluar.style.display = "block"; btnKeluar.className = "btn-amber";
-                selectKategori.disabled = true;
-            } else if (statusPaksa === "Dipanggil CS/GUDANG" || statusPaksa === "Dipanggil CS") {
-                btnAntri.innerText = "Posisi Antrian Dikunci (Di CS/GUDANG)"; btnAntri.className = "btn-purple btn-disabled"; btnAntri.disabled = true;
-                btnCustomer.style.display = "none"; btnClosing.style.display = "none";
-                btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal";
-                btnKeluar.style.display = "none"; selectKategori.disabled = true;
+        function setButtonLoading(btnElement, isLoading, defaultText) {
+            if (!btnElement) return;
+            if (isLoading) {
+                btnElement.disabled = true;
+                btnElement.classList.add('btn-disabled');
+                btnElement.innerHTML = `<span class="spinner"></span> Memeriksa Lokasi GPS...`;
             } else {
-                btnAntri.innerText = "Daftar Antrian"; btnAntri.className = "btn-success"; btnAntri.disabled = false;
-                btnCustomer.style.display = "none"; btnClosing.style.display = "none";
-                btnCS.style.display = "none"; btnKeluar.style.display = "none"; selectKategori.disabled = false;
+                btnElement.disabled = false;
+                btnElement.classList.remove('btn-disabled');
+                btnElement.innerHTML = defaultText;
             }
-
-            document.getElementById('nama-aktif-ha').innerText = namaHANow;
-            document.getElementById('nama-aktif-av').innerText = namaAVNow;
-            document.getElementById('item-antrian-list-ha').innerHTML = listHtmlHA;
-            document.getElementById('item-antrian-list-av').innerHTML = listHtmlAV;
         }
 
-        function aksiUtamaAntri() {
-            const kategoriPilih = document.getElementById('pilih-kategori').value;
-            eksekusiAksiMutlak('btn-utama-antri', 'Mendaftarkan...', 'daftarAntri', 'Standby', kategoriPilih);
+        function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
+            if (!koordinatToko.lat || !koordinatToko.lng) {
+                const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
+                if (cachedKoordinat) {
+                    try { koordinatToko = JSON.parse(cachedKoordinat); } catch(e) {}
+                }
+            }
+
+            if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
+                if (typeof callbackBerhasil === 'function') callbackBerhasil();
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const jarakMeter = hitungJarakHaversine(
+                            position.coords.latitude, position.coords.longitude, 
+                            Number(koordinatToko.lat), Number(koordinatToko.lng)
+                        );
+                        const batasRadius = Number(koordinatToko.radius) || 50;
+
+                        if (jarakMeter > batasRadius) {
+                            if (typeof callbackBatal === 'function') callbackBatal();
+                            tampilkanModal("Di Luar Radius Toko", `Gagal mendaftar antrean!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar area toko.`);
+                            return; 
+                        }
+                        
+                        if (typeof callbackBerhasil === 'function') callbackBerhasil();
+                    },
+                    function(error) {
+                        if (typeof callbackBatal === 'function') callbackBatal();
+                        tampilkanModal("GPS Wajib Aktif", "Pastikan GPS Anda aktif dan pastikan izin lokasi (Location Permission) di browser sudah diatur ke 'Allow' / Diizinkan.");
+                    },
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+                );
+            } else {
+                if (typeof callbackBatal === 'function') callbackBatal();
+                tampilkanModal("Tidak Mendukung", "Browser Anda tidak mendukung fitur GPS.");
+            }
+        }
+
+        function aksiHadirKerja() {
+            const btn = document.getElementById('btn-hadir');
+            setButtonLoading(btn, true, "Konfirmasi Kehadiran & Masuk Antri");
+
+            validasiGpsDanJalankan(function() {
+                setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
+                const kategoriPilih = document.getElementById('pilih-kategori-hadir').value;
+                
+                const tanggalHariIni = getTanggalIndo();
+                localStorage.setItem('ufo_checkin_hari_ini', 'true');
+                localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
+
+                eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
+            }, function() {
+                setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
+            });
+        }
+
+        function aksiDaftarAntrianNormal() {
+            const btn = document.getElementById('btn-daftar-antrian');
+            setButtonLoading(btn, true, "Daftar Antrian");
+
+            validasiGpsDanJalankan(function() {
+                setButtonLoading(btn, false, "Daftar Antrian");
+                const kategoriPilih = document.getElementById('pilih-kategori-normal').value;
+                eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
+            }, function() {
+                setButtonLoading(btn, false, "Daftar Antrian");
+            });
         }
 
         function aksiUtamaCustomer() {
             tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
-                eksekusiAksiMutlak('btn-utama-customer', 'Memproses...', 'ambilAntrian', 'Melayani');
+                eksekusiAksiInstan('ambilAntrian', 'Melayani');
             });
         }
 
         function aksiSelesaiClosing() {
-            tampilkanModalKonfirmasi("Konfirmasi Selesai", "Selesai melayani customer? Anda akan dikeluarkan dari antrian.", function() {
-                eksekusiAksiMutlak('btn-selesai-closing', 'Memproses...', 'selesaiMelayani', 'belum_ada');
+            tampilkanModalKonfirmasi("Konfirmasi Selesai", "Selesai melayani customer?", function() {
+                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
             });
         }
 
         function aksiToggleCS() {
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
-
             if (statusSekarang === "Standby") {
-                tampilkanModalKonfirmasi("Status Dipanggil CS/GUDANG", "Dipanggil oleh CS/GUDANG? Posisi antrian Anda akan dikunci.", function() {
-                    eksekusiAksiMutlak('btn-utama-cs', 'Mengunci...', 'panggilCS', 'Dipanggil CS/GUDANG');
+                tampilkanModalKonfirmasi("Dipanggil CS/Gudang", "Posisi antrian Anda akan dikunci sementara.", function() {
+                    eksekusiAksiInstan('panggilCS', 'Dipanggil CS');
                 });
-            } else if (statusSekarang === "Dipanggil CS/GUDANG" || statusSekarang === "Dipanggil CS") {
-                tampilkanModalKonfirmasi("Selesai Urusan CS/GUDANG", "Urusan CS/GUDANG sudah selesai? Kembali aktif di antrian.", function() {
-                    eksekusiAksiMutlak('btn-utama-cs', 'Memproses...', 'selesaiCS', 'Standby');
+            } else {
+                eksekusiAksiInstan('selesaiCS', 'Standby');
+            }
+        }
+
+        function aksiToggleIbadah() {
+            const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
+            if (statusSekarang === "Standby") {
+                tampilkanModalKonfirmasi("Ibadah", "Posisi antrian Anda akan dikunci sementara selama ibadah.", function() {
+                    eksekusiAksiInstan('panggilIbadah', 'Ibadah');
                 });
+            } else {
+                eksekusiAksiInstan('selesaiIbadah', 'Standby');
             }
         }
 
         function bukaModalKeluarIstirahat() {
-            tampilkanModalKonfirmasi("Keluar Antrian", "Apakah Anda yakin ingin keluar dari antrian untuk istirahat / ada keperluan?", function() {
-                eksekusiAksiMutlak('btn-keluar-istirahat', 'Memproses...', 'selesaiMelayani', 'belum_ada');
+            tampilkanModalKonfirmasi("Keluar Antrian", "Yakin ingin keluar dari antrian?", function() {
+                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
             });
         }
 
-        function konfirmasiSudahBacaPengumuman() {
-            if (pengumumanTerakhirGlobal) {
-                localStorage.setItem('ufo_last_read_announcement', pengumumanTerakhirGlobal);
+        function initAtauUpdatePetaPromotor(latToko, lngToko, radiusToko, latUser, lngUser) {
+            if (!latToko || !lngToko || isNaN(latToko) || isNaN(lngToko)) return;
+
+            if (!mapPromotor) {
+                const mapContainer = document.getElementById('map-promotor');
+                if (!mapContainer) return;
+                
+                mapPromotor = L.map('map-promotor', { zoomControl: false }).setView([latToko, lngToko], 18);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(mapPromotor);
             }
-            document.getElementById('modal-pengumuman-spv').classList.remove('active');
+
+            if (!circleTokoPeta) {
+                circleTokoPeta = L.circle([latToko, lngToko], {
+                    color: '#ef4444',
+                    fillColor: '#ef4444',
+                    fillOpacity: 0.15,
+                    radius: radiusToko || 50
+                }).addTo(mapPromotor);
+
+                markerTokoPeta = L.marker([latToko, lngToko]).addTo(mapPromotor)
+                    .bindPopup("<b>Titik Pusat Toko UFO</b>");
+            } else {
+                circleTokoPeta.setLatLng([latToko, lngToko]);
+                circleTokoPeta.setRadius(radiusToko || 50);
+                markerTokoPeta.setLatLng([latToko, lngToko]);
+            }
+
+            if (latUser && lngUser && !isNaN(latUser) && !isNaN(lngUser)) {
+                if (!markerSayaPeta) {
+                    markerSayaPeta = L.circleMarker([latUser, lngUser], {
+                        radius: 8,
+                        fillColor: "#2563eb",
+                        color: "#ffffff",
+                        weight: 2,
+                        fillOpacity: 1
+                    }).addTo(mapPromotor).bindPopup("<b>Posisi Anda Sekarang</b>");
+                } else {
+                    markerSayaPeta.setLatLng([latUser, lngUser]);
+                }
+            }
+            
+            setTimeout(() => { if (mapPromotor) mapPromotor.invalidateSize(); }, 150);
+        }
+
+        function mulaiPemantauanGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    function(position) {
+                        if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
+                            return; 
+                        }
+
+                        let statusSaya = cekStatusSayaDariArray(daftarAntrianGlobal);
+                        if (statusSaya !== "Standby") {
+                            return; 
+                        }
+
+                        let latUser = position.coords.latitude;
+                        let lngUser = position.coords.longitude;
+                        let latToko = Number(koordinatToko.lat);
+                        let lngToko = Number(koordinatToko.lng);
+                        let batasRadius = Number(koordinatToko.radius) || 50;
+
+                        initAtauUpdatePetaPromotor(latToko, lngToko, batasRadius, latUser, lngUser);
+
+                        const jarakMeter = hitungJarakHaversine(latUser, lngUser, latToko, lngToko);
+
+                        if (jarakMeter > batasRadius) {
+                            eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
+                            tampilkanModal("Auto-Exit GPS", `Anda berada di luar radius ${Math.round(jarakMeter)} meter dari toko (Batas maksimal ${batasRadius} meter). Anda otomatis dikeluarkan dari antrean.`);
+                        }
+                    },
+                    function(error) {},
+                    { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+                );
+            }
+        }
+
+        function hitungJarakHaversine(lat1, lon1, lat2, lon2) {
+            const R = 6371000; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+        }
+
+        function tampilkanModal(judul, desc) {
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-customer" onclick="tutupModal()">OK</button>`;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function tampilkanModalKonfirmasi(judul, desc, callbackYa) {
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-customer" id="btn-modal-ya">Ya</button>
+            `;
+            document.getElementById('custom-modal').classList.add('active');
+            document.getElementById('btn-modal-ya').onclick = function() { tutupModal(); callbackYa(); };
+        }
+        function tutupModal() { document.getElementById('custom-modal').classList.remove('active'); }
+    </script>
+</body>
+</html>";
+
+        let daftarAntrianGlobal = [];
+        let masterSalesGlobal = [];
+        let statusSistemGlobal = "BUKA";
+        let namaSalesAktifGlobal = "";
+        let koordinatToko = { lat: "", lng: "", radius: 50 }; 
+        let localActionActive = false;
+
+        let mapPromotor = null;
+        let markerTokoPeta = null;
+        let circleTokoPeta = null;
+        let markerSayaPeta = null;
+
+        function getTanggalIndo() {
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yyyy = now.getFullYear();
+            return `${dd}-${mm}-${yyyy}`;
+        }
+
+        window.onload = function() {
+            initDarkMode();
+            
+            const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
+            if (cachedKoordinat) {
+                try { 
+                    koordinatToko = JSON.parse(cachedKoordinat); 
+                    if (koordinatToko.lat && koordinatToko.lng) {
+                        setTimeout(() => {
+                            initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, null, null);
+                        }, 50);
+                    }
+                } catch(e) {}
+            }
+
+            muatMasterSalesInstant();
+            muatCacheAntrianInstan();
+            
+            const tanggalHariIni = getTanggalIndo();
+            const tanggalCheckinTerakhir = localStorage.getItem('ufo_checkin_tanggal') || "";
+            if (tanggalCheckinTerakhir !== tanggalHariIni) {
+                localStorage.removeItem('ufo_checkin_hari_ini');
+                localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
+            }
+            
+            const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
+            if (cachedNama) {
+                namaSalesAktifGlobal = cachedNama;
+                document.getElementById('panel-login').style.display = 'none';
+                document.getElementById('panel-menu-utama').style.display = 'block';
+                document.getElementById('label-user-aktif').innerText = cachedNama;
+            } else {
+                document.getElementById('panel-login').style.display = 'block';
+                document.getElementById('panel-menu-utama').style.display = 'none';
+            }
+
+            cekServerBg();
+            muatMasterSales();
+            mulaiPemantauanGPS();
+            
+            setInterval(() => {
+                muatDataAntrian();
+                cekStatusPerangkatSaya();
+            }, 3000); 
+        };
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('ufo_dark_mode', isDark ? 'true' : 'false');
+            updateDarkButtonText(isDark);
+        }
+
+        function initDarkMode() {
+            const isDark = localStorage.getItem('ufo_dark_mode') === 'true';
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+            }
+            updateDarkButtonText(isDark);
+        }
+
+        function updateDarkButtonText(isDark) {
+            const btn = document.getElementById('btn-toggle-dark');
+            if (btn) btn.innerHTML = isDark ? '☀️ Terang' : '🌙 Gelap';
+        }
+
+        function getDeviceId() {
+            let localSalt = localStorage.getItem('ufo_device_salt');
+            if (!localSalt) {
+                localSalt = Math.random().toString(36).substring(2) + Date.now().toString(36);
+                localStorage.setItem('ufo_device_salt', localSalt);
+            }
+            let hash = 0;
+            for (let i = 0; i < localSalt.length; i++) { hash = (hash << 5) - hash + localSalt.charCodeAt(i); hash |= 0; }
+            return "DEV-" + Math.abs(hash).toString().padStart(9, '0').substring(0, 9);
+        }
+
+        function muatCacheAntrianInstan() {
+            const cachedAntrian = localStorage.getItem('ufo_antrian_cache');
+            if (cachedAntrian) {
+                try {
+                    const parsed = JSON.parse(cachedAntrian);
+                    renderUIRental(parsed.data, parsed.statusAntrian, parsed.koordinatPusat);
+                } catch(e) {}
+            }
+        }
+
+        function cekServerBg() {
+            const deviceId = getDeviceId();
+            Promise.all([
+                fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`).then(r => r.json()).catch(() => null),
+                fetch(`${SCRIPT_URL}?aksi=getAntrian`).then(r => r.json()).catch(() => null)
+            ]).then(([resBinding, resAntrian]) => {
+                if (resBinding && resBinding.status === "terkunci" && resBinding.nama) {
+                    namaSalesAktifGlobal = resBinding.nama;
+                    localStorage.setItem('ufo_nama_sales_aktif', resBinding.nama);
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = resBinding.nama;
+                }
+                if (resAntrian && resAntrian.status === "sukses") {
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
+                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat);
+                }
+            });
+        }
+
+        function cekStatusPerangkatSaya() {
+            const namaSaya = localStorage.getItem('ufo_nama_sales_aktif');
+            const deviceId = getDeviceId();
+            if (!namaSaya) return;
+
+            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.status !== "terkunci" || !res.nama || res.nama.trim().toLowerCase() !== namaSaya.trim().toLowerCase()) {
+                    localStorage.removeItem('ufo_nama_sales_aktif');
+                    localStorage.removeItem('ufo_checkin_hari_ini');
+                    alert("Perangkat Anda telah di-reset oleh Admin. Silakan pilih ulang nama Anda.");
+                    window.location.reload();
+                }
+            }).catch(() => {});
+        }
+
+        function simpanAkunHP() {
+            const namaPilih = document.getElementById('pilih-sales').value;
+            const deviceId = getDeviceId();
+            if(!namaPilih) {
+                tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
+                return;
+            }
+
+            const btn = document.getElementById('btn-simpan-hp');
+            setButtonLoading(btn, true, "Menyimpan Perangkat...");
+
+            validasiGpsDanJalankan(function() {
+                lanjutkanSimpanAkun(namaPilih, deviceId, btn);
+            }, function() {
+                setButtonLoading(btn, false, "Simpan & Kunci di HP Ini");
+            });
+        }
+
+        function lanjutkanSimpanAkun(namaPilih, deviceId, btnElement) {
+            fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                setButtonLoading(btnElement, false, "Simpan & Kunci di HP Ini");
+                if(res.status === "sukses") {
+                    namaSalesAktifGlobal = namaPilih;
+                    localStorage.setItem('ufo_nama_sales_aktif', namaPilih);
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = namaPilih;
+                    muatDataAntrian();
+                } else { 
+                    tampilkanModal("Akses Ditolak", res.pesan); 
+                }
+            }).catch(() => {
+                setButtonLoading(btnElement, false, "Simpan & Kunci di HP Ini");
+                tampilkanModal("Gagal", "Terjadi gangguan jaringan saat menyimpan perangkat.");
+            });
+        }
+
+        function getAkunAktif() {
+            if (!namaSalesAktifGlobal) namaSalesAktifGlobal = localStorage.getItem('ufo_nama_sales_aktif') || "";
+            return namaSalesAktifGlobal;
+        }
+
+        function muatMasterSalesInstant() {
+            const cachedSales = localStorage.getItem('ufo_master_sales_cache');
+            if (cachedSales) {
+                try {
+                    masterSalesGlobal = JSON.parse(cachedSales);
+                    let html = '<option value="">-- Pilih Nama Anda --</option>';
+                    masterSalesGlobal.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
+                    document.getElementById('pilih-sales').innerHTML = html;
+                } catch(e) {}
+            }
+        }
+
+        function muatMasterSales() {
+            fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses" && res.data) {
+                    masterSalesGlobal = res.data;
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(res.data));
+                    let html = '<option value="">-- Pilih Nama Anda --</option>';
+                    res.data.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
+                    document.getElementById('pilih-sales').innerHTML = html;
+                }
+            });
+        }
+
+        function cekStatusSayaDariArray(dataAntrian) {
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            if (!akunSaya) return "belum_ada";
+            const itemSaya = (dataAntrian || []).find(item => String(item.nama).trim().toLowerCase() === akunSaya);
+            return itemSaya ? itemSaya.status : "belum_ada";
+        }
+
+        function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
+            if (localActionActive) return;
+
+            daftarAntrianGlobal = dataAntrian || [];
+            statusSistemGlobal = statusSistem || "BUKA";
+            
+            if (koordinatServer) {
+                koordinatToko.lat = koordinatServer.lat || "";
+                koordinatToko.lng = koordinatServer.lng || "";
+                koordinatToko.radius = Number(koordinatServer.radius) || 50;
+                
+                localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
+            }
+
+            const badge = document.getElementById('badge-status-sistem');
+            badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
+            badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
+
+            let listHA = "", listAV = "";
+            let urutHA = 1, urutAV = 1;
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            let kategoriSayaAktif = "";
+
+            const dataStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
+            const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
+            const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
+
+            document.getElementById('promotor-nama-ha').textContent = promotorHA ? promotorHA.nama : "Belum Ada";
+            document.getElementById('promotor-nama-av').textContent = promotorAV ? promotorAV.nama : "Belum Ada";
+
+            if (daftarAntrianGlobal.length > 0) {
+                daftarAntrianGlobal.forEach((item) => {
+                    let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
+                    if (String(item.nama).trim().toLowerCase() === akunSaya) {
+                        kategoriSayaAktif = kat;
+                    }
+
+                    let itemHtml = "";
+                    if (item.status === "Standby") {
+                        let urut = 1;
+                        if (kat === "HA") urut = urutHA++;
+                        else if (kat === "AV") urut = urutAV++;
+
+                        let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
+                        itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
+                    } else if (item.status === "Melayani") {
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
+                    } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/Gudang</span></li>`;
+                    } else if (item.status === "Ibadah") {
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-ibadah">Sedang Ibadah</span></li>`;
+                    }
+
+                    if (kat === "HA") listHA += itemHtml;
+                    else if (kat === "AV") listAV += itemHtml;
+                });
+            }
+
+            const kosongHtml = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian</span></li>";
+            document.getElementById('list-HA').innerHTML = listHA || kosongHtml;
+            document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
+
+            let statusSayaNyata = cekStatusSayaDariArray(daftarAntrianGlobal);
+            const sectionCheckinAwal = document.getElementById('section-checkin-awal');
+            const sectionNormal = document.getElementById('section-normal');
+            
+            const sectionPetaGps = document.getElementById('section-peta-gps');
+            if (statusSayaNyata === "belum_ada" || statusSayaNyata === "Standby") {
+                if (sectionPetaGps) sectionPetaGps.style.display = "block";
+                setTimeout(() => { 
+                    if (mapPromotor) mapPromotor.invalidateSize(); 
+                    else if (koordinatToko.lat && koordinatToko.lng) {
+                        initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, null, null);
+                    }
+                }, 100);
+            } else {
+                if (sectionPetaGps) sectionPetaGps.style.display = "none";
+            }
+
+            let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
+
+            if (statusSayaNyata !== "belum_ada") {
+                sectionCheckinAwal.style.display = 'none';
+                sectionNormal.style.display = 'block';
+            } else if (!sudahCheckinPernahHariIni) {
+                sectionCheckinAwal.style.display = 'block';
+                sectionNormal.style.display = 'none';
+            } else {
+                sectionCheckinAwal.style.display = 'none';
+                sectionNormal.style.display = 'block';
+            }
+
+            const btnDaftar = document.getElementById('btn-daftar-antrian');
+            const groupPilihKat = document.getElementById('group-pilih-kategori-normal');
+            const btnCustomer = document.getElementById('btn-utama-customer');
+            const btnClosing = document.getElementById('btn-selesai-closing');
+            const btnCS = document.getElementById('btn-utama-cs');
+            const btnIbadah = document.getElementById('btn-utama-ibadah');
+            const btnKeluar = document.getElementById('btn-keluar-istirahat');
+
+            if (statusSayaNyata === "belum_ada") {
+                groupPilihKat.style.display = "block";
+                btnDaftar.style.display = "block";
+                btnCustomer.style.display = "none";
+                btnClosing.style.display = "none";
+                btnCS.style.display = "none";
+                btnIbadah.style.display = "none";
+                btnKeluar.style.display = "none";
+
+                if (statusSistemGlobal === "TUTUP") {
+                    btnDaftar.disabled = true; btnDaftar.className = "btn-success btn-disabled";
+                } else {
+                    btnDaftar.disabled = false; btnDaftar.className = "btn-success btn-pulse";
+                }
+            } else {
+                groupPilihKat.style.display = "none";
+                btnDaftar.style.display = "none";
+
+                if (statusSayaNyata === "Standby") {
+                    btnCustomer.style.display = "block"; 
+                    btnClosing.style.display = "none";
+                    btnCS.style.display = "block"; 
+                    btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
+                    btnKeluar.style.display = "block";
+
+                    if (statusSistemGlobal === "TUTUP") {
+                        btnCustomer.disabled = true; btnCustomer.className = "btn-customer btn-disabled";
+                        btnCS.disabled = true; btnCS.className = "btn-purple btn-disabled";
+                        btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
+                        btnKeluar.disabled = true; btnKeluar.className = "btn-amber btn-disabled";
+                    } else {
+                        let listSubStandby = daftarAntrianGlobal.filter(it => it.status === "Standby" && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
+                        let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
+                        let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
+
+                        btnCustomer.disabled = !apakahSayaBisaAmbil; 
+                        btnCustomer.className = apakahSayaBisaAmbil ? "btn-customer btn-pulse" : "btn-customer btn-disabled";
+                        btnCS.disabled = false; btnCS.className = "btn-purple";
+                        btnIbadah.disabled = false; btnIbadah.className = "btn-indigo";
+                        btnKeluar.disabled = false; btnKeluar.className = "btn-amber";
+                    }
+                } else if (statusSayaNyata === "Melayani") {
+                    btnCustomer.style.display = "none"; btnClosing.style.display = "block";
+                    btnCS.style.display = "none"; btnIbadah.style.display = "none"; btnKeluar.style.display = "none";
+                } else if (statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") {
+                    btnCustomer.style.display = "none"; btnClosing.style.display = "none";
+                    btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal"; btnCS.disabled = false;
+                    btnIbadah.style.display = "none";
+                    btnKeluar.style.display = "none";
+                } else if (statusSayaNyata === "Ibadah") {
+                    btnCustomer.style.display = "none";
+                    btnClosing.style.display = "none";
+                    btnCS.style.display = "none";
+                    btnKeluar.style.display = "none";
+                    
+                    btnIbadah.style.display = "block"; 
+                    btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)"; 
+                    btnIbadah.className = "btn-teal"; 
+                    btnIbadah.disabled = false;
+                }
+            }
+        }
+
+        function muatDataAntrian() {
+            if (localActionActive) return;
+            fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res && res.status === "sukses" && !localActionActive) {
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
+                    renderUIRental(res.data, res.statusAntrian, res.koordinatPusat);
+                }
+            }).catch(() => {});
+        }
+
+        function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
+            const namaSales = getAkunAktif().trim();
+            if (!namaSales) return;
+
+            localActionActive = true;
+            let katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
+
+            if (targetStatusSimulasi === "belum_ada") {
+                daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
+            } else {
+                let ketemu = false;
+                daftarAntrianGlobal.forEach(item => {
+                    if (String(item.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
+                        item.status = targetStatusSimulasi;
+                        if (katBaru) item.kategori = katBaru;
+                        ketemu = true;
+                    }
+                });
+                if (!ketemu) {
+                    daftarAntrianGlobal.push({ nama: namaSales, status: targetStatusSimulasi, kategori: katAktif });
+                }
+            }
+
+            localActionActive = false;
+            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+            localActionActive = true;
+
+            fetch(`${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(katAktif)}&subkategori=${encodeURIComponent(katAktif)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res && res.status === "sukses" && res.data) {
+                    daftarAntrianGlobal = res.data;
+                }
+                localActionActive = false;
+                renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+            }).catch(() => { 
+                localActionActive = false; 
+            });
+        }
+
+        function setButtonLoading(btnElement, isLoading, defaultText) {
+            if (!btnElement) return;
+            if (isLoading) {
+                btnElement.disabled = true;
+                btnElement.classList.add('btn-disabled');
+                btnElement.innerHTML = `<span class="spinner"></span> Memeriksa Lokasi GPS...`;
+            } else {
+                btnElement.disabled = false;
+                btnElement.classList.remove('btn-disabled');
+                btnElement.innerHTML = defaultText;
+            }
+        }
+
+        function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
+            if (!koordinatToko.lat || !koordinatToko.lng) {
+                const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
+                if (cachedKoordinat) {
+                    try { koordinatToko = JSON.parse(cachedKoordinat); } catch(e) {}
+                }
+            }
+
+            if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
+                if (typeof callbackBerhasil === 'function') callbackBerhasil();
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const jarakMeter = hitungJarakHaversine(
+                            position.coords.latitude, position.coords.longitude, 
+                            Number(koordinatToko.lat), Number(koordinatToko.lng)
+                        );
+                        const batasRadius = Number(koordinatToko.radius) || 50;
+
+                        if (jarakMeter > batasRadius) {
+                            if (typeof callbackBatal === 'function') callbackBatal();
+                            tampilkanModal("Di Luar Radius Toko", `Gagal mendaftar antrean!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar area toko.`);
+                            return; 
+                        }
+                        
+                        if (typeof callbackBerhasil === 'function') callbackBerhasil();
+                    },
+                    function(error) {
+                        if (typeof callbackBatal === 'function') callbackBatal();
+                        tampilkanModal("GPS Wajib Aktif", "Pastikan GPS Anda aktif dan pastikan izin lokasi (Location Permission) di browser sudah diatur ke 'Allow' / Diizinkan.");
+                    },
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+                );
+            } else {
+                if (typeof callbackBatal === 'function') callbackBatal();
+                tampilkanModal("Tidak Mendukung", "Browser Anda tidak mendukung fitur GPS.");
+            }
+        }
+
+        function aksiHadirKerja() {
+            const btn = document.getElementById('btn-hadir');
+            setButtonLoading(btn, true, "Konfirmasi Kehadiran & Masuk Antri");
+
+            validasiGpsDanJalankan(function() {
+                setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
+                const kategoriPilih = document.getElementById('pilih-kategori-hadir').value;
+                
+                const tanggalHariIni = getTanggalIndo();
+                localStorage.setItem('ufo_checkin_hari_ini', 'true');
+                localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
+
+                eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
+            }, function() {
+                setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
+            });
+        }
+
+        function aksiDaftarAntrianNormal() {
+            const btn = document.getElementById('btn-daftar-antrian');
+            setButtonLoading(btn, true, "Daftar Antrian");
+
+            validasiGpsDanJalankan(function() {
+                setButtonLoading(btn, false, "Daftar Antrian");
+                const kategoriPilih = document.getElementById('pilih-kategori-normal').value;
+                eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
+            }, function() {
+                setButtonLoading(btn, false, "Daftar Antrian");
+            });
+        }
+
+        function aksiUtamaCustomer() {
+            tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
+                eksekusiAksiInstan('ambilAntrian', 'Melayani');
+            });
+        }
+
+        function aksiSelesaiClosing() {
+            tampilkanModalKonfirmasi("Konfirmasi Selesai", "Selesai melayani customer?", function() {
+                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
+            });
+        }
+
+        function aksiToggleCS() {
+            const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
+            if (statusSekarang === "Standby") {
+                tampilkanModalKonfirmasi("Dipanggil CS/Gudang", "Posisi antrian Anda akan dikunci sementara.", function() {
+                    eksekusiAksiInstan('panggilCS', 'Dipanggil CS');
+                });
+            } else {
+                eksekusiAksiInstan('selesaiCS', 'Standby');
+            }
+        }
+
+        function aksiToggleIbadah() {
+            const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
+            if (statusSekarang === "Standby") {
+                tampilkanModalKonfirmasi("Ibadah", "Posisi antrian Anda akan dikunci sementara selama ibadah.", function() {
+                    eksekusiAksiInstan('panggilIbadah', 'Ibadah');
+                });
+            } else {
+                eksekusiAksiInstan('selesaiIbadah', 'Standby');
+            }
+        }
+
+        function bukaModalKeluarIstirahat() {
+            tampilkanModalKonfirmasi("Keluar Antrian", "Yakin ingin keluar dari antrian?", function() {
+                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
+            });
+        }
+
+        function initAtauUpdatePetaPromotor(latToko, lngToko, radiusToko, latUser, lngUser) {
+            if (!latToko || !lngToko || isNaN(latToko) || isNaN(lngToko)) return;
+
+            if (!mapPromotor) {
+                const mapContainer = document.getElementById('map-promotor');
+                if (!mapContainer) return;
+                
+                mapPromotor = L.map('map-promotor', { zoomControl: false }).setView([latToko, lngToko], 18);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(mapPromotor);
+            }
+
+            if (!circleTokoPeta) {
+                circleTokoPeta = L.circle([latToko, lngToko], {
+                    color: '#ef4444',
+                    fillColor: '#ef4444',
+                    fillOpacity: 0.15,
+                    radius: radiusToko || 50
+                }).addTo(mapPromotor);
+
+                markerTokoPeta = L.marker([latToko, lngToko]).addTo(mapPromotor)
+                    .bindPopup("<b>Titik Pusat Toko UFO</b>");
+            } else {
+                circleTokoPeta.setLatLng([latToko, lngToko]);
+                circleTokoPeta.setRadius(radiusToko || 50);
+                markerTokoPeta.setLatLng([latToko, lngToko]);
+            }
+
+            if (latUser && lngUser && !isNaN(latUser) && !isNaN(lngUser)) {
+                if (!markerSayaPeta) {
+                    markerSayaPeta = L.circleMarker([latUser, lngUser], {
+                        radius: 8,
+                        fillColor: "#2563eb",
+                        color: "#ffffff",
+                        weight: 2,
+                        fillOpacity: 1
+                    }).addTo(mapPromotor).bindPopup("<b>Posisi Anda Sekarang</b>");
+                } else {
+                    markerSayaPeta.setLatLng([latUser, lngUser]);
+                }
+            }
+            
+            setTimeout(() => { if (mapPromotor) mapPromotor.invalidateSize(); }, 150);
+        }
+
+        function mulaiPemantauanGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    function(position) {
+                        if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
+                            return; 
+                        }
+
+                        let statusSaya = cekStatusSayaDariArray(daftarAntrianGlobal);
+                        if (statusSaya !== "Standby") {
+                            return; 
+                        }
+
+                        let latUser = position.coords.latitude;
+                        let lngUser = position.coords.longitude;
+                        let latToko = Number(koordinatToko.lat);
+                        let lngToko = Number(koordinatToko.lng);
+                        let batasRadius = Number(koordinatToko.radius) || 50;
+
+                        initAtauUpdatePetaPromotor(latToko, lngToko, batasRadius, latUser, lngUser);
+
+                        const jarakMeter = hitungJarakHaversine(latUser, lngUser, latToko, lngToko);
+
+                        if (jarakMeter > batasRadius) {
+                            eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
+                            tampilkanModal("Auto-Exit GPS", `Anda berada di luar radius ${Math.round(jarakMeter)} meter dari toko (Batas maksimal ${batasRadius} meter). Anda otomatis dikeluarkan dari antrean.`);
+                        }
+                    },
+                    function(error) {},
+                    { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+                );
+            }
+        }
+
+        function hitungJarakHaversine(lat1, lon1, lat2, lon2) {
+            const R = 6371000; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
         function tampilkanModal(judul, desc) {
