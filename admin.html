@@ -9,17 +9,17 @@
     
     <style>
         :root {
-            --admin-purple: #7c3aed;
-            --admin-dark: #5b21b6;
-            --bg: #fffde7;
+            --admin-purple: #059669;
+            --admin-dark: #047857;
+            --bg: #f0fdf4;
             --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #475569;
+            --text-main: #064e3b;
+            --text-muted: #047857;
             --border: #0f172a;
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
-            --primary: #3b82f6;
+            --primary: #059669;
         }
 
         /* STYLING MODE GELAP: MERAH CERAH MENYALA NEON BOX */
@@ -56,7 +56,7 @@
         /* TOMBOL GANTI TEMA */
         .top-controls { display: flex; justify-content: flex-end; margin-bottom: 12px; }
         .dark-mode-btn {
-            background: #a855f7;
+            background: #10b981;
             color: #ffffff;
             border: 3px solid #0f172a;
             font-weight: 800;
@@ -75,22 +75,23 @@
         }
 
         .header-admin { 
-            background: #a855f7; 
+            background: #34d399; 
             border-radius: 18px; 
             padding: 22px; 
-            color: white; 
+            color: #064e3b; 
             text-align: center; 
             margin-bottom: 20px; 
             border: 4px solid var(--border);
             box-shadow: 4px 4px 0px #0f172a; 
         }
-        .header-admin h2 { margin: 0 0 6px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 2px 2px 0px #0f172a; }
-        .header-admin p { margin: 0; font-size: 13px; opacity: 0.95; font-weight: 700; text-shadow: 1px 1px 0px #0f172a; }
+        .header-admin h2 { margin: 0 0 6px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
+        .header-admin p { margin: 0; font-size: 13px; opacity: 0.95; font-weight: 700; }
 
         body.dark-mode .header-admin { 
             background: linear-gradient(135deg, #7f0015 0%, #300008 100%) !important; 
             border: 3px solid #ff1f3d !important; 
             box-shadow: 0 0 40px rgba(255, 31, 61, 0.8) !important;
+            color: white !important;
         }
         body.dark-mode .header-admin h2 {
             color: #ffffff !important;
@@ -115,7 +116,7 @@
         .timer-box-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
         
         .timer-card-admin { 
-            background: #fdf2f8; 
+            background: #d1fae5; 
             border-radius: 18px; 
             padding: 16px 14px; 
             color: var(--text-main); 
@@ -129,8 +130,8 @@
             overflow: hidden; 
         }
         .timer-card-admin::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; border-bottom: 2px solid var(--border); }
-        .timer-card-admin.ha::before { background: #60a5fa; }
-        .timer-card-admin.av::before { background: #c084fc; }
+        .timer-card-admin.ha::before { background: #10b981; }
+        .timer-card-admin.av::before { background: #059669; }
 
         body.dark-mode .timer-card-admin.ha,
         body.dark-mode .timer-card-admin.av {
@@ -142,8 +143,8 @@
         body.dark-mode .timer-card-admin::before { display: none; }
 
         .timer-badge-title { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: inline-block; border: 2px solid #0f172a; }
-        .ha .timer-badge-title { background: #dbeafe; color: #1e40af; }
-        .av .timer-badge-title { background: #f3e8ff; color: #6b21a8; }
+        .ha .timer-badge-title { background: #a7f3d0; color: #065f46; }
+        .av .timer-badge-title { background: #6ee7b7; color: #064e3b; }
 
         body.dark-mode .timer-card-admin.ha .timer-badge-title,
         body.dark-mode .timer-card-admin.av .timer-badge-title { 
@@ -153,7 +154,7 @@
             text-shadow: 0 0 15px rgba(255, 31, 61, 1); 
         }
 
-        .admin-nama-promotor { font-size: 16px; font-weight: 800; color: #0f172a; margin-top: 2px; line-height: 1.3; min-height: 36px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
+        .admin-nama-promotor { font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 36px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
         
         body.dark-mode .timer-card-admin.ha .admin-nama-promotor,
         body.dark-mode .timer-card-admin.av .admin-nama-promotor { color: #ffffff !important; text-shadow: 0 0 20px rgba(255, 31, 61, 1); }
@@ -221,7 +222,7 @@
         }
         button:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0px #0f172a !important; }
         
-        .btn-purple { background: #a855f7; color: white; }
+        .btn-purple { background: #34d399; color: #064e3b; }
         .btn-success { background: #4ade80; color: #064e3b; }
         .btn-warning { background: #fbbf24; color: #78350f; }
         .btn-danger { background: #f87171; color: #450a0a; }
@@ -304,7 +305,6 @@
 
         .promotor-list-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
         
-        /* KARTU PROMOTOR DIPERBAIKI AGAR RAPI DI SEBELAH KANAN */
         .promotor-card-item {
             background: #ffffff;
             border: 3px solid var(--border);
