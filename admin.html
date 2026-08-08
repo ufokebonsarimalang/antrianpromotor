@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - UFO Kebonsari</title>
+    <title>Executive Dashboard Admin - UFO Kebonsari</title>
     <link rel="shortcut icon" href="#">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #f8fafc;
+            --bg: #f1f5f9;
             --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --danger: #ef4444;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --primary: #3b82f6;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #cbd5e1;
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
         }
 
         /* STYLING MODE GELAP: TETAP NEON MERAH MENYALA */
@@ -31,12 +32,12 @@
 
         *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
         
-        /* MODE TERANG: MODERN MINIMALIS (CLEAN & PROFESSIONAL) */
+        /* MODE TERANG: EXECUTIVE KANTORAN (PROFESIONAL, FORMAL, ELEGAN) */
         body { 
-            background: var(--bg); 
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
             color: var(--text-main); 
             margin: 0; 
-            padding: 20px; 
+            padding: 24px; 
             display: flex; 
             justify-content: center; 
             min-height: 100vh; 
@@ -47,12 +48,12 @@
 
         .admin-container { 
             width: 100%; 
-            max-width: 650px; 
+            max-width: 680px; 
             background: var(--card-bg); 
-            border-radius: 20px; 
-            padding: 24px; 
+            border-radius: 16px; 
+            padding: 32px; 
             border: 1px solid var(--border); 
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+            box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.08); 
             transition: all 0.2s ease;
         }
 
@@ -63,19 +64,21 @@
         }
 
         /* TOMBOL GANTI TEMA */
-        .top-controls { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+        .top-controls { display: flex; justify-content: flex-end; margin-bottom: 16px; }
         .dark-mode-btn {
-            background: #e2e8f0;
-            color: #1e293b;
-            border: 1px solid #cbd5e1;
-            font-weight: 700;
-            border-radius: 10px;
-            padding: 8px 14px;
+            background: #0f172a;
+            color: #ffffff;
+            border: 1px solid #1e293b;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 8px 16px;
             cursor: pointer;
             font-size: 12px;
+            letter-spacing: 0.3px;
             transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .dark-mode-btn:hover { background: #cbd5e1; }
+        .dark-mode-btn:hover { background: #1e293b; }
         
         body.dark-mode .dark-mode-btn { 
             background: #ff1f3d !important; 
@@ -85,17 +88,17 @@
         }
 
         .header-admin { 
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
-            border-radius: 16px; 
-            padding: 22px; 
+            background: linear-gradient(135deg, #0f172a 0%, #334155 100%); 
+            border-radius: 12px; 
+            padding: 24px; 
             color: white; 
             text-align: center; 
-            margin-bottom: 20px; 
+            margin-bottom: 24px; 
             border: none;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); 
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1); 
         }
-        .header-admin h2 { margin: 0 0 6px 0; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; text-shadow: none; }
-        .header-admin p { margin: 0; font-size: 13px; opacity: 0.9; font-weight: 500; }
+        .header-admin h2 { margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.2px; text-shadow: none; }
+        .header-admin p { margin: 0; font-size: 13px; opacity: 0.85; font-weight: 500; letter-spacing: 0.3px; }
 
         body.dark-mode .header-admin { 
             background: linear-gradient(135deg, #7f0015 0%, #300008 100%) !important; 
@@ -111,9 +114,9 @@
             text-shadow: 0 0 12px rgba(255, 31, 61, 0.8) !important;
         }
 
-        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px; border: none; box-shadow: none; }
-        .status-open { background: #d1fae5; color: #065f46; }
-        .status-closed { background: #fee2e2; color: #991b1b; }
+        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-top: 14px; text-transform: uppercase; letter-spacing: 0.8px; }
+        .status-open { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .status-closed { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
         body.dark-mode .status-badge {
             background: #50000e !important;
@@ -122,16 +125,16 @@
             box-shadow: 0 0 30px rgba(255, 31, 61, 0.9), inset 0 0 12px rgba(255, 31, 61, 0.5) !important;
         }
 
-        .timer-box-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+        .timer-box-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
         
         .timer-card-admin { 
-            background: #f1f5f9; 
-            border-radius: 16px; 
-            padding: 16px 14px; 
+            background: #f8fafc; 
+            border-radius: 12px; 
+            padding: 18px 14px; 
             color: var(--text-main); 
             text-align: center; 
             border: 1px solid var(--border); 
-            box-shadow: none; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
@@ -148,9 +151,9 @@
             box-shadow: 0 0 35px rgba(255, 31, 61, 0.9), inset 0 0 15px rgba(255, 31, 61, 0.5) !important;
         }
 
-        .timer-badge-title { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: inline-block; border: none; }
-        .ha .timer-badge-title { background: #dbeafe; color: #1e40af; }
-        .av .timer-badge-title { background: #f3e8ff; color: #6b21a8; }
+        .timer-badge-title { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: inline-block; }
+        .ha .timer-badge-title { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .av .timer-badge-title { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
 
         body.dark-mode .timer-card-admin.ha .timer-badge-title,
         body.dark-mode .timer-card-admin.av .timer-badge-title { 
@@ -160,37 +163,37 @@
             text-shadow: 0 0 15px rgba(255, 31, 61, 1); 
         }
 
-        .admin-nama-promotor { font-size: 15px; font-weight: 700; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 36px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
+        .admin-nama-promotor { font-size: 16px; font-weight: 700; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 32px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
         
         body.dark-mode .timer-card-admin.ha .admin-nama-promotor,
         body.dark-mode .timer-card-admin.av .admin-nama-promotor { color: #ffffff !important; text-shadow: 0 0 20px rgba(255, 31, 61, 1); }
 
-        .input-group { margin-bottom: 16px; text-align: left; }
+        .input-group { margin-bottom: 18px; text-align: left; }
         .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
         body.dark-mode .input-group label { color: #ff8585 !important; }
 
         select, input[type="text"], input[type="password"], input[type="number"] { 
             width: 100%; 
             padding: 12px 14px; 
-            border-radius: 12px; 
+            border-radius: 8px; 
             border: 1px solid var(--border); 
-            background: #f8fafc; 
+            background: #ffffff; 
             font-size: 14px; 
-            font-weight: 600; 
+            font-weight: 500; 
             color: var(--text-main);
             outline: none; 
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 14px center;
             background-size: 16px;
             cursor: pointer;
-            box-shadow: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
             transition: all 0.2s ease;
         }
-        select:focus, input:focus { border-color: #3b82f6; background: #ffffff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        select:focus, input:focus { border-color: var(--accent); background: #ffffff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
 
         body.dark-mode select, body.dark-mode input[type="text"], body.dark-mode input[type="password"], body.dark-mode input[type="number"] { 
             background: #2b0007 !important; 
@@ -213,11 +216,11 @@
         button { 
             width: 100%; 
             padding: 12px 16px; 
-            border-radius: 12px; 
+            border-radius: 8px; 
             font-size: 12px; 
             font-weight: 700; 
             cursor: pointer; 
-            border: none; 
+            border: 1px solid transparent; 
             text-transform: uppercase; 
             transition: all 0.2s ease; 
             display: inline-flex; 
@@ -225,19 +228,19 @@
             align-items: center; 
             gap: 8px; 
             letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        button:active { transform: scale(0.98); }
+        button:active { transform: scale(0.99); }
         
-        .btn-purple { background: #3b82f6; color: white; }
-        .btn-success { background: #10b981; color: white; }
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-primary { background: #0284c7; color: white; }
-        .btn-teal { background: #14b8a6; color: white; }
-        .btn-darkred { background: #dc2626; color: white; }
-        .btn-cancel { background: #e2e8f0; color: #475569; }
-        .btn-disabled { background: #e2e8f0 !important; color: #94a3b8 !important; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; }
+        .btn-purple { background: #2563eb; color: white; border-color: #1d4ed8; }
+        .btn-success { background: #059669; color: white; border-color: #047857; }
+        .btn-warning { background: #d97706; color: white; border-color: #b45309; }
+        .btn-danger { background: #dc2626; color: white; border-color: #b91c1c; }
+        .btn-primary { background: #0284c7; color: white; border-color: #0369a1; }
+        .btn-teal { background: #0d9488; color: white; border-color: #0f766e; }
+        .btn-darkred { background: #991b1b; color: white; border-color: #7f1d1d; }
+        .btn-cancel { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+        .btn-disabled { background: #e2e8f0 !important; color: #94a3b8 !important; border-color: #cbd5e1 !important; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; }
 
         body.dark-mode .btn-purple,
         body.dark-mode .btn-success,
@@ -262,33 +265,33 @@
         .btn-action { 
             padding: 6px 12px; 
             font-size: 11px; 
-            border-radius: 8px; 
+            border-radius: 6px; 
             width: auto; 
             font-weight: 700; 
             cursor: pointer; 
-            border: none; 
+            border: 1px solid transparent; 
             text-transform: uppercase; 
             display: inline-flex; 
             align-items: center; 
             justify-content: center; 
             gap: 4px; 
-            box-shadow: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
             transition: all 0.2s ease;
             white-space: nowrap;
         }
-        .btn-action:active { transform: scale(0.96); }
+        .btn-action:active { transform: scale(0.97); }
 
-        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block; flex-shrink: 0; }
+        .spinner { width: 14px; height: 14px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block; flex-shrink: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .section-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 10px 0; text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+        .section-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 28px 0 10px 0; text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
         body.dark-mode .section-title { color: #ffb3bc !important; border-bottom-color: #ff1f3d !important; }
         
         .admin-grid { display: flex; flex-direction: column; gap: 10px; }
 
-        .list-section-wrapper { margin-bottom: 20px; text-align: left; }
+        .list-section-wrapper { margin-bottom: 24px; text-align: left; }
         .list-antrian { list-style: none; padding: 0; margin: 0 0 16px 0; }
-        .list-antrian li { padding: 12px 14px; background: #f8fafc; border-radius: 10px; margin-bottom: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; box-shadow: none; }
+        .list-antrian li { padding: 12px 16px; background: #f8fafc; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; box-shadow: none; }
         
         body.dark-mode .list-antrian li { 
             background: #2b0007 !important; 
@@ -297,12 +300,12 @@
             box-shadow: 0 0 25px rgba(255, 31, 61, 0.7) !important;
         }
 
-        .badge-status-item { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; white-space: nowrap; border: none; }
-        .badge-giliran-anda { background: #d1fae5; color: #065f46; }
-        .badge-standby { background: #e0f2fe; color: #0369a1; }
-        .badge-melayani { background: #fef3c7; color: #92400e; }
-        .badge-cs { background: #f3e8ff; color: #6b21a8; }
-        .badge-ibadah { background: #e0e7ff; color: #3730a3; }
+        .badge-status-item { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
+        .badge-giliran-anda { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-standby { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+        .badge-ibadah { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
 
         body.dark-mode .badge-status-item {
             background: #50000e !important;
@@ -315,8 +318,8 @@
         .promotor-card-item {
             background: #f8fafc;
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 10px 14px;
+            border-radius: 8px;
+            padding: 12px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -338,7 +341,7 @@
         }
         .promotor-name-text { 
             font-size: 13px; 
-            font-weight: 700; 
+            font-weight: 600; 
             color: var(--text-main); 
             white-space: nowrap; 
             overflow: hidden; 
@@ -354,18 +357,17 @@
         }
 
         .badge-status-sanksi { 
-            padding: 3px 8px; 
-            border-radius: 12px; 
+            padding: 4px 10px; 
+            border-radius: 6px; 
             font-size: 10px; 
             font-weight: 700; 
             display: inline-flex; 
             align-items: center; 
             gap: 4px; 
-            border: none;
             white-space: nowrap;
         }
-        .badge-aman { background: #d1fae5; color: #065f46; }
-        .badge-penalti { background: #fee2e2; color: #991b1b; }
+        .badge-aman { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-penalti { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
@@ -373,9 +375,9 @@
         .modal-box { 
             background: white; 
             width: 100%; 
-            max-width: 380px; 
-            padding: 24px; 
-            border-radius: 16px; 
+            max-width: 400px; 
+            padding: 28px; 
+            border-radius: 12px; 
             text-align: center; 
             border: 1px solid var(--border); 
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
@@ -387,10 +389,11 @@
             box-shadow: 0 0 45px rgba(255, 31, 61, 0.9) !important;
         }
 
-        .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-        .modal-desc { font-size: 13px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5; text-align: left; font-weight: 600; }
+        .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; color: var(--text-main); }
+        body.dark-mode .modal-title { color: #ffffff !important; }
+        .modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; text-align: left; font-weight: 500; }
         body.dark-mode .modal-desc { color: #ffffff !important; }
-        .modal-desc select, .modal-desc input { font-size: 13px; padding: 10px 12px; margin-top: 4px; border-radius: 10px; border: 1px solid var(--border); box-shadow: none; }
+        .modal-desc select, .modal-desc input { font-size: 13px; padding: 10px 12px; margin-top: 4px; border-radius: 8px; border: 1px solid var(--border); box-shadow: none; }
         .modal-actions { display: flex; gap: 10px; }
         .modal-actions button { flex: 1; padding: 10px; font-size: 12px; }
 
@@ -405,17 +408,17 @@
         </div>
 
         <div class="header-admin">
-            <h2>🔑 Control Panel Admin</h2>
-            <p>Antrian Promotor UFO Kebonsari</p>
+            <h2>Executive Dashboard Admin</h2>
+            <p>Sistem Antrian Promotor - UFO Kebonsari</p>
             <div id="badge-status-sistem" class="status-badge status-open">STATUS: OPEN</div>
         </div>
 
         <div id="login-admin-box">
             <div class="input-group">
                 <label>Masukkan PIN Admin Khusus</label>
-                <input type="password" id="input-pin-admin" placeholder="PIN ADMIN" style="text-align: center; font-size: 16px; letter-spacing: 2px;">
+                <input type="password" id="input-pin-admin" placeholder="••••" style="text-align: center; font-size: 18px; letter-spacing: 4px;">
             </div>
-            <button type="button" id="btn-login-admin" class="btn-purple" onclick="prosesLoginAdmin()">Masuk Panel Kontrol</button>
+            <button type="button" id="btn-login-admin" class="btn-purple" onclick="prosesLoginAdmin()">Autentikasi & Masuk</button>
         </div>
 
         <div id="controls-admin-box" style="display: none;">
@@ -437,41 +440,41 @@
                 <ul id="list-AV" class="list-antrian"><li><span>Memuat...</span></li></ul>
             </div>
 
-            <div class="section-title">Pengaturan Status GPS Validasi Toko</div>
+            <div class="section-title">Konfigurasi Validasi GPS Toko</div>
             <div class="admin-grid" style="margin-bottom: 15px;">
                 <div style="display: flex; gap: 8px;">
-                    <button type="button" id="btn-on-gps" class="btn-success" style="flex:1;" onclick="toggleGPSAdmin(true)">🟢 AKTIFKAN GPS</button>
-                    <button type="button" id="btn-off-gps" class="btn-danger" style="flex:1;" onclick="toggleGPSAdmin(false)">🔴 MATIKAN GPS</button>
+                    <button type="button" id="btn-on-gps" class="btn-success" style="flex:1;" onclick="toggleGPSAdmin(true)">Aktifkan GPS</button>
+                    <button type="button" id="btn-off-gps" class="btn-danger" style="flex:1;" onclick="toggleGPSAdmin(false)">Matikan GPS</button>
                 </div>
-                <div id="label-status-gps" style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-align: center; margin-top: 4px;">Status GPS: Memeriksa...</div>
+                <div id="label-status-gps" style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-align: center; margin-top: 4px;">Status GPS: Memeriksa...</div>
             </div>
 
-            <div class="section-title">1. Kontrol Sistem Antrian</div>
+            <div class="section-title">1. Manajemen Operasional Sistem</div>
             <div class="admin-grid">
-                <button type="button" class="btn-success" onclick="bukaModalToggleSistem('BUKA')">BUKA ANTRIAN</button>
-                <button type="button" class="btn-danger" onclick="bukaModalToggleSistem('TUTUP')">TUTUP ANTRIAN</button>
+                <button type="button" class="btn-success" onclick="bukaModalToggleSistem('BUKA')">Buka Sistem Antrian</button>
+                <button type="button" class="btn-danger" onclick="bukaModalToggleSistem('TUTUP')">Tutup Sistem Antrian</button>
             </div>
 
-            <div class="section-title">2. Manajemen Urutan & Waktu</div>
+            <div class="section-title">2. Manajemen Urutan Antrian</div>
             <div class="admin-grid">
-                <button type="button" class="btn-teal" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Antrian</button>
+                <button type="button" class="btn-teal" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Promotor ke Antrian</button>
                 <button type="button" class="btn-warning" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
             </div>
 
-            <div class="section-title">3. Tindakan Khusus & Emergency</div>
+            <div class="section-title">3. Tindakan Darurat & Kontrol Khusus</div>
             <div class="admin-grid">
                 <button type="button" class="btn-primary" onclick="bukaModalFormAdminKategori('adminAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
                 <button type="button" class="btn-warning" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
-                <button type="button" class="btn-darkred" onclick="bukaModalResetDeviceAdmin()">Reset Perangkat Promotor</button>
-                <button type="button" class="btn-danger" onclick="bukaModalResetTotal()">RESET SEMUA ANTRIAN</button>
+                <button type="button" class="btn-darkred" onclick="bukaModalResetDeviceAdmin()">Reset Kunci Perangkat Promotor</button>
+                <button type="button" class="btn-danger" onclick="bukaModalResetTotal()">Reset Seluruh Antrian Aktif</button>
             </div>
 
-            <div class="section-title">4. Manajemen Status Akun Promotor (Lock/Unlock)</div>
+            <div class="section-title">4. Manajemen Status Akun Promotor</div>
             <div id="tabel-penalti-admin" class="promotor-list-grid">
-                <div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 600;">Memuat data promotor...</div>
+                <div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 500;">Memuat data promotor...</div>
             </div>
 
-            <button type="button" class="btn-cancel" style="margin-top: 20px; font-weight: 700;" onclick="logoutAdmin()">🔒 Kunci Panel Admin</button>
+            <button type="button" class="btn-cancel" style="margin-top: 24px; font-weight: 700;" onclick="logoutAdmin()">Keluar (Lock Panel Admin)</button>
         </div>
     </div>
 
@@ -616,13 +619,13 @@
                 const btnOff = document.getElementById('btn-off-gps');
 
                 if (koordinatTokoAdmin.lat && koordinatTokoAdmin.lat !== "") {
-                    statusGpsLabel.innerHTML = `Status GPS: <b style="color:#10b981;">AKTIF</b> (Radius: ${koordinatTokoAdmin.radius}m)`;
+                    statusGpsLabel.innerHTML = `Status GPS: <b style="color:#059669;">AKTIF</b> (Radius: ${koordinatTokoAdmin.radius}m)`;
                     if (btnOn && btnOff && !sedangDiprosesGlobal) {
                         btnOn.disabled = true; btnOn.className = "btn-success btn-disabled";
                         btnOff.disabled = false; btnOff.className = "btn-danger";
                     }
                 } else {
-                    statusGpsLabel.innerHTML = `Status GPS: <b style="color:#ef4444;">NONAKTIF (OFF)</b>`;
+                    statusGpsLabel.innerHTML = `Status GPS: <b style="color:#dc2626;">NONAKTIF (OFF)</b>`;
                     if (btnOn && btnOff && !sedangDiprosesGlobal) {
                         btnOn.disabled = false; btnOn.className = "btn-success";
                         btnOff.disabled = true; btnOff.className = "btn-danger btn-disabled";
@@ -685,10 +688,10 @@
                     btnOff.innerHTML = `<span class="spinner"></span> Mematikan...`;
                     fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=&lng=&radius=50&t=${Date.now()}`)
                     .then(r => r.json()).then(res => {
-                        btnOff.innerHTML = `🔴 MATIKAN GPS`;
+                        btnOff.innerHTML = `Matikan GPS`;
                         tampilkanModal("GPS Dinonaktifkan", "Validasi radius GPS toko berhasil dimatikan (OFF).");
                         muatDataAntrian(); selesai();
-                    }).catch(() => { btnOff.innerHTML = `🔴 MATIKAN GPS`; selesai(); });
+                    }).catch(() => { btnOff.innerHTML = `Matikan GPS`; selesai(); });
                 } else {
                     btnOn.innerHTML = `<span class="spinner"></span> Mendeteksi GPS...`;
                     if (navigator.geolocation) {
@@ -699,16 +702,16 @@
 
                             fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=${encodeURIComponent(radius)}&t=${Date.now()}`)
                             .then(r => r.json()).then(res => {
-                                btnOn.innerHTML = `🟢 AKTIFKAN GPS`;
+                                btnOn.innerHTML = `Aktifkan GPS`;
                                 tampilkanModal("GPS Diaktifkan", "Titik GPS & Radius Toko berhasil diset dari perangkat Anda.");
                                 muatDataAntrian(); selesai();
-                            }).catch(() => { btnOn.innerHTML = `🟢 AKTIFKAN GPS`; selesai(); });
+                            }).catch(() => { btnOn.innerHTML = `Aktifkan GPS`; selesai(); });
                         }, function() {
-                            btnOn.innerHTML = `🟢 AKTIFKAN GPS`;
+                            btnOn.innerHTML = `Aktifkan GPS`;
                             alert("Gagal mendeteksi lokasi perangkat Anda.");
                             selesai();
                         }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
-                    } else { btnOn.innerHTML = `🟢 AKTIFKAN GPS`; selesai(); }
+                    } else { btnOn.innerHTML = `Aktifkan GPS`; selesai(); }
                 }
             });
         }
@@ -716,7 +719,7 @@
         function renderTabelStatusAkunAdmin(dataSales) {
             let html = "";
             if (!dataSales || dataSales.length === 0) {
-                html = `<div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 600;">Belum ada data promotor</div>`;
+                html = `<div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 500;">Belum ada data promotor</div>`;
             } else {
                 dataSales.forEach(item => {
                     const nama = typeof item === 'object' ? item.nama : item;
@@ -797,7 +800,7 @@
 
         function bukaModalToggleSistem(targetStatus) {
             document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
-            document.getElementById('modal-desc').innerHTML = `Status baru: <b>${targetStatus}</b>`;
+            document.getElementById('modal-desc').innerHTML = `Status baru sistem: <b>${targetStatus}</b>`;
             document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
@@ -817,7 +820,7 @@
 
         function bukaModalResetTotal() {
             document.getElementById('modal-title').innerText = 'Reset Semua Antrian';
-            document.getElementById('modal-desc').innerHTML = `⚠️ <b>PERINGATAN:</b><br>Semua antrian akan dihapus total.`;
+            document.getElementById('modal-desc').innerHTML = `⚠️ <b>PERINGATAN:</b><br>Seluruh data antrian akan dihapus dari sistem.`;
             document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-danger" onclick="eksekusiResetTotal()">Reset Sekarang</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
