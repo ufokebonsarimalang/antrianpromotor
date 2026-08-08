@@ -3,406 +3,490 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antrian Walk-In Promotor - UFO Kebonsari</title>
+    <title>Dashboard Admin - UFO Kebonsari</title>
     <link rel="shortcut icon" href="#">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Leaflet CSS untuk Peta Visual -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --success: #2563eb;
-            --customer-blue: #2563eb;
-            --closing-red: #dc2626;
-            --purple-cs: #7c3aed;
-            --teal-cs: #0d9488;
-            --amber-rest: #d97706;
-            --indigo-ibadah: #4f46e5;
-            --bg-color: #f1f5f9;
+            --admin-purple: #7c3aed;
+            --admin-dark: #5b21b6;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #475569;
-            --border: #cbd5e1;
+            --border: #0f172a;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --primary: #3b82f6;
         }
 
-        /* STYLING MODE GELAP: BACKGROUND MENGIKUTI WARNA ASLI DENGAN EFEK NEON MENYALA */
-        body.dark-mode {
-            --bg-color: #080203 !important;
-            --card-bg: #140406 !important;
-            --text-main: #ffffff !important;
-            --text-muted: #fca5a5 !important;
-            --border: #ef4444 !important;
+        *, body, button, select, input { 
+            font-family: 'Plus Jakarta Sans', sans-serif !important; 
+            box-sizing: border-box; 
         }
-
-        body.dark-mode { background: #080203 !important; }
         
-        /* KOTAK UTAMA / CONTAINER */
-        body.dark-mode .app-container { 
-            background: #140406 !important; 
-            border: 2px solid #ffffff !important; 
-            box-shadow: 0 0 45px rgba(255, 255, 255, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1) !important; 
+        /* BACKGROUND WALLPAPER DRAGON BALL UNTUK MODE TERANG */
+        body { 
+            background: linear-gradient(rgba(255, 253, 231, 0.88), rgba(255, 253, 231, 0.88)), 
+                        url('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=1000&auto=format&fit=crop') no-repeat center center fixed; 
+            background-size: cover;
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 16px; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
         }
-
-        /* TOMBOL GANTI TEMA: NEON BOX PUTIH */
-        body.dark-mode .dark-mode-btn { 
-            background: #ffffff !important; 
-            color: #000000 !important; 
-            border: 2px solid #ffffff !important; 
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3) !important; 
-        }
-
-        /* HEADER */
-        body.dark-mode .gradient-header { 
-            background: linear-gradient(135deg, #450a0a 0%, #1f0505 100%) !important; 
-            border: 2px solid #ef4444 !important; 
-            box-shadow: 0 0 35px rgba(239, 68, 68, 0.6) !important;
-        }
-        body.dark-mode .gradient-header h2 {
-            color: #fca5a5 !important;
-            text-shadow: 0 0 15px rgba(239, 68, 68, 0.9) !important;
-        }
-        body.dark-mode .gradient-header p {
-            color: #f87171 !important;
-            text-shadow: 0 0 10px rgba(239, 68, 68, 0.7) !important;
-        }
-
-        /* BOX STATUS ANTRIAN: KUNING MENYALA */
-        body.dark-mode .status-badge-sistem {
-            background: #713f12 !important;
-            color: #fde047 !important;
-            border: 2px solid #facc15 !important;
-            box-shadow: 0 0 25px rgba(250, 204, 21, 0.8), inset 0 0 10px rgba(250, 204, 21, 0.4) !important;
-        }
-
-        /* BOX PILIH NAMA & USER BADGE: UNGU MENYALA */
-        body.dark-mode select, body.dark-mode input[type="text"] { 
-            background: #2e1065 !important; 
-            color: #f3e8ff !important; 
-            border: 2px solid #a855f7 !important; 
-            box-shadow: 0 0 25px rgba(168, 85, 247, 0.7), inset 0 0 10px rgba(168, 85, 247, 0.3) !important;
-        }
-
-        body.dark-mode select:disabled { 
-            background-color: #18181b !important; 
-            color: #71717a !important; 
-            border-color: #27272a !important; 
-            box-shadow: none !important;
-        }
-
-        body.dark-mode .user-badge { 
-            background: #2e1065 !important; 
-            border: 2px solid #a855f7 !important; 
-            color: #ffffff !important; 
-            box-shadow: 0 0 25px rgba(168, 85, 247, 0.7), inset 0 0 10px rgba(168, 85, 247, 0.3) !important;
-        }
-
-        /* KOTAK GILIRAN HA & AV (ATAS-BAWAH) */
-        .timer-box-wrapper { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
-        .timer-card-admin { background: #f8fafc; border-radius: 14px; padding: 16px; text-align: center; border: 2px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; }
         
-        body.dark-mode .timer-card-admin.ha {
-            background: #713f12 !important;
-            border: 3px solid #facc15 !important;
-            border-radius: 20px !important;
-            box-shadow: 0 0 25px rgba(250, 204, 21, 0.6), inset 0 0 15px rgba(250, 204, 21, 0.3) !important;
-        }
-        body.dark-mode .timer-card-admin.av {
-            background: #064e3b !important;
-            border: 3px solid #22c55e !important;
-            border-radius: 20px !important;
-            box-shadow: 0 0 25px rgba(34, 197, 94, 0.6), inset 0 0 15px rgba(34, 197, 94, 0.3) !important;
+        .admin-container { 
+            width: 100%; 
+            max-width: 650px; 
+            background: var(--card-bg); 
+            border-radius: 24px; 
+            padding: 24px; 
+            border: 4px solid var(--border); 
+            box-shadow: 6px 6px 0px #0f172a; 
         }
 
-        .timer-badge-title { font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; display: block; }
-        .ha .timer-badge-title { color: #2563eb; }
-        .av .timer-badge-title { color: #7c3aed; }
+        .header-admin { 
+            background: #ff9800; 
+            border-radius: 18px; 
+            padding: 22px; 
+            color: white; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            border: 4px solid var(--border);
+            box-shadow: 4px 4px 0px #0f172a; 
+        }
+        .header-admin h2 { 
+            margin: 0 0 6px 0; 
+            font-size: 24px; 
+            font-weight: 800; 
+            letter-spacing: -0.5px; 
+            text-shadow: 2px 2px 0px #0f172a; 
+        }
+        .header-admin p { 
+            margin: 0; 
+            font-size: 13px; 
+            opacity: 0.95; 
+            font-weight: 700; 
+            text-shadow: 1px 1px 0px #0f172a; 
+        }
 
-        body.dark-mode .timer-card-admin.ha .timer-badge-title { color: #fde047 !important; text-shadow: 0 0 10px rgba(253, 224, 71, 0.8); }
-        body.dark-mode .timer-card-admin.av .timer-badge-title { color: #86efac !important; text-shadow: 0 0 10px rgba(134, 239, 172, 0.8); }
+        .status-badge { 
+            display: inline-block; 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: 800; 
+            margin-top: 12px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            border: 3px solid #0f172a; 
+            box-shadow: 2px 2px 0px #0f172a; 
+        }
+        .status-open { background: #4ade80; color: #064e3b; }
+        .status-closed { background: #f87171; color: #450a0a; }
 
-        .promotor-nama-aktif { font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 36px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
+        .timer-box-wrapper { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 14px; 
+            margin-bottom: 20px; 
+        }
         
-        body.dark-mode .timer-card-admin.ha .promotor-nama-aktif { color: #fef08a !important; text-shadow: 0 0 15px rgba(254, 240, 138, 0.9); }
-        body.dark-mode .timer-card-admin.av .promotor-nama-aktif { color: #bbf7d0 !important; text-shadow: 0 0 15px rgba(187, 247, 208, 0.9); }
+        .timer-card-admin { 
+            background: #fff7ed; 
+            border-radius: 18px; 
+            padding: 16px 14px; 
+            color: var(--text-main); 
+            text-align: center; 
+            border: 3px solid var(--border); 
+            box-shadow: 4px 4px 0px #0f172a; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        .timer-card-admin::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            height: 6px; 
+            border-bottom: 2px solid var(--border); 
+        }
+        .timer-card-admin.ha::before { background: #60a5fa; }
+        .timer-card-admin.av::before { background: #c084fc; }
 
-        body.dark-mode .list-antrian li { 
-            background: #1f0505 !important; 
-            border: 2px solid #f87171 !important; 
-            color: #ffffff !important; 
-            box-shadow: 0 0 20px rgba(248, 113, 113, 0.5) !important;
+        .timer-badge-title { 
+            font-size: 10px; 
+            font-weight: 800; 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            margin-bottom: 6px; 
+            display: inline-block; 
+            border: 2px solid #0f172a; 
+        }
+        .ha .timer-badge-title { background: #dbeafe; color: #1e40af; }
+        .av .timer-badge-title { background: #f3e8ff; color: #6b21a8; }
+
+        .admin-nama-promotor { 
+            font-size: 16px; 
+            font-weight: 800; 
+            color: #0f172a; 
+            margin-top: 2px; 
+            line-height: 1.3; 
+            min-height: 36px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            word-break: break-word; 
         }
 
-        body.dark-mode .modal-box { 
-            background: #2b0a0d !important; 
-            border: 2px solid #ef4444 !important; 
-            color: #ffffff !important; 
-            box-shadow: 0 0 40px rgba(239, 68, 68, 0.6) !important;
+        .input-group { 
+            margin-bottom: 16px; 
+            text-align: left; 
+        }
+        .input-group label { 
+            display: block; 
+            font-size: 12px; 
+            font-weight: 800; 
+            color: var(--text-main); 
+            text-transform: uppercase; 
+            margin-bottom: 8px; 
+            letter-spacing: 0.5px; 
         }
 
-        body.dark-mode .btn-cancel {
-            background: #334155 !important;
-            color: #ffffff !important;
-            border: 2px solid #94a3b8 !important;
-            box-shadow: 0 0 20px rgba(148, 163, 184, 0.6), inset 0 0 8px rgba(148, 163, 184, 0.3) !important;
-        }
-
-        /* --- BACKGROUND TOMBOL MENGIKUTI WARNA ASLI DENGAN EFEK NEON MENYALA --- */
-        
-        /* Tombol Simpan / Daftar / Customer: BACKGROUND BIRU MENYALA */
-        body.dark-mode .btn-success,
-        body.dark-mode .btn-customer {
-            background: #1e3a8a !important;
-            color: #ffffff !important;
-            border: 2px solid #3b82f6 !important;
-            box-shadow: 0 0 25px rgba(59, 130, 246, 0.8), inset 0 0 12px rgba(59, 130, 246, 0.4) !important;
-        }
-
-        /* Tombol Closing / Selesai: BACKGROUND MERAH MENYALA */
-        body.dark-mode .btn-closing {
-            background: #7f1d1d !important;
-            color: #ffffff !important;
-            border: 2px solid #ef4444 !important;
-            box-shadow: 0 0 25px rgba(239, 68, 68, 0.8), inset 0 0 12px rgba(239, 68, 68, 0.4) !important;
-        }
-
-        /* Tombol CS / Gudang: BACKGROUND UNGU MENYALA */
-        body.dark-mode .btn-purple {
-            background: #581c87 !important;
-            color: #ffffff !important;
-            border: 2px solid #a855f7 !important;
-            box-shadow: 0 0 25px rgba(168, 85, 247, 0.8), inset 0 0 12px rgba(168, 85, 247, 0.4) !important;
-        }
-
-        /* Tombol Selesai CS / Selesai Ibadah: BACKGROUND TOSCA MENYALA */
-        body.dark-mode .btn-teal {
-            background: #115e59 !important;
-            color: #ffffff !important;
-            border: 2px solid #14b8a6 !important;
-            box-shadow: 0 0 25px rgba(20, 184, 166, 0.8), inset 0 0 12px rgba(20, 184, 166, 0.4) !important;
-        }
-
-        /* Tombol Ibadah: BACKGROUND INDIGO MENYALA */
-        body.dark-mode .btn-indigo {
-            background: #312e81 !important;
-            color: #ffffff !important;
-            border: 2px solid #6366f1 !important;
-            box-shadow: 0 0 25px rgba(99, 102, 241, 0.8), inset 0 0 12px rgba(99, 102, 241, 0.4) !important;
-        }
-
-        /* Tombol Keluar / Istirahat: BACKGROUND AMBER / ORANGE MENYALA */
-        body.dark-mode .btn-amber {
-            background: #78350f !important;
-            color: #ffffff !important;
-            border: 2px solid #f59e0b !important;
-            box-shadow: 0 0 25px rgba(245, 158, 11, 0.8), inset 0 0 12px rgba(245, 158, 11, 0.4) !important;
-        }
-
-        /* Tombol Laporkan WhatsApp: BACKGROUND HIJAU MENYALA */
-        body.dark-mode .wa-report-btn {
-            background: #064e3b !important;
-            color: #ffffff !important;
-            border: 2px solid #22c55e !important;
-            box-shadow: 0 0 25px rgba(34, 197, 94, 0.8), inset 0 0 12px rgba(34, 197, 94, 0.4) !important;
-        }
-
-        @keyframes pulseGlow {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-            70% { transform: scale(1.02); box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-        .btn-pulse { animation: pulseGlow 2s infinite; }
-
-        @keyframes pulseGreen {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            70% { transform: scale(1.02); box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-        }
-        .wa-pulse { animation: pulseGreen 2s infinite; }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .spinner { display: inline-block; width: 16px; height: 16px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s ease-in-out infinite; vertical-align: middle; margin-right: 6px; }
-
-        *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
-        body { background: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 500px; background: var(--card-bg); border-radius: 24px; padding: 24px; border: 2px solid var(--border); box-shadow: 0 15px 35px -5px rgba(0,0,0,0.1); text-align: center; }
-
-        .top-controls { display: flex; justify-content: flex-end; margin-bottom: 12px; }
-
-        .gradient-header { background: linear-gradient(135deg, #dc2626 0%, #ffffff 100%); border-radius: 18px; padding: 22px; color: white; margin-bottom: 18px; box-shadow: 0 8px 20px -4px rgba(220, 38, 38, 0.3); }
-        .gradient-header h2 { margin: 0; font-size: 22px; font-weight: 800; text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
-        .gradient-header p { margin: 6px 0 0 0; font-size: 13px; font-weight: 700; text-shadow: 1px 1px 4px rgba(0,0,0,0.6); }
-
-        .status-badge-sistem { display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 18px; letter-spacing: 0.5px; }
-        .status-open { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
-        .status-closed { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
-
-        .input-group { margin-bottom: 16px; text-align: left; }
-        .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
-
-        select, input[type="text"] { 
+        select, input[type="text"], input[type="password"], input[type="number"] { 
             width: 100%; 
             padding: 14px 16px; 
             border-radius: 14px; 
-            border: 2px solid var(--border); 
+            border: 3px solid var(--border); 
             background: #ffffff; 
             font-size: 15px; 
-            font-weight: 600; 
-            color: var(--text-main); 
+            font-weight: 700; 
+            color: var(--text-main);
             outline: none; 
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f172a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 14px center;
             background-size: 18px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            box-shadow: 3px 3px 0px #0f172a;
+            transition: all 0.1s ease;
         }
 
-        select:focus, input[type="text"]:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        input[type="text"], input[type="password"], input[type="number"] {
+            background-image: none;
+            cursor: text;
+        }
+
+        select:focus, input:focus { 
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px var(--admin-purple); 
+        }
+
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            border-radius: 14px; 
+            font-size: 13px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            border: 3px solid var(--border); 
+            text-transform: uppercase; 
+            transition: all 0.1s ease; 
+            display: inline-flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 8px; 
+            letter-spacing: 0.5px;
+            box-shadow: 4px 4px 0px #0f172a;
+        }
+        button:active { 
+            transform: translate(3px, 3px); 
+            box-shadow: 1px 1px 0px #0f172a !important; 
         }
         
-        button { width: 100%; padding: 14px 12px; border-radius: 14px; font-size: 13px; font-weight: 800; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; }
-        button:active { transform: scale(0.98); }
-
-        .btn-success { background: #2563eb; color: white; }
-        .btn-customer { background: #2563eb; color: white; }
-        .btn-closing { background: var(--closing-red); color: white; }
-        .btn-purple { background: #7c3aed; color: white; }
-        .btn-teal { background: #0d9488; color: white; }
-        .btn-amber { background: #d97706; color: white; }
-        .btn-indigo { background: var(--indigo-ibadah); color: white; }
-        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; animation: none !important; }
-
-        .user-badge { background: #f8fafc; border: 2px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 18px; text-align: left; font-size: 14px; font-weight: 600; }
-        .list-antrian { list-style: none; padding: 0; margin: 8px 0 0 0; text-align: left; }
-        .list-antrian li { padding: 12px 14px; background: #ffffff; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--border); font-size: 14px; font-weight: 700; }
+        .btn-purple { background: #ff9800; color: white; }
+        .btn-success { background: #4ade80; color: #064e3b; }
+        .btn-warning { background: #fbbf24; color: #78350f; }
+        .btn-danger { background: #f87171; color: #450a0a; }
+        .btn-primary { background: #60a5fa; color: #1e3a8a; }
+        .btn-teal { background: #2dd4bf; color: #134e4a; }
+        .btn-darkred { background: #dc2626; color: white; }
+        .btn-cancel { background: #e2e8f0; color: #0f172a; }
+        .btn-disabled { 
+            background: #cbd5e1 !important; 
+            color: #64748b !important; 
+            cursor: not-allowed !important; 
+            box-shadow: none !important; 
+            transform: none !important; 
+        }
         
-        .badge-status-item { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
-        .badge-giliran-anda { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
-        .badge-standby { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-        .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-        .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
-        .badge-ibadah { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        .btn-action { 
+            padding: 8px 14px; 
+            font-size: 11px; 
+            border-radius: 10px; 
+            width: auto; 
+            font-weight: 800; 
+            cursor: pointer; 
+            border: 2px solid var(--border); 
+            text-transform: uppercase; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 6px; 
+            box-shadow: 2px 2px 0px #0f172a;
+            transition: all 0.1s ease;
+        }
+        .btn-action:active { 
+            transform: translate(2px, 2px); 
+            box-shadow: 0px 0px 0px #0f172a !important; 
+        }
 
-        .wa-report-btn { margin-top: 16px; background: #25d366; border: 2px solid #1ebe57; color: white; font-size: 13px; padding: 14px; border-radius: 12px; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 10px; font-weight: 800; }
+        .spinner { 
+            width: 16px; 
+            height: 16px; 
+            border: 3px solid rgba(15, 23, 42, 0.3); 
+            border-radius: 50%; 
+            border-top-color: #0f172a; 
+            animation: spin 0.8s linear infinite; 
+            display: inline-block; 
+            flex-shrink: 0; 
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 11, 20, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
+        .section-title { 
+            font-size: 12px; 
+            font-weight: 800; 
+            color: var(--text-main); 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px; 
+            margin: 24px 0 10px 0; 
+            text-align: left; 
+            border-bottom: 3px solid var(--border); 
+            padding-bottom: 4px; 
+        }
+        .admin-grid { display: flex; flex-direction: column; gap: 12px; }
+
+        .list-section-wrapper { margin-bottom: 20px; text-align: left; }
+        .list-antrian { list-style: none; padding: 0; margin: 0 0 16px 0; }
+        .list-antrian li { 
+            padding: 12px 14px; 
+            background: #ffffff; 
+            border-radius: 12px; 
+            margin-bottom: 8px; 
+            border: 3px solid var(--border); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 14px; 
+            font-weight: 800; 
+            box-shadow: 3px 3px 0px #0f172a; 
+        }
+        
+        .badge-status-item { 
+            font-size: 11px; 
+            font-weight: 800; 
+            padding: 3px 8px; 
+            border-radius: 6px; 
+            white-space: nowrap; 
+            border: 2px solid var(--border); 
+        }
+        .badge-giliran-anda { background: #4ade80; color: #064e3b; }
+        .badge-standby { background: #60a5fa; color: #1e3a8a; }
+        .badge-melayani { background: #fbbf24; color: #78350f; }
+        .badge-cs { background: #c084fc; color: #3b0764; }
+        .badge-ibadah { background: #818cf8; color: #1e1b4b; }
+
+        .promotor-list-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .promotor-card-item {
+            background: #ffffff;
+            border: 3px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 3px 3px 0px #0f172a;
+            gap: 12px;
+        }
+        .promotor-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+        .promotor-name-text {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .badge-status-sanksi { 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-size: 10px; 
+            font-weight: 800; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 4px; 
+            border: 2px solid var(--border);
+            box-shadow: 2px 2px 0px #0f172a;
+            white-space: nowrap;
+        }
+        .badge-aman { background: #4ade80; color: #064e3b; }
+        .badge-penalti { background: #f87171; color: #450a0a; }
+
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(15, 23, 42, 0.75); 
+            backdrop-filter: blur(4px); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 9999; 
+            opacity: 0; 
+            visibility: hidden; 
+            transition: all 0.2s; 
+            padding: 16px; 
+        }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-box { background: white; width: 100%; max-width: 380px; padding: 24px; border-radius: 20px; text-align: center; border: 2px solid var(--border); }
-        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; color: var(--text-main); }
-        .modal-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; font-weight: 600; text-align: left; }
+        
+        .modal-box { 
+            background: white; 
+            width: 100%; 
+            max-width: 380px; 
+            padding: 24px; 
+            border-radius: 20px; 
+            text-align: center; 
+            border: 4px solid var(--border); 
+            box-shadow: 6px 6px 0px #0f172a;
+        }
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+        .modal-desc { 
+            font-size: 14px; 
+            color: var(--text-main); 
+            margin-bottom: 20px; 
+            line-height: 1.5; 
+            text-align: left; 
+            font-weight: 700; 
+        }
+        .modal-desc select, .modal-desc input { 
+            font-size: 14px; 
+            padding: 12px 14px; 
+            margin-top: 4px; 
+            border-radius: 12px; 
+            border: 3px solid var(--border); 
+            box-shadow: 2px 2px 0px #0f172a; 
+        }
         .modal-actions { display: flex; gap: 10px; }
         .modal-actions button { flex: 1; padding: 12px; font-size: 13px; }
+
+        @media (max-width: 480px) { .timer-box-wrapper { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <div class="top-controls">
-            <button type="button" class="dark-mode-btn" id="btn-toggle-dark" onclick="toggleDarkMode()">🌙 Gelap</button>
+    <div class="admin-container">
+        <div class="header-admin">
+            <h2>🔑 Control Panel Admin</h2>
+            <p>Antrian Promotor UFO Kebonsari</p>
+            <div id="badge-status-sistem" class="status-badge status-open">STATUS: OPEN</div>
         </div>
 
-        <div class="gradient-header">
-            <h2>Antrian Walk-In Promotor</h2>
-            <p>UFO Kebonsari</p>
-        </div>
-
-        <div id="badge-status-sistem" class="status-badge-sistem status-open">
-            STATUS ANTRIAN: OPEN
-        </div>
-
-        <!-- PANEL LOGIN -->
-        <div id="panel-login" style="display: none;">
+        <div id="login-admin-box">
             <div class="input-group">
-                <label>Pilih Nama Anda (Kunci Perangkat)</label>
-                <select id="pilih-sales"><option value="">-- Pilih Nama Anda --</option></select>
+                <label>Masukkan PIN Admin Khusus</label>
+                <input type="password" id="input-pin-admin" placeholder="PIN ADMIN" style="text-align: center; font-size: 18px; letter-spacing: 3px;">
             </div>
-            <button type="button" id="btn-simpan-hp" class="btn-customer btn-pulse" onclick="simpanAkunHP()">Simpan & Kunci di HP Ini</button>
+            <button type="button" id="btn-login-admin" class="btn-purple" onclick="prosesLoginAdmin()">Masuk Panel Kontrol</button>
         </div>
 
-        <!-- PANEL MENU UTAMA -->
-        <div id="panel-menu-utama" style="display: none;">
-            <div class="user-badge">
-                <span style="color: var(--text-muted);">Promotor:</span> <strong id="label-user-aktif" style="color:var(--primary-dark); font-size: 15px;">-</strong>
-            </div>
-
-            <!-- PETA MINI VISUALISASI POSISI -->
-            <div class="input-group" id="section-peta-gps">
-                <label>Peta Posisi Anda & Radius Toko</label>
-                <div id="map-promotor" style="width: 100%; height: 180px; border-radius: 14px; border: 2px solid var(--border); z-index: 1;"></div>
-            </div>
-
-            <!-- KOTAK GILIRAN HA & AV -->
+        <div id="controls-admin-box" style="display: none;">
             <div class="timer-box-wrapper">
                 <div class="timer-card-admin ha">
                     <div>
-                        <span class="timer-badge-title">GILIRAN HA SAAT INI</span>
-                        <div id="promotor-nama-ha" class="promotor-nama-aktif">Memuat...</div>
+                        <span class="timer-badge-title">Giliran HA</span>
+                        <div id="admin-nama-ha" class="admin-nama-promotor">Memuat...</div>
                     </div>
                 </div>
                 <div class="timer-card-admin av">
                     <div>
-                        <span class="timer-badge-title">GILIRAN AV SAAT INI</span>
-                        <div id="promotor-nama-av" class="promotor-nama-aktif">Memuat...</div>
+                        <span class="timer-badge-title">Giliran AV</span>
+                        <div id="admin-nama-av" class="admin-nama-promotor">Memuat...</div>
                     </div>
                 </div>
             </div>
 
-            <!-- CHECK-IN KEDATANGAN -->
-            <div id="section-checkin-awal" style="display: none;">
-                <div class="input-group">
-                    <label>Check-in Kehadiran (Awal Masuk Kerja)</label>
-                    <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 8px 0; text-align: left;">Silakan pilih kategori utama Anda untuk hari ini:</p>
-                    <select id="pilih-kategori-hadir">
-                        <option value="HA">HA (Home Appliance)</option>
-                        <option value="AV">AV (Audio Video)</option>
-                    </select>
-                </div>
-                <button type="button" id="btn-hadir" class="btn-success btn-pulse" onclick="aksiHadirKerja()">Konfirmasi Kehadiran & Masuk Antri</button>
+            <!-- LIVE URUTAN KATEGORI HA & AV -->
+            <div class="list-section-wrapper">
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-main); border-bottom: 3px solid var(--border); padding-bottom: 6px; margin-bottom: 12px; text-transform: uppercase;">LIVE URUTAN KATEGORI HA</div>
+                <ul id="list-HA" class="list-antrian"><li><span>Memuat...</span></li></ul>
+
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-main); border-bottom: 3px solid var(--border); padding-bottom: 6px; margin-top: 24px; margin-bottom: 12px; text-transform: uppercase;">LIVE URUTAN KATEGORI AV</div>
+                <ul id="list-AV" class="list-antrian"><li><span>Memuat...</span></li></ul>
             </div>
 
-            <!-- SISTEM NORMAL -->
-            <div id="section-normal" style="display: none;">
-                <div class="input-group" id="group-pilih-kategori-normal">
-                    <label>Pilih Kategori Antrian</label>
-                    <select id="pilih-kategori-normal">
-                        <option value="HA">HA (Home Appliance)</option>
-                        <option value="AV">AV (Audio Video)</option>
-                    </select>
+            <div class="section-title">Pengaturan Status GPS Validasi Toko</div>
+            <div class="admin-grid" style="margin-bottom: 15px;">
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" id="btn-on-gps" class="btn-success" style="flex:1;" onclick="toggleGPSAdmin(true)">🟢 AKTIFKAN GPS</button>
+                    <button type="button" id="btn-off-gps" class="btn-danger" style="flex:1;" onclick="toggleGPSAdmin(false)">🔴 MATIKAN GPS</button>
                 </div>
-
-                <button type="button" id="btn-daftar-antrian" class="btn-success btn-pulse" onclick="aksiDaftarAntrianNormal()" style="display: none; margin-top: 4px;">Daftar Antrian</button>
-                <button type="button" id="btn-utama-customer" class="btn-customer btn-pulse" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 12px;">Sudah Membawa Customer</button>
-                <button type="button" id="btn-selesai-closing" class="btn-closing" onclick="aksiSelesaiClosing()" style="display: none; margin-top: 10px;">SELESAI MELAYANI (DEAL / CLOSING)</button>
-                <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 12px;">DIPANGGIL CS/GUDANG (KUNCI POSISI)</button>
-                
-                <button type="button" id="btn-utama-ibadah" class="btn-indigo" onclick="aksiToggleIbadah()" style="display: none; margin-top: 12px;">SEDANG IBADAH (KUNCI POSISI)</button>
-
-                <button type="button" id="btn-keluar-istirahat" class="btn-amber" onclick="bukaModalKeluarIstirahat()" style="display: none; margin-top: 12px;">KELUAR ANTRIAN (ISTIRAHAT)</button>
+                <div id="label-status-gps" style="font-size: 12px; font-weight: 800; color: var(--text-main); text-align: center; margin-top: 4px;">Status GPS: Memeriksa...</div>
             </div>
+
+            <div class="section-title">1. Kontrol Sistem Antrian</div>
+            <div class="admin-grid">
+                <button type="button" class="btn-success" onclick="bukaModalToggleSistem('BUKA')">BUKA ANTRIAN</button>
+                <button type="button" class="btn-danger" onclick="bukaModalToggleSistem('TUTUP')">TUTUP ANTRIAN</button>
+            </div>
+
+            <div class="section-title">2. Manajemen Urutan & Waktu</div>
+            <div class="admin-grid">
+                <button type="button" class="btn-teal" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Antrian</button>
+                <button type="button" class="btn-warning" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
+            </div>
+
+            <div class="section-title">3. Tindakan Khusus & Emergency</div>
+            <div class="admin-grid">
+                <button type="button" class="btn-primary" onclick="bukaModalFormAdminKategori('adminAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
+                <button type="button" class="btn-warning" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
+                <button type="button" class="btn-darkred" onclick="bukaModalResetDeviceAdmin()">Reset Perangkat Promotor</button>
+                <button type="button" class="btn-danger" onclick="bukaModalResetTotal()">RESET SEMUA ANTRIAN</button>
+            </div>
+
+            <div class="section-title">4. Manajemen Status Akun Promotor (Lock/Unlock)</div>
+            <div id="tabel-penalti-admin" class="promotor-list-grid">
+                <div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 700;">Memuat data promotor...</div>
+            </div>
+
+            <button type="button" class="btn-cancel" style="margin-top: 24px; font-weight: 800;" onclick="logoutAdmin()">🔒 Kunci Panel Admin</button>
         </div>
-
-        <!-- LIVE URUTAN KATEGORI HA & AV -->
-        <div style="margin-top: 24px; text-align: left;">
-            <div style="font-size: 14px; font-weight: 800; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 12px; text-transform: uppercase;">LIVE URUTAN KATEGORI HA</div>
-            <ul id="list-HA" class="list-antrian"><li><span>Memuat...</span></li></ul>
-
-            <div style="font-size: 14px; font-weight: 800; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-top: 24px; margin-bottom: 12px; text-transform: uppercase;">LIVE URUTAN KATEGORI AV</div>
-            <ul id="list-AV" class="list-antrian"><li><span>Memuat...</span></li></ul>
-        </div>
-
-        <a href="https://wa.me/6289524391002" target="_blank" class="wa-report-btn wa-pulse">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="fill: #ffffff; stroke: none;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-            Laporkan via WhatsApp
-        </a>
     </div>
 
     <div id="custom-modal" class="modal-overlay">
@@ -410,273 +494,173 @@
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
             <div id="modal-desc" class="modal-desc">Isi pesan...</div>
             <div id="modal-actions" class="modal-actions">
-                <button type="button" class="btn-customer" onclick="tutupModal()">OK</button>
+                <button type="button" class="btn-primary" onclick="tutupModal()">OK</button>
             </div>
         </div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
-
-        let daftarAntrianGlobal = [];
+        
         let masterSalesGlobal = [];
-        let statusSistemGlobal = "BUKA";
-        let namaSalesAktifGlobal = "";
-        let koordinatToko = { lat: "", lng: "", radius: 50 }; 
-        let localActionActive = false;
-
-        let mapPromotor = null;
-        let markerTokoPeta = null;
-        let circleTokoPeta = null;
-        let markerSayaPeta = null;
-
-        function getTanggalIndo() {
-            const now = new Date();
-            const dd = String(now.getDate()).padStart(2, '0');
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const yyyy = now.getFullYear();
-            return `${dd}-${mm}-${yyyy}`;
-        }
+        let daftarAntrianGlobal = [];
+        let sedangProsesAksiAdmin = false; 
+        let savedPinAdmin = "";
+        let koordinatTokoAdmin = { lat: "", lng: "", radius: 50 };
+        let sedangDiprosesGlobal = false;
 
         window.onload = function() {
-            initDarkMode();
-            
-            const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
-            if (cachedKoordinat) {
-                try { 
-                    koordinatToko = JSON.parse(cachedKoordinat); 
-                    if (koordinatToko.lat && koordinatToko.lng) {
-                        setTimeout(() => {
-                            initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, null, null);
-                        }, 50);
-                    }
-                } catch(e) {}
-            }
-
             muatMasterSalesInstant();
             muatCacheAntrianInstan();
-            
-            const tanggalHariIni = getTanggalIndo();
-            const tanggalCheckinTerakhir = localStorage.getItem('ufo_checkin_tanggal') || "";
-            if (tanggalCheckinTerakhir !== tanggalHariIni) {
-                localStorage.removeItem('ufo_checkin_hari_ini');
-                localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
-            }
-            
-            const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
-            if (cachedNama) {
-                namaSalesAktifGlobal = cachedNama;
-                document.getElementById('panel-login').style.display = 'none';
-                document.getElementById('panel-menu-utama').style.display = 'block';
-                document.getElementById('label-user-aktif').innerText = cachedNama;
+
+            savedPinAdmin = localStorage.getItem('ufo_admin_pin') || "";
+            if (savedPinAdmin) {
+                document.getElementById('input-pin-admin').value = savedPinAdmin;
+                document.getElementById('login-admin-box').style.display = 'none';
+                document.getElementById('controls-admin-box').style.display = 'block';
             } else {
-                document.getElementById('panel-login').style.display = 'block';
-                document.getElementById('panel-menu-utama').style.display = 'none';
+                document.getElementById('login-admin-box').style.display = 'block';
+                document.getElementById('controls-admin-box').style.display = 'none';
             }
 
-            cekServerBg();
             muatMasterSales();
-            mulaiPemantauanGPS();
+            muatDataAntrian();
             
-            setInterval(() => {
-                muatDataAntrian();
-                cekStatusPerangkatSaya();
-            }, 3000); 
+            setInterval(muatDataAntrian, 3000); 
         };
 
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('ufo_dark_mode', isDark ? 'true' : 'false');
-            updateDarkButtonText(isDark);
+        function amanKlikAdmin(callbackAksi) {
+            if (sedangDiprosesGlobal) return;
+            sedangDiprosesGlobal = true;
+            const semuaTombol = document.querySelectorAll('button');
+            semuaTombol.forEach(b => b.disabled = true);
+
+            callbackAksi(function() {
+                sedangDiprosesGlobal = false;
+                semuaTombol.forEach(b => b.disabled = false);
+            });
         }
 
-        function initDarkMode() {
-            const isDark = localStorage.getItem('ufo_dark_mode') === 'true';
-            if (isDark) {
-                document.body.classList.add('dark-mode');
-            }
-            updateDarkButtonText(isDark);
+        function getActivePinAdmin() { 
+            return savedPinAdmin || document.getElementById('input-pin-admin').value || localStorage.getItem('ufo_admin_pin') || ""; 
         }
 
-        function updateDarkButtonText(isDark) {
-            const btn = document.getElementById('btn-toggle-dark');
-            if (btn) btn.innerHTML = isDark ? '☀️ Terang' : '🌙 Gelap';
+        function prosesLoginAdmin() {
+            amanKlikAdmin(function(selesai) {
+                const pin = document.getElementById('input-pin-admin').value.trim();
+                if(!pin) {
+                    tampilkanModal("Perhatian", "Masukkan PIN Admin!");
+                    selesai();
+                    return;
+                }
+
+                const btn = document.getElementById('btn-login-admin');
+                const textAsli = btn.innerHTML;
+                btn.innerHTML = `<span class="spinner"></span> Memeriksa...`;
+
+                fetch(`${SCRIPT_URL}?aksi=loginAdmin&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(res => {
+                    btn.innerHTML = textAsli;
+                    if(res.status === "sukses") {
+                        savedPinAdmin = pin; 
+                        localStorage.setItem('ufo_admin_pin', pin);
+                        document.getElementById('login-admin-box').style.display = 'none';
+                        document.getElementById('controls-admin-box').style.display = 'block';
+                    } else { 
+                        tampilkanModal("Gagal Login", res.pesan); 
+                    }
+                    selesai();
+                }).catch(() => {
+                    btn.innerHTML = textAsli;
+                    tampilkanModal("Gagal", "Terjadi gangguan jaringan saat login.");
+                    selesai();
+                });
+            });
         }
 
-        function getDeviceId() {
-            let localSalt = localStorage.getItem('ufo_device_salt');
-            if (!localSalt) {
-                localSalt = Math.random().toString(36).substring(2) + Date.now().toString(36);
-                localStorage.setItem('ufo_device_salt', localSalt);
-            }
-            let hash = 0;
-            for (let i = 0; i < localSalt.length; i++) { hash = (hash << 5) - hash + localSalt.charCodeAt(i); hash |= 0; }
-            return "DEV-" + Math.abs(hash).toString().padStart(9, '0').substring(0, 9);
+        function logoutAdmin() {
+            localStorage.removeItem('ufo_admin_pin'); 
+            savedPinAdmin = "";
+            document.getElementById('input-pin-admin').value = "";
+            document.getElementById('login-admin-box').style.display = 'block';
+            document.getElementById('controls-admin-box').style.display = 'none';
         }
 
         function muatCacheAntrianInstan() {
-            const cachedAntrian = localStorage.getItem('ufo_antrian_cache');
-            if (cachedAntrian) {
-                try {
-                    const parsed = JSON.parse(cachedAntrian);
-                    renderUIRental(parsed.data, parsed.statusAntrian, parsed.koordinatPusat);
-                } catch(e) {}
+            const cachedAntrian = localStorage.getItem('ufo_admin_antrian_cache');
+            if (cachedAntrian) { 
+                try { 
+                    const res = JSON.parse(cachedAntrian); 
+                    renderUIWithData(res); 
+                } catch(e) {} 
             }
-        }
-
-        function cekServerBg() {
-            const deviceId = getDeviceId();
-            Promise.all([
-                fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`).then(r => r.json()).catch(() => null),
-                fetch(`${SCRIPT_URL}?aksi=getAntrian`).then(r => r.json()).catch(() => null)
-            ]).then(([resBinding, resAntrian]) => {
-                if (resBinding && resBinding.status === "terkunci" && resBinding.nama) {
-                    namaSalesAktifGlobal = resBinding.nama;
-                    localStorage.setItem('ufo_nama_sales_aktif', resBinding.nama);
-                    document.getElementById('panel-login').style.display = 'none';
-                    document.getElementById('panel-menu-utama').style.display = 'block';
-                    document.getElementById('label-user-aktif').innerText = resBinding.nama;
-                }
-                if (resAntrian && resAntrian.status === "sukses") {
-                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
-                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat);
-                }
-            });
-        }
-
-        function cekStatusPerangkatSaya() {
-            const namaSaya = localStorage.getItem('ufo_nama_sales_aktif');
-            const deviceId = getDeviceId();
-            if (!namaSaya) return;
-
-            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                if (res.status !== "terkunci" || !res.nama || res.nama.trim().toLowerCase() !== namaSaya.trim().toLowerCase()) {
-                    localStorage.removeItem('ufo_nama_sales_aktif');
-                    localStorage.removeItem('ufo_checkin_hari_ini');
-                    alert("Perangkat Anda telah di-reset oleh Admin. Silakan pilih ulang nama Anda.");
-                    window.location.reload();
-                }
-            }).catch(() => {});
-        }
-
-        function simpanAkunHP() {
-            const namaPilih = document.getElementById('pilih-sales').value;
-            const deviceId = getDeviceId();
-            if(!namaPilih) {
-                tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
-                return;
-            }
-
-            const btn = document.getElementById('btn-simpan-hp');
-            setButtonLoading(btn, true, "Menyimpan Perangkat...");
-
-            validasiGpsDanJalankan(function() {
-                lanjutkanSimpanAkun(namaPilih, deviceId, btn);
-            }, function() {
-                setButtonLoading(btn, false, "Simpan & Kunci di HP Ini");
-            });
-        }
-
-        function lanjutkanSimpanAkun(namaPilih, deviceId, btnElement) {
-            fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                setButtonLoading(btnElement, false, "Simpan & Kunci di HP Ini");
-                if(res.status === "sukses") {
-                    namaSalesAktifGlobal = namaPilih;
-                    localStorage.setItem('ufo_nama_sales_aktif', namaPilih);
-                    document.getElementById('panel-login').style.display = 'none';
-                    document.getElementById('panel-menu-utama').style.display = 'block';
-                    document.getElementById('label-user-aktif').innerText = namaPilih;
-                    muatDataAntrian();
-                } else { 
-                    tampilkanModal("Akses Ditolak", res.pesan); 
-                }
-            }).catch(() => {
-                setButtonLoading(btnElement, false, "Simpan & Kunci di HP Ini");
-                tampilkanModal("Gagal", "Terjadi gangguan jaringan saat menyimpan perangkat.");
-            });
-        }
-
-        function getAkunAktif() {
-            if (!namaSalesAktifGlobal) namaSalesAktifGlobal = localStorage.getItem('ufo_nama_sales_aktif') || "";
-            return namaSalesAktifGlobal;
         }
 
         function muatMasterSalesInstant() {
             const cachedSales = localStorage.getItem('ufo_master_sales_cache');
-            if (cachedSales) {
-                try {
-                    masterSalesGlobal = JSON.parse(cachedSales);
-                    let html = '<option value="">-- Pilih Nama Anda --</option>';
-                    masterSalesGlobal.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
-                    document.getElementById('pilih-sales').innerHTML = html;
-                } catch(e) {}
+            if (cachedSales) { 
+                try { 
+                    masterSalesGlobal = JSON.parse(cachedSales) || []; 
+                    renderTabelStatusAkunAdmin(masterSalesGlobal); 
+                } catch(e) {} 
             }
         }
 
-        function muatMasterSales() {
-            fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                if(res.status === "sukses" && res.data) {
-                    masterSalesGlobal = res.data;
-                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(res.data));
-                    let html = '<option value="">-- Pilih Nama Anda --</option>';
-                    res.data.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
-                    document.getElementById('pilih-sales').innerHTML = html;
-                }
-            });
-        }
+        function renderUIWithData(res) {
+            if (sedangProsesAksiAdmin) return;
 
-        function cekStatusSayaDariArray(dataAntrian) {
-            const akunSaya = getAkunAktif().trim().toLowerCase();
-            if (!akunSaya) return "belum_ada";
-            const itemSaya = (dataAntrian || []).find(item => String(item.nama).trim().toLowerCase() === akunSaya);
-            return itemSaya ? itemSaya.status : "belum_ada";
-        }
-
-        function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
-            if (localActionActive) return;
-
-            daftarAntrianGlobal = dataAntrian || [];
-            statusSistemGlobal = statusSistem || "BUKA";
-            
-            if (koordinatServer) {
-                koordinatToko.lat = koordinatServer.lat || "";
-                koordinatToko.lng = koordinatServer.lng || "";
-                koordinatToko.radius = Number(koordinatServer.radius) || 50;
-                
-                localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
-            }
-
+            const statusSistem = res.statusAntrian || "BUKA";
             const badge = document.getElementById('badge-status-sistem');
-            badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
-            badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
+            badge.innerText = statusSistem === "BUKA" ? "STATUS: OPEN" : "STATUS: CLOSED";
+            badge.className = statusSistem === "BUKA" ? "status-badge status-open" : "status-badge status-closed";
+
+            if (res.koordinatPusat) {
+                koordinatTokoAdmin.lat = res.koordinatPusat.lat || "";
+                koordinatTokoAdmin.lng = res.koordinatPusat.lng || "";
+                koordinatTokoAdmin.radius = res.koordinatPusat.radius || 50;
+
+                const statusGpsLabel = document.getElementById('label-status-gps');
+                const btnOn = document.getElementById('btn-on-gps');
+                const btnOff = document.getElementById('btn-off-gps');
+
+                if (koordinatTokoAdmin.lat && koordinatTokoAdmin.lat !== "") {
+                    statusGpsLabel.innerHTML = `Status GPS: <b style="color:#10b981;">AKTIF</b> (Radius: ${koordinatTokoAdmin.radius}m)`;
+                    if (btnOn && btnOff && !sedangDiprosesGlobal) {
+                        btnOn.disabled = true; 
+                        btnOn.className = "btn-success btn-disabled";
+                        btnOff.disabled = false; 
+                        btnOff.className = "btn-danger";
+                    }
+                } else {
+                    statusGpsLabel.innerHTML = `Status GPS: <b style="color:#ef4444;">NONAKTIF (OFF)</b>`;
+                    if (btnOn && btnOff && !sedangDiprosesGlobal) {
+                        btnOn.disabled = false; 
+                        btnOn.className = "btn-success";
+                        btnOff.disabled = true; 
+                        btnOff.className = "btn-danger btn-disabled";
+                    }
+                }
+            }
 
             let listHA = "", listAV = "";
             let urutHA = 1, urutAV = 1;
-            const akunSaya = getAkunAktif().trim().toLowerCase();
-            let kategoriSayaAktif = "";
+            
+            const data = res.data || [];
+            daftarAntrianGlobal = data;
 
-            const dataStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
+            const dataStandby = data.filter(item => item.status === "Standby");
             const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
             const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
 
-            document.getElementById('promotor-nama-ha').textContent = promotorHA ? promotorHA.nama : "Belum Ada";
-            document.getElementById('promotor-nama-av').textContent = promotorAV ? promotorAV.nama : "Belum Ada";
+            document.getElementById('admin-nama-ha').textContent = promotorHA ? promotorHA.nama : "Belum Ada";
+            document.getElementById('admin-nama-av').textContent = promotorAV ? promotorAV.nama : "Belum Ada";
 
-            if (daftarAntrianGlobal.length > 0) {
-                daftarAntrianGlobal.forEach((item) => {
+            if (data.length > 0) {
+                data.forEach((item) => {
                     let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
-                    if (String(item.nama).trim().toLowerCase() === akunSaya) {
-                        kategoriSayaAktif = kat;
-                    }
-
                     let itemHtml = "";
+
                     if (item.status === "Standby") {
                         let urut = 1;
                         if (kat === "HA") urut = urutHA++;
@@ -700,393 +684,423 @@
             const kosongHtml = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian</span></li>";
             document.getElementById('list-HA').innerHTML = listHA || kosongHtml;
             document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
+        }
 
-            let statusSayaNyata = cekStatusSayaDariArray(daftarAntrianGlobal);
-            const sectionCheckinAwal = document.getElementById('section-checkin-awal');
-            const sectionNormal = document.getElementById('section-normal');
-            
-            const sectionPetaGps = document.getElementById('section-peta-gps');
-            if (statusSayaNyata === "belum_ada" || statusSayaNyata === "Standby") {
-                if (sectionPetaGps) sectionPetaGps.style.display = "block";
-                setTimeout(() => { 
-                    if (mapPromotor) mapPromotor.invalidateSize(); 
-                    else if (koordinatToko.lat && koordinatToko.lng) {
-                        initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, null, null);
-                    }
-                }, 100);
-            } else {
-                if (sectionPetaGps) sectionPetaGps.style.display = "none";
-            }
+        function toggleGPSAdmin(statusAktif) {
+            amanKlikAdmin(function(selesai) {
+                const pin = getActivePinAdmin();
+                if (!pin) { 
+                    alert("PIN Admin tidak ditemukan!"); 
+                    selesai(); 
+                    return; 
+                }
 
-            let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
+                const btnOn = document.getElementById('btn-on-gps');
+                const btnOff = document.getElementById('btn-off-gps');
 
-            if (statusSayaNyata !== "belum_ada") {
-                sectionCheckinAwal.style.display = 'none';
-                sectionNormal.style.display = 'block';
-            } else if (!sudahCheckinPernahHariIni) {
-                sectionCheckinAwal.style.display = 'block';
-                sectionNormal.style.display = 'none';
-            } else {
-                sectionCheckinAwal.style.display = 'none';
-                sectionNormal.style.display = 'block';
-            }
-
-            const btnDaftar = document.getElementById('btn-daftar-antrian');
-            const groupPilihKat = document.getElementById('group-pilih-kategori-normal');
-            const btnCustomer = document.getElementById('btn-utama-customer');
-            const btnClosing = document.getElementById('btn-selesai-closing');
-            const btnCS = document.getElementById('btn-utama-cs');
-            const btnIbadah = document.getElementById('btn-utama-ibadah');
-            const btnKeluar = document.getElementById('btn-keluar-istirahat');
-
-            if (statusSayaNyata === "belum_ada") {
-                groupPilihKat.style.display = "block";
-                btnDaftar.style.display = "block";
-                btnCustomer.style.display = "none";
-                btnClosing.style.display = "none";
-                btnCS.style.display = "none";
-                btnIbadah.style.display = "none";
-                btnKeluar.style.display = "none";
-
-                if (statusSistemGlobal === "TUTUP") {
-                    btnDaftar.disabled = true; btnDaftar.className = "btn-success btn-disabled";
+                if (!statusAktif) {
+                    btnOff.innerHTML = `<span class="spinner"></span> Mematikan...`;
+                    fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=&lng=&radius=50&t=${Date.now()}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        btnOff.innerHTML = `🔴 MATIKAN GPS`;
+                        tampilkanModal("GPS Dinonaktifkan", "Validasi radius GPS toko berhasil dimatikan (OFF).");
+                        muatDataAntrian(); 
+                        selesai();
+                    })
+                    .catch(() => { 
+                        btnOff.innerHTML = `🔴 MATIKAN GPS`; 
+                        selesai(); 
+                    });
                 } else {
-                    btnDaftar.disabled = false; btnDaftar.className = "btn-success btn-pulse";
-                }
-            } else {
-                groupPilihKat.style.display = "none";
-                btnDaftar.style.display = "none";
+                    btnOn.innerHTML = `<span class="spinner"></span> Mendeteksi GPS...`;
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function(pos) {
+                            const lat = pos.coords.latitude;
+                            const lng = pos.coords.longitude;
+                            const radius = "50";
 
-                if (statusSayaNyata === "Standby") {
-                    btnCustomer.style.display = "block"; 
-                    btnClosing.style.display = "none";
-                    btnCS.style.display = "block"; 
-                    btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
-                    btnKeluar.style.display = "block";
-
-                    if (statusSistemGlobal === "TUTUP") {
-                        btnCustomer.disabled = true; btnCustomer.className = "btn-customer btn-disabled";
-                        btnCS.disabled = true; btnCS.className = "btn-purple btn-disabled";
-                        btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
-                        btnKeluar.disabled = true; btnKeluar.className = "btn-amber btn-disabled";
-                    } else {
-                        let listSubStandby = daftarAntrianGlobal.filter(it => it.status === "Standby" && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
-                        let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
-                        let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
-
-                        btnCustomer.disabled = !apakahSayaBisaAmbil; 
-                        btnCustomer.className = apakahSayaBisaAmbil ? "btn-customer btn-pulse" : "btn-customer btn-disabled";
-                        btnCS.disabled = false; btnCS.className = "btn-purple";
-                        btnIbadah.disabled = false; btnIbadah.className = "btn-indigo";
-                        btnKeluar.disabled = false; btnKeluar.className = "btn-amber";
+                            fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=${encodeURIComponent(radius)}&t=${Date.now()}`)
+                            .then(r => r.json())
+                            .then(res => {
+                                btnOn.innerHTML = `🟢 AKTIFKAN GPS`;
+                                tampilkanModal("GPS Diaktifkan", "Titik GPS & Radius Toko berhasil diset dari perangkat Anda.");
+                                muatDataAntrian(); 
+                                selesai();
+                            })
+                            .catch(() => { 
+                                btnOn.innerHTML = `🟢 AKTIFKAN GPS`; 
+                                selesai(); 
+                            });
+                        }, function() {
+                            btnOn.innerHTML = `🟢 AKTIFKAN GPS`;
+                            alert("Gagal mendeteksi lokasi perangkat Anda.");
+                            selesai();
+                        }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+                    } else { 
+                        btnOn.innerHTML = `🟢 AKTIFKAN GPS`; 
+                        selesai(); 
                     }
-                } else if (statusSayaNyata === "Melayani") {
-                    btnCustomer.style.display = "none"; btnClosing.style.display = "block";
-                    btnCS.style.display = "none"; btnIbadah.style.display = "none"; btnKeluar.style.display = "none";
-                } else if (statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") {
-                    btnCustomer.style.display = "none"; btnClosing.style.display = "none";
-                    btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal"; btnCS.disabled = false;
-                    btnIbadah.style.display = "none";
-                    btnKeluar.style.display = "none";
-                } else if (statusSayaNyata === "Ibadah") {
-                    btnCustomer.style.display = "none";
-                    btnClosing.style.display = "none";
-                    btnCS.style.display = "none";
-                    btnKeluar.style.display = "none";
+                }
+            });
+        }
+
+        function renderTabelStatusAkunAdmin(dataSales) {
+            let html = "";
+            if (!dataSales || dataSales.length === 0) {
+                html = `<div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 700;">Belum ada data promotor</div>`;
+            } else {
+                dataSales.forEach(item => {
+                    const nama = typeof item === 'object' ? item.nama : item;
+                    const statusLock = String(item.statusLock || "").trim().toUpperCase();
                     
-                    btnIbadah.style.display = "block"; 
-                    btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)"; 
-                    btnIbadah.className = "btn-teal"; 
-                    btnIbadah.disabled = false;
+                    let badgeHtml = "", aksiHtml = "";
+                    if (statusLock === "LOCKED") {
+                        badgeHtml = `<span class="badge-status-sanksi badge-penalti">LOCKED</span>`;
+                        aksiHtml = `<button type="button" class="btn-action btn-success" onclick="unlockPromotor('${nama.replace(/'/g, "\\'")}')">Buka Kunci</button>`;
+                    } else {
+                        badgeHtml = `<span class="badge-status-sanksi badge-aman">AMAN</span>`;
+                        aksiHtml = `<button type="button" class="btn-action btn-danger" onclick="lockPromotor('${nama.replace(/'/g, "\\'")}')">Lock Akun</button>`;
+                    }
+
+                    html += `
+                        <div class="promotor-card-item">
+                            <div class="promotor-info">
+                                <span class="promotor-name-text">${nama}</span>
+                                ${badgeHtml}
+                            </div>
+                            <div>${aksiHtml}</div>
+                        </div>
+                    `;
+                });
+            }
+            const container = document.getElementById('tabel-penalti-admin');
+            if(container) container.innerHTML = html;
+        }
+
+        function lockPromotor(namaSales) {
+            const pin = getActivePinAdmin();
+            if(!pin) return alert("PIN Admin tidak ditemukan!");
+            
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = "Lock Akun Promotor";
+            document.getElementById('modal-desc').innerHTML = `
+                Yakin ingin mengunci akun <b>(${namaSales})</b>?<br><br>
+                Masukkan Alasan / Keterangan Lock:<br>
+                <input type="text" id="input-alasan-lock" placeholder="Contoh: Belum bersih-bersih" style="width:100%;">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-danger" id="btn-modal-konfirmasi-lock">Ya, Lock Akun</button>
+            `;
+            modal.classList.add('active');
+
+            document.getElementById('btn-modal-konfirmasi-lock').onclick = function() {
+                const alasan = document.getElementById('input-alasan-lock').value.trim();
+                if(!alasan) return alert("Harap masukkan alasan!");
+
+                tutupModal();
+                amanKlikAdmin(function(selesai) {
+                    fetch(`${SCRIPT_URL}?aksi=adminLockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&t=${Date.now()}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        tampilkanModal("Berhasil", res.pesan);
+                        muatMasterSales(); 
+                        muatDataAntrian(); 
+                        selesai();
+                    })
+                    .catch(() => selesai());
+                });
+            };
+        }
+
+        function unlockPromotor(namaSales) {
+            const pin = getActivePinAdmin();
+            if(!pin) return alert("PIN Admin tidak ditemukan!");
+            
+            tampilkanModalKonfirmasi("Buka Kunci Promotor", `Buka kunci akun (${namaSales})?`, function() {
+                amanKlikAdmin(function(selesai) {
+                    fetch(`${SCRIPT_URL}?aksi=adminUnlockPromotor&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        tampilkanModal("Berhasil", res.pesan);
+                        muatMasterSales(); 
+                        muatDataAntrian(); 
+                        selesai();
+                    })
+                    .catch(() => selesai());
+                });
+            });
+        }
+
+        function bukaModalToggleSistem(targetStatus) {
+            document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
+            document.getElementById('modal-desc').innerHTML = `Status baru: <b>${targetStatus}</b>`;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-primary" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>
+            `;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function eksekusiToggleSistem(targetStatus) {
+            tutupModal();
+            amanKlikAdmin(function(selesai) {
+                const pin = getActivePinAdmin();
+                if(!pin) { 
+                    alert("PIN Admin tidak ditemukan!"); 
+                    selesai(); 
+                    return; 
+                }
+                fetch(`${SCRIPT_URL}?aksi=adminSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(res => {
+                    tampilkanModal("Status Sistem", res.pesan);
+                    muatDataAntrian(); 
+                    selesai();
+                })
+                .catch(() => selesai());
+            });
+        }
+
+        function bukaModalResetTotal() {
+            document.getElementById('modal-title').innerText = 'Reset Semua Antrian';
+            document.getElementById('modal-desc').innerHTML = `⚠️ <b>PERINGATAN:</b><br>Semua antrian akan dihapus total.`;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-danger" onclick="eksekusiResetTotal()">Reset Sekarang</button>
+            `;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function eksekusiResetTotal() {
+            tutupModal();
+            amanKlikAdmin(function(selesai) {
+                const pin = getActivePinAdmin();
+                if(!pin) { 
+                    alert("PIN Admin tidak ditemukan!"); 
+                    selesai(); 
+                    return; 
+                }
+                fetch(`${SCRIPT_URL}?aksi=adminResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(res => {
+                    tampilkanModal("Reset Total", res.pesan);
+                    muatDataAntrian(); 
+                    selesai();
+                })
+                .catch(() => selesai());
+            });
+        }
+
+        function bukaModalTambahAntriAdmin() {
+            document.getElementById('modal-title').innerText = "Masukkan Promotor ke Antrian";
+            if (!masterSalesGlobal || masterSalesGlobal.length === 0) {
+                const cachedSales = localStorage.getItem('ufo_master_sales_cache');
+                if (cachedSales) { 
+                    try { 
+                        masterSalesGlobal = JSON.parse(cachedSales); 
+                    } catch(e) {} 
                 }
             }
+
+            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
+            masterSalesGlobal.forEach(n => { 
+                let nama = typeof n === 'object' ? n.nama : n; 
+                optionsSales += `<option value="${nama}">${nama}</option>`; 
+            });
+            
+            document.getElementById('modal-desc').innerHTML = `
+                Kategori:<br>
+                <select id="admin-select-kategori">
+                    <option value="HA">HA (Home Appliance)</option>
+                    <option value="AV">AV (Audio Video)</option>
+                </select><br><br>
+                Promotor:<br>
+                <select id="admin-select-sales">${optionsSales}</select><br><br>
+                Posisi Urutan:<br>
+                <input type="number" id="admin-input-posisi" value="1" min="1">
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-primary" onclick="eksekusiTambahAntriAdmin()">Proses</button>
+            `;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function eksekusiTambahAntriAdmin() {
+            const kategori = document.getElementById('admin-select-kategori').value; 
+            const namaSales = document.getElementById('admin-select-sales').value; 
+            const posisi = document.getElementById('admin-input-posisi').value || "1"; 
+            
+            if(!namaSales) return alert("Pilih promotor!"); 
+            tutupModal();
+            amanKlikAdmin(function(selesai) {
+                const pin = getActivePinAdmin();
+                fetch(`${SCRIPT_URL}?aksi=adminDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(res => {
+                    tampilkanModal("Status Admin", res.pesan);
+                    muatDataAntrian(); 
+                    selesai();
+                })
+                .catch(() => selesai());
+            });
+        }
+
+        function bukaModalResetDeviceAdmin() {
+            document.getElementById('modal-title').innerText = "Reset Perangkat Promotor";
+            if (!masterSalesGlobal || masterSalesGlobal.length === 0) {
+                const cachedSales = localStorage.getItem('ufo_master_sales_cache');
+                if (cachedSales) { 
+                    try { 
+                        masterSalesGlobal = JSON.parse(cachedSales); 
+                    } catch(e) {} 
+                }
+            }
+
+            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
+            if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                masterSalesGlobal.forEach(n => { 
+                    let nama = typeof n === 'object' ? n.nama : n; 
+                    optionsSales += `<option value="${nama}">${nama}</option>`; 
+                });
+            }
+
+            document.getElementById('modal-desc').innerHTML = `
+                Pilih Promotor yang perangkatnya akan di-reset:<br><br>
+                <select id="admin-select-sales-reset">${optionsSales}</select>
+            `;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-danger" onclick="eksekusiResetDeviceAdmin()">Reset Perangkat</button>
+            `;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function eksekusiResetDeviceAdmin() {
+            const selectEl = document.getElementById('admin-select-sales-reset');
+            const namaSales = selectEl ? selectEl.value : "";
+            if (!namaSales) return alert("Pilih nama promotor terlebih dahulu!");
+
+            tutupModal();
+            amanKlikAdmin(function(selesai) {
+                const pin = getActivePinAdmin();
+                if(!pin) { 
+                    alert("PIN Admin tidak ditemukan!"); 
+                    selesai(); 
+                    return; 
+                }
+                fetch(`${SCRIPT_URL}?aksi=adminResetDevice&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(res => {
+                    tampilkanModal("Status Reset Perangkat", res.pesan);
+                    muatDataAntrian(); 
+                    selesai();
+                })
+                .catch(() => {
+                    tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mereset perangkat.");
+                    selesai();
+                });
+            });
+        }
+
+        function bukaModalFormAdminKategori(aksiName, judulAksi, butuhPilihPromotor = true) {
+            document.getElementById('modal-title').innerText = judulAksi;
+            if (!masterSalesGlobal || masterSalesGlobal.length === 0) {
+                const cachedSales = localStorage.getItem('ufo_master_sales_cache');
+                if (cachedSales) { 
+                    try { 
+                        masterSalesGlobal = JSON.parse(cachedSales); 
+                    } catch(e) {} 
+                }
+            }
+
+            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
+            masterSalesGlobal.forEach(n => { 
+                let nama = typeof n === 'object' ? n.nama : n; 
+                optionsSales += `<option value="${nama}">${nama}</option>`; 
+            });
+            
+            let htmlContent = `Kategori:<br><select id="admin-select-kategori"><option value="HA">HA (Home Appliance)</option><option value="AV">AV (Audio Video)</option></select><br><br>`;
+            if (butuhPilihPromotor) htmlContent += `Promotor:<br><select id="admin-select-sales">${optionsSales}</select>`;
+            
+            document.getElementById('modal-desc').innerHTML = htmlContent;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-primary" onclick="eksekusiAksiAdminKategori('${aksiName}', ${butuhPilihPromotor})">Proses</button>
+            `;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function eksekusiAksiAdminKategori(aksiName, butuhPilihPromotor) {
+            const kategori = document.getElementById('admin-select-kategori').value; 
+            let namaSales = butuhPilihPromotor ? document.getElementById('admin-select-sales').value : ""; 
+            if(butuhPilihPromotor && !namaSales) return alert("Pilih promotor!"); 
+            
+            tutupModal();
+            amanKlikAdmin(function(selesai) {
+                const pin = getActivePinAdmin();
+                fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(res => {
+                    tampilkanModal("Status Admin", res.pesan);
+                    muatDataAntrian(); 
+                    selesai();
+                })
+                .catch(() => selesai());
+            });
+        }
+
+        function muatMasterSales() {
+            fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses") { 
+                    masterSalesGlobal = res.data || []; 
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal)); 
+                    renderTabelStatusAkunAdmin(masterSalesGlobal); 
+                }
+            });
         }
 
         function muatDataAntrian() {
-            if (localActionActive) return;
+            if(sedangProsesAksiAdmin) return; 
             fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
             .then(res => res.json())
-            .then(res => {
-                if (res && res.status === "sukses" && !localActionActive) {
-                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
-                    renderUIRental(res.data, res.statusAntrian, res.koordinatPusat);
-                }
-            }).catch(() => {});
-        }
-
-        function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
-            const namaSales = getAkunAktif().trim();
-            if (!namaSales) return;
-
-            localActionActive = true;
-            let katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
-
-            if (targetStatusSimulasi === "belum_ada") {
-                daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
-            } else {
-                let ketemu = false;
-                daftarAntrianGlobal.forEach(item => {
-                    if (String(item.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
-                        item.status = targetStatusSimulasi;
-                        if (katBaru) item.kategori = katBaru;
-                        ketemu = true;
-                    }
-                });
-                if (!ketemu) {
-                    daftarAntrianGlobal.push({ nama: namaSales, status: targetStatusSimulasi, kategori: katAktif });
-                }
-            }
-
-            localActionActive = false;
-            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
-            localActionActive = true;
-
-            fetch(`${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(katAktif)}&subkategori=${encodeURIComponent(katAktif)}&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                if (res && res.status === "sukses" && res.data) {
-                    daftarAntrianGlobal = res.data;
-                }
-                localActionActive = false;
-                renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
-            }).catch(() => { 
-                localActionActive = false; 
+            .then(res => { 
+                if(!sedangProsesAksiAdmin && res.status === "sukses") { 
+                    localStorage.setItem('ufo_admin_antrian_cache', JSON.stringify(res)); 
+                    renderUIWithData(res); 
+                } 
             });
         }
 
-        function setButtonLoading(btnElement, isLoading, defaultText) {
-            if (!btnElement) return;
-            if (isLoading) {
-                btnElement.disabled = true;
-                btnElement.classList.add('btn-disabled');
-                btnElement.innerHTML = `<span class="spinner"></span> Memeriksa Lokasi GPS...`;
-            } else {
-                btnElement.disabled = false;
-                btnElement.classList.remove('btn-disabled');
-                btnElement.innerHTML = defaultText;
-            }
-        }
-
-        function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
-            if (!koordinatToko.lat || !koordinatToko.lng) {
-                const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
-                if (cachedKoordinat) {
-                    try { koordinatToko = JSON.parse(cachedKoordinat); } catch(e) {}
-                }
-            }
-
-            if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
-                if (typeof callbackBerhasil === 'function') callbackBerhasil();
-                return;
-            }
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        const jarakMeter = hitungJarakHaversine(
-                            position.coords.latitude, position.coords.longitude, 
-                            Number(koordinatToko.lat), Number(koordinatToko.lng)
-                        );
-                        const batasRadius = Number(koordinatToko.radius) || 50;
-
-                        if (jarakMeter > batasRadius) {
-                            if (typeof callbackBatal === 'function') callbackBatal();
-                            tampilkanModal("Di Luar Radius Toko", `Gagal mendaftar antrean!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar area toko.`);
-                            return; 
-                        }
-                        
-                        if (typeof callbackBerhasil === 'function') callbackBerhasil();
-                    },
-                    function(error) {
-                        if (typeof callbackBatal === 'function') callbackBatal();
-                        tampilkanModal("GPS Wajib Aktif", "Pastikan GPS Anda aktif dan pastikan izin lokasi (Location Permission) di browser sudah diatur ke 'Allow' / Diizinkan.");
-                    },
-                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
-                );
-            } else {
-                if (typeof callbackBatal === 'function') callbackBatal();
-                tampilkanModal("Tidak Mendukung", "Browser Anda tidak mendukung fitur GPS.");
-            }
-        }
-
-        function aksiHadirKerja() {
-            const btn = document.getElementById('btn-hadir');
-            setButtonLoading(btn, true, "Konfirmasi Kehadiran & Masuk Antri");
-
-            validasiGpsDanJalankan(function() {
-                setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
-                const kategoriPilih = document.getElementById('pilih-kategori-hadir').value;
-                
-                const tanggalHariIni = getTanggalIndo();
-                localStorage.setItem('ufo_checkin_hari_ini', 'true');
-                localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
-
-                eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
-            }, function() {
-                setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
-            });
-        }
-
-        function aksiDaftarAntrianNormal() {
-            const btn = document.getElementById('btn-daftar-antrian');
-            setButtonLoading(btn, true, "Daftar Antrian");
-
-            validasiGpsDanJalankan(function() {
-                setButtonLoading(btn, false, "Daftar Antrian");
-                const kategoriPilih = document.getElementById('pilih-kategori-normal').value;
-                eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
-            }, function() {
-                setButtonLoading(btn, false, "Daftar Antrian");
-            });
-        }
-
-        function aksiUtamaCustomer() {
-            tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
-                eksekusiAksiInstan('ambilAntrian', 'Melayani');
-            });
-        }
-
-        function aksiSelesaiClosing() {
-            tampilkanModalKonfirmasi("Konfirmasi Selesai", "Selesai melayani customer?", function() {
-                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
-            });
-        }
-
-        function aksiToggleCS() {
-            const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
-            if (statusSekarang === "Standby") {
-                tampilkanModalKonfirmasi("Dipanggil CS/Gudang", "Posisi antrian Anda akan dikunci sementara.", function() {
-                    eksekusiAksiInstan('panggilCS', 'Dipanggil CS');
-                });
-            } else {
-                eksekusiAksiInstan('selesaiCS', 'Standby');
-            }
-        }
-
-        function aksiToggleIbadah() {
-            const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
-            if (statusSekarang === "Standby") {
-                tampilkanModalKonfirmasi("Ibadah", "Posisi antrian Anda akan dikunci sementara selama ibadah.", function() {
-                    eksekusiAksiInstan('panggilIbadah', 'Ibadah');
-                });
-            } else {
-                eksekusiAksiInstan('selesaiIbadah', 'Standby');
-            }
-        }
-
-        function bukaModalKeluarIstirahat() {
-            tampilkanModalKonfirmasi("Keluar Antrian", "Yakin ingin keluar dari antrian?", function() {
-                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
-            });
-        }
-
-        function initAtauUpdatePetaPromotor(latToko, lngToko, radiusToko, latUser, lngUser) {
-            if (!latToko || !lngToko || isNaN(latToko) || isNaN(lngToko)) return;
-
-            if (!mapPromotor) {
-                const mapContainer = document.getElementById('map-promotor');
-                if (!mapContainer) return;
-                
-                mapPromotor = L.map('map-promotor', { zoomControl: false }).setView([latToko, lngToko], 18);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
-                }).addTo(mapPromotor);
-            }
-
-            if (!circleTokoPeta) {
-                circleTokoPeta = L.circle([latToko, lngToko], {
-                    color: '#ef4444',
-                    fillColor: '#ef4444',
-                    fillOpacity: 0.15,
-                    radius: radiusToko || 50
-                }).addTo(mapPromotor);
-
-                markerTokoPeta = L.marker([latToko, lngToko]).addTo(mapPromotor)
-                    .bindPopup("<b>Titik Pusat Toko UFO</b>");
-            } else {
-                circleTokoPeta.setLatLng([latToko, lngToko]);
-                circleTokoPeta.setRadius(radiusToko || 50);
-                markerTokoPeta.setLatLng([latToko, lngToko]);
-            }
-
-            if (latUser && lngUser && !isNaN(latUser) && !isNaN(lngUser)) {
-                if (!markerSayaPeta) {
-                    markerSayaPeta = L.circleMarker([latUser, lngUser], {
-                        radius: 8,
-                        fillColor: "#2563eb",
-                        color: "#ffffff",
-                        weight: 2,
-                        fillOpacity: 1
-                    }).addTo(mapPromotor).bindPopup("<b>Posisi Anda Sekarang</b>");
-                } else {
-                    markerSayaPeta.setLatLng([latUser, lngUser]);
-                }
-            }
-            
-            setTimeout(() => { if (mapPromotor) mapPromotor.invalidateSize(); }, 150);
-        }
-
-        function mulaiPemantauanGPS() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(
-                    function(position) {
-                        if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
-                            return; 
-                        }
-
-                        let statusSaya = cekStatusSayaDariArray(daftarAntrianGlobal);
-                        if (statusSaya !== "Standby") {
-                            return; 
-                        }
-
-                        let latUser = position.coords.latitude;
-                        let lngUser = position.coords.longitude;
-                        let latToko = Number(koordinatToko.lat);
-                        let lngToko = Number(koordinatToko.lng);
-                        let batasRadius = Number(koordinatToko.radius) || 50;
-
-                        initAtauUpdatePetaPromotor(latToko, lngToko, batasRadius, latUser, lngUser);
-
-                        const jarakMeter = hitungJarakHaversine(latUser, lngUser, latToko, lngToko);
-
-                        if (jarakMeter > batasRadius) {
-                            eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
-                            tampilkanModal("Auto-Exit GPS", `Anda berada di luar radius ${Math.round(jarakMeter)} meter dari toko (Batas maksimal ${batasRadius} meter). Anda otomatis dikeluarkan dari antrean.`);
-                        }
-                    },
-                    function(error) {},
-                    { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
-                );
-            }
-        }
-
-        function hitungJarakHaversine(lat1, lon1, lat2, lon2) {
-            const R = 6371000; 
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-        }
-
-        function tampilkanModal(judul, desc) {
+        function tampilkanModal(judul, pesan) {
             document.getElementById('modal-title').innerText = judul;
-            document.getElementById('modal-desc').innerText = desc;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-customer" onclick="tutupModal()">OK</button>`;
+            document.getElementById('modal-desc').innerHTML = String(pesan).replace(/\n/g, '<br>');
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-primary" onclick="tutupModal()">OK</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
         function tampilkanModalKonfirmasi(judul, desc, callbackYa) {
+            const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = judul;
-            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-desc').innerHTML = String(desc).replace(/\n/g, '<br>');
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-customer" id="btn-modal-ya">Ya</button>
+                <button type="button" class="btn-primary" id="btn-modal-konfirmasi-ya">Ya</button>
             `;
-            document.getElementById('custom-modal').classList.add('active');
-            document.getElementById('btn-modal-ya').onclick = function() { tutupModal(); callbackYa(); };
+            modal.classList.add('active');
+            document.getElementById('btn-modal-konfirmasi-ya').onclick = function() { 
+                tutupModal(); 
+                if (typeof callbackYa === 'function') callbackYa(); 
+            };
         }
-        function tutupModal() { document.getElementById('custom-modal').classList.remove('active'); }
+
+        function tutupModal() { 
+            document.getElementById('custom-modal').classList.remove('active'); 
+        }
     </script>
 </body>
 </html>
