@@ -231,7 +231,6 @@
         .btn-cancel { background: #e2e8f0; color: #0f172a; }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; }
 
-        /* --- SEMUA TOMBOL DALAM MODE GELAP MENJADI MERAH NEON TERANG --- */
         body.dark-mode .btn-purple,
         body.dark-mode .btn-success,
         body.dark-mode .btn-warning,
@@ -253,7 +252,7 @@
         }
         
         .btn-action { 
-            padding: 8px 14px; 
+            padding: 8px 12px; 
             font-size: 11px; 
             border-radius: 10px; 
             width: auto; 
@@ -264,9 +263,10 @@
             display: inline-flex; 
             align-items: center; 
             justify-content: center; 
-            gap: 6px; 
+            gap: 4px; 
             box-shadow: 2px 2px 0px #0f172a;
             transition: all 0.1s ease;
+            white-space: nowrap;
         }
         .btn-action:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #0f172a !important; }
 
@@ -303,6 +303,8 @@
         }
 
         .promotor-list-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        
+        /* KARTU PROMOTOR DIPERBAIKI AGAR RAPI DI SEBELAH KANAN */
         .promotor-card-item {
             background: #ffffff;
             border: 3px solid var(--border);
@@ -320,11 +322,32 @@
             box-shadow: 0 0 25px rgba(255, 31, 61, 0.7) !important;
         }
 
-        .promotor-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
-        .promotor-name-text { font-size: 14px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .promotor-info { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            flex: 1; 
+            min-width: 0; 
+        }
+        .promotor-name-text { 
+            font-size: 14px; 
+            font-weight: 800; 
+            color: var(--text-main); 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        body.dark-mode .promotor-name-text { color: #ffffff !important; }
+
+        .promotor-action-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
 
         .badge-status-sanksi { 
-            padding: 4px 10px; 
+            padding: 4px 8px; 
             border-radius: 20px; 
             font-size: 10px; 
             font-weight: 800; 
@@ -706,9 +729,11 @@
                         <div class="promotor-card-item">
                             <div class="promotor-info">
                                 <span class="promotor-name-text">${nama}</span>
-                                ${badgeHtml}
                             </div>
-                            <div>${aksiHtml}</div>
+                            <div class="promotor-action-wrapper">
+                                ${badgeHtml}
+                                ${aksiHtml}
+                            </div>
                         </div>
                     `;
                 });
