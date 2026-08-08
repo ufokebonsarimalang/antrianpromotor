@@ -9,20 +9,18 @@
     
     <style>
         :root {
-            --admin-purple: #059669;
-            --admin-dark: #047857;
-            --bg: #f0fdf4;
+            --bg: #f8fafc;
             --card-bg: #ffffff;
-            --text-main: #064e3b;
-            --text-muted: #047857;
-            --border: #0f172a;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
-            --primary: #059669;
+            --primary: #3b82f6;
         }
 
-        /* STYLING MODE GELAP: MERAH CERAH MENYALA NEON BOX */
+        /* STYLING MODE GELAP: TETAP NEON MERAH MENYALA */
         body.dark-mode {
             --bg: #050102 !important;
             --card-bg: #1a0205 !important;
@@ -32,7 +30,18 @@
         }
 
         *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
-        body { background: var(--bg); color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; transition: background 0.2s ease; }
+        
+        /* MODE TERANG: MODERN MINIMALIS (CLEAN & PROFESSIONAL) */
+        body { 
+            background: var(--bg); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
+            transition: background 0.2s ease; 
+        }
         
         body.dark-mode { background: #050102 !important; }
 
@@ -40,10 +49,10 @@
             width: 100%; 
             max-width: 650px; 
             background: var(--card-bg); 
-            border-radius: 24px; 
+            border-radius: 20px; 
             padding: 24px; 
-            border: 4px solid var(--border); 
-            box-shadow: 6px 6px 0px #0f172a; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
             transition: all 0.2s ease;
         }
 
@@ -54,19 +63,20 @@
         }
 
         /* TOMBOL GANTI TEMA */
-        .top-controls { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+        .top-controls { display: flex; justify-content: flex-end; margin-bottom: 14px; }
         .dark-mode-btn {
-            background: #10b981;
-            color: #ffffff;
-            border: 3px solid #0f172a;
-            font-weight: 800;
-            border-radius: 12px;
+            background: #e2e8f0;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            font-weight: 700;
+            border-radius: 10px;
             padding: 8px 14px;
             cursor: pointer;
-            box-shadow: 3px 3px 0px #0f172a;
-            text-transform: uppercase;
             font-size: 12px;
+            transition: all 0.2s;
         }
+        .dark-mode-btn:hover { background: #cbd5e1; }
+        
         body.dark-mode .dark-mode-btn { 
             background: #ff1f3d !important; 
             color: #ffffff !important; 
@@ -75,23 +85,22 @@
         }
 
         .header-admin { 
-            background: #34d399; 
-            border-radius: 18px; 
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+            border-radius: 16px; 
             padding: 22px; 
-            color: #064e3b; 
+            color: white; 
             text-align: center; 
             margin-bottom: 20px; 
-            border: 4px solid var(--border);
-            box-shadow: 4px 4px 0px #0f172a; 
+            border: none;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); 
         }
-        .header-admin h2 { margin: 0 0 6px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
-        .header-admin p { margin: 0; font-size: 13px; opacity: 0.95; font-weight: 700; }
+        .header-admin h2 { margin: 0 0 6px 0; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; text-shadow: none; }
+        .header-admin p { margin: 0; font-size: 13px; opacity: 0.9; font-weight: 500; }
 
         body.dark-mode .header-admin { 
             background: linear-gradient(135deg, #7f0015 0%, #300008 100%) !important; 
             border: 3px solid #ff1f3d !important; 
             box-shadow: 0 0 40px rgba(255, 31, 61, 0.8) !important;
-            color: white !important;
         }
         body.dark-mode .header-admin h2 {
             color: #ffffff !important;
@@ -102,9 +111,9 @@
             text-shadow: 0 0 12px rgba(255, 31, 61, 0.8) !important;
         }
 
-        .status-badge { display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px; border: 3px solid #0f172a; box-shadow: 2px 2px 0px #0f172a; }
-        .status-open { background: #4ade80; color: #064e3b; }
-        .status-closed { background: #f87171; color: #450a0a; }
+        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px; border: none; box-shadow: none; }
+        .status-open { background: #d1fae5; color: #065f46; }
+        .status-closed { background: #fee2e2; color: #991b1b; }
 
         body.dark-mode .status-badge {
             background: #50000e !important;
@@ -116,22 +125,20 @@
         .timer-box-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
         
         .timer-card-admin { 
-            background: #d1fae5; 
-            border-radius: 18px; 
+            background: #f1f5f9; 
+            border-radius: 16px; 
             padding: 16px 14px; 
             color: var(--text-main); 
             text-align: center; 
-            border: 3px solid var(--border); 
-            box-shadow: 4px 4px 0px #0f172a; 
+            border: 1px solid var(--border); 
+            box-shadow: none; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             position: relative; 
             overflow: hidden; 
         }
-        .timer-card-admin::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; border-bottom: 2px solid var(--border); }
-        .timer-card-admin.ha::before { background: #10b981; }
-        .timer-card-admin.av::before { background: #059669; }
+        .timer-card-admin::before { display: none; }
 
         body.dark-mode .timer-card-admin.ha,
         body.dark-mode .timer-card-admin.av {
@@ -140,11 +147,10 @@
             border-radius: 20px !important;
             box-shadow: 0 0 35px rgba(255, 31, 61, 0.9), inset 0 0 15px rgba(255, 31, 61, 0.5) !important;
         }
-        body.dark-mode .timer-card-admin::before { display: none; }
 
-        .timer-badge-title { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: inline-block; border: 2px solid #0f172a; }
-        .ha .timer-badge-title { background: #a7f3d0; color: #065f46; }
-        .av .timer-badge-title { background: #6ee7b7; color: #064e3b; }
+        .timer-badge-title { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: inline-block; border: none; }
+        .ha .timer-badge-title { background: #dbeafe; color: #1e40af; }
+        .av .timer-badge-title { background: #f3e8ff; color: #6b21a8; }
 
         body.dark-mode .timer-card-admin.ha .timer-badge-title,
         body.dark-mode .timer-card-admin.av .timer-badge-title { 
@@ -154,36 +160,37 @@
             text-shadow: 0 0 15px rgba(255, 31, 61, 1); 
         }
 
-        .admin-nama-promotor { font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 36px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
+        .admin-nama-promotor { font-size: 15px; font-weight: 700; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 36px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
         
         body.dark-mode .timer-card-admin.ha .admin-nama-promotor,
         body.dark-mode .timer-card-admin.av .admin-nama-promotor { color: #ffffff !important; text-shadow: 0 0 20px rgba(255, 31, 61, 1); }
 
         .input-group { margin-bottom: 16px; text-align: left; }
-        .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-main); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
         body.dark-mode .input-group label { color: #ff8585 !important; }
 
         select, input[type="text"], input[type="password"], input[type="number"] { 
             width: 100%; 
-            padding: 14px 16px; 
-            border-radius: 14px; 
-            border: 3px solid var(--border); 
-            background: #ffffff; 
-            font-size: 15px; 
-            font-weight: 700; 
+            padding: 12px 14px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            background: #f8fafc; 
+            font-size: 14px; 
+            font-weight: 600; 
             color: var(--text-main);
             outline: none; 
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f172a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 14px center;
-            background-size: 18px;
+            background-size: 16px;
             cursor: pointer;
-            box-shadow: 3px 3px 0px #0f172a;
-            transition: all 0.1s ease;
+            box-shadow: none;
+            transition: all 0.2s ease;
         }
+        select:focus, input:focus { border-color: #3b82f6; background: #ffffff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
 
         body.dark-mode select, body.dark-mode input[type="text"], body.dark-mode input[type="password"], body.dark-mode input[type="number"] { 
             background: #2b0007 !important; 
@@ -205,32 +212,32 @@
 
         button { 
             width: 100%; 
-            padding: 14px; 
-            border-radius: 14px; 
-            font-size: 13px; 
-            font-weight: 800; 
+            padding: 12px 16px; 
+            border-radius: 12px; 
+            font-size: 12px; 
+            font-weight: 700; 
             cursor: pointer; 
-            border: 3px solid var(--border); 
+            border: none; 
             text-transform: uppercase; 
-            transition: all 0.1s ease; 
+            transition: all 0.2s ease; 
             display: inline-flex; 
             justify-content: center; 
             align-items: center; 
             gap: 8px; 
             letter-spacing: 0.5px;
-            box-shadow: 4px 4px 0px #0f172a;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-        button:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0px #0f172a !important; }
+        button:active { transform: scale(0.98); }
         
-        .btn-purple { background: #34d399; color: #064e3b; }
-        .btn-success { background: #4ade80; color: #064e3b; }
-        .btn-warning { background: #fbbf24; color: #78350f; }
-        .btn-danger { background: #f87171; color: #450a0a; }
-        .btn-primary { background: #60a5fa; color: #1e3a8a; }
-        .btn-teal { background: #2dd4bf; color: #134e4a; }
+        .btn-purple { background: #3b82f6; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-primary { background: #0284c7; color: white; }
+        .btn-teal { background: #14b8a6; color: white; }
         .btn-darkred { background: #dc2626; color: white; }
-        .btn-cancel { background: #e2e8f0; color: #0f172a; }
-        .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; }
+        .btn-cancel { background: #e2e8f0; color: #475569; }
+        .btn-disabled { background: #e2e8f0 !important; color: #94a3b8 !important; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; }
 
         body.dark-mode .btn-purple,
         body.dark-mode .btn-success,
@@ -253,35 +260,35 @@
         }
         
         .btn-action { 
-            padding: 8px 12px; 
+            padding: 6px 12px; 
             font-size: 11px; 
-            border-radius: 10px; 
+            border-radius: 8px; 
             width: auto; 
-            font-weight: 800; 
+            font-weight: 700; 
             cursor: pointer; 
-            border: 2px solid var(--border); 
+            border: none; 
             text-transform: uppercase; 
             display: inline-flex; 
             align-items: center; 
             justify-content: center; 
             gap: 4px; 
-            box-shadow: 2px 2px 0px #0f172a;
-            transition: all 0.1s ease;
+            box-shadow: none;
+            transition: all 0.2s ease;
             white-space: nowrap;
         }
-        .btn-action:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #0f172a !important; }
+        .btn-action:active { transform: scale(0.96); }
 
-        .spinner { width: 16px; height: 16px; border: 3px solid rgba(15, 23, 42, 0.3); border-radius: 50%; border-top-color: #0f172a; animation: spin 0.8s linear infinite; display: inline-block; flex-shrink: 0; }
+        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block; flex-shrink: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .section-title { font-size: 12px; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 10px 0; text-align: left; border-bottom: 3px solid var(--border); padding-bottom: 4px; }
+        .section-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 10px 0; text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
         body.dark-mode .section-title { color: #ffb3bc !important; border-bottom-color: #ff1f3d !important; }
         
-        .admin-grid { display: flex; flex-direction: column; gap: 12px; }
+        .admin-grid { display: flex; flex-direction: column; gap: 10px; }
 
         .list-section-wrapper { margin-bottom: 20px; text-align: left; }
         .list-antrian { list-style: none; padding: 0; margin: 0 0 16px 0; }
-        .list-antrian li { padding: 12px 14px; background: #ffffff; border-radius: 12px; margin-bottom: 8px; border: 3px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 800; box-shadow: 3px 3px 0px #0f172a; }
+        .list-antrian li { padding: 12px 14px; background: #f8fafc; border-radius: 10px; margin-bottom: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; box-shadow: none; }
         
         body.dark-mode .list-antrian li { 
             background: #2b0007 !important; 
@@ -290,12 +297,12 @@
             box-shadow: 0 0 25px rgba(255, 31, 61, 0.7) !important;
         }
 
-        .badge-status-item { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; border: 2px solid var(--border); }
-        .badge-giliran-anda { background: #4ade80; color: #064e3b; }
-        .badge-standby { background: #60a5fa; color: #1e3a8a; }
-        .badge-melayani { background: #fbbf24; color: #78350f; }
-        .badge-cs { background: #c084fc; color: #3b0764; }
-        .badge-ibadah { background: #818cf8; color: #1e1b4b; }
+        .badge-status-item { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; white-space: nowrap; border: none; }
+        .badge-giliran-anda { background: #d1fae5; color: #065f46; }
+        .badge-standby { background: #e0f2fe; color: #0369a1; }
+        .badge-melayani { background: #fef3c7; color: #92400e; }
+        .badge-cs { background: #f3e8ff; color: #6b21a8; }
+        .badge-ibadah { background: #e0e7ff; color: #3730a3; }
 
         body.dark-mode .badge-status-item {
             background: #50000e !important;
@@ -303,17 +310,17 @@
             border: 1px solid #ff1f3d !important;
         }
 
-        .promotor-list-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .promotor-list-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
         
         .promotor-card-item {
-            background: #ffffff;
-            border: 3px solid var(--border);
-            border-radius: 14px;
-            padding: 12px 16px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 3px 3px 0px #0f172a;
+            box-shadow: none;
             gap: 12px;
         }
         body.dark-mode .promotor-card-item {
@@ -330,8 +337,8 @@
             min-width: 0; 
         }
         .promotor-name-text { 
-            font-size: 14px; 
-            font-weight: 800; 
+            font-size: 13px; 
+            font-weight: 700; 
             color: var(--text-main); 
             white-space: nowrap; 
             overflow: hidden; 
@@ -347,21 +354,20 @@
         }
 
         .badge-status-sanksi { 
-            padding: 4px 8px; 
-            border-radius: 20px; 
+            padding: 3px 8px; 
+            border-radius: 12px; 
             font-size: 10px; 
-            font-weight: 800; 
+            font-weight: 700; 
             display: inline-flex; 
             align-items: center; 
             gap: 4px; 
-            border: 2px solid var(--border);
-            box-shadow: 2px 2px 0px #0f172a;
+            border: none;
             white-space: nowrap;
         }
-        .badge-aman { background: #4ade80; color: #064e3b; }
-        .badge-penalti { background: #f87171; color: #450a0a; }
+        .badge-aman { background: #d1fae5; color: #065f46; }
+        .badge-penalti { background: #fee2e2; color: #991b1b; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         
         .modal-box { 
@@ -369,10 +375,10 @@
             width: 100%; 
             max-width: 380px; 
             padding: 24px; 
-            border-radius: 20px; 
+            border-radius: 16px; 
             text-align: center; 
-            border: 4px solid var(--border); 
-            box-shadow: 6px 6px 0px #0f172a;
+            border: 1px solid var(--border); 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
         body.dark-mode .modal-box { 
             background: #2b0007 !important; 
@@ -381,12 +387,12 @@
             box-shadow: 0 0 45px rgba(255, 31, 61, 0.9) !important;
         }
 
-        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
-        .modal-desc { font-size: 14px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5; text-align: left; font-weight: 700; }
+        .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .modal-desc { font-size: 13px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5; text-align: left; font-weight: 600; }
         body.dark-mode .modal-desc { color: #ffffff !important; }
-        .modal-desc select, .modal-desc input { font-size: 14px; padding: 12px 14px; margin-top: 4px; border-radius: 12px; border: 3px solid var(--border); box-shadow: 2px 2px 0px #0f172a; }
+        .modal-desc select, .modal-desc input { font-size: 13px; padding: 10px 12px; margin-top: 4px; border-radius: 10px; border: 1px solid var(--border); box-shadow: none; }
         .modal-actions { display: flex; gap: 10px; }
-        .modal-actions button { flex: 1; padding: 12px; font-size: 13px; }
+        .modal-actions button { flex: 1; padding: 10px; font-size: 12px; }
 
         @media (max-width: 480px) { .timer-box-wrapper { grid-template-columns: 1fr; } }
     </style>
@@ -395,7 +401,7 @@
 
     <div class="admin-container">
         <div class="top-controls">
-            <button type="button" class="dark-mode-btn" id="btn-toggle-dark" onclick="toggleDarkMode()">🌙 Gelap</button>
+            <button type="button" class="dark-mode-btn" id="btn-toggle-dark" onclick="toggleDarkMode()">🌙 Mode Gelap</button>
         </div>
 
         <div class="header-admin">
@@ -407,7 +413,7 @@
         <div id="login-admin-box">
             <div class="input-group">
                 <label>Masukkan PIN Admin Khusus</label>
-                <input type="password" id="input-pin-admin" placeholder="PIN ADMIN" style="text-align: center; font-size: 18px; letter-spacing: 3px;">
+                <input type="password" id="input-pin-admin" placeholder="PIN ADMIN" style="text-align: center; font-size: 16px; letter-spacing: 2px;">
             </div>
             <button type="button" id="btn-login-admin" class="btn-purple" onclick="prosesLoginAdmin()">Masuk Panel Kontrol</button>
         </div>
@@ -424,20 +430,20 @@
 
             <!-- LIVE URUTAN KATEGORI HA & AV -->
             <div class="list-section-wrapper">
-                <div style="font-size: 14px; font-weight: 800; color: var(--text-main); border-bottom: 3px solid var(--border); padding-bottom: 6px; margin-bottom: 12px; text-transform: uppercase;">LIVE URUTAN KATEGORI HA</div>
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase;">LIVE URUTAN KATEGORI HA</div>
                 <ul id="list-HA" class="list-antrian"><li><span>Memuat...</span></li></ul>
 
-                <div style="font-size: 14px; font-weight: 800; color: var(--text-main); border-bottom: 3px solid var(--border); padding-bottom: 6px; margin-top: 24px; margin-bottom: 12px; text-transform: uppercase;">LIVE URUTAN KATEGORI AV</div>
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-top: 20px; margin-bottom: 10px; text-transform: uppercase;">LIVE URUTAN KATEGORI AV</div>
                 <ul id="list-AV" class="list-antrian"><li><span>Memuat...</span></li></ul>
             </div>
 
             <div class="section-title">Pengaturan Status GPS Validasi Toko</div>
             <div class="admin-grid" style="margin-bottom: 15px;">
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 8px;">
                     <button type="button" id="btn-on-gps" class="btn-success" style="flex:1;" onclick="toggleGPSAdmin(true)">🟢 AKTIFKAN GPS</button>
                     <button type="button" id="btn-off-gps" class="btn-danger" style="flex:1;" onclick="toggleGPSAdmin(false)">🔴 MATIKAN GPS</button>
                 </div>
-                <div id="label-status-gps" style="font-size: 12px; font-weight: 800; color: var(--text-main); text-align: center; margin-top: 4px;">Status GPS: Memeriksa...</div>
+                <div id="label-status-gps" style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-align: center; margin-top: 4px;">Status GPS: Memeriksa...</div>
             </div>
 
             <div class="section-title">1. Kontrol Sistem Antrian</div>
@@ -462,10 +468,10 @@
 
             <div class="section-title">4. Manajemen Status Akun Promotor (Lock/Unlock)</div>
             <div id="tabel-penalti-admin" class="promotor-list-grid">
-                <div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 700;">Memuat data promotor...</div>
+                <div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 600;">Memuat data promotor...</div>
             </div>
 
-            <button type="button" class="btn-cancel" style="margin-top: 24px; font-weight: 800;" onclick="logoutAdmin()">🔒 Kunci Panel Admin</button>
+            <button type="button" class="btn-cancel" style="margin-top: 20px; font-weight: 700;" onclick="logoutAdmin()">🔒 Kunci Panel Admin</button>
         </div>
     </div>
 
@@ -527,7 +533,7 @@
 
         function updateDarkButtonText(isDark) {
             const btn = document.getElementById('btn-toggle-dark');
-            if (btn) btn.innerHTML = isDark ? '☀️ Terang' : '🌙 Gelap';
+            if (btn) btn.innerHTML = isDark ? '☀️ Mode Terang' : '🌙 Mode Gelap';
         }
 
         function amanKlikAdmin(callbackAksi) {
@@ -662,7 +668,7 @@
                 });
             }
 
-            const kosongHtml = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian</span></li>";
+            const kosongHtml = "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian</span></li>";
             document.getElementById('list-HA').innerHTML = listHA || kosongHtml;
             document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
         }
@@ -710,7 +716,7 @@
         function renderTabelStatusAkunAdmin(dataSales) {
             let html = "";
             if (!dataSales || dataSales.length === 0) {
-                html = `<div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 700;">Belum ada data promotor</div>`;
+                html = `<div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 600;">Belum ada data promotor</div>`;
             } else {
                 dataSales.forEach(item => {
                     const nama = typeof item === 'object' ? item.nama : item;
