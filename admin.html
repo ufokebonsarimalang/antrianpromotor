@@ -11,11 +11,11 @@
         :root {
             --admin-purple: #7c3aed;
             --admin-dark: #5b21b6;
-            --bg: #fffde7; /* Kuning pastel khas kertas komik */
+            --bg: #fffde7;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #475569;
-            --border: #0f172a; /* Garis tepi tebal hitam */
+            --border: #0f172a;
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
@@ -25,7 +25,6 @@
         *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
         body { background: var(--bg); color: var(--text-main); margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; }
         
-        /* CONTAINER UTAMA DENGAN EFEK KARTUN 3D SHADOW */
         .admin-container { 
             width: 100%; 
             max-width: 650px; 
@@ -55,7 +54,6 @@
 
         .timer-box-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
         
-        /* KARTU HA & AV KARTUN STYLE */
         .timer-card-admin { 
             background: #fdf2f8; 
             border-radius: 18px; 
@@ -83,7 +81,6 @@
         .input-group { margin-bottom: 16px; text-align: left; }
         .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-main); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
 
-        /* INPUT & SELECT KARTUN STYLE */
         select, input[type="text"], input[type="password"], input[type="number"] { 
             width: 100%; 
             padding: 14px 16px; 
@@ -116,7 +113,6 @@
             box-shadow: 4px 4px 0px var(--admin-purple); 
         }
 
-        /* TOMBOL KARTUN DENGAN EFEK 3D SHADOW */
         button { 
             width: 100%; 
             padding: 14px; 
@@ -181,24 +177,52 @@
         .badge-cs { background: #c084fc; color: #3b0764; }
         .badge-ibadah { background: #818cf8; color: #1e1b4b; }
 
-        .table-responsive { width: 100%; overflow-x: auto; margin-top: 10px; border-radius: 12px; border: 3px solid var(--border); background: #ffffff; box-shadow: 4px 4px 0px #0f172a; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-        th, td { padding: 12px 14px; border-bottom: 2px solid var(--border); vertical-align: middle; }
-        th { background: #f1f5f9; font-weight: 800; color: var(--text-main); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
-        tr:last-child td { border-bottom: none; }
-        
+        /* --- STYLING BARU UNTUK MANAJEMEN STATUS AKUN (LEBIH RAPI & KARTUN STYLE) --- */
+        .promotor-list-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .promotor-card-item {
+            background: #ffffff;
+            border: 3px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 3px 3px 0px #0f172a;
+            gap: 10px;
+        }
+        .promotor-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+        .promotor-name-text {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .badge-status-sanksi { 
-            padding: 6px 12px; 
+            padding: 4px 10px; 
             border-radius: 20px; 
-            font-size: 11px; 
+            font-size: 10px; 
             font-weight: 800; 
             display: inline-flex; 
             align-items: center; 
-            gap: 6px; 
+            gap: 4px; 
             border: 2px solid var(--border);
             box-shadow: 2px 2px 0px #0f172a;
+            white-space: nowrap;
         }
-        
         .badge-normal { background: #4ade80; color: #064e3b; }
         .badge-penalti { background: #f87171; color: #450a0a; }
 
@@ -290,22 +314,11 @@
             </div>
 
             <div class="section-title">4. Manajemen Status Akun Promotor (Lock/Unlock)</div>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nama Promotor</th>
-                            <th>Status Akun</th>
-                            <th>Aksi Admin</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabel-penalti-admin">
-                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Memuat data promotor...</td></tr>
-                    </tbody>
-                </table>
+            <div id="tabel-penalti-admin" class="promotor-list-grid">
+                <div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 700;">Memuat data promotor...</div>
             </div>
 
-            <button type="button" class="btn-cancel" style="margin-top: 20px; font-weight: 800;" onclick="logoutAdmin()">🔒 Kunci Panel Admin</button>
+            <button type="button" class="btn-cancel" style="margin-top: 24px; font-weight: 800;" onclick="logoutAdmin()">🔒 Kunci Panel Admin</button>
         </div>
     </div>
 
@@ -529,7 +542,7 @@
         function renderTabelStatusAkunAdmin(dataSales) {
             let html = "";
             if (!dataSales || dataSales.length === 0) {
-                html = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">Belum ada data promotor</td></tr>`;
+                html = `<div style="text-align: center; color: var(--text-muted); padding: 12px; font-weight: 700;">Belum ada data promotor</div>`;
             } else {
                 dataSales.forEach(item => {
                     const nama = typeof item === 'object' ? item.nama : item;
@@ -544,11 +557,19 @@
                         aksiHtml = `<button type="button" class="btn-action btn-danger" onclick="lockPromotor('${nama.replace(/'/g, "\\'")}')">Lock Akun</button>`;
                     }
 
-                    html += `<tr><td><b style="font-size: 14px; color: var(--text-main);">${nama}</b></td><td>${badgeHtml}</td><td>${aksiHtml}</td></tr>`;
+                    html += `
+                        <div class="promotor-card-item">
+                            <div class="promotor-info">
+                                <span class="promotor-name-text">${nama}</span>
+                                ${badgeHtml}
+                            </div>
+                            <div>${aksiHtml}</div>
+                        </div>
+                    `;
                 });
             }
-            const tbody = document.getElementById('tabel-penalti-admin');
-            if(tbody) tbody.innerHTML = html;
+            const container = document.getElementById('tabel-penalti-admin');
+            if(container) container.innerHTML = html;
         }
 
         function lockPromotor(namaSales) {
