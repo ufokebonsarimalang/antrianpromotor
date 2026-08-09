@@ -1056,7 +1056,7 @@
             setTimeout(() => { if (mapPromotor) mapPromotor.invalidateSize(); }, 150);
         }
 
-        function mulaiPemantauanGPS() {
+       function mulaiPemantauanGPS() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     function(position) {
@@ -1087,7 +1087,8 @@
 
                         if (jarakMeter > batasRadius) {
                             counterLuarRadiusGPS++;
-                            if (counterLuarRadiusGPS >= 5) {
+                            // Diturunkan jadi 3 kali pengecekan agar lebih cepat merespons saat keluar area
+                            if (counterLuarRadiusGPS >= 3) {
                                 counterLuarRadiusGPS = 0;
                                 eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
                                 tampilkanModal("Auto-Exit GPS", `Anda berada di luar radius ${Math.round(jarakMeter)} meter dari toko (Batas maksimal ${batasRadius} meter). Anda otomatis dikeluarkan dari antrean.`);
@@ -1096,12 +1097,18 @@
                             counterLuarRadiusGPS = 0;
                         }
                     },
-                    function(error) {},
-                    { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+                    function(error) {
+                        // Jika GPS gagal karena layar terkunci, coba panggil ulang secara paksa
+                        console.warn("GPS Warning:", error.message);
+                    },
+                    { 
+                        enableHighAccuracy: true, 
+                        maximumAge: 0,        // Memaksa mengambil data GPS baru yang fresh, bukan dari cache
+                        timeout: 10000 
+                    }
                 );
             }
         }
-
         function hitungJarakHaversine(lat1, lon1, lat2, lon2) {
             const R = 6371000; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
