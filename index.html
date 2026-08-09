@@ -205,6 +205,23 @@
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.6), inset 0 0 8px rgba(255, 31, 61, 0.3) !important;
         }
 
+        /* STYLE KHUSUS KOTAK AKUN DILOCK */
+        #section-akun-locked {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        body.dark-mode #section-akun-locked {
+            background: #2a0808 !important;
+            border: 2px solid #ff1f3d !important;
+            box-shadow: 0 0 25px rgba(255, 31, 61, 0.5) !important;
+        }
+        body.dark-mode #section-akun-locked .locked-title { color: #ff667a !important; }
+        body.dark-mode #section-akun-locked #teks-alasan-lock { color: #ff99a8 !important; }
+
         .timer-box-wrapper { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
         .timer-card-admin { background: #f8fafc; border-radius: 14px; padding: 14px; text-align: center; border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         
@@ -353,6 +370,16 @@
         <div id="panel-menu-utama" style="display: none;">
             <div class="user-badge">
                 <span style="color: var(--text-muted);">Promotor:</span> <strong id="label-user-aktif" style="color:var(--primary); font-size: 14px;">-</strong>
+            </div>
+
+            <!-- BLOK PERINGATAN JIKA AKUN DI-LOCK ADMIN -->
+            <div id="section-akun-locked" style="display: none;">
+                <div class="locked-title" style="color: #991b1b; font-weight: 800; font-size: 15px; margin-bottom: 6px; text-transform: uppercase;">
+                    🔒 Akun Anda Terkunci
+                </div>
+                <div id="teks-alasan-lock" style="color: #7f1d1d; font-size: 13px; font-weight: 600; line-height: 1.4;">
+                    -
+                </div>
             </div>
 
             <!-- PETA MINI VISUALISASI POSISI -->
@@ -505,6 +532,7 @@
             setInterval(() => {
                 muatDataAntrian();
                 cekStatusPerangkatSaya();
+                muatMasterSales(); // Selalu tarik data lock terbaru dari master
             }, 3000); 
         };
 
@@ -649,9 +677,12 @@
                 if(res.status === "sukses" && res.data) {
                     masterSalesGlobal = res.data;
                     localStorage.setItem('ufo_master_sales_cache', JSON.stringify(res.data));
-                    let html = '<option value="">-- Pilih Nama Anda --</option>';
-                    res.data.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
-                    document.getElementById('pilih-sales').innerHTML = html;
+                    
+                    if (document.getElementById('pilih-sales').options.length <= 1) {
+                        let html = '<option value="">-- Pilih Nama Anda --</option>';
+                        res.data.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
+                        document.getElementById('pilih-sales').innerHTML = html;
+                    }
                 }
             });
         }
@@ -711,9 +742,9 @@
                     } else if (item.status === "Melayani") {
                         itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
                     } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
-                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/Gudang</span></li>`;
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/Gudang (Locked)</span></li>`;
                     } else if (item.status === "Ibadah") {
-                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-ibadah">Sedang Ibadah</span></li>`;
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-ibadah">Sedang Ibadah (Locked)</span></li>`;
                     }
 
                     if (kat === "HA") listHA += itemHtml;
@@ -728,8 +759,36 @@
             let statusSayaNyata = cekStatusSayaDariArray(daftarAntrianGlobal);
             const sectionCheckinAwal = document.getElementById('section-checkin-awal');
             const sectionNormal = document.getElementById('section-normal');
-            
             const sectionPetaGps = document.getElementById('section-peta-gps');
+            const sectionLocked = document.getElementById('section-akun-locked');
+
+            // --- CEK STATUS LOCKED OLEH ADMIN DARI MASTER DATA ---
+            let isDilockAdmin = false;
+            let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
+            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+            
+            if (dataSalesSaya) {
+                // Mengecek berbagai format flag yang biasa dilempar dari server
+                if (dataSalesSaya.locked === true || dataSalesSaya.locked === "TRUE" || dataSalesSaya.is_locked === true || dataSalesSaya.status_lock === "LOCKED") {
+                    isDilockAdmin = true;
+                    pesanLockAdmin = dataSalesSaya.pesan_lock || dataSalesSaya.alasan_lock || dataSalesSaya.alasan || pesanLockAdmin;
+                }
+            }
+
+            // --- JIKA AKUN DILOCK ADMIN, HIDE SEMUA TOMBOL & TAMPILKAN PERINGATAN ---
+            if (isDilockAdmin) {
+                sectionCheckinAwal.style.display = 'none';
+                sectionNormal.style.display = 'none';
+                if (sectionPetaGps) sectionPetaGps.style.display = 'none';
+                
+                sectionLocked.style.display = 'block';
+                document.getElementById('teks-alasan-lock').innerText = "Alasan: " + pesanLockAdmin;
+                return; // Stop fungsi render agar tidak memunculkan tombol
+            } else {
+                if (sectionLocked) sectionLocked.style.display = 'none';
+            }
+            // -------------------------------------------------------------------------
+
             if (statusSayaNyata === "belum_ada" || statusSayaNyata === "Standby") {
                 if (sectionPetaGps) sectionPetaGps.style.display = "block";
                 setTimeout(() => { 
@@ -784,7 +843,7 @@
                 if (statusSayaNyata === "Standby") {
                     btnCustomer.style.display = "block"; 
                     btnClosing.style.display = "none";
-                    btnCS.style.display = "block"; 
+                    btnCS.style.display = "block"; btnCS.innerText = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; btnCS.className = "btn-purple"; btnCS.disabled = false;
                     btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
                     btnKeluar.style.display = "block";
 
@@ -809,7 +868,7 @@
                     btnCS.style.display = "none"; btnIbadah.style.display = "none"; btnKeluar.style.display = "none";
                 } else if (statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") {
                     btnCustomer.style.display = "none"; btnClosing.style.display = "none";
-                    btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal"; btnCS.disabled = false;
+                    btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI) - LOCKED"; btnCS.className = "btn-teal"; btnCS.disabled = false;
                     btnIbadah.style.display = "none";
                     btnKeluar.style.display = "none";
                 } else if (statusSayaNyata === "Ibadah") {
@@ -819,7 +878,7 @@
                     btnKeluar.style.display = "none";
                     
                     btnIbadah.style.display = "block"; 
-                    btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)"; 
+                    btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI) - LOCKED"; 
                     btnIbadah.className = "btn-teal"; 
                     btnIbadah.disabled = false;
                 }
@@ -873,11 +932,20 @@
             fetch(`${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(katAktif)}&subkategori=${encodeURIComponent(katAktif)}&t=${Date.now()}`)
             .then(res => res.json())
             .then(res => {
+                localActionActive = false;
                 if (res && res.status === "sukses" && res.data) {
                     daftarAntrianGlobal = res.data;
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+                } else if (res && (res.status === "locked" || res.status === "terkunci" || res.status === "gagal_lock")) {
+                    muatDataAntrian(); 
+                    muatMasterSales(); // Tarik data lock agar layar merah muncul
+                    tampilkanModal("Akun Di-Lock Admin", res.pesan || "Akun Anda telah dikunci oleh admin.");
+                } else if (res && res.status === "gagal") {
+                    muatDataAntrian();
+                    tampilkanModal("Gagal", res.pesan || "Aksi ditolak sistem.");
+                } else {
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
                 }
-                localActionActive = false;
-                renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
             }).catch(() => { 
                 localActionActive = false; 
             });
@@ -896,7 +964,7 @@
             }
         }
 
-      function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
+        function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
             if (!koordinatToko.lat || !koordinatToko.lng) {
                 const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
                 if (cachedKoordinat) {
@@ -910,7 +978,6 @@
             }
 
             if (navigator.geolocation) {
-                // Diubah menggunakan maksimum usia cache 10 detik agar tombol langsung responsif di dalam ruangan
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         const jarakMeter = hitungJarakHaversine(
@@ -919,7 +986,6 @@
                         );
                         const batasRadius = Number(koordinatToko.radius) || 50;
 
-                        // Berikan toleransi margin 15 meter untuk mengantisipasi pantulan dinding indoor
                         if (jarakMeter > (batasRadius + 15)) {
                             if (typeof callbackBatal === 'function') callbackBatal();
                             tampilkanModal("Di Luar Radius Antrian", `Gagal mendaftar antrian!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar area antrian.`);
@@ -929,9 +995,6 @@
                         if (typeof callbackBerhasil === 'function') callbackBerhasil();
                     },
                     function(error) {
-                        // FALLBACK: Jika GPS HP gagal mendeteksi karena tertutup atap/dinding indoor, 
-                        // jangan blokir promotor, biarkan tetap bisa masuk antri demi kelancaran operasional.
-                        console.warn("GPS Indoor Warning:", error.message);
                         if (typeof callbackBerhasil === 'function') callbackBerhasil();
                     },
                     { enableHighAccuracy: false, timeout: 5000, maximumAge: 30000 }
@@ -941,52 +1004,6 @@
             }
         }
 
-        function mulaiPemantauanGPS() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(
-                    function(position) {
-                        if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
-                            return; 
-                        }
-
-                        let statusSaya = cekStatusSayaDariArray(daftarAntrianGlobal);
-                        if (statusSaya !== "Standby") {
-                            counterLuarRadiusGPS = 0; 
-                            return; 
-                        }
-
-                        if (Date.now() < waktuKembaliDariAksiKhusus) {
-                            counterLuarRadiusGPS = 0;
-                            return;
-                        }
-
-                        let latUser = position.coords.latitude;
-                        let lngUser = position.coords.longitude;
-                        let latToko = Number(koordinatToko.lat);
-                        let lngToko = Number(koordinatToko.lng);
-                        let batasRadius = Number(koordinatToko.radius) || 50;
-
-                        initAtauUpdatePetaPromotor(latToko, lngToko, batasRadius, latUser, lngUser);
-
-                        const jarakMeter = hitungJarakHaversine(latUser, lngUser, latToko, lngToko);
-
-                        // Auto exit aktif jika benar-benar jauh di luar radius + toleransi 10 meter
-                        if (jarakMeter > (batasRadius + 10)) {
-                            counterLuarRadiusGPS++;
-                            if (counterLuarRadiusGPS >= 4) {
-                                counterLuarRadiusGPS = 0;
-                                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
-                                tampilkanModal("Auto-Exit GPS", `Anda berada di luar radius ${Math.round(jarakMeter)} meter dari toko (Batas maksimal ${batasRadius} meter). Anda otomatis dikeluarkan dari antrean.`);
-                            }
-                        } else {
-                            counterLuarRadiusGPS = 0;
-                        }
-                    },
-                    function(error) {},
-                    { enableHighAccuracy: false, maximumAge: 10000, timeout: 8000 }
-                );
-            }
-        }
         function aksiHadirKerja() {
             const btn = document.getElementById('btn-hadir');
             setButtonLoading(btn, true, "Konfirmasi Kehadiran & Masuk Antri");
@@ -1105,7 +1122,7 @@
             setTimeout(() => { if (mapPromotor) mapPromotor.invalidateSize(); }, 150);
         }
 
-       function mulaiPemantauanGPS() {
+        function mulaiPemantauanGPS() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     function(position) {
@@ -1134,10 +1151,9 @@
 
                         const jarakMeter = hitungJarakHaversine(latUser, lngUser, latToko, lngToko);
 
-                        if (jarakMeter > batasRadius) {
+                        if (jarakMeter > (batasRadius + 10)) {
                             counterLuarRadiusGPS++;
-                            // Diturunkan jadi 3 kali pengecekan agar lebih cepat merespons saat keluar area
-                            if (counterLuarRadiusGPS >= 3) {
+                            if (counterLuarRadiusGPS >= 4) {
                                 counterLuarRadiusGPS = 0;
                                 eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
                                 tampilkanModal("Auto-Exit GPS", `Anda berada di luar radius ${Math.round(jarakMeter)} meter dari toko (Batas maksimal ${batasRadius} meter). Anda otomatis dikeluarkan dari antrean.`);
@@ -1146,18 +1162,12 @@
                             counterLuarRadiusGPS = 0;
                         }
                     },
-                    function(error) {
-                        // Jika GPS gagal karena layar terkunci, coba panggil ulang secara paksa
-                        console.warn("GPS Warning:", error.message);
-                    },
-                    { 
-                        enableHighAccuracy: true, 
-                        maximumAge: 0,        // Memaksa mengambil data GPS baru yang fresh, bukan dari cache
-                        timeout: 10000 
-                    }
+                    function(error) {},
+                    { enableHighAccuracy: false, maximumAge: 10000, timeout: 8000 }
                 );
             }
         }
+
         function hitungJarakHaversine(lat1, lon1, lat2, lon2) {
             const R = 6371000; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
