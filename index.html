@@ -205,12 +205,13 @@
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.6), inset 0 0 8px rgba(255, 31, 61, 0.3) !important;
         }
 
-        /* STYLE BOX PERINGATAN KELOMPOK LOCK ADMIN (KOLOM B & C) */
+        /* STYLE BOX ALASAN LOCKED DI BAWAH TOMBOL */
         #section-akun-locked {
             background: #fee2e2;
             border: 2px solid #f87171;
             border-radius: 12px;
             padding: 14px;
+            margin-top: 10px;
             margin-bottom: 16px;
             text-align: left;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -371,16 +372,6 @@
                 <span style="color: var(--text-muted);">Promotor:</span> <strong id="label-user-aktif" style="color:var(--primary); font-size: 14px;">-</strong>
             </div>
 
-            <!-- BOX PERINGATAN KELOMPOK LOCK ADMIN (KOLOM B & C) -->
-            <div id="section-akun-locked" style="display: none;">
-                <div class="locked-title" style="color: #991b1b; font-weight: 800; font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">
-                    ⚠️ AKUN ANDA TERKUNCI OLEH ADMIN
-                </div>
-                <div id="teks-alasan-lock" style="color: #7f1d1d; font-size: 12px; font-weight: 600; line-height: 1.4;">
-                    -
-                </div>
-            </div>
-
             <!-- PETA MINI VISUALISASI POSISI -->
             <div class="input-group" id="section-peta-gps">
                 <label>Peta Posisi Anda & Radius Antrian</label>
@@ -427,6 +418,17 @@
                 </div>
 
                 <button type="button" id="btn-daftar-antrian" class="btn-success btn-pulse" onclick="aksiDaftarAntrianNormal()" style="display: none; margin-top: 4px;">Daftar Antrian</button>
+                
+                <!-- BOX PERINGATAN ALASAN LOCKED (DIBAWAH TOMBOL DAFTAR ANTRIAN) -->
+                <div id="section-akun-locked" style="display: none;">
+                    <div class="locked-title" style="color: #991b1b; font-weight: 800; font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">
+                        ⚠️ AKUN ANDA TERKUNCI
+                    </div>
+                    <div id="teks-alasan-lock" style="color: #7f1d1d; font-size: 12px; font-weight: 600; line-height: 1.4;">
+                        -
+                    </div>
+                </div>
+
                 <button type="button" id="btn-utama-customer" class="btn-customer btn-pulse" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 10px;">Sudah Membawa Customer</button>
                 <button type="button" id="btn-selesai-closing" class="btn-closing" onclick="aksiSelesaiClosing()" style="display: none; margin-top: 10px;">SELESAI MELAYANI (DEAL / CLOSING)</button>
                 <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 10px;">DIPANGGIL CS/GUDANG (KUNCI POSISI)</button>
@@ -789,15 +791,22 @@
             const btnIbadah = document.getElementById('btn-utama-ibadah');
             const btnKeluar = document.getElementById('btn-keluar-istirahat');
 
-            // --- JIKA AKUN DILOCK ADMIN: MUNCULKAN BOX & PAKSA TOMBOL JADI ABU-ABU ---
+            // --- JIKA AKUN DILOCK ADMIN: TOMBOL DAFTAR JADI "OTOMATIS TERKUNCI" (ABU2) & MUNCUL BOX ALASAN DI BAWAHNYA ---
             if (isDilockAdmin) {
-                sectionLocked.style.display = 'block';
-                document.getElementById('teks-alasan-lock').innerText = "Alasan: " + pesanLockAdmin;
-
                 sectionCheckinAwal.style.display = 'none';
                 sectionNormal.style.display = 'block';
                 groupPilihKat.style.display = 'block';
-                if (btnDaftar) { btnDaftar.style.display = 'block'; btnDaftar.disabled = true; btnDaftar.className = "btn-success btn-disabled"; }
+                
+                if (btnDaftar) { 
+                    btnDaftar.style.display = 'block'; 
+                    btnDaftar.disabled = true; 
+                    btnDaftar.className = "btn-success btn-disabled"; 
+                    btnDaftar.innerText = "OTOMATIS TERKUNCI"; 
+                }
+                
+                sectionLocked.style.display = 'block';
+                document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
+
                 if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
                 if (btnCustomer) { btnCustomer.style.display = 'none'; }
                 if (btnClosing) { btnClosing.style.display = 'none'; }
@@ -808,8 +817,9 @@
                 return; 
             } else {
                 if (sectionLocked) sectionLocked.style.display = 'none';
+                if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
             }
-            // -------------------------------------------------------------------------
+            // ---------------------------------------------------------------------------------------------------------
 
             if (statusSayaNyata === "belum_ada" || statusSayaNyata === "Standby") {
                 if (sectionPetaGps) sectionPetaGps.style.display = "block";
@@ -953,7 +963,6 @@
                 } else if (res && (res.status === "locked" || res.status === "terkunci" || res.status === "gagal_lock")) {
                     muatDataAntrian(); 
                     muatMasterSales(); 
-                    tampilkanModal("Akun Di-Lock Admin", res.pesan || "Akun Anda telah dikunci oleh admin.");
                 } else if (res && res.status === "gagal") {
                     muatDataAntrian();
                     tampilkanModal("Gagal", res.pesan || "Aksi ditolak sistem.");
