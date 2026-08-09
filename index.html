@@ -1013,7 +1013,7 @@
             }
         }
 
-        function mulaiPemantauanGPS() {
+       function mulaiPemantauanGPS() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     function(position) {
@@ -1026,7 +1026,9 @@
                         }
 
                         let statusSaya = cekStatusSayaDariArray(daftarAntrianGlobal);
-                        if (statusSaya !== "Standby") {
+                        
+                        // JANGAN AUTO-EXIT JIKA BELUM MASUK ANTRIAN ATAU SEDANG MELAYANI/CS/IBADAH
+                        if (statusSaya === "belum_ada" || statusSaya === "Melayani" || statusSaya === "Dipanggil CS/GUDANG" || statusSaya === "Dipanggil CS" || statusSaya === "Ibadah") {
                             counterLuarRadiusGPS = 0; 
                             return; 
                         }
@@ -1046,10 +1048,22 @@
 
                         const jarakMeter = hitungJarakHaversine(latUser, lngUser, latToko, lngToko);
 
+                        // Jika jarak promotor melebihi batas radius + toleransi 15 meter saat berstatus Standby
                         if (jarakMeter > (batasRadius + 15)) {
                             counterLuarRadiusGPS++;
                             if (counterLuarRadiusGPS >= 3) {
                                 counterLuarRadiusGPS = 0;
+                                
+                                // KIRIM PERINTAH HAPUS MUTLAK KE SERVER GAS
+                                const namaSales = getAkunAktif().trim();
+                                if (namaSales) {
+                                    fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
+                                    .then(res => res.json())
+                                    .then(res => {
+                                        muatDataAntrian();
+                                    }).catch(() => {});
+                                }
+
                                 eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
                                 tampilkanModal("Auto-Exit GPS", `Anda terdeteksi berada di luar radius toko (${Math.round(jarakMeter)} meter). Anda otomatis dikeluarkan dari antrean.`);
                             }
@@ -1062,7 +1076,6 @@
                 );
             }
         }
-
         function aksiHadirKerja() {
             const btn = document.getElementById('btn-hadir');
             setButtonLoading(btn, true, "Konfirmasi Kehadiran & Masuk Antri");
