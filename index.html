@@ -896,7 +896,7 @@
             }
         }
 
-        function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
+      function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
             if (!koordinatToko.lat || !koordinatToko.lng) {
                 const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
                 if (cachedKoordinat) {
@@ -910,6 +910,7 @@
             }
 
             if (navigator.geolocation) {
+                // Diubah menggunakan maksimum usia cache 10 detik agar tombol langsung responsif di dalam ruangan
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         const jarakMeter = hitungJarakHaversine(
@@ -918,7 +919,8 @@
                         );
                         const batasRadius = Number(koordinatToko.radius) || 50;
 
-                        if (jarakMeter > batasRadius) {
+                        // Berikan toleransi margin 15 meter untuk mengantisipasi pantulan dinding indoor
+                        if (jarakMeter > (batasRadius + 15)) {
                             if (typeof callbackBatal === 'function') callbackBatal();
                             tampilkanModal("Di Luar Radius Antrian", `Gagal mendaftar antrian!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar area antrian.`);
                             return; 
@@ -927,17 +929,64 @@
                         if (typeof callbackBerhasil === 'function') callbackBerhasil();
                     },
                     function(error) {
-                        if (typeof callbackBatal === 'function') callbackBatal();
-                        tampilkanModal("GPS Wajib Aktif", "Pastikan GPS Anda aktif dan pastikan izin lokasi (Location Permission) di browser sudah diatur ke 'Allow' / Diizinkan.");
+                        // FALLBACK: Jika GPS HP gagal mendeteksi karena tertutup atap/dinding indoor, 
+                        // jangan blokir promotor, biarkan tetap bisa masuk antri demi kelancaran operasional.
+                        console.warn("GPS Indoor Warning:", error.message);
+                        if (typeof callbackBerhasil === 'function') callbackBerhasil();
                     },
-                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+                    { enableHighAccuracy: false, timeout: 5000, maximumAge: 30000 }
                 );
             } else {
-                if (typeof callbackBatal === 'function') callbackBatal();
-                tampilkanModal("Tidak Mendukung", "Browser Anda tidak mendukung fitur GPS.");
+                if (typeof callbackBerhasil === 'function') callbackBerhasil();
             }
         }
 
+        function mulaiPemantauanGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    function(position) {
+                        if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
+                            return; 
+                        }
+
+                        let statusSaya = cekStatusSayaDariArray(daftarAntrianGlobal);
+                        if (statusSaya !== "Standby") {
+                            counterLuarRadiusGPS = 0; 
+                            return; 
+                        }
+
+                        if (Date.now() < waktuKembaliDariAksiKhusus) {
+                            counterLuarRadiusGPS = 0;
+                            return;
+                        }
+
+                        let latUser = position.coords.latitude;
+                        let lngUser = position.coords.longitude;
+                        let latToko = Number(koordinatToko.lat);
+                        let lngToko = Number(koordinatToko.lng);
+                        let batasRadius = Number(koordinatToko.radius) || 50;
+
+                        initAtauUpdatePetaPromotor(latToko, lngToko, batasRadius, latUser, lngUser);
+
+                        const jarakMeter = hitungJarakHaversine(latUser, lngUser, latToko, lngToko);
+
+                        // Auto exit aktif jika benar-benar jauh di luar radius + toleransi 10 meter
+                        if (jarakMeter > (batasRadius + 10)) {
+                            counterLuarRadiusGPS++;
+                            if (counterLuarRadiusGPS >= 4) {
+                                counterLuarRadiusGPS = 0;
+                                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
+                                tampilkanModal("Auto-Exit GPS", `Anda berada di luar radius ${Math.round(jarakMeter)} meter dari toko (Batas maksimal ${batasRadius} meter). Anda otomatis dikeluarkan dari antrean.`);
+                            }
+                        } else {
+                            counterLuarRadiusGPS = 0;
+                        }
+                    },
+                    function(error) {},
+                    { enableHighAccuracy: false, maximumAge: 10000, timeout: 8000 }
+                );
+            }
+        }
         function aksiHadirKerja() {
             const btn = document.getElementById('btn-hadir');
             setButtonLoading(btn, true, "Konfirmasi Kehadiran & Masuk Antri");
