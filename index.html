@@ -1013,7 +1013,7 @@
             }
         }
 
-       function mulaiPemantauanGPS() {
+   function mulaiPemantauanGPS() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     function(position) {
@@ -1027,8 +1027,8 @@
 
                         let statusSaya = cekStatusSayaDariArray(daftarAntrianGlobal);
                         
-                        // JANGAN AUTO-EXIT JIKA BELUM MASUK ANTRIAN ATAU SEDANG MELAYANI/CS/IBADAH
-                        if (statusSaya === "belum_ada" || statusSaya === "Melayani" || statusSaya === "Dipanggil CS/GUDANG" || statusSaya === "Dipanggil CS" || statusSaya === "Ibadah") {
+                        // JIKA STATUS SAYA BUKAN STANDBY (Misal: Melayani, CS, Ibadah, atau Belum Masuk), JANGAN AUTO-EXIT
+                        if (statusSaya !== "Standby") {
                             counterLuarRadiusGPS = 0; 
                             return; 
                         }
@@ -1048,15 +1048,16 @@
 
                         const jarakMeter = hitungJarakHaversine(latUser, lngUser, latToko, lngToko);
 
-                        // Jika jarak promotor melebihi batas radius + toleransi 15 meter saat berstatus Standby
+                        // JIKA POSISI STANDBY (baik urutan 1, 2, atau seterusnya) BERADA DI LUAR RADIUS + 15M
                         if (jarakMeter > (batasRadius + 15)) {
                             counterLuarRadiusGPS++;
+                            // Jika terdeteksi di luar radius selama 3 kali deteksi GPS berturut-turut (~10-15 detik)
                             if (counterLuarRadiusGPS >= 3) {
                                 counterLuarRadiusGPS = 0;
                                 
-                                // KIRIM PERINTAH HAPUS MUTLAK KE SERVER GAS
                                 const namaSales = getAkunAktif().trim();
                                 if (namaSales) {
+                                    // Tembak langsung server Google Apps Script untuk menghapus nama dari antrean
                                     fetch(`${SCRIPT_URL}?aksi=selesaiMelayani&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
                                     .then(res => res.json())
                                     .then(res => {
