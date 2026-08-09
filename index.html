@@ -300,17 +300,6 @@
         
         .top-controls { display: flex; justify-content: flex-end; margin-bottom: 12px; }
 
-        .gradient-header h2 { margin: 0; font-size: 20px; font-weight: 800; }
-        .gradient-header p { margin: 4px 0 0 0; font-size: 12px; font-weight: 600; }
-
-        .status-open { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .status-closed { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-
-        select:focus, input[type="text"]:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
-        }
-        
         button { width: 100%; padding: 12px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.3px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
         button:active { transform: scale(0.98); }
 
@@ -767,7 +756,6 @@
             const sectionPetaGps = document.getElementById('section-peta-gps');
             const sectionLocked = document.getElementById('section-akun-locked');
 
-            // --- CEK KOLOM B (LOCKED) DAN KOLOM C (ALASAN) DARI MASTER SALES ---
             let isDilockAdmin = false;
             let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
             
@@ -791,7 +779,6 @@
             const btnIbadah = document.getElementById('btn-utama-ibadah');
             const btnKeluar = document.getElementById('btn-keluar-istirahat');
 
-            // --- JIKA AKUN DILOCK ADMIN: TOMBOL DAFTAR JADI "OTOMATIS TERKUNCI" (ABU2) & MUNCUL BOX ALASAN DI BAWAHNYA ---
             if (isDilockAdmin) {
                 sectionCheckinAwal.style.display = 'none';
                 sectionNormal.style.display = 'block';
@@ -819,7 +806,6 @@
                 if (sectionLocked) sectionLocked.style.display = 'none';
                 if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
             }
-            // ---------------------------------------------------------------------------------------------------------
 
             if (statusSayaNyata === "belum_ada" || statusSayaNyata === "Standby") {
                 if (sectionPetaGps) sectionPetaGps.style.display = "block";
@@ -1009,9 +995,9 @@
                         );
                         const batasRadius = Number(koordinatToko.radius) || 50;
 
-                        if (jarakMeter > (batasRadius + 15)) {
+                        if (jarakMeter > (batasRadius + 25)) {
                             if (typeof callbackBatal === 'function') callbackBatal();
-                            tampilkanModal("Di Luar Radius Antrian", `Gagal mendaftar antrian!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar area antrian.`);
+                            tampilkanModal("Di Luar Radius Antrian", `Gagal mendaftar antrian!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar area toko.`);
                             return; 
                         }
                         
@@ -1020,10 +1006,60 @@
                     function(error) {
                         if (typeof callbackBerhasil === 'function') callbackBerhasil();
                     },
-                    { enableHighAccuracy: false, timeout: 5000, maximumAge: 30000 }
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
                 );
             } else {
                 if (typeof callbackBerhasil === 'function') callbackBerhasil();
+            }
+        }
+
+        function mulaiPemantauanGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    function(position) {
+                        if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
+                            const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
+                            if (cachedKoordinat) {
+                                try { koordinatToko = JSON.parse(cachedKoordinat); } catch(e) {}
+                            }
+                            if (!koordinatToko.lat || !koordinatToko.lng) return; 
+                        }
+
+                        let statusSaya = cekStatusSayaDariArray(daftarAntrianGlobal);
+                        if (statusSaya !== "Standby") {
+                            counterLuarRadiusGPS = 0; 
+                            return; 
+                        }
+
+                        if (Date.now() < waktuKembaliDariAksiKhusus) {
+                            counterLuarRadiusGPS = 0;
+                            return;
+                        }
+
+                        let latUser = position.coords.latitude;
+                        let lngUser = position.coords.longitude;
+                        let latToko = Number(koordinatToko.lat);
+                        let lngToko = Number(koordinatToko.lng);
+                        let batasRadius = Number(koordinatToko.radius) || 50;
+
+                        initAtauUpdatePetaPromotor(latToko, lngToko, batasRadius, latUser, lngUser);
+
+                        const jarakMeter = hitungJarakHaversine(latUser, lngUser, latToko, lngToko);
+
+                        if (jarakMeter > (batasRadius + 15)) {
+                            counterLuarRadiusGPS++;
+                            if (counterLuarRadiusGPS >= 3) {
+                                counterLuarRadiusGPS = 0;
+                                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
+                                tampilkanModal("Auto-Exit GPS", `Anda terdeteksi berada di luar radius toko (${Math.round(jarakMeter)} meter). Anda otomatis dikeluarkan dari antrean.`);
+                            }
+                        } else {
+                            counterLuarRadiusGPS = 0;
+                        }
+                    },
+                    function(error) {},
+                    { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+                );
             }
         }
 
@@ -1143,52 +1179,6 @@
             }
             
             setTimeout(() => { if (mapPromotor) mapPromotor.invalidateSize(); }, 150);
-        }
-
-        function mulaiPemantauanGPS() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(
-                    function(position) {
-                        if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
-                            return; 
-                        }
-
-                        let statusSaya = cekStatusSayaDariArray(daftarAntrianGlobal);
-                        if (statusSaya !== "Standby") {
-                            counterLuarRadiusGPS = 0; 
-                            return; 
-                        }
-
-                        if (Date.now() < waktuKembaliDariAksiKhusus) {
-                            counterLuarRadiusGPS = 0;
-                            return;
-                        }
-
-                        let latUser = position.coords.latitude;
-                        let lngUser = position.coords.longitude;
-                        let latToko = Number(koordinatToko.lat);
-                        let lngToko = Number(koordinatToko.lng);
-                        let batasRadius = Number(koordinatToko.radius) || 50;
-
-                        initAtauUpdatePetaPromotor(latToko, lngToko, batasRadius, latUser, lngUser);
-
-                        const jarakMeter = hitungJarakHaversine(latUser, lngUser, latToko, lngToko);
-
-                        if (jarakMeter > (batasRadius + 10)) {
-                            counterLuarRadiusGPS++;
-                            if (counterLuarRadiusGPS >= 4) {
-                                counterLuarRadiusGPS = 0;
-                                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
-                                tampilkanModal("Auto-Exit GPS", `Anda berada di luar radius ${Math.round(jarakMeter)} meter dari toko (Batas maksimal ${batasRadius} meter). Anda otomatis dikeluarkan dari antrean.`);
-                            }
-                        } else {
-                            counterLuarRadiusGPS = 0;
-                        }
-                    },
-                    function(error) {},
-                    { enableHighAccuracy: false, maximumAge: 10000, timeout: 8000 }
-                );
-            }
         }
 
         function hitungJarakHaversine(lat1, lon1, lat2, lon2) {
