@@ -1057,7 +1057,7 @@
             setTimeout(() => { if (mapPromotor) mapPromotor.invalidateSize(); }, 150);
         }
 
-        function mulaiPemantauanGPS() {
+       function mulaiPemantauanGPS() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     function(position) {
@@ -1066,8 +1066,12 @@
                         }
 
                         let statusSaya = cekStatusSayaDariArray(daftarAntrianGlobal);
+                        
+                        // PERBAIKAN UTAMA: 
+                        // Auto-exit GPS HANYA AKTIF jika status benar-benar "Standby". 
+                        // Jika status sedang "Dipanggil CS", "Ibadah", atau "Melayani", GPS auto-exit dimatikan.
                         if (statusSaya !== "Standby") {
-                            counterLuarRadiusGPS = 0; // Reset counter jika tidak standby
+                            counterLuarRadiusGPS = 0; 
                             return; 
                         }
 
@@ -1083,14 +1087,14 @@
 
                         if (jarakMeter > batasRadius) {
                             counterLuarRadiusGPS++;
-                            // Diubah menjadi 5 kali pengecekan berturut-turut sebelum auto-exit
+                            // 5 kali pengecekan berturut-turut untuk memastikan benar-benar di luar radius
                             if (counterLuarRadiusGPS >= 5) {
                                 counterLuarRadiusGPS = 0;
                                 eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
                                 tampilkanModal("Auto-Exit GPS", `Anda berada di luar radius ${Math.round(jarakMeter)} meter dari toko (Batas maksimal ${batasRadius} meter). Anda otomatis dikeluarkan dari antrean.`);
                             }
                         } else {
-                            // Reset counter jika kembali masuk ke dalam radius toko
+                            // Reset counter jika berada di dalam radius
                             counterLuarRadiusGPS = 0;
                         }
                     },
