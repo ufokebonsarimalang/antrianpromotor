@@ -286,7 +286,6 @@
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
         }
 
-        /* ANIMASI EMAS MENYALA UNTUK TOMBOL WAKTU MAKAN */
         @keyframes goldGlow {
             0% { transform: scale(1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.6), inset 0 0 6px rgba(255, 255, 255, 0.5); }
             50% { transform: scale(1.02); box-shadow: 0 0 22px rgba(245, 158, 11, 0.95), inset 0 0 10px rgba(255, 255, 255, 0.8); }
@@ -317,8 +316,8 @@
         .btn-closing { background: #e11d48; color: white; }
         .btn-purple { background: #7c3aed; color: white; }
         .btn-teal { background: #0f766e; color: white; }
-        .btn-amber { background: #d97706; color: white; } /* Tombol Waktu Makan */
-        .btn-maroon { background: #9a3412; color: white; } /* Tombol Keluar Istirahat */
+        .btn-amber { background: #d97706; color: white; } 
+        .btn-maroon { background: #9a3412; color: white; } 
         .btn-indigo { background: #4338ca; color: white; }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; animation: none !important; transform: none !important; pointer-events: none !important; }
 
@@ -491,6 +490,19 @@
         window.onload = function() {
             initDarkMode();
             
+            // Cek pergantian hari untuk reset status makan lokal
+            const tanggalHariIni = getTanggalIndo();
+            const tanggalMakanTerakhirHP = localStorage.getItem('ufo_tanggal_makan_terakhir') || "";
+            if (tanggalMakanTerakhirHP !== tanggalHariIni) {
+                for (let i = 0; i < localStorage.length; i++) {
+                    let key = localStorage.key(i);
+                    if (key && key.startsWith('ufo_sudah_makan_')) {
+                        localStorage.removeItem(key);
+                    }
+                }
+                localStorage.setItem('ufo_tanggal_makan_terakhir', tanggalHariIni);
+            }
+            
             const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
             if (cachedKoordinat) {
                 try { koordinatToko = JSON.parse(cachedKoordinat); } catch(e) {}
@@ -499,7 +511,6 @@
             muatMasterSalesInstant();
             muatCacheAntrianInstan();
             
-            const tanggalHariIni = getTanggalIndo();
             const tanggalCheckinTerakhir = localStorage.getItem('ufo_checkin_tanggal') || "";
             if (tanggalCheckinTerakhir !== tanggalHariIni) {
                 localStorage.removeItem('ufo_checkin_hari_ini');
@@ -865,7 +876,11 @@
 
                     if (apakahSayaUrutanPertama) {
                         btnMakan.style.display = "block";
-                        if (sudahMakanDariServer) {
+                        
+                        // Cek cache lokal juga agar langsung responsif tanpa menunggu server
+                        const cacheSudahMakan = localStorage.getItem('ufo_sudah_makan_' + akunSaya) === 'true';
+
+                        if (sudahMakanDariServer || cacheSudahMakan) {
                             btnMakan.disabled = true;
                             btnMakan.className = "btn-success btn-disabled";
                             btnMakan.innerText = "SUDAH MAKAN HARI INI";
@@ -1084,11 +1099,15 @@
             });
         }
 
-        // --- FUNGSI WAKTU MAKAN & SELESAI MAKAN (SEPERTI CS / IBADAH) ---
+        // --- LOGIKA WAKTU MAKAN & SELESAI MAKAN (SEKALI SEHARI) ---
         function aksiToggleMakan() {
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
             if (statusSekarang === "Standby") {
                 tampilkanModalKonfirmasi("Waktu Makan", "Posisi antrian utama Anda akan dikunci sementara selama waktu makan, dan promotor di bawah Anda akan naik menggantikan sementara. Lanjutkan?", function() {
+                    const akun = getAkunAktif().trim().toLowerCase();
+                    localStorage.setItem('ufo_sudah_makan_' + akun, 'true');
+                    localStorage.setItem('ufo_tanggal_makan_terakhir', getTanggalIndo());
+                    
                     eksekusiAksiInstan('panggilMakan', 'Waktu Makan');
                 });
             } else {
