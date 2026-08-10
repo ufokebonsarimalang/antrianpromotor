@@ -7,7 +7,7 @@
     <link rel="shortcut icon" href="#">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Leaflet CSS untuk Peta Visual -->
+    <!-- Leaflet CSS untuk Peta Visual Check-in -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -372,12 +372,6 @@
                 <span style="color: var(--text-muted);">Promotor:</span> <strong id="label-user-aktif" style="color:var(--primary); font-size: 14px;">-</strong>
             </div>
 
-            <!-- PETA MINI VISUALISASI POSISI HANYA SAAT CHECK-IN/DAFTAR -->
-            <div class="input-group" id="section-peta-gps">
-                <label>Peta Posisi Toko & Radius Validasi</label>
-                <div id="map-promotor" style="width: 100%; height: 160px; border-radius: 12px; border: 1px solid var(--border); z-index: 1;"></div>
-            </div>
-
             <!-- KOTAK GILIRAN HA & AV -->
             <div class="timer-box-wrapper">
                 <div class="timer-card-admin ha">
@@ -394,9 +388,12 @@
                 </div>
             </div>
 
-            <!-- CHECK-IN KEDATANGAN -->
+            <!-- CHECK-IN KEDATANGAN (PETA GPS HANYA MUNCUL DI SINI SAAT BELUM CHECK-IN) -->
             <div id="section-checkin-awal" style="display: none;">
                 <div class="input-group">
+                    <label>Peta Posisi Toko & Radius Check-In</label>
+                    <div id="map-promotor" style="width: 100%; height: 150px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 12px; z-index: 1;"></div>
+                    
                     <label>Check-in Kehadiran (Awal Masuk Kerja)</label>
                     <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 6px 0; text-align: left; font-weight: 600;">Silakan pilih kategori utama Anda untuk hari ini:</p>
                     <select id="pilih-kategori-hadir">
@@ -492,14 +489,7 @@
             
             const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
             if (cachedKoordinat) {
-                try { 
-                    koordinatToko = JSON.parse(cachedKoordinat); 
-                    if (koordinatToko.lat && koordinatToko.lng) {
-                        setTimeout(() => {
-                            initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, null, null);
-                        }, 50);
-                    }
-                } catch(e) {}
+                try { koordinatToko = JSON.parse(cachedKoordinat); } catch(e) {}
             }
 
             muatMasterSalesInstant();
@@ -525,13 +515,6 @@
 
             cekServerBg();
             muatMasterSales();
-            
-            // Peta awal dimuat sekali untuk panduan visual
-            if (navigator.geolocation && koordinatToko.lat) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, pos.coords.latitude, pos.coords.longitude);
-                }, () => {}, {maximumAge: 30000});
-            }
             
             setInterval(() => {
                 muatDataAntrian();
@@ -830,6 +813,13 @@
             } else if (!sudahCheckinPernahHariIni) {
                 sectionCheckinAwal.style.display = 'block';
                 sectionNormal.style.display = 'none';
+                
+                // Munculkan peta khusus saat check-in awal
+                if (navigator.geolocation && koordinatToko.lat) {
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, pos.coords.latitude, pos.coords.longitude);
+                    }, () => {}, {maximumAge: 30000});
+                }
             } else {
                 sectionCheckinAwal.style.display = 'none';
                 sectionNormal.style.display = 'block';
@@ -971,7 +961,6 @@
             }
         }
 
-        // GPS HANYA DIJALANKAN KETIKA CHECK-IN / DAFTAR AWAL
         function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
             if (!koordinatToko.lat || !koordinatToko.lng) {
                 const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
@@ -994,7 +983,6 @@
                         );
                         const batasRadius = Number(koordinatToko.radius) || 50;
 
-                        // Diberikan toleransi longgar (+30 meter) untuk antisipasi sinyal tertutup gedung toko saat awal absen
                         if (jarakMeter > (batasRadius + 30)) {
                             if (typeof callbackBatal === 'function') callbackBatal();
                             tampilkanModal("Di Luar Radius Toko", `Gagal melakukan check-in!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda harus berada di area toko untuk absen.`);
