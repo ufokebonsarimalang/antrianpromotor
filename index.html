@@ -21,6 +21,7 @@
             --purple-cs: #7c3aed;
             --teal-cs: #0f766e;
             --amber-rest: #d97706;
+            --maroon-exit: #9a3412;
             --indigo-ibadah: #4338ca;
             --gold-eat: #f59e0b;
             --bg-color: #f8fafc;
@@ -271,6 +272,7 @@
         body.dark-mode .btn-teal,
         body.dark-mode .btn-indigo,
         body.dark-mode .btn-amber,
+        body.dark-mode .btn-maroon,
         body.dark-mode .wa-report-btn {
             background: #99001f !important;
             color: #ffffff !important;
@@ -284,7 +286,7 @@
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
         }
 
-        /* KHUSUS ANIMASI EMAS MENYALA UNTUK TOMBOL MAKAN */
+        /* ANIMASI EMAS MENYALA UNTUK TOMBOL WAKTU MAKAN */
         @keyframes goldGlow {
             0% { transform: scale(1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.6), inset 0 0 6px rgba(255, 255, 255, 0.5); }
             50% { transform: scale(1.02); box-shadow: 0 0 22px rgba(245, 158, 11, 0.95), inset 0 0 10px rgba(255, 255, 255, 0.8); }
@@ -307,17 +309,6 @@
         
         .top-controls { display: flex; justify-content: flex-end; margin-bottom: 12px; }
 
-        .gradient-header h2 { margin: 0; font-size: 20px; font-weight: 800; }
-        .gradient-header p { margin: 4px 0 0 0; font-size: 12px; font-weight: 600; }
-
-        .status-open { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .status-closed { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-
-        select:focus, input[type="text"]:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
-        }
-        
         button { width: 100%; padding: 12px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.3px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
         button:active { transform: scale(0.98); }
 
@@ -326,7 +317,8 @@
         .btn-closing { background: #e11d48; color: white; }
         .btn-purple { background: #7c3aed; color: white; }
         .btn-teal { background: #0f766e; color: white; }
-        .btn-amber { background: #d97706; color: white; }
+        .btn-amber { background: #d97706; color: white; } /* Tombol Waktu Makan */
+        .btn-maroon { background: #9a3412; color: white; } /* Tombol Keluar Istirahat */
         .btn-indigo { background: #4338ca; color: white; }
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; animation: none !important; transform: none !important; pointer-events: none !important; }
 
@@ -336,6 +328,7 @@
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
         .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
         .badge-ibadah { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        .badge-makan { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
 
         .wa-report-btn { margin-top: 14px; background: #10b981; border: none; color: white; font-size: 12px; padding: 12px; border-radius: 12px; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
@@ -395,7 +388,7 @@
                 </div>
             </div>
 
-            <!-- CHECK-IN KEDATANGAN (PETA GPS HANYA MUNCUL DI SINI SAAT BELUM CHECK-IN) -->
+            <!-- CHECK-IN KEDATANGAN -->
             <div id="section-checkin-awal" style="display: none;">
                 <div class="input-group">
                     <label>Peta Posisi Toko & Radius Check-In</label>
@@ -421,7 +414,6 @@
                     </select>
                 </div>
 
-                <!-- TOMBOL DAFTAR ANTRIAN & BOX ALASAN LOCKED DI BAWAHNYA -->
                 <button type="button" id="btn-daftar-antrian" class="btn-success btn-pulse" onclick="aksiDaftarAntrianNormal()" style="display: none; margin-top: 4px;">Daftar Antrian</button>
                 
                 <div id="section-akun-locked" style="display: none;">
@@ -435,19 +427,20 @@
 
                 <button type="button" id="btn-utama-customer" class="btn-customer btn-pulse" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 10px;">Sudah Membawa Customer</button>
                 
-                <!-- TOMBOL WAKTU MAKAN KHUSUS URUTAN 1 (WARNA EMAS MENYALA & 1 KALI KLIK) -->
-                <button type="button" id="btn-waktu-makan" class="btn-gold-pulse" onclick="aksiWaktuMakan()" style="display: none; margin-top: 10px;">WAKTU MAKAN</button>
+                <!-- TOMBOL WAKTU MAKAN -->
+                <button type="button" id="btn-waktu-makan" class="btn-amber btn-gold-pulse" onclick="aksiToggleMakan()" style="display: none; margin-top: 10px;">WAKTU MAKAN</button>
 
                 <button type="button" id="btn-selesai-closing" class="btn-closing" onclick="aksiSelesaiClosing()" style="display: none; margin-top: 10px;">SELESAI MELAYANI (DEAL / CLOSING)</button>
                 <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 10px;">DIPANGGIL CS/GUDANG (KUNCI POSISI)</button>
                 
                 <button type="button" id="btn-utama-ibadah" class="btn-indigo" onclick="aksiToggleIbadah()" style="display: none; margin-top: 10px;">SEDANG IBADAH (KUNCI POSISI)</button>
 
-                <button type="button" id="btn-keluar-istirahat" class="btn-amber" onclick="bukaModalKeluarIstirahat()" style="display: none; margin-top: 10px;">KELUAR ANTRIAN (ISTIRAHAT)</button>
+                <!-- TOMBOL KELUAR ANTRIAN (WARNA MAROON) -->
+                <button type="button" id="btn-keluar-istirahat" class="btn-maroon" onclick="bukaModalKeluarIstirahat()" style="display: none; margin-top: 10px;">KELUAR ANTRIAN (ISTIRAHAT)</button>
             </div>
         </div>
 
-        <!-- LIVE URUTAN KATEGORI HA & AV -->
+        <!-- LIVE URUTAN -->
         <div style="margin-top: 20px; text-align: left;">
             <div style="font-size: 13px; font-weight: 800; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.3px;">LIVE URUTAN KATEGORI HA</div>
             <ul id="list-HA" class="list-antrian"><li><span>Memuat...</span></li></ul>
@@ -510,7 +503,6 @@
             const tanggalCheckinTerakhir = localStorage.getItem('ufo_checkin_tanggal') || "";
             if (tanggalCheckinTerakhir !== tanggalHariIni) {
                 localStorage.removeItem('ufo_checkin_hari_ini');
-                localStorage.removeItem('ufo_makan_hari_ini'); // Reset jatah makan setiap hari baru
                 localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
             }
             
@@ -607,7 +599,6 @@
                 if (res.status !== "terkunci" || !res.nama || res.nama.trim().toLowerCase() !== namaSaya.trim().toLowerCase()) {
                     localStorage.removeItem('ufo_nama_sales_aktif');
                     localStorage.removeItem('ufo_checkin_hari_ini');
-                    localStorage.removeItem('ufo_makan_hari_ini');
                     alert("Perangkat Anda telah di-reset oleh Admin. Silakan pilih ulang nama Anda.");
                     window.location.reload();
                 }
@@ -721,7 +712,7 @@
             const akunSaya = getAkunAktif().trim().toLowerCase();
             let kategoriSayaAktif = "";
 
-            const dataStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
+            const dataStandby = daftarAntrianGlobal.filter(item => item.status === "Standby" || item.status === "Waktu Makan");
             const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
             const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
 
@@ -736,12 +727,17 @@
                     }
 
                     let itemHtml = "";
-                    if (item.status === "Standby") {
+                    if (item.status === "Standby" || item.status === "Waktu Makan") {
                         let urut = 1;
                         if (kat === "HA") urut = urutHA++;
                         else if (kat === "AV") urut = urutAV++;
 
-                        let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
+                        let badgeHtml = "";
+                        if (item.status === "Waktu Makan") {
+                            badgeHtml = `<span class="badge-status-item badge-makan">Waktu Makan (${urut})</span>`;
+                        } else {
+                            badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
+                        }
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
                     } else if (item.status === "Melayani") {
                         itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
@@ -765,18 +761,18 @@
             const sectionNormal = document.getElementById('section-normal');
             const sectionLocked = document.getElementById('section-akun-locked');
 
-            // --- CEK KOLOM B (LOCKED) DAN KOLOM C (ALASAN) DARI MASTER SALES ---
             let isDilockAdmin = false;
             let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
             
             const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
             
+            let sudahMakanDariServer = false;
             if (dataSalesSaya) {
-                let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : (dataSalesSaya.status_lock !== undefined ? dataSalesSaya.status_lock : dataSalesSaya.is_locked);
-                
-                if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "TRUE" || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA" || String(statusLockVal).trim() === "1") {
+                if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
+                let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
+                if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
                     isDilockAdmin = true;
-                    pesanLockAdmin = dataSalesSaya.alasan || dataSalesSaya.pesan_lock || dataSalesSaya.alasan_lock || dataSalesSaya.keterangan || pesanLockAdmin;
+                    pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
                 }
             }
 
@@ -790,7 +786,6 @@
             const btnIbadah = document.getElementById('btn-utama-ibadah');
             const btnKeluar = document.getElementById('btn-keluar-istirahat');
 
-            // --- JIKA AKUN DILOCK ADMIN ---
             if (isDilockAdmin) {
                 sectionCheckinAwal.style.display = 'none';
                 sectionNormal.style.display = 'block';
@@ -864,18 +859,16 @@
                     btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
                     btnKeluar.style.display = "block";
 
-                    // --- ATURAN TOMBOL WAKTU MAKAN HANYA UNTUK URUTAN 1 (MAKSIMAL 1 KALI HARI INI) ---
-                    let listSubStandby = daftarAntrianGlobal.filter(it => it.status === "Standby" && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
+                    let listSubStandby = daftarAntrianGlobal.filter(it => (it.status === "Standby" || it.status === "Waktu Makan") && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
                     let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
                     let apakahSayaUrutanPertama = (indexSaya === 0);
-                    let sudahMakanHariIni = localStorage.getItem('ufo_makan_hari_ini') === 'true';
 
                     if (apakahSayaUrutanPertama) {
                         btnMakan.style.display = "block";
-                        if (sudahMakanHariIni) {
+                        if (sudahMakanDariServer) {
                             btnMakan.disabled = true;
                             btnMakan.className = "btn-success btn-disabled";
-                            btnMakan.innerText = "SUDAH MAKAN (SELESAI)";
+                            btnMakan.innerText = "SUDAH MAKAN HARI INI";
                         } else if (statusSistemGlobal === "TUTUP") {
                             btnMakan.disabled = true;
                             btnMakan.className = "btn-gold-pulse btn-disabled";
@@ -886,15 +879,14 @@
                             btnMakan.innerText = "WAKTU MAKAN";
                         }
                     } else {
-                        btnMakan.style.display = "none"; // Sembunyikan untuk selain urutan 1
+                        btnMakan.style.display = "none"; 
                     }
-                    // ---------------------------------------------------------------------------------
 
                     if (statusSistemGlobal === "TUTUP") {
                         btnCustomer.disabled = true; btnCustomer.className = "btn-customer btn-disabled";
                         btnCS.disabled = true; btnCS.className = "btn-purple btn-disabled";
                         btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
-                        btnKeluar.disabled = true; btnKeluar.className = "btn-amber btn-disabled";
+                        btnKeluar.disabled = true; btnKeluar.className = "btn-maroon btn-disabled";
                     } else {
                         let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
 
@@ -902,8 +894,19 @@
                         btnCustomer.className = apakahSayaBisaAmbil ? "btn-customer btn-pulse" : "btn-customer btn-disabled";
                         btnCS.disabled = false; btnCS.className = "btn-purple";
                         btnIbadah.disabled = false; btnIbadah.className = "btn-indigo";
-                        btnKeluar.disabled = false; btnKeluar.className = "btn-amber";
+                        btnKeluar.disabled = false; btnKeluar.className = "btn-maroon";
                     }
+                } else if (statusSayaNyata === "Waktu Makan") {
+                    btnCustomer.style.display = "none";
+                    btnClosing.style.display = "none";
+                    btnCS.style.display = "none";
+                    btnIbadah.style.display = "none";
+                    btnKeluar.style.display = "none";
+
+                    btnMakan.style.display = "block";
+                    btnMakan.innerText = "SELESAI MAKAN (KEMBALI ANTRI)";
+                    btnMakan.className = "btn-teal";
+                    btnMakan.disabled = false;
                 } else if (statusSayaNyata === "Melayani") {
                     btnCustomer.style.display = "none"; 
                     btnMakan.style.display = "none"; 
@@ -1081,13 +1084,18 @@
             });
         }
 
-        // --- FKSI AKSI WAKTU MAKAN (BERLAKU 1 KALI SEHARI) ---
-        function aksiWaktuMakan() {
-            tampilkanModalKonfirmasi("Waktu Makan", "Anda yakin ingin menggunakan jatah waktu makan sekarang? Tombol ini hanya berlaku 1 kali hari ini.", function() {
-                localStorage.setItem('ufo_makan_hari_ini', 'true');
-                tampilkanModal("Berhasil", "Jatah waktu makan hari ini telah digunakan.");
-                renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
-            });
+        // --- FUNGSI WAKTU MAKAN & SELESAI MAKAN (SEPERTI CS / IBADAH) ---
+        function aksiToggleMakan() {
+            const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
+            if (statusSekarang === "Standby") {
+                tampilkanModalKonfirmasi("Waktu Makan", "Posisi antrian utama Anda akan dikunci sementara selama waktu makan, dan promotor di bawah Anda akan naik menggantikan sementara. Lanjutkan?", function() {
+                    eksekusiAksiInstan('panggilMakan', 'Waktu Makan');
+                });
+            } else {
+                tampilkanModalKonfirmasi("Selesai Makan", "Kembali aktif ke antrian utama?", function() {
+                    eksekusiAksiInstan('selesaiMakan', 'Standby');
+                });
+            }
         }
 
         function aksiSelesaiClosing() {
