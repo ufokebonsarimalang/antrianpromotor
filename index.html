@@ -22,6 +22,7 @@
             --teal-cs: #0f766e;
             --amber-rest: #d97706;
             --indigo-ibadah: #4338ca;
+            --gold-eat: #f59e0b;
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
@@ -180,13 +181,6 @@
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.6), inset 0 0 8px rgba(255, 31, 61, 0.3) !important;
         }
 
-        body.dark-mode select:disabled { 
-            background-color: #120002 !important; 
-            color: #71717a !important; 
-            border-color: #3f000b !important; 
-            box-shadow: none !important;
-        }
-
         .user-badge { 
             background: #f8fafc; 
             border: 1px solid var(--border); 
@@ -205,7 +199,6 @@
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.6), inset 0 0 8px rgba(255, 31, 61, 0.3) !important;
         }
 
-        /* STYLE BOX ALASAN LOCKED DI BAWAH TOMBOL DAFTAR ANTRIAN */
         #section-akun-locked {
             background: #fee2e2;
             border: 2px solid #f87171;
@@ -290,6 +283,20 @@
             70% { transform: scale(1.01); box-shadow: 0 0 0 8px rgba(2, 132, 199, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
         }
+
+        /* KHUSUS ANIMASI EMAS MENYALA UNTUK TOMBOL MAKAN */
+        @keyframes goldGlow {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.6), inset 0 0 6px rgba(255, 255, 255, 0.5); }
+            50% { transform: scale(1.02); box-shadow: 0 0 22px rgba(245, 158, 11, 0.95), inset 0 0 10px rgba(255, 255, 255, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.6), inset 0 0 6px rgba(255, 255, 255, 0.5); }
+        }
+        .btn-gold-pulse { 
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+            color: #ffffff !important;
+            border: 2px solid #fde68a !important;
+            animation: goldGlow 1.8s infinite ease-in-out; 
+        }
+
         .btn-pulse { animation: pulseGlow 2s infinite; }
         .wa-pulse { animation: pulseGlow 2s infinite; }
 
@@ -427,6 +434,10 @@
                 </div>
 
                 <button type="button" id="btn-utama-customer" class="btn-customer btn-pulse" onclick="aksiUtamaCustomer()" style="display: none; margin-top: 10px;">Sudah Membawa Customer</button>
+                
+                <!-- TOMBOL WAKTU MAKAN KHUSUS URUTAN 1 (WARNA EMAS MENYALA & 1 KALI KLIK) -->
+                <button type="button" id="btn-waktu-makan" class="btn-gold-pulse" onclick="aksiWaktuMakan()" style="display: none; margin-top: 10px;">WAKTU MAKAN</button>
+
                 <button type="button" id="btn-selesai-closing" class="btn-closing" onclick="aksiSelesaiClosing()" style="display: none; margin-top: 10px;">SELESAI MELAYANI (DEAL / CLOSING)</button>
                 <button type="button" id="btn-utama-cs" class="btn-purple" onclick="aksiToggleCS()" style="display: none; margin-top: 10px;">DIPANGGIL CS/GUDANG (KUNCI POSISI)</button>
                 
@@ -499,6 +510,7 @@
             const tanggalCheckinTerakhir = localStorage.getItem('ufo_checkin_tanggal') || "";
             if (tanggalCheckinTerakhir !== tanggalHariIni) {
                 localStorage.removeItem('ufo_checkin_hari_ini');
+                localStorage.removeItem('ufo_makan_hari_ini'); // Reset jatah makan setiap hari baru
                 localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
             }
             
@@ -595,6 +607,7 @@
                 if (res.status !== "terkunci" || !res.nama || res.nama.trim().toLowerCase() !== namaSaya.trim().toLowerCase()) {
                     localStorage.removeItem('ufo_nama_sales_aktif');
                     localStorage.removeItem('ufo_checkin_hari_ini');
+                    localStorage.removeItem('ufo_makan_hari_ini');
                     alert("Perangkat Anda telah di-reset oleh Admin. Silakan pilih ulang nama Anda.");
                     window.location.reload();
                 }
@@ -771,12 +784,13 @@
             const btnHadir = document.getElementById('btn-hadir');
             const groupPilihKat = document.getElementById('group-pilih-kategori-normal');
             const btnCustomer = document.getElementById('btn-utama-customer');
+            const btnMakan = document.getElementById('btn-waktu-makan');
             const btnClosing = document.getElementById('btn-selesai-closing');
             const btnCS = document.getElementById('btn-utama-cs');
             const btnIbadah = document.getElementById('btn-utama-ibadah');
             const btnKeluar = document.getElementById('btn-keluar-istirahat');
 
-            // --- JIKA AKUN DILOCK ADMIN: TOMBOL DAFTAR JADI "OTOMATIS TERKUNCI" (ABU2) & MUNCUL BOX ALASAN DI BAWAHNYA ---
+            // --- JIKA AKUN DILOCK ADMIN ---
             if (isDilockAdmin) {
                 sectionCheckinAwal.style.display = 'none';
                 sectionNormal.style.display = 'block';
@@ -794,6 +808,7 @@
 
                 if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
                 if (btnCustomer) { btnCustomer.style.display = 'none'; }
+                if (btnMakan) { btnMakan.style.display = 'none'; }
                 if (btnClosing) { btnClosing.style.display = 'none'; }
                 if (btnCS) { btnCS.style.display = 'none'; }
                 if (btnIbadah) { btnIbadah.style.display = 'none'; }
@@ -803,7 +818,6 @@
                 if (sectionLocked) sectionLocked.style.display = 'none';
                 if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
             }
-            // ---------------------------------------------------------------------------------------------------------
 
             let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
 
@@ -814,7 +828,6 @@
                 sectionCheckinAwal.style.display = 'block';
                 sectionNormal.style.display = 'none';
                 
-                // Munculkan peta khusus saat check-in awal
                 if (navigator.geolocation && koordinatToko.lat) {
                     navigator.geolocation.getCurrentPosition(pos => {
                         initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, pos.coords.latitude, pos.coords.longitude);
@@ -829,6 +842,7 @@
                 groupPilihKat.style.display = "block";
                 btnDaftar.style.display = "block";
                 btnCustomer.style.display = "none";
+                btnMakan.style.display = "none";
                 btnClosing.style.display = "none";
                 btnCS.style.display = "none";
                 btnIbadah.style.display = "none";
@@ -850,14 +864,38 @@
                     btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
                     btnKeluar.style.display = "block";
 
+                    // --- ATURAN TOMBOL WAKTU MAKAN HANYA UNTUK URUTAN 1 (MAKSIMAL 1 KALI HARI INI) ---
+                    let listSubStandby = daftarAntrianGlobal.filter(it => it.status === "Standby" && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
+                    let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
+                    let apakahSayaUrutanPertama = (indexSaya === 0);
+                    let sudahMakanHariIni = localStorage.getItem('ufo_makan_hari_ini') === 'true';
+
+                    if (apakahSayaUrutanPertama) {
+                        btnMakan.style.display = "block";
+                        if (sudahMakanHariIni) {
+                            btnMakan.disabled = true;
+                            btnMakan.className = "btn-success btn-disabled";
+                            btnMakan.innerText = "SUDAH MAKAN (SELESAI)";
+                        } else if (statusSistemGlobal === "TUTUP") {
+                            btnMakan.disabled = true;
+                            btnMakan.className = "btn-gold-pulse btn-disabled";
+                            btnMakan.innerText = "WAKTU MAKAN";
+                        } else {
+                            btnMakan.disabled = false;
+                            btnMakan.className = "btn-gold-pulse";
+                            btnMakan.innerText = "WAKTU MAKAN";
+                        }
+                    } else {
+                        btnMakan.style.display = "none"; // Sembunyikan untuk selain urutan 1
+                    }
+                    // ---------------------------------------------------------------------------------
+
                     if (statusSistemGlobal === "TUTUP") {
                         btnCustomer.disabled = true; btnCustomer.className = "btn-customer btn-disabled";
                         btnCS.disabled = true; btnCS.className = "btn-purple btn-disabled";
                         btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
                         btnKeluar.disabled = true; btnKeluar.className = "btn-amber btn-disabled";
                     } else {
-                        let listSubStandby = daftarAntrianGlobal.filter(it => it.status === "Standby" && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
-                        let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
                         let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
 
                         btnCustomer.disabled = !apakahSayaBisaAmbil; 
@@ -867,15 +905,20 @@
                         btnKeluar.disabled = false; btnKeluar.className = "btn-amber";
                     }
                 } else if (statusSayaNyata === "Melayani") {
-                    btnCustomer.style.display = "none"; btnClosing.style.display = "block";
+                    btnCustomer.style.display = "none"; 
+                    btnMakan.style.display = "none"; 
+                    btnClosing.style.display = "block";
                     btnCS.style.display = "none"; btnIbadah.style.display = "none"; btnKeluar.style.display = "none";
                 } else if (statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") {
-                    btnCustomer.style.display = "none"; btnClosing.style.display = "none";
+                    btnCustomer.style.display = "none"; 
+                    btnMakan.style.display = "none"; 
+                    btnClosing.style.display = "none";
                     btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal"; btnCS.disabled = false;
                     btnIbadah.style.display = "none";
                     btnKeluar.style.display = "none";
                 } else if (statusSayaNyata === "Ibadah") {
                     btnCustomer.style.display = "none";
+                    btnMakan.style.display = "none";
                     btnClosing.style.display = "none";
                     btnCS.style.display = "none";
                     btnKeluar.style.display = "none";
@@ -1035,6 +1078,15 @@
         function aksiUtamaCustomer() {
             tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
                 eksekusiAksiInstan('ambilAntrian', 'Melayani');
+            });
+        }
+
+        // --- FKSI AKSI WAKTU MAKAN (BERLAKU 1 KALI SEHARI) ---
+        function aksiWaktuMakan() {
+            tampilkanModalKonfirmasi("Waktu Makan", "Anda yakin ingin menggunakan jatah waktu makan sekarang? Tombol ini hanya berlaku 1 kali hari ini.", function() {
+                localStorage.setItem('ufo_makan_hari_ini', 'true');
+                tampilkanModal("Berhasil", "Jatah waktu makan hari ini telah digunakan.");
+                renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
             });
         }
 
