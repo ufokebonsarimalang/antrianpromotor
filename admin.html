@@ -598,14 +598,16 @@
                 const btnOff = document.getElementById('btn-off-gps');
 
                 if (!statusAktif) {
+                    const textAsli = btnOff.innerHTML;
                     btnOff.innerHTML = `<span class="spinner"></span> Mematikan...`;
                     fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=&lng=&radius=50&t=${Date.now()}`)
                     .then(r => r.json()).then(res => {
-                        btnOff.innerHTML = `Matikan GPS`;
+                        btnOff.innerHTML = textAsli;
                         tampilkanModal("GPS Dinonaktifkan", "Validasi radius GPS toko berhasil dimatikan (OFF).");
                         muatDataAntrian(); selesai();
-                    }).catch(() => { btnOff.innerHTML = `Matikan GPS`; selesai(); });
+                    }).catch(() => { btnOff.innerHTML = textAsli; selesai(); });
                 } else {
+                    const textAsli = btnOn.innerHTML;
                     btnOn.innerHTML = `<span class="spinner"></span> Mendeteksi GPS...`;
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(function(pos) {
@@ -615,16 +617,16 @@
 
                             fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=${encodeURIComponent(radius)}&t=${Date.now()}`)
                             .then(r => r.json()).then(res => {
-                                btnOn.innerHTML = `Aktifkan GPS`;
+                                btnOn.innerHTML = textAsli;
                                 tampilkanModal("GPS Diaktifkan", "Titik GPS & Radius Toko berhasil diset dari perangkat Anda.");
                                 muatDataAntrian(); selesai();
-                            }).catch(() => { btnOn.innerHTML = `Aktifkan GPS`; selesai(); });
+                            }).catch(() => { btnOn.innerHTML = textAsli; selesai(); });
                         }, function() {
-                            btnOn.innerHTML = `Aktifkan GPS`;
+                            btnOn.innerHTML = textAsli;
                             alert("Gagal mendeteksi lokasi perangkat Anda.");
                             selesai();
                         }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
-                    } else { btnOn.innerHTML = `Aktifkan GPS`; selesai(); }
+                    } else { btnOn.innerHTML = textAsli; selesai(); }
                 }
             });
         }
@@ -632,40 +634,50 @@
         function bukaModalToggleSistem(targetStatus) {
             document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
             document.getElementById('modal-desc').innerHTML = `Status baru sistem: <b>${targetStatus}</b>`;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
         function eksekusiToggleSistem(targetStatus) {
-            tutupModal();
+            const btnOk = document.getElementById('btn-modal-action-ok');
+            if (btnOk) {
+                btnOk.disabled = true;
+                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            }
             amanKlikAdmin(function(selesai) {
                 const pin = getActivePinAdmin();
-                if(!pin) { alert("PIN Admin tidak ditemukan!"); selesai(); return; }
+                if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
                 fetch(`${SCRIPT_URL}?aksi=adminSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}&t=${Date.now()}`)
                 .then(res => res.json()).then(res => {
+                    tutupModal();
                     tampilkanModal("Status Sistem", res.pesan);
                     muatDataAntrian(); selesai();
-                }).catch(() => selesai());
+                }).catch(() => { tutupModal(); selesai(); });
             });
         }
 
         function bukaModalResetTotal() {
             document.getElementById('modal-title').innerText = 'Reset Semua Antrian';
             document.getElementById('modal-desc').innerHTML = `⚠️ <b>PERINGATAN:</b><br>Seluruh data antrian akan dihapus dari sistem.`;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-danger" onclick="eksekusiResetTotal()">Reset Sekarang</button>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiResetTotal()">Reset Sekarang</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
         function eksekusiResetTotal() {
-            tutupModal();
+            const btnOk = document.getElementById('btn-modal-action-ok');
+            if (btnOk) {
+                btnOk.disabled = true;
+                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            }
             amanKlikAdmin(function(selesai) {
                 const pin = getActivePinAdmin();
-                if(!pin) { alert("PIN Admin tidak ditemukan!"); selesai(); return; }
+                if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
                 fetch(`${SCRIPT_URL}?aksi=adminResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
                 .then(res => res.json()).then(res => {
+                    tutupModal();
                     tampilkanModal("Reset Total", res.pesan);
                     muatDataAntrian(); selesai();
-                }).catch(() => selesai());
+                }).catch(() => { tutupModal(); selesai(); });
             });
         }
 
@@ -690,7 +702,7 @@
                 Posisi Urutan:<br>
                 <input type="number" id="admin-input-posisi" value="1" min="1">
             `;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" onclick="eksekusiTambahAntriAdmin()">Proses</button>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiTambahAntriAdmin()">Proses</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
@@ -700,14 +712,21 @@
             const posisi = document.getElementById('admin-input-posisi').value || "1"; 
             
             if(!namaSales) return alert("Pilih promotor!"); 
-            tutupModal();
+
+            const btnOk = document.getElementById('btn-modal-action-ok');
+            if (btnOk) {
+                btnOk.disabled = true;
+                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            }
+
             amanKlikAdmin(function(selesai) {
                 const pin = getActivePinAdmin();
                 fetch(`${SCRIPT_URL}?aksi=adminDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&t=${Date.now()}`)
                 .then(res => res.json()).then(res => {
+                    tutupModal();
                     tampilkanModal("Status Admin", res.pesan);
                     muatDataAntrian(); selesai();
-                }).catch(() => selesai());
+                }).catch(() => { tutupModal(); selesai(); });
             });
         }
 
@@ -732,7 +751,7 @@
             `;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-danger" onclick="eksekusiResetDeviceAdmin()">Reset Perangkat</button>
+                <button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiResetDeviceAdmin()">Reset Perangkat</button>
             `;
             document.getElementById('custom-modal').classList.add('active');
         }
@@ -742,15 +761,22 @@
             const namaSales = selectEl ? selectEl.value : "";
             if (!namaSales) return alert("Pilih nama promotor terlebih dahulu!");
 
-            tutupModal();
+            const btnOk = document.getElementById('btn-modal-action-ok');
+            if (btnOk) {
+                btnOk.disabled = true;
+                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            }
+
             amanKlikAdmin(function(selesai) {
                 const pin = getActivePinAdmin();
-                if(!pin) { alert("PIN Admin tidak ditemukan!"); selesai(); return; }
+                if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
                 fetch(`${SCRIPT_URL}?aksi=adminResetDevice&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
                 .then(res => res.json()).then(res => {
+                    tutupModal();
                     tampilkanModal("Status Reset Perangkat", res.pesan);
                     muatDataAntrian(); selesai();
                 }).catch(() => {
+                    tutupModal();
                     tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mereset perangkat.");
                     selesai();
                 });
@@ -771,7 +797,7 @@
             if (butuhPilihPromotor) htmlContent += `Promotor:<br><select id="admin-select-sales">${optionsSales}</select>`;
             
             document.getElementById('modal-desc').innerHTML = htmlContent;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" onclick="eksekusiAksiAdminKategori('${aksiName}', ${butuhPilihPromotor})">Proses</button>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiAksiAdminKategori('${aksiName}', ${butuhPilihPromotor})">Proses</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
@@ -779,15 +805,21 @@
             const kategori = document.getElementById('admin-select-kategori').value; 
             let namaSales = butuhPilihPromotor ? document.getElementById('admin-select-sales').value : ""; 
             if(butuhPilihPromotor && !namaSales) return alert("Pilih promotor!"); 
-            
-            tutupModal();
+
+            const btnOk = document.getElementById('btn-modal-action-ok');
+            if (btnOk) {
+                btnOk.disabled = true;
+                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            }
+
             amanKlikAdmin(function(selesai) {
                 const pin = getActivePinAdmin();
                 fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&t=${Date.now()}`)
                 .then(res => res.json()).then(res => {
+                    tutupModal();
                     tampilkanModal("Status Admin", res.pesan);
                     muatDataAntrian(); selesai();
-                }).catch(() => selesai());
+                }).catch(() => { tutupModal(); selesai(); });
             });
         }
 
