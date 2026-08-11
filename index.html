@@ -12,35 +12,35 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        :root {
-            --primary: #0284c7;
-            --primary-dark: #0369a1;
-            --success: #0d9488;
-            --customer-blue: #0284c7;
-            --closing-red: #e11d48;
-            --purple-cs: #7c3aed;
-            --teal-cs: #0f766e;
+      :root {
+            --primary: #0f172a;
+            --primary-dark: #1e293b;
+            --success: #059669;
+            --customer-blue: #0f172a;
+            --closing-red: #dc2626;
+            --purple-cs: #0f172a;
+            --teal-cs: #059669;
             --amber-rest: #d97706;
-            --maroon-exit: #9a3412;
-            --indigo-ibadah: #4338ca;
-            --gold-eat: #f59e0b;
+            --maroon-exit: #dc2626;
+            --indigo-ibadah: #0f172a;
+            --gold-eat: #d97706;
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
-            --text-muted: #475569;
+            --text-muted: #64748b;
             --border: #e2e8f0;
         }
 
         body.dark-mode {
-            --bg-color: #000000 !important;
-            --card-bg: #090204 !important;
+            --bg-color: #050102 !important;
+            --card-bg: #1a0205 !important;
             --text-main: #ffffff !important;
-            --text-muted: #ff99a8 !important;
+            --text-muted: #ff8585 !important;
             --border: #ff1f3d !important;
         }
 
         body { 
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); 
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
             background-size: cover;
             color: var(--text-main); 
             margin: 0; 
@@ -50,7 +50,7 @@
             min-height: 100vh; 
         }
 
-        body.dark-mode { background: #000000 !important; }
+        body.dark-mode { background: #050102 !important; }
         
         .app-container { 
             width: 100%; 
@@ -230,8 +230,8 @@
         }
 
         .timer-badge-title { font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.4px; }
-        .ha .timer-badge-title { color: #0284c7; } 
-        .av .timer-badge-title { color: #7c3aed; } 
+        .ha .timer-badge-title { color: #0f172a; } 
+        .av .timer-badge-title { color: #0f172a; } 
 
         body.dark-mode .timer-card-admin.ha .timer-badge-title,
         body.dark-mode .timer-card-admin.av .timer-badge-title { color: #ff99a8 !important; text-shadow: 0 0 10px rgba(255, 31, 61, 0.8); }
@@ -281,9 +281,9 @@
         }
 
         @keyframes pulseGlow {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.4); }
-            70% { transform: scale(1.01); box-shadow: 0 0 0 8px rgba(2, 132, 199, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(15, 23, 42, 0.2); }
+            70% { transform: scale(1.01); box-shadow: 0 0 0 6px rgba(15, 23, 42, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(15, 23, 42, 0); }
         }
 
         @keyframes goldGlow {
@@ -311,14 +311,31 @@
         button { width: 100%; padding: 12px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.3px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
         button:active { transform: scale(0.98); }
 
-        .btn-success { background: #0d9488; color: white; }
-        .btn-customer { background: #0284c7; color: white; }
-        .btn-closing { background: #e11d48; color: white; }
-        .btn-purple { background: #7c3aed; color: white; }
-        .btn-teal { background: #0f766e; color: white; }
+        /* KELOMPOK TOMBOL DISERAGAMKAN MENJADI TEMA PROFESIONAL (GELAP / NETRAL) */
+        .btn-success { background: #0f172a; color: white; }
+        .btn-success:hover { background: #1e293b; }
+
+        .btn-customer { background: #0f172a; color: white; }
+        .btn-customer:hover { background: #1e293b; }
+
+        .btn-closing { background: #dc2626; color: white; }
+        .btn-closing:hover { background: #b91c1c; }
+
+        .btn-purple { background: #0f172a; color: white; }
+        .btn-purple:hover { background: #1e293b; }
+
+        .btn-teal { background: #0f172a; color: white; }
+        .btn-teal:hover { background: #1e293b; }
+
         .btn-amber { background: #d97706; color: white; } 
-        .btn-maroon { background: #9a3412; color: white; } 
-        .btn-indigo { background: #4338ca; color: white; }
+        .btn-amber:hover { background: #b45309; }
+
+        .btn-maroon { background: #dc2626; color: white; } 
+        .btn-maroon:hover { background: #b91c1c; }
+
+        .btn-indigo { background: #0f172a; color: white; }
+        .btn-indigo:hover { background: #1e293b; }
+
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; animation: none !important; transform: none !important; pointer-events: none !important; }
 
         .badge-status-item { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
@@ -329,7 +346,8 @@
         .badge-ibadah { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
         .badge-makan { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
 
-        .wa-report-btn { margin-top: 14px; background: #10b981; border: none; color: white; font-size: 12px; padding: 12px; border-radius: 12px; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .wa-report-btn { margin-top: 14px; background: #0f172a; border: none; color: white; font-size: 12px; padding: 12px; border-radius: 12px; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .wa-report-btn:hover { background: #1e293b; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
