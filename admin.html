@@ -21,7 +21,6 @@
             --danger: #dc2626;
         }
 
-        /* STYLING MODE GELAP: TETAP NEON MERAH MENYALA */
         body.dark-mode {
             --bg: #050102 !important;
             --card-bg: #1a0205 !important;
@@ -32,7 +31,6 @@
 
         *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
         
-        /* MODE TERANG: EXECUTIVE KANTORAN (PROFESIONAL, FORMAL, ELEGAN) */
         body { 
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
             color: var(--text-main); 
@@ -63,7 +61,6 @@
             box-shadow: 0 0 50px rgba(255, 31, 61, 0.9), inset 0 0 20px rgba(255, 31, 61, 0.4) !important; 
         }
 
-        /* TOMBOL GANTI TEMA */
         .top-controls { display: flex; justify-content: flex-end; margin-bottom: 16px; }
         .dark-mode-btn {
             background: #0f172a;
@@ -78,7 +75,6 @@
             transition: all 0.2s;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .dark-mode-btn:hover { background: #1e293b; }
         
         body.dark-mode .dark-mode-btn { 
             background: #ff1f3d !important; 
@@ -94,24 +90,15 @@
             color: white; 
             text-align: center; 
             margin-bottom: 24px; 
-            border: none;
             box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1); 
         }
-        .header-admin h2 { margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.2px; text-shadow: none; }
-        .header-admin p { margin: 0; font-size: 13px; opacity: 0.85; font-weight: 500; letter-spacing: 0.3px; }
+        .header-admin h2 { margin: 0 0 6px 0; font-size: 20px; font-weight: 700; }
+        .header-admin p { margin: 0; font-size: 13px; opacity: 0.85; font-weight: 500; }
 
         body.dark-mode .header-admin { 
             background: linear-gradient(135deg, #7f0015 0%, #300008 100%) !important; 
             border: 3px solid #ff1f3d !important; 
             box-shadow: 0 0 40px rgba(255, 31, 61, 0.8) !important;
-        }
-        body.dark-mode .header-admin h2 {
-            color: #ffffff !important;
-            text-shadow: 0 0 20px rgba(255, 31, 61, 1) !important;
-        }
-        body.dark-mode .header-admin p {
-            color: #ffb3bc !important;
-            text-shadow: 0 0 12px rgba(255, 31, 61, 0.8) !important;
         }
 
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-top: 14px; text-transform: uppercase; letter-spacing: 0.8px; }
@@ -122,11 +109,10 @@
             background: #50000e !important;
             color: #ff667a !important;
             border: 2px solid #ff1f3d !important;
-            box-shadow: 0 0 30px rgba(255, 31, 61, 0.9), inset 0 0 12px rgba(255, 31, 61, 0.5) !important;
+            box-shadow: 0 0 30px rgba(255, 31, 61, 0.9);
         }
 
         .timer-box-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-        
         .timer-card-admin { 
             background: #f8fafc; 
             border-radius: 12px; 
@@ -134,12 +120,9 @@
             color: var(--text-main); 
             text-align: center; 
             border: 1px solid var(--border); 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
-            position: relative; 
-            overflow: hidden; 
         }
 
         body.dark-mode .timer-card-admin.ha,
@@ -147,29 +130,27 @@
             background: #3d000a !important;
             border: 3px solid #ff1f3d !important;
             border-radius: 20px !important;
-            box-shadow: 0 0 35px rgba(255, 31, 61, 0.9), inset 0 0 15px rgba(255, 31, 61, 0.5) !important;
+            box-shadow: 0 0 35px rgba(255, 31, 61, 0.9);
         }
 
-        .timer-badge-title { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: inline-block; }
-        .ha .timer-badge-title { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-        .av .timer-badge-title { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+        .timer-badge-title { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; margin-bottom: 8px; display: inline-block; }
+        .ha .timer-badge-title { background: #e0f2fe; color: #0369a1; }
+        .av .timer-badge-title { background: #f3e8ff; color: #6b21a8; }
 
         body.dark-mode .timer-card-admin.ha .timer-badge-title,
         body.dark-mode .timer-card-admin.av .timer-badge-title { 
             background: #50000e !important;
             color: #ffb3bc !important; 
             border: 2px solid #ff1f3d !important;
-            text-shadow: 0 0 15px rgba(255, 31, 61, 1); 
         }
 
-        .admin-nama-promotor { font-size: 16px; font-weight: 700; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 32px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
+        .admin-nama-promotor { font-size: 16px; font-weight: 700; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 32px; display: flex; align-items: center; justify-content: center; }
         
         body.dark-mode .timer-card-admin.ha .admin-nama-promotor,
         body.dark-mode .timer-card-admin.av .admin-nama-promotor { color: #ffffff !important; text-shadow: 0 0 20px rgba(255, 31, 61, 1); }
 
         .input-group { margin-bottom: 18px; text-align: left; }
-        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
-        body.dark-mode .input-group label { color: #ff8585 !important; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
 
         select, input[type="text"], input[type="password"], input[type="number"] { 
             width: 100%; 
@@ -178,32 +159,14 @@
             border: 1px solid var(--border); 
             background: #ffffff; 
             font-size: 14px; 
-            font-weight: 500; 
             color: var(--text-main);
             outline: none; 
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-            transition: all 0.2s ease;
         }
-        select:focus, input:focus { border-color: var(--accent); background: #ffffff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
 
         body.dark-mode select, body.dark-mode input[type="text"], body.dark-mode input[type="password"], body.dark-mode input[type="number"] { 
             background: #2b0007 !important; 
             color: #ffffff !important; 
             border: 2px solid #ff1f3d !important; 
-            box-shadow: 0 0 25px rgba(255, 31, 61, 0.8), inset 0 0 10px rgba(255, 31, 61, 0.4) !important;
-        }
-
-        input[type="text"], input[type="password"], input[type="number"] {
-            background-image: none;
-            cursor: text;
         }
 
         button { 
@@ -220,102 +183,54 @@
             justify-content: center; 
             align-items: center; 
             gap: 8px; 
-            letter-spacing: 0.5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        button:active { transform: scale(0.99); }
         
-        .btn-purple { background: #2563eb; color: white; border-color: #1d4ed8; }
-        .btn-success { background: #059669; color: white; border-color: #047857; }
-        .btn-warning { background: #d97706; color: white; border-color: #b45309; }
-        .btn-danger { background: #dc2626; color: white; border-color: #b91c1c; }
-        .btn-primary { background: #0284c7; color: white; border-color: #0369a1; }
-        .btn-teal { background: #0d9488; color: white; border-color: #0f766e; }
-        .btn-darkred { background: #991b1b; color: white; border-color: #7f1d1d; }
-        .btn-cancel { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
-        .btn-disabled { background: #e2e8f0 !important; color: #94a3b8 !important; border-color: #cbd5e1 !important; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; }
+        .btn-purple { background: #2563eb; color: white; }
+        .btn-success { background: #059669; color: white; }
+        .btn-warning { background: #d97706; color: white; }
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-primary { background: #0284c7; color: white; }
+        .btn-teal { background: #0d9488; color: white; }
+        .btn-darkred { background: #991b1b; color: white; }
+        .btn-cancel { background: #f1f5f9; color: #475569; }
 
-        body.dark-mode .btn-purple,
-        body.dark-mode .btn-success,
-        body.dark-mode .btn-warning,
-        body.dark-mode .btn-danger,
-        body.dark-mode .btn-primary,
-        body.dark-mode .btn-teal,
-        body.dark-mode .btn-darkred {
+        body.dark-mode button {
             background: #99001f !important;
             color: #ffffff !important;
             border: 2px solid #ff1f3d !important;
-            box-shadow: 0 0 30px rgba(255, 31, 61, 0.9), inset 0 0 12px rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 0 25px rgba(255, 31, 61, 0.8) !important;
         }
 
-        body.dark-mode .btn-cancel {
-            background: #50000e !important;
-            color: #ffffff !important;
-            border: 2px solid #ff1f3d !important;
-            box-shadow: 0 0 25px rgba(255, 31, 61, 0.8), inset 0 0 10px rgba(255, 31, 61, 0.4) !important;
-        }
-
-        .spinner { width: 14px; height: 14px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block; flex-shrink: 0; }
+        .spinner { width: 14px; height: 14px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .section-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 28px 0 10px 0; text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+        .section-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 28px 0 10px 0; text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
         body.dark-mode .section-title { color: #ffb3bc !important; border-bottom-color: #ff1f3d !important; }
         
         .admin-grid { display: flex; flex-direction: column; gap: 10px; }
-
         .list-section-wrapper { margin-bottom: 24px; text-align: left; }
         .list-antrian { list-style: none; padding: 0; margin: 0 0 16px 0; }
-        .list-antrian li { padding: 12px 16px; background: #f8fafc; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; box-shadow: none; }
+        .list-antrian li { padding: 12px 16px; background: #f8fafc; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; }
         
         body.dark-mode .list-antrian li { 
             background: #2b0007 !important; 
             border: 2px solid #ff1f3d !important; 
             color: #ffffff !important; 
-            box-shadow: 0 0 25px rgba(255, 31, 61, 0.7) !important;
         }
 
-        .badge-status-item { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
-        .badge-giliran-anda { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .badge-standby { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-        .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-        .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
-        .badge-ibadah { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        .badge-status-item { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
 
-        body.dark-mode .badge-status-item {
-            background: #50000e !important;
-            color: #ffb3bc !important;
-            border: 1px solid #ff1f3d !important;
-        }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         
-        .modal-box { 
-            background: white; 
-            width: 100%; 
-            max-width: 400px; 
-            padding: 28px; 
-            border-radius: 12px; 
-            text-align: center; 
-            border: 1px solid var(--border); 
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        body.dark-mode .modal-box { 
-            background: #2b0007 !important; 
-            border: 3px solid #ff1f3d !important; 
-            color: #ffffff !important; 
-            box-shadow: 0 0 45px rgba(255, 31, 61, 0.9) !important;
-        }
+        .modal-box { background: white; width: 100%; max-width: 400px; padding: 28px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        body.dark-mode .modal-box { background: #2b0007 !important; border: 3px solid #ff1f3d !important; color: #ffffff !important; }
 
-        .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; color: var(--text-main); }
-        body.dark-mode .modal-title { color: #ffffff !important; }
-        .modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; text-align: left; font-weight: 500; }
+        .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+        .modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; text-align: left; }
         body.dark-mode .modal-desc { color: #ffffff !important; }
-        .modal-desc select, .modal-desc input { font-size: 13px; padding: 10px 12px; margin-top: 4px; border-radius: 8px; border: 1px solid var(--border); box-shadow: none; }
         .modal-actions { display: flex; gap: 10px; }
         .modal-actions button { flex: 1; padding: 10px; font-size: 12px; }
-
-        @media (max-width: 480px) { .timer-box-wrapper { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -349,7 +264,6 @@
                 </div>
             </div>
 
-            <!-- LIVE URUTAN KATEGORI HA & AV -->
             <div class="list-section-wrapper">
                 <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase;">LIVE URUTAN KATEGORI HA</div>
                 <ul id="list-HA" class="list-antrian"><li><span>Memuat...</span></li></ul>
@@ -373,9 +287,11 @@
                 <button type="button" class="btn-danger" onclick="bukaModalToggleSistem('TUTUP')">Tutup Sistem Antrian</button>
             </div>
 
-            <div class="section-title">2. Manajemen Urutan Antrian</div>
+            <div class="section-title">2. Manajemen Urutan & Master Sales</div>
             <div class="admin-grid">
                 <button type="button" class="btn-teal" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Promotor ke Antrian</button>
+                <button type="button" class="btn-success" onclick="bukaModalTambahMasterSales()">+ Tambah Nama Baru (Master Sales)</button>
+                <button type="button" class="btn-warning" onclick="bukaModalHapusMasterSales()">- Hapus Nama Permanen (Master Sales)</button>
                 <button type="button" class="btn-warning" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
             </div>
 
@@ -428,7 +344,6 @@
 
             muatMasterSales();
             muatDataAntrian();
-            
             setInterval(muatDataAntrian, 3000); 
         };
 
@@ -441,9 +356,7 @@
 
         function initDarkMode() {
             const isDark = localStorage.getItem('ufo_admin_dark_mode') === 'true';
-            if (isDark) {
-                document.body.classList.add('dark-mode');
-            }
+            if (isDark) document.body.classList.add('dark-mode');
             updateDarkButtonText(isDark);
         }
 
@@ -469,11 +382,7 @@
         function prosesLoginAdmin() {
             amanKlikAdmin(function(selesai) {
                 const pin = document.getElementById('input-pin-admin').value.trim();
-                if(!pin) {
-                    tampilkanModal("Perhatian", "Masukkan PIN Admin!");
-                    selesai();
-                    return;
-                }
+                if(!pin) { tampilkanModal("Perhatian", "Masukkan PIN Admin!"); selesai(); return; }
 
                 const btn = document.getElementById('btn-login-admin');
                 const textAsli = btn.innerHTML;
@@ -516,39 +425,13 @@
 
         function renderUIWithData(res) {
             if (sedangProsesAksiAdmin) return;
-
             const statusSistem = res.statusAntrian || "BUKA";
             const badge = document.getElementById('badge-status-sistem');
             badge.innerText = statusSistem === "BUKA" ? "STATUS: OPEN" : "STATUS: CLOSED";
             badge.className = statusSistem === "BUKA" ? "status-badge status-open" : "status-badge status-closed";
 
-            if (res.koordinatPusat) {
-                koordinatTokoAdmin.lat = res.koordinatPusat.lat || "";
-                koordinatTokoAdmin.lng = res.koordinatPusat.lng || "";
-                koordinatTokoAdmin.radius = res.koordinatPusat.radius || 50;
-
-                const statusGpsLabel = document.getElementById('label-status-gps');
-                const btnOn = document.getElementById('btn-on-gps');
-                const btnOff = document.getElementById('btn-off-gps');
-
-                if (koordinatTokoAdmin.lat && koordinatTokoAdmin.lat !== "") {
-                    statusGpsLabel.innerHTML = `Status GPS: <b style="color:#059669;">AKTIF</b> (Radius: ${koordinatTokoAdmin.radius}m)`;
-                    if (btnOn && btnOff && !sedangDiprosesGlobal) {
-                        btnOn.disabled = true; btnOn.className = "btn-success btn-disabled";
-                        btnOff.disabled = false; btnOff.className = "btn-danger";
-                    }
-                } else {
-                    statusGpsLabel.innerHTML = `Status GPS: <b style="color:#dc2626;">NONAKTIF (OFF)</b>`;
-                    if (btnOn && btnOff && !sedangDiprosesGlobal) {
-                        btnOn.disabled = false; btnOn.className = "btn-success";
-                        btnOff.disabled = true; btnOff.className = "btn-danger btn-disabled";
-                    }
-                }
-            }
-
             let listHA = "", listAV = "";
             let urutHA = 1, urutAV = 1;
-            
             const data = res.data || [];
             daftarAntrianGlobal = data;
 
@@ -559,286 +442,203 @@
             document.getElementById('admin-nama-ha').textContent = promotorHA ? promotorHA.nama : "Belum Ada";
             document.getElementById('admin-nama-av').textContent = promotorAV ? promotorAV.nama : "Belum Ada";
 
-            if (data.length > 0) {
-                data.forEach((item) => {
-                    let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
-                    let itemHtml = "";
+            data.forEach((item) => {
+                let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
+                let itemHtml = "";
+                if (item.status === "Standby") {
+                    let urut = (kat === "HA") ? urutHA++ : urutAV++;
+                    let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
+                    itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
+                } else if (item.status === "Melayani") {
+                    itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
+                } else if (item.status.includes("CS")) {
+                    itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/Gudang</span></li>`;
+                }
+                if (kat === "HA") listHA += itemHtml; else listAV += itemHtml;
+            });
 
-                    if (item.status === "Standby") {
-                        let urut = 1;
-                        if (kat === "HA") urut = urutHA++;
-                        else if (kat === "AV") urut = urutAV++;
-
-                        let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
-                        itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
-                    } else if (item.status === "Melayani") {
-                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
-                    } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
-                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/Gudang</span></li>`;
-                    } else if (item.status === "Ibadah") {
-                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-ibadah">Sedang Ibadah</span></li>`;
-                    }
-
-                    if (kat === "HA") listHA += itemHtml;
-                    else if (kat === "AV") listAV += itemHtml;
-                });
-            }
-
-            const kosongHtml = "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian</span></li>";
-            document.getElementById('list-HA').innerHTML = listHA || kosongHtml;
-            document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
+            document.getElementById('list-HA').innerHTML = listHA || "<li><span>Belum ada antrian</span></li>";
+            document.getElementById('list-AV').innerHTML = listAV || "<li><span>Belum ada antrian</span></li>";
         }
 
         function toggleGPSAdmin(statusAktif) {
             amanKlikAdmin(function(selesai) {
                 const pin = getActivePinAdmin();
                 if (!pin) { alert("PIN Admin tidak ditemukan!"); selesai(); return; }
-
-                const btnOn = document.getElementById('btn-on-gps');
-                const btnOff = document.getElementById('btn-off-gps');
+                const btn = statusAktif ? document.getElementById('btn-on-gps') : document.getElementById('btn-off-gps');
+                const textAsli = btn.innerHTML;
+                btn.innerHTML = `<span class="spinner"></span> Memproses...`;
 
                 if (!statusAktif) {
-                    const textAsli = btnOff.innerHTML;
-                    btnOff.innerHTML = `<span class="spinner"></span> Mematikan...`;
                     fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=&lng=&radius=50&t=${Date.now()}`)
-                    .then(r => r.json()).then(res => {
-                        btnOff.innerHTML = textAsli;
-                        tampilkanModal("GPS Dinonaktifkan", "Validasi radius GPS toko berhasil dimatikan (OFF).");
-                        muatDataAntrian(); selesai();
-                    }).catch(() => { btnOff.innerHTML = textAsli; selesai(); });
+                    .then(r => r.json()).then(res => { btn.innerHTML = textAsli; tampilkanModal("GPS Dinonaktifkan", res.pesan); muatDataAntrian(); selesai(); }).catch(() => { btn.innerHTML = textAsli; selesai(); });
                 } else {
-                    const textAsli = btnOn.innerHTML;
-                    btnOn.innerHTML = `<span class="spinner"></span> Mendeteksi GPS...`;
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(function(pos) {
-                            const lat = pos.coords.latitude;
-                            const lng = pos.coords.longitude;
-                            const radius = "50";
-
-                            fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=${encodeURIComponent(radius)}&t=${Date.now()}`)
-                            .then(r => r.json()).then(res => {
-                                btnOn.innerHTML = textAsli;
-                                tampilkanModal("GPS Diaktifkan", "Titik GPS & Radius Toko berhasil diset dari perangkat Anda.");
-                                muatDataAntrian(); selesai();
-                            }).catch(() => { btnOn.innerHTML = textAsli; selesai(); });
-                        }, function() {
-                            btnOn.innerHTML = textAsli;
-                            alert("Gagal mendeteksi lokasi perangkat Anda.");
-                            selesai();
-                        }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
-                    } else { btnOn.innerHTML = textAsli; selesai(); }
+                    navigator.geolocation.getCurrentPosition(function(pos) {
+                        fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=${pos.coords.latitude}&lng=${pos.coords.longitude}&radius=50&t=${Date.now()}`)
+                        .then(r => r.json()).then(res => { btn.innerHTML = textAsli; tampilkanModal("GPS Diaktifkan", res.pesan); muatDataAntrian(); selesai(); }).catch(() => { btn.innerHTML = textAsli; selesai(); });
+                    }, function() { btn.innerHTML = textAsli; alert("Gagal mendeteksi GPS."); selesai(); }, { enableHighAccuracy: true });
                 }
             });
         }
 
-        function bukaModalToggleSistem(targetStatus) {
-            document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
-            document.getElementById('modal-desc').innerHTML = `Status baru sistem: <b>${targetStatus}</b>`;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>`;
+        // --- MODAL & EKSEKUSI: TAMBAH & HAPUS MASTER SALES ---
+        function bukaModalTambahMasterSales() {
+            document.getElementById('modal-title').innerText = "Tambah Nama Promotor Baru";
+            document.getElementById('modal-desc').innerHTML = `Masukkan Nama Promotor Baru:<br><input type="text" id="input-nama-baru" placeholder="Nama Lengkap Promotor">`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiTambahMasterSales()">Simpan</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
-        function eksekusiToggleSistem(targetStatus) {
+        function eksekusiTambahMasterSales() {
+            const namaBaru = document.getElementById('input-nama-baru').value.trim();
+            if (!namaBaru) return alert("Nama tidak boleh kosong!");
+            
             const btnOk = document.getElementById('btn-modal-action-ok');
-            if (btnOk) {
-                btnOk.disabled = true;
-                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
-            }
+            btnOk.disabled = true; btnOk.innerHTML = `<span class="spinner"></span> Menyimpan...`;
+
             amanKlikAdmin(function(selesai) {
                 const pin = getActivePinAdmin();
-                if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
-                fetch(`${SCRIPT_URL}?aksi=adminSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}&t=${Date.now()}`)
-                .then(res => res.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Status Sistem", res.pesan);
-                    muatDataAntrian(); selesai();
+                fetch(`${SCRIPT_URL}?aksi=adminTambahMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaBaru)}&t=${Date.now()}`)
+                .then(r => r.json()).then(res => {
+                    tutupModal(); tampilkanModal("Master Sales", res.pesan); muatMasterSales(); selesai();
                 }).catch(() => { tutupModal(); selesai(); });
+            });
+        }
+
+        function bukaModalHapusMasterSales() {
+            document.getElementById('modal-title').innerText = "Hapus Nama Permanen";
+            if (!masterSalesGlobal.length) muatMasterSalesInstant();
+            let options = '<option value="">-- Pilih Promotor --</option>';
+            masterSalesGlobal.forEach(n => { let nama = typeof n === 'object' ? n.nama : n; options += `<option value="${nama}">${nama}</option>`; });
+
+            document.getElementById('modal-desc').innerHTML = `Pilih promotor yang akan dihapus dari sistem:<br><select id="select-hapus-sales">${options}</select>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiHapusMasterSales()">Hapus Permanen</button>`;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function eksekusiHapusMasterSales() {
+            const namaHapus = document.getElementById('select-hapus-sales').value;
+            if (!namaHapus) return alert("Pilih promotor terlebih dahulu!");
+
+            const btnOk = document.getElementById('btn-modal-action-ok');
+            btnOk.disabled = true; btnOk.innerHTML = `<span class="spinner"></span> Menghapus...`;
+
+            amanKlikAdmin(function(selesai) {
+                const pin = getActivePinAdmin();
+                fetch(`${SCRIPT_URL}?aksi=adminHapusMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaHapus)}&t=${Date.now()}`)
+                .then(r => r.json()).then(res => {
+                    tutupModal(); tampilkanModal("Master Sales", res.pesan); muatMasterSales(); selesai();
+                }).catch(() => { tutupModal(); selesai(); });
+            });
+        }
+        // ---------------------------------------------------
+
+        function bukaModalToggleSistem(status) {
+            document.getElementById('modal-title').innerText = status === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
+            document.getElementById('modal-desc').innerHTML = `Ubah status sistem ke: <b>${status}</b>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiToggleSistem('${status}')">Proses</button>`;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function eksekusiToggleSistem(status) {
+            const btnOk = document.getElementById('btn-modal-action-ok');
+            btnOk.disabled = true; btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            amanKlikAdmin(function(selesai) {
+                fetch(`${SCRIPT_URL}?aksi=adminSetStatusAntrian&pin=${encodeURIComponent(getActivePinAdmin())}&statusBaru=${status}&t=${Date.now()}`)
+                .then(r => r.json()).then(res => { tutupModal(); tampilkanModal("Sistem", res.pesan); muatDataAntrian(); selesai(); }).catch(() => { tutupModal(); selesai(); });
             });
         }
 
         function bukaModalResetTotal() {
             document.getElementById('modal-title').innerText = 'Reset Semua Antrian';
-            document.getElementById('modal-desc').innerHTML = `⚠️ <b>PERINGATAN:</b><br>Seluruh data antrian akan dihapus dari sistem.`;
+            document.getElementById('modal-desc').innerHTML = `⚠️ Seluruh data antrian aktif akan dikosongkan.`;
             document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiResetTotal()">Reset Sekarang</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
         function eksekusiResetTotal() {
             const btnOk = document.getElementById('btn-modal-action-ok');
-            if (btnOk) {
-                btnOk.disabled = true;
-                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
-            }
+            btnOk.disabled = true; btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
             amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
-                fetch(`${SCRIPT_URL}?aksi=adminResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
-                .then(res => res.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Reset Total", res.pesan);
-                    muatDataAntrian(); selesai();
-                }).catch(() => { tutupModal(); selesai(); });
+                fetch(`${SCRIPT_URL}?aksi=adminResetAntrian&pin=${encodeURIComponent(getActivePinAdmin())}&t=${Date.now()}`)
+                .then(r => r.json()).then(res => { tutupModal(); tampilkanModal("Reset", res.pesan); muatDataAntrian(); selesai(); }).catch(() => { tutupModal(); selesai(); });
             });
         }
 
         function bukaModalTambahAntriAdmin() {
             document.getElementById('modal-title').innerText = "Masukkan Promotor ke Antrian";
-            if (!masterSalesGlobal || masterSalesGlobal.length === 0) {
-                const cachedSales = localStorage.getItem('ufo_master_sales_cache');
-                if (cachedSales) { try { masterSalesGlobal = JSON.parse(cachedSales); } catch(e) {} }
-            }
-
-            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
-            masterSalesGlobal.forEach(n => { let nama = typeof n === 'object' ? n.nama : n; optionsSales += `<option value="${nama}">${nama}</option>`; });
+            if (!masterSalesGlobal.length) muatMasterSalesInstant();
+            let options = ''; masterSalesGlobal.forEach(n => { let nama = typeof n === 'object' ? n.nama : n; options += `<option value="${nama}">${nama}</option>`; });
             
-            document.getElementById('modal-desc').innerHTML = `
-                Kategori:<br>
-                <select id="admin-select-kategori">
-                    <option value="HA">HA (Home Appliance)</option>
-                    <option value="AV">AV (Audio Video)</option>
-                </select><br><br>
-                Promotor:<br>
-                <select id="admin-select-sales">${optionsSales}</select><br><br>
-                Posisi Urutan:<br>
-                <input type="number" id="admin-input-posisi" value="1" min="1">
-            `;
+            document.getElementById('modal-desc').innerHTML = `Kategori:<br><select id="admin-select-kategori"><option value="HA">HA</option><option value="AV">AV</option></select><br><br>Promotor:<br><select id="admin-select-sales">${options}</select><br><br>Posisi Urutan:<br><input type="number" id="admin-input-posisi" value="1" min="1">`;
             document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiTambahAntriAdmin()">Proses</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
         function eksekusiTambahAntriAdmin() {
-            const kategori = document.getElementById('admin-select-kategori').value; 
-            const namaSales = document.getElementById('admin-select-sales').value; 
-            const posisi = document.getElementById('admin-input-posisi').value || "1"; 
-            
-            if(!namaSales) return alert("Pilih promotor!"); 
-
             const btnOk = document.getElementById('btn-modal-action-ok');
-            if (btnOk) {
-                btnOk.disabled = true;
-                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
-            }
-
+            btnOk.disabled = true; btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
             amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                fetch(`${SCRIPT_URL}?aksi=adminDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&t=${Date.now()}`)
-                .then(res => res.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Status Admin", res.pesan);
-                    muatDataAntrian(); selesai();
-                }).catch(() => { tutupModal(); selesai(); });
+                fetch(`${SCRIPT_URL}?aksi=adminDaftarAntri&pin=${encodeURIComponent(getActivePinAdmin())}&namaSales=${encodeURIComponent(document.getElementById('admin-select-sales').value)}&kategori=${encodeURIComponent(document.getElementById('admin-select-kategori').value)}&posisi=${encodeURIComponent(document.getElementById('admin-input-posisi').value)}&t=${Date.now()}`)
+                .then(r => r.json()).then(res => { tutupModal(); tampilkanModal("Admin", res.pesan); muatDataAntrian(); selesai(); }).catch(() => { tutupModal(); selesai(); });
             });
         }
 
         function bukaModalResetDeviceAdmin() {
             document.getElementById('modal-title').innerText = "Reset Perangkat Promotor";
-            if (!masterSalesGlobal || masterSalesGlobal.length === 0) {
-                const cachedSales = localStorage.getItem('ufo_master_sales_cache');
-                if (cachedSales) { try { masterSalesGlobal = JSON.parse(cachedSales); } catch(e) {} }
-            }
-
-            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
-            if (masterSalesGlobal && masterSalesGlobal.length > 0) {
-                masterSalesGlobal.forEach(n => { 
-                    let nama = typeof n === 'object' ? n.nama : n; 
-                    optionsSales += `<option value="${nama}">${nama}</option>`; 
-                });
-            }
-
-            document.getElementById('modal-desc').innerHTML = `
-                Pilih Promotor yang perangkatnya akan di-reset:<br><br>
-                <select id="admin-select-sales-reset">${optionsSales}</select>
-            `;
-            document.getElementById('modal-actions').innerHTML = `
-                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiResetDeviceAdmin()">Reset Perangkat</button>
-            `;
+            if (!masterSalesGlobal.length) muatMasterSalesInstant();
+            let options = '<option value="">-- Pilih Promotor --</option>'; masterSalesGlobal.forEach(n => { let nama = typeof n === 'object' ? n.nama : n; options += `<option value="${nama}">${nama}</option>`; });
+            
+            document.getElementById('modal-desc').innerHTML = `Pilih Promotor:<br><select id="admin-select-sales-reset">${options}</select>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiResetDeviceAdmin()">Reset</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
         function eksekusiResetDeviceAdmin() {
-            const selectEl = document.getElementById('admin-select-sales-reset');
-            const namaSales = selectEl ? selectEl.value : "";
-            if (!namaSales) return alert("Pilih nama promotor terlebih dahulu!");
-
+            const nama = document.getElementById('admin-select-sales-reset').value;
+            if (!nama) return alert("Pilih promotor!");
             const btnOk = document.getElementById('btn-modal-action-ok');
-            if (btnOk) {
-                btnOk.disabled = true;
-                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
-            }
-
+            btnOk.disabled = true; btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
             amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
-                fetch(`${SCRIPT_URL}?aksi=adminResetDevice&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
-                .then(res => res.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Status Reset Perangkat", res.pesan);
-                    muatDataAntrian(); selesai();
-                }).catch(() => {
-                    tutupModal();
-                    tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mereset perangkat.");
-                    selesai();
-                });
+                fetch(`${SCRIPT_URL}?aksi=adminResetDevice&pin=${encodeURIComponent(getActivePinAdmin())}&namaSales=${encodeURIComponent(nama)}&t=${Date.now()}`)
+                .then(r => r.json()).then(res => { tutupModal(); tampilkanModal("Reset Device", res.pesan); muatDataAntrian(); selesai(); }).catch(() => { tutupModal(); selesai(); });
             });
         }
 
-        function bukaModalFormAdminKategori(aksiName, judulAksi, butuhPilihPromotor = true) {
-            document.getElementById('modal-title').innerText = judulAksi;
-            if (!masterSalesGlobal || masterSalesGlobal.length === 0) {
-                const cachedSales = localStorage.getItem('ufo_master_sales_cache');
-                if (cachedSales) { try { masterSalesGlobal = JSON.parse(cachedSales); } catch(e) {} }
-            }
-
-            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
-            masterSalesGlobal.forEach(n => { let nama = typeof n === 'object' ? n.nama : n; optionsSales += `<option value="${nama}">${nama}</option>`; });
+        function bukaModalFormAdminKategori(aksiName, judul, butuhSales = true) {
+            document.getElementById('modal-title').innerText = judul;
+            if (!masterSalesGlobal.length) muatMasterSalesInstant();
+            let options = ''; masterSalesGlobal.forEach(n => { let nama = typeof n === 'object' ? n.nama : n; options += `<option value="${nama}">${nama}</option>`; });
             
-            let htmlContent = `Kategori:<br><select id="admin-select-kategori"><option value="HA">HA (Home Appliance)</option><option value="AV">AV (Audio Video)</option></select><br><br>`;
-            if (butuhPilihPromotor) htmlContent += `Promotor:<br><select id="admin-select-sales">${optionsSales}</select>`;
+            let html = `Kategori:<br><select id="admin-select-kategori"><option value="HA">HA</option><option value="AV">AV</option></select><br><br>`;
+            if (butuhSales) html += `Promotor:<br><select id="admin-select-sales">${options}</select>`;
             
-            document.getElementById('modal-desc').innerHTML = htmlContent;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiAksiAdminKategori('${aksiName}', ${butuhPilihPromotor})">Proses</button>`;
+            document.getElementById('modal-desc').innerHTML = html;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiAksiAdminKategori('${aksiName}', ${butuhSales})">Proses</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
-        function eksekusiAksiAdminKategori(aksiName, butuhPilihPromotor) {
-            const kategori = document.getElementById('admin-select-kategori').value; 
-            let namaSales = butuhPilihPromotor ? document.getElementById('admin-select-sales').value : ""; 
-            if(butuhPilihPromotor && !namaSales) return alert("Pilih promotor!"); 
-
+        function eksekusiAksiAdminKategori(aksiName, butuhSales) {
             const btnOk = document.getElementById('btn-modal-action-ok');
-            if (btnOk) {
-                btnOk.disabled = true;
-                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
-            }
-
+            btnOk.disabled = true; btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            let nama = butuhSales ? document.getElementById('admin-select-sales').value : "";
             amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&t=${Date.now()}`)
-                .then(res => res.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Status Admin", res.pesan);
-                    muatDataAntrian(); selesai();
-                }).catch(() => { tutupModal(); selesai(); });
+                fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(getActivePinAdmin())}&namaSales=${encodeURIComponent(nama)}&kategori=${encodeURIComponent(document.getElementById('admin-select-kategori').value)}&t=${Date.now()}`)
+                .then(r => r.json()).then(res => { tutupModal(); tampilkanModal("Admin", res.pesan); muatDataAntrian(); selesai(); }).catch(() => { tutupModal(); selesai(); });
             });
         }
 
         function muatMasterSales() {
-            fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                if(res.status === "sukses") { 
-                    masterSalesGlobal = res.data || []; 
-                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal)); 
-                }
+            fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`).then(r => r.json()).then(res => {
+                if(res.status === "sukses") { masterSalesGlobal = res.data || []; localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal)); }
             });
         }
 
         function muatDataAntrian() {
-            if(sedangProsesAksiAdmin) return; 
-            fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => { if(!sedangProsesAksiAdmin && res.status === "sukses") { localStorage.setItem('ufo_admin_antrian_cache', JSON.stringify(res)); renderUIWithData(res); } });
+            if(sedangProsesAksiAdmin) return;
+            fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`).then(r => r.json()).then(res => {
+                if(!sedangProsesAksiAdmin && res.status === "sukses") { localStorage.setItem('ufo_admin_antrian_cache', JSON.stringify(res)); renderUIWithData(res); }
+            });
         }
 
         function tampilkanModal(judul, pesan) {
