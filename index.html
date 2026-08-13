@@ -736,7 +736,7 @@
         }
 
         function jalankanHitungMundur() {
-            if (intervalCountdownLock) clearInterval(intervalCountdownLock);
+            if (intervalCountdownLock) return; // Jika interval sudah berjalan, biarkan berjalan agar tidak reset
 
             intervalCountdownLock = setInterval(() => {
                 let waktuSelesaiEpoch = window.waktuSelesaiLockGlobal || 0;
@@ -745,6 +745,7 @@
 
                 if (selisihDetik <= 0) {
                     clearInterval(intervalCountdownLock);
+                    intervalCountdownLock = null;
                     const wrapperEl = document.getElementById('wrapper-countdown-lock');
                     if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
                     setTimeout(() => { window.location.reload(); }, 2000);
@@ -839,11 +840,11 @@
             if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
                 
+                // Ambil persis waktu selesai dari database server
                 let waktuLockServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
-                if ((!waktuLockServer || waktuLockServer === 0) && (dataSalesSaya.locked === true || String(dataSalesSaya.locked).toUpperCase() === "LOCKED" || String(dataSalesSaya.locked).toUpperCase() === "YA")) {
-                    waktuLockServer = new Date().getTime() + (15 * 60 * 1000); 
+                if (waktuLockServer > 0) {
+                    window.waktuSelesaiLockGlobal = waktuLockServer;
                 }
-                window.waktuSelesaiLockGlobal = waktuLockServer;
 
                 let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
                 if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
@@ -871,13 +872,20 @@
                 document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
 
                 let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
-                if (sudahTerimaHukumanHP && window.waktuSelesaiLockGlobal > 0) {
-                    document.getElementById('btn-terima-hukuman').style.display = 'none';
-                    document.getElementById('wrapper-countdown-lock').style.display = 'block';
-                    jalankanHitungMundur();
+                
+                // Jika waktu server masih berlaku (belum habis)
+                if (window.waktuSelesaiLockGlobal > new Date().getTime()) {
+                    if (sudahTerimaHukumanHP) {
+                        document.getElementById('btn-terima-hukuman').style.display = 'none';
+                        document.getElementById('wrapper-countdown-lock').style.display = 'block';
+                        jalankanHitungMundur();
+                    } else {
+                        document.getElementById('btn-terima-hukuman').style.display = 'block';
+                        document.getElementById('wrapper-countdown-lock').style.display = 'none';
+                    }
                 } else {
-                    document.getElementById('btn-terima-hukuman').style.display = 'block';
-                    document.getElementById('wrapper-countdown-lock').style.display = 'none';
+                    // Jika waktu hukuman di server sudah habis, hapus status lokal
+                    localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
                 }
 
                 if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
@@ -893,6 +901,10 @@
                 if (sectionLocked) sectionLocked.style.display = 'none';
                 if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
                 localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                if (intervalCountdownLock) {
+                    clearInterval(intervalCountdownLock);
+                    intervalCountdownLock = null;
+                }
             }
 
             let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
