@@ -725,8 +725,12 @@
         }
 
         function mulaiTimerHukumanPromotor() {
-            document.getElementById('btn-terima-hukuman').style.display = 'none';
-            document.getElementById('wrapper-countdown-lock').style.display = 'block';
+            const btnTerima = document.getElementById('btn-terima-hukuman');
+            const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+            
+            if (btnTerima) btnTerima.style.display = 'none';
+            if (wrapperCountdown) wrapperCountdown.style.display = 'block';
+
             localStorage.setItem('ufo_terima_hukuman_' + getAkunAktif(), 'true');
             jalankanHitungMundur();
         }
