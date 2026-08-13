@@ -1060,17 +1060,22 @@
             }
         }
 
-        function muatDataAntrian() {
-            if (localActionActive) return;
-            fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                if (res && res.status === "sukses" && !localActionActive) {
-                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
-                    renderUIRental(res.data, res.statusAntrian, res.koordinatPusat);
-                }
-            }).catch(() => {});
+      function muatDataAntrian() {
+    if (localActionActive) return;
+    Promise.all([
+        fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`).then(r => r.json()).catch(() => null),
+        fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`).then(r => r.json()).catch(() => null)
+    ]).then(([resAntrian, resSales]) => {
+        if (resSales && resSales.status === "sukses" && resSales.data) {
+            masterSalesGlobal = resSales.data;
+            localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resSales.data));
         }
+        if (resAntrian && resAntrian.status === "sukses" && !localActionActive) {
+            localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
+            renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat);
+        }
+    });
+}
 
         function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
             const namaSales = getAkunAktif().trim();
