@@ -913,33 +913,36 @@ function updateTampilanTimer() {
             const sectionNormal = document.getElementById('section-normal');
             const sectionLocked = document.getElementById('section-akun-locked');
 
-            let isDilockAdmin = false;
-            let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
-            
-            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
-            
-            let sudahMakanDariServer = false;
-            if (dataSalesSaya) {
-                if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
-                
-                let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
-                let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+          let isDilockAdmin = false;
+let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
 
-                if (waktuServer > new Date().getTime()) {
-                    window.waktuSelesaiLockGlobal = waktuServer;
-                    localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
-                } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
-                    window.waktuSelesaiLockGlobal = Number(savedDeadline);
-                } else if (waktuServer > 0) {
-                    window.waktuSelesaiLockGlobal = waktuServer;
-                }
+const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
 
-                let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
-                if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
-                    isDilockAdmin = true;
-                    pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
-                }
-            }
+if (dataSalesSaya) {
+    if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
+    
+    let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
+    let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+
+    if (waktuServer > new Date().getTime()) {
+        window.waktuSelesaiLockGlobal = waktuServer;
+        localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
+    } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+        window.waktuSelesaiLockGlobal = Number(savedDeadline);
+    }
+
+    let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
+    
+    // CEK TAMBAHAN: Jika status terkunci tapi waktu server sudah lewat dari waktu sekarang, abaikan lock-nya!
+    if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
+        if (waktuServer > 0 && new Date().getTime() >= waktuServer) {
+            isDilockAdmin = false; // Waktu sudah habis, jangan dikunci!
+        } else {
+            isDilockAdmin = true;
+            pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
+        }
+    }
+}
 
             const btnDaftar = document.getElementById('btn-daftar-antrian');
             const btnHadir = document.getElementById('btn-hadir');
