@@ -736,7 +736,7 @@
         }
 
         function jalankanHitungMundur() {
-            if (intervalCountdownLock) return; // Jika interval sudah berjalan, biarkan berjalan agar tidak reset
+            if (intervalCountdownLock) return; // Mencegah interval menumpuk dan reset
 
             intervalCountdownLock = setInterval(() => {
                 let waktuSelesaiEpoch = window.waktuSelesaiLockGlobal || 0;
@@ -840,7 +840,7 @@
             if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
                 
-                // Ambil persis waktu selesai dari database server
+                // Ambil waktu selesai dari database server
                 let waktuLockServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
                 if (waktuLockServer > 0) {
                     window.waktuSelesaiLockGlobal = waktuLockServer;
@@ -873,7 +873,7 @@
 
                 let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
                 
-                // Jika waktu server masih berlaku (belum habis)
+                // Pastikan waktu server sinkron dan belum lewat
                 if (window.waktuSelesaiLockGlobal > new Date().getTime()) {
                     if (sudahTerimaHukumanHP) {
                         document.getElementById('btn-terima-hukuman').style.display = 'none';
@@ -884,7 +884,6 @@
                         document.getElementById('wrapper-countdown-lock').style.display = 'none';
                     }
                 } else {
-                    // Jika waktu hukuman di server sudah habis, hapus status lokal
                     localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
                 }
 
