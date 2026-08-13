@@ -838,7 +838,13 @@
             let sudahMakanDariServer = false;
             if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
-                window.waktuSelesaiLockGlobal = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+                
+                let waktuLockServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+                if ((!waktuLockServer || waktuLockServer === 0) && (dataSalesSaya.locked === true || String(dataSalesSaya.locked).toUpperCase() === "LOCKED" || String(dataSalesSaya.locked).toUpperCase() === "YA")) {
+                    waktuLockServer = new Date().getTime() + (15 * 60 * 1000); 
+                }
+                window.waktuSelesaiLockGlobal = waktuLockServer;
+
                 let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
                 if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
                     isDilockAdmin = true;
