@@ -753,24 +753,19 @@
                     clearInterval(intervalCountdownLock);
                     intervalCountdownLock = null;
                     
-                    // 1. Bersihkan status hukuman di memori lokal HP secara instan
                     const akunSaya = getAkunAktif().trim().toLowerCase();
                     localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
                     
-                    // 2. Reset variabel global lock agar dianggap sudah tidak terkunci
                     window.waktuSelesaiLockGlobal = 0;
                     
-                    // 3. Update status data di Master Sales lokal agar berubah jadi tidak terkunci
                     const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
                     if (dataSalesSaya) {
                         dataSalesSaya.locked = "";
                         dataSalesSaya.waktuSelesaiLock = 0;
                     }
                     
-                    // 4. LANGSUNG RENDER ULANG TAMPILAN TANPA RELOAD MANUAL!
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
 
-                    // 5. Kirim perintah di background ke server untuk memastikan database ikut bersih
                     fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`).then(r => r.json()).then(res => {
                         if (res.status === "sukses" && res.data) {
                             masterSalesGlobal = res.data;
@@ -789,6 +784,7 @@
                 }
             }, 1000);
         }
+
         function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
             if (localActionActive) return;
 
@@ -863,7 +859,7 @@
             let isDilockAdmin = false;
             let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
             
-            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+            const dataSalesSaya = masterSalesGlobal.find(s => s && s.nama && String(s.nama).trim().toLowerCase() === akunSaya);
             
             let sudahMakanDariServer = false;
             if (dataSalesSaya) {
@@ -876,8 +872,10 @@
 
                 let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
                 if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
-                    isDilockAdmin = true;
-                    pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
+                    if (window.waktuSelesaiLockGlobal === 0 || window.waktuSelesaiLockGlobal > new Date().getTime()) {
+                        isDilockAdmin = true;
+                        pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
+                    }
                 }
             }
 
@@ -891,66 +889,41 @@
             const btnIbadah = document.getElementById('btn-utama-ibadah');
             const btnKeluar = document.getElementById('btn-keluar-istirahat');
 
-      if (isDilockAdmin) {
-            // Pastikan jika waktu selesai lock sudah terlewati di masa lampau, matikan status lock secara mutlak
-            if (window.waktuSelesaiLockGlobal > 0 && window.waktuSelesaiLockGlobal <= new Date().getTime()) {
-                isDilockAdmin = false;
+            if (isDilockAdmin) {
+                if (window.waktuSelesaiLockGlobal > 0 && window.waktuSelesaiLockGlobal <= new Date().getTime()) {
+                    isDilockAdmin = false;
+                }
             }
-        }
 
-        if (isDilockAdmin) {
-            sectionCheckinAwal.style.display = 'none';
-            sectionNormal.style.display = 'block';
-            groupPilihKat.style.display = 'block';
-            
-            sectionLocked.style.display = 'block';
-            document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
+            if (isDilockAdmin) {
+                sectionCheckinAwal.style.display = 'none';
+                sectionNormal.style.display = 'block';
+                groupPilihKat.style.display = 'block';
+                
+                sectionLocked.style.display = 'block';
+                document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
 
-            let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
-            
-            // Periksa apakah waktu hukuman masih berjalan
-            if (window.waktuSelesaiLockGlobal > new Date().getTime()) {
-                if (sudahTerimaHukumanHP) {
-                    document.getElementById('btn-terima-hukuman').style.display = 'none';
-                    document.getElementById('wrapper-countdown-lock').style.display = 'block';
-                    jalankanHitungMundur();
+                let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
+                
+                if (window.waktuSelesaiLockGlobal === 0 || window.waktuSelesaiLockGlobal > new Date().getTime()) {
+                    if (sudahTerimaHukumanHP) {
+                        document.getElementById('btn-terima-hukuman').style.display = 'none';
+                        document.getElementById('wrapper-countdown-lock').style.display = 'block';
+                        jalankanHitungMundur();
+                    } else {
+                        document.getElementById('btn-terima-hukuman').style.display = 'block';
+                        document.getElementById('wrapper-countdown-lock').style.display = 'none';
+                    }
                 } else {
-                    document.getElementById('btn-terima-hukuman').style.display = 'block';
-                    document.getElementById('wrapper-countdown-lock').style.display = 'none';
+                    localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                    if (intervalCountdownLock) {
+                        clearInterval(intervalCountdownLock);
+                        intervalCountdownLock = null;
+                    }
+                    isDilockAdmin = false; 
                 }
-            } else {
-                // Jika waktu sudah habis, bersihkan cache hukuman dan matikan status lock
-                localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
-                if (intervalCountdownLock) {
-                    clearInterval(intervalCountdownLock);
-                    intervalCountdownLock = null;
-                }
-                isDilockAdmin = false; 
             }
-        }
 
-        // Jika setelah pengecekan waktu ternyata status lock sudah habis (false), jalankan mode normal
-        if (!isDilockAdmin) {
-            if (sectionLocked) sectionLocked.style.display = 'none';
-            if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
-            localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
-            if (intervalCountdownLock) {
-                clearInterval(intervalCountdownLock);
-                intervalCountdownLock = null;
-            }
-        } else {
-            // Jika masih murni terkunci, sembunyikan semua tombol operasional
-            if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
-            if (btnCustomer) { btnCustomer.style.display = 'none'; }
-            if (btnMakan) { btnMakan.style.display = 'none'; }
-            if (btnClosing) { btnClosing.style.display = 'none'; }
-            if (btnCS) { btnCS.style.display = 'none'; }
-            if (btnIbadah) { btnIbadah.style.display = 'none'; }
-            if (btnKeluar) { btnKeluar.style.display = 'none'; }
-            if (btnDaftar) { btnDaftar.style.display = 'none'; }
-            return; 
-        }
-            
             if (!isDilockAdmin) {
                 if (sectionLocked) sectionLocked.style.display = 'none';
                 if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
@@ -959,8 +932,18 @@
                     clearInterval(intervalCountdownLock);
                     intervalCountdownLock = null;
                 }
+            } else {
+                if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
+                if (btnCustomer) { btnCustomer.style.display = 'none'; }
+                if (btnMakan) { btnMakan.style.display = 'none'; }
+                if (btnClosing) { btnClosing.style.display = 'none'; }
+                if (btnCS) { btnCS.style.display = 'none'; }
+                if (btnIbadah) { btnIbadah.style.display = 'none'; }
+                if (btnKeluar) { btnKeluar.style.display = 'none'; }
+                if (btnDaftar) { btnDaftar.style.display = 'none'; }
+                return; 
             }
-
+            
             let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
 
             if (statusSayaNyata !== "belum_ada") {
@@ -1082,15 +1065,6 @@
                     btnIbadah.disabled = false;
                 }
             }
-            if (localActionActive) return;
-            fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                if (res && res.status === "sukses" && !localActionActive) {
-                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
-                    renderUIRental(res.data, res.statusAntrian, res.koordinatPusat);
-                }
-            }).catch(() => {});
         }
 
         function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
