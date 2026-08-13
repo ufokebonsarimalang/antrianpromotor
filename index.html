@@ -501,6 +501,7 @@
         let markerSayaPeta = null;
         
         let intervalCountdownLock = null;
+        let lastLockedStateKey = "";
 
         function getTanggalIndo() {
             const now = new Date();
@@ -852,12 +853,25 @@
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
                 
                 let waktuLockServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+                let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
+                
+                let isServerLocked = (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA");
+
+                let currentLockStateKey = `${isServerLocked}_${waktuLockServer}`;
+                if (lastLockedStateKey && lastLockedStateKey !== currentLockStateKey && !isServerLocked) {
+                    localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                    localStorage.removeItem('ufo_waktu_selesai_lock_' + akunSaya);
+                }
+                lastLockedStateKey = currentLockStateKey;
+
                 if (waktuLockServer > 0) {
-                    localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, waktuLockServer);
+                    let savedLocalLock = Number(localStorage.getItem('ufo_waktu_selesai_lock_' + akunSaya)) || 0;
+                    if (waktuLockServer !== savedLocalLock) {
+                        localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, waktuLockServer);
+                    }
                 }
 
-                let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
-                if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
+                if (isServerLocked) {
                     isDilockAdmin = true;
                     pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
                 }
@@ -1312,7 +1326,7 @@
             document.getElementById('custom-modal').classList.add('active');
             document.getElementById('btn-modal-ya').onclick = function() { tutupModal(); callbackYa(); };
         }
-        function tutupModal() { document.getElementById('custom-modal').classList.remove('active'); }
+        function tutupModal() { document.getElementById('custom-modal'].classList.remove('active'); }
     </script>
     </body>
 </html>
