@@ -653,7 +653,7 @@
             });
         }
 
-        /* --- FITUR KONTROL HUKUMAN / LOCK AKUN --- */
+        /* --- FITUR KONTROL HUKUMAN / LOCK AKUN (DENGAN INPUT DURASI) --- */
         function bukaModalLockPromotorAdmin() {
             document.getElementById('modal-title').innerText = "Kontrol Hukuman / Lock Akun";
             
@@ -682,7 +682,7 @@
                 
                 <div id="wrapper-alasan-hukuman">
                     Pilih Alasan Hukuman:<br>
-                    <select id="admin-select-alasan">
+                    <select id="admin-select-alasan" style="margin-bottom: 12px;">
                         <option value="pulang tanpa keluar antrian">pulang tanpa keluar antrian</option>
                         <option value="istirahat tanpa keluar antrian">istirahat tanpa keluar antrian</option>
                         <option value="melayani tapi tidak menekan tombol sudah membawa customer">melayani tapi tidak menekan tombol sudah membawa customer</option>
@@ -691,6 +691,9 @@
                         <option value="Melanggar Aturan Toko">Melanggar Aturan Toko</option>
                         <option value="Lainnya">Lainnya</option>
                     </select>
+
+                    Durasi Hukuman (Menit):<br>
+                    <input type="number" id="admin-input-durasi-menit" value="15" min="1" max="1440" style="margin-top: 4px;">
                 </div>
             `;
 
@@ -712,10 +715,12 @@
             const selectSales = document.getElementById('admin-select-sales-lock');
             const selectStatus = document.getElementById('admin-select-status-lock');
             const selectAlasan = document.getElementById('admin-select-alasan');
+            const inputDurasi = document.getElementById('admin-input-durasi-menit');
 
             const namaSales = selectSales ? selectSales.value : "";
             const aksiLock = selectStatus ? selectStatus.value : "LOCK";
             const alasan = (aksiLock === "LOCK" && selectAlasan) ? selectAlasan.value : "";
+            const durasiMenit = (aksiLock === "LOCK" && inputDurasi) ? inputDurasi.value : "15";
 
             if (!namaSales) {
                 alert("Pilih promotor terlebih dahulu!");
@@ -734,7 +739,7 @@
 
                 let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
 
-                fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&t=${Date.now()}`)
+                fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
                     tutupModal();
