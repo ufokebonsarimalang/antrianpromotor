@@ -789,276 +789,281 @@
                 }
             }, 1000);
         }
-        function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
-            if (localActionActive) return;
+   // Ganti seluruh isi fungsi renderUIRental di halaman Promotor dengan ini:
+function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
+    if (localActionActive) return;
 
-            daftarAntrianGlobal = dataAntrian || [];
-            statusSistemGlobal = statusSistem || "BUKA";
-            
-            if (koordinatServer && koordinatServer.lat && koordinatServer.lng) {
-                koordinatToko.lat = koordinatServer.lat;
-                koordinatToko.lng = koordinatServer.lng;
-                koordinatToko.radius = Number(koordinatServer.radius) || 50;
-                localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
+    daftarAntrianGlobal = dataAntrian || [];
+    statusSistemGlobal = statusSistem || "BUKA";
+    
+    if (koordinatServer && koordinatServer.lat && koordinatServer.lng) {
+        koordinatToko.lat = koordinatServer.lat;
+        koordinatToko.lng = koordinatServer.lng;
+        koordinatToko.radius = Number(koordinatServer.radius) || 50;
+        localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
+    }
+
+    const badge = document.getElementById('badge-status-sistem');
+    badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
+    badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
+
+    let listHA = "", listAV = "";
+    let urutHA = 1, urutAV = 1;
+    const akunSaya = getAkunAktif().trim().toLowerCase();
+    let kategoriSayaAktif = "";
+
+    const dataStandby = daftarAntrianGlobal.filter(item => item.status === "Standby" || item.status === "Waktu Makan");
+    const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
+    const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
+
+    document.getElementById('promotor-nama-ha').textContent = promotorHA ? promotorHA.nama : "Belum Ada";
+    document.getElementById('promotor-nama-av').textContent = promotorAV ? promotorAV.nama : "Belum Ada";
+
+    if (daftarAntrianGlobal.length > 0) {
+        daftarAntrianGlobal.forEach((item) => {
+            let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
+            if (String(item.nama).trim().toLowerCase() === akunSaya) {
+                kategoriSayaAktif = kat;
             }
 
-            const badge = document.getElementById('badge-status-sistem');
-            badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
-            badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
+            let itemHtml = "";
+            if (item.status === "Standby" || item.status === "Waktu Makan") {
+                let urut = 1;
+                if (kat === "HA") urut = urutHA++;
+                else if (kat === "AV") urut = urutAV++;
 
-            let listHA = "", listAV = "";
-            let urutHA = 1, urutAV = 1;
-            const akunSaya = getAkunAktif().trim().toLowerCase();
-            let kategoriSayaAktif = "";
-
-            const dataStandby = daftarAntrianGlobal.filter(item => item.status === "Standby" || item.status === "Waktu Makan");
-            const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
-            const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
-
-            document.getElementById('promotor-nama-ha').textContent = promotorHA ? promotorHA.nama : "Belum Ada";
-            document.getElementById('promotor-nama-av').textContent = promotorAV ? promotorAV.nama : "Belum Ada";
-
-            if (daftarAntrianGlobal.length > 0) {
-                daftarAntrianGlobal.forEach((item) => {
-                    let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
-                    if (String(item.nama).trim().toLowerCase() === akunSaya) {
-                        kategoriSayaAktif = kat;
-                    }
-
-                    let itemHtml = "";
-                    if (item.status === "Standby" || item.status === "Waktu Makan") {
-                        let urut = 1;
-                        if (kat === "HA") urut = urutHA++;
-                        else if (kat === "AV") urut = urutAV++;
-
-                        let badgeHtml = "";
-                        if (item.status === "Waktu Makan") {
-                            badgeHtml = `<span class="badge-status-item badge-makan">Waktu Makan (${urut})</span>`;
-                        } else {
-                            badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
-                        }
-                        itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
-                    } else if (item.status === "Melayani") {
-                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
-                    } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
-                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/Gudang</span></li>`;
-                    } else if (item.status === "Ibadah") {
-                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-ibadah">Sedang Ibadah</span></li>`;
-                    }
-
-                    if (kat === "HA") listHA += itemHtml;
-                    else if (kat === "AV") listAV += itemHtml;
-                });
-            }
-
-            const kosongHtml = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian</span></li>";
-            document.getElementById('list-HA').innerHTML = listHA || kosongHtml;
-            document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
-
-            let statusSayaNyata = cekStatusSayaDariArray(daftarAntrianGlobal);
-            const sectionCheckinAwal = document.getElementById('section-checkin-awal');
-            const sectionNormal = document.getElementById('section-normal');
-            const sectionLocked = document.getElementById('section-akun-locked');
-
-            let isDilockAdmin = false;
-            let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
-            
-            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
-            
-            let sudahMakanDariServer = false;
-            if (dataSalesSaya) {
-                if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
-                
-                let waktuLockServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
-                if (waktuLockServer > 0) {
-                    window.waktuSelesaiLockGlobal = waktuLockServer;
-                }
-
-                let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
-                if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
-                    isDilockAdmin = true;
-                    pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
-                }
-            }
-
-            const btnDaftar = document.getElementById('btn-daftar-antrian');
-            const btnHadir = document.getElementById('btn-hadir');
-            const groupPilihKat = document.getElementById('group-pilih-kategori-normal');
-            const btnCustomer = document.getElementById('btn-utama-customer');
-            const btnMakan = document.getElementById('btn-waktu-makan');
-            const btnClosing = document.getElementById('btn-selesai-closing');
-            const btnCS = document.getElementById('btn-utama-cs');
-            const btnIbadah = document.getElementById('btn-utama-ibadah');
-            const btnKeluar = document.getElementById('btn-keluar-istirahat');
-
-            if (isDilockAdmin) {
-                sectionCheckinAwal.style.display = 'none';
-                sectionNormal.style.display = 'block';
-                groupPilihKat.style.display = 'block';
-                
-                sectionLocked.style.display = 'block';
-                document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
-
-                let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
-                
-                if (window.waktuSelesaiLockGlobal > new Date().getTime()) {
-                    if (sudahTerimaHukumanHP) {
-                        document.getElementById('btn-terima-hukuman').style.display = 'none';
-                        document.getElementById('wrapper-countdown-lock').style.display = 'block';
-                        jalankanHitungMundur();
-                    } else {
-                        document.getElementById('btn-terima-hukuman').style.display = 'block';
-                        document.getElementById('wrapper-countdown-lock').style.display = 'none';
-                    }
+                let badgeHtml = "";
+                if (item.status === "Waktu Makan") {
+                    badgeHtml = `<span class="badge-status-item badge-makan">Waktu Makan (${urut})</span>`;
                 } else {
-                    localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
-                    if (intervalCountdownLock) {
-                        clearInterval(intervalCountdownLock);
-                        intervalCountdownLock = null;
-                    }
+                    badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
                 }
+                itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
+            } else if (item.status === "Melayani") {
+                itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
+            } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
+                itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/Gudang</span></li>`;
+            } else if (item.status === "Ibadah") {
+                itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-ibadah">Sedang Ibadah</span></li>`;
+            }
 
-                if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
-                if (btnCustomer) { btnCustomer.style.display = 'none'; }
-                if (btnMakan) { btnMakan.style.display = 'none'; }
-                if (btnClosing) { btnClosing.style.display = 'none'; }
-                if (btnCS) { btnCS.style.display = 'none'; }
-                if (btnIbadah) { btnIbadah.style.display = 'none'; }
-                if (btnKeluar) { btnKeluar.style.display = 'none'; }
-                if (btnDaftar) { btnDaftar.style.display = 'none'; }
-                return; 
+            if (kat === "HA") listHA += itemHtml;
+            else if (kat === "AV") listAV += itemHtml;
+        });
+    }
+
+    const kosongHtml = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian</span></li>";
+    document.getElementById('list-HA').innerHTML = listHA || kosongHtml;
+    document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
+
+    let statusSayaNyata = cekStatusSayaDariArray(daftarAntrianGlobal);
+    const sectionCheckinAwal = document.getElementById('section-checkin-awal');
+    const sectionNormal = document.getElementById('section-normal');
+    const sectionLocked = document.getElementById('section-akun-locked');
+
+    let isDilockAdmin = false;
+    let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
+    
+    const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+    
+    let sudahMakanDariServer = false;
+    if (dataSalesSaya) {
+        if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
+        
+        let waktuLockServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+        // Hanya update waktuSelesaiLockGlobal jika server mengirim nilai yang valid dan masa hukuman belum habis
+        if (waktuLockServer > new Date().getTime()) {
+            window.waktuSelesaiLockGlobal = waktuLockServer;
+        }
+
+        let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
+        if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
+            isDilockAdmin = true;
+            pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
+        }
+    }
+
+    const btnDaftar = document.getElementById('btn-daftar-antrian');
+    const btnHadir = document.getElementById('btn-hadir');
+    const groupPilihKat = document.getElementById('group-pilih-kategori-normal');
+    const btnCustomer = document.getElementById('btn-utama-customer');
+    const btnMakan = document.getElementById('btn-waktu-makan');
+    const btnClosing = document.getElementById('btn-selesai-closing');
+    const btnCS = document.getElementById('btn-utama-cs');
+    const btnIbadah = document.getElementById('btn-utama-ibadah');
+    const btnKeluar = document.getElementById('btn-keluar-istirahat');
+
+    if (isDilockAdmin) {
+        sectionCheckinAwal.style.display = 'none';
+        sectionNormal.style.display = 'block';
+        groupPilihKat.style.display = 'block';
+        
+        sectionLocked.style.display = 'block';
+        document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
+
+        let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
+        
+        // Pengecekan aman menggunakan window.waktuSelesaiLockGlobal
+        if (window.waktuSelesaiLockGlobal > new Date().getTime()) {
+            if (sudahTerimaHukumanHP) {
+                document.getElementById('btn-terima-hukuman').style.display = 'none';
+                document.getElementById('wrapper-countdown-lock').style.display = 'block';
+                jalankanHitungMundur();
             } else {
-                if (sectionLocked) sectionLocked.style.display = 'none';
-                if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
-                localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                document.getElementById('btn-terima-hukuman').style.display = 'block';
+                document.getElementById('wrapper-countdown-lock').style.display = 'none';
+            }
+        } else {
+            localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+            if (window.waktuSelesaiLockGlobal > 0 && window.waktuSelesaiLockGlobal <= new Date().getTime()) {
                 if (intervalCountdownLock) {
                     clearInterval(intervalCountdownLock);
                     intervalCountdownLock = null;
                 }
             }
-
-            let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
-
-            if (statusSayaNyata !== "belum_ada") {
-                sectionCheckinAwal.style.display = 'none';
-                sectionNormal.style.display = 'block';
-            } else if (!sudahCheckinPernahHariIni) {
-                sectionCheckinAwal.style.display = 'block';
-                sectionNormal.style.display = 'none';
-                
-                if (navigator.geolocation && koordinatToko.lat) {
-                    navigator.geolocation.getCurrentPosition(pos => {
-                        initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, pos.coords.latitude, pos.coords.longitude);
-                    }, () => {}, {maximumAge: 30000});
-                }
-            } else {
-                sectionCheckinAwal.style.display = 'none';
-                sectionNormal.style.display = 'block';
-            }
-
-            if (statusSayaNyata === "belum_ada") {
-                groupPilihKat.style.display = "block";
-                btnDaftar.style.display = "block";
-                btnCustomer.style.display = "none";
-                btnMakan.style.display = "none";
-                btnClosing.style.display = "none";
-                btnCS.style.display = "none";
-                btnIbadah.style.display = "none";
-                btnKeluar.style.display = "none";
-
-                if (statusSistemGlobal === "TUTUP") {
-                    btnDaftar.disabled = true; btnDaftar.className = "btn-success btn-disabled";
-                } else {
-                    btnDaftar.disabled = false; btnDaftar.className = "btn-success btn-pulse";
-                }
-            } else {
-                groupPilihKat.style.display = "none";
-                btnDaftar.style.display = "none";
-
-                if (statusSayaNyata === "Standby") {
-                    btnCustomer.style.display = "block"; 
-                    btnClosing.style.display = "none";
-                    btnCS.style.display = "block"; btnCS.innerText = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; btnCS.className = "btn-purple"; btnCS.disabled = false;
-                    btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
-                    btnKeluar.style.display = "block";
-
-                    let listSubStandby = daftarAntrianGlobal.filter(it => (it.status === "Standby" || it.status === "Waktu Makan") && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
-                    let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
-                    let apakahSayaUrutanPertama = (indexSaya === 0);
-
-                    if (apakahSayaUrutanPertama) {
-                        btnMakan.style.display = "block";
-                        
-                        const cacheSudahMakan = localStorage.getItem('ufo_sudah_makan_' + akunSaya) === 'true';
-
-                        if (sudahMakanDariServer || cacheSudahMakan) {
-                            btnMakan.disabled = true;
-                            btnMakan.className = "btn-success btn-disabled";
-                            btnMakan.innerText = "SUDAH MAKAN HARI INI";
-                        } else if (statusSistemGlobal === "TUTUP") {
-                            btnMakan.disabled = true;
-                            btnMakan.className = "btn-gold-pulse btn-disabled";
-                            btnMakan.innerText = "WAKTU MAKAN";
-                        } else {
-                            btnMakan.disabled = false;
-                            btnMakan.className = "btn-gold-pulse";
-                            btnMakan.innerText = "WAKTU MAKAN";
-                        }
-                    } else {
-                        btnMakan.style.display = "none"; 
-                    }
-
-                    if (statusSistemGlobal === "TUTUP") {
-                        btnCustomer.disabled = true; btnCustomer.className = "btn-customer btn-disabled";
-                        btnCS.disabled = true; btnCS.className = "btn-purple btn-disabled";
-                        btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
-                        btnKeluar.disabled = true; btnKeluar.className = "btn-maroon btn-disabled";
-                    } else {
-                        let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
-
-                        btnCustomer.disabled = !apakahSayaBisaAmbil; 
-                        btnCustomer.className = apakahSayaBisaAmbil ? "btn-customer btn-pulse" : "btn-customer btn-disabled";
-                        btnCS.disabled = false; btnCS.className = "btn-purple";
-                        btnIbadah.disabled = false; btnIbadah.className = "btn-indigo";
-                        btnKeluar.disabled = false; btnKeluar.className = "btn-maroon";
-                    }
-                } else if (statusSayaNyata === "Waktu Makan") {
-                    btnCustomer.style.display = "none";
-                    btnClosing.style.display = "none";
-                    btnCS.style.display = "none";
-                    btnIbadah.style.display = "none";
-                    btnKeluar.style.display = "none";
-
-                    btnMakan.style.display = "block";
-                    btnMakan.innerText = "SELESAI MAKAN (KEMBALI ANTRI)";
-                    btnMakan.className = "btn-teal";
-                    btnMakan.disabled = false;
-                } else if (statusSayaNyata === "Melayani") {
-                    btnCustomer.style.display = "none"; 
-                    btnMakan.style.display = "none"; 
-                    btnClosing.style.display = "block";
-                    btnCS.style.display = "none"; btnIbadah.style.display = "none"; btnKeluar.style.display = "none";
-                } else if (statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") {
-                    btnCustomer.style.display = "none"; 
-                    btnMakan.style.display = "none"; 
-                    btnClosing.style.display = "none";
-                    btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal"; btnCS.disabled = false;
-                    btnIbadah.style.display = "none";
-                    btnKeluar.style.display = "none";
-                } else if (statusSayaNyata === "Ibadah") {
-                    btnCustomer.style.display = "none";
-                    btnMakan.style.display = "none";
-                    btnClosing.style.display = "none";
-                    btnCS.style.display = "none";
-                    btnKeluar.style.display = "none";
-                    
-                    btnIbadah.style.display = "block"; 
-                    btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)"; 
-                    btnIbadah.className = "btn-teal"; 
-                    btnIbadah.disabled = false;
-                }
-            }
         }
+
+        if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
+        if (btnCustomer) { btnCustomer.style.display = 'none'; }
+        if (btnMakan) { btnMakan.style.display = 'none'; }
+        if (btnClosing) { btnClosing.style.display = 'none'; }
+        if (btnCS) { btnCS.style.display = 'none'; }
+        if (btnIbadah) { btnIbadah.style.display = 'none'; }
+        if (btnKeluar) { btnKeluar.style.display = 'none'; }
+        if (btnDaftar) { btnDaftar.style.display = 'none'; }
+        return; 
+    } else {
+        if (sectionLocked) sectionLocked.style.display = 'none';
+        if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
+        localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+        if (intervalCountdownLock) {
+            clearInterval(intervalCountdownLock);
+            intervalCountdownLock = null;
+        }
+    }
+
+    let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
+
+    if (statusSayaNyata !== "belum_ada") {
+        sectionCheckinAwal.style.display = 'none';
+        sectionNormal.style.display = 'block';
+    } else if (!sudahCheckinPernahHariIni) {
+        sectionCheckinAwal.style.display = 'block';
+        sectionNormal.style.display = 'none';
+        
+        if (navigator.geolocation && koordinatToko.lat) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, pos.coords.latitude, pos.coords.longitude);
+            }, () => {}, {maximumAge: 30000});
+        }
+    } else {
+        sectionCheckinAwal.style.display = 'none';
+        sectionNormal.style.display = 'block';
+    }
+
+    if (statusSayaNyata === "belum_ada") {
+        groupPilihKat.style.display = "block";
+        btnDaftar.style.display = "block";
+        btnCustomer.style.display = "none";
+        btnMakan.style.display = "none";
+        btnClosing.style.display = "none";
+        btnCS.style.display = "none";
+        btnIbadah.style.display = "none";
+        btnKeluar.style.display = "none";
+
+        if (statusSistemGlobal === "TUTUP") {
+            btnDaftar.disabled = true; btnDaftar.className = "btn-success btn-disabled";
+        } else {
+            btnDaftar.disabled = false; btnDaftar.className = "btn-success btn-pulse";
+        }
+    } else {
+        groupPilihKat.style.display = "none";
+        btnDaftar.style.display = "none";
+
+        if (statusSayaNyata === "Standby") {
+            btnCustomer.style.display = "block"; 
+            btnClosing.style.display = "none";
+            btnCS.style.display = "block"; btnCS.innerText = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; btnCS.className = "btn-purple"; btnCS.disabled = false;
+            btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
+            btnKeluar.style.display = "block";
+
+            let listSubStandby = daftarAntrianGlobal.filter(it => (it.status === "Standby" || it.status === "Waktu Makan") && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
+            let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
+            let apakahSayaUrutanPertama = (indexSaya === 0);
+
+            if (apakahSayaUrutanPertama) {
+                btnMakan.style.display = "block";
+                
+                const cacheSudahMakan = localStorage.getItem('ufo_sudah_makan_' + akunSaya) === 'true';
+
+                if (sudahMakanDariServer || cacheSudahMakan) {
+                    btnMakan.disabled = true;
+                    btnMakan.className = "btn-success btn-disabled";
+                    btnMakan.innerText = "SUDAH MAKAN HARI INI";
+                } else if (statusSistemGlobal === "TUTUP") {
+                    btnMakan.disabled = true;
+                    btnMakan.className = "btn-gold-pulse btn-disabled";
+                    btnMakan.innerText = "WAKTU MAKAN";
+                } else {
+                    btnMakan.disabled = false;
+                    btnMakan.className = "btn-gold-pulse";
+                    btnMakan.innerText = "WAKTU MAKAN";
+                }
+            } else {
+                btnMakan.style.display = "none"; 
+            }
+
+            if (statusSistemGlobal === "TUTUP") {
+                btnCustomer.disabled = true; btnCustomer.className = "btn-customer btn-disabled";
+                btnCS.disabled = true; btnCS.className = "btn-purple btn-disabled";
+                btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
+                btnKeluar.disabled = true; btnKeluar.className = "btn-maroon btn-disabled";
+            } else {
+                let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
+
+                btnCustomer.disabled = !apakahSayaBisaAmbil; 
+                btnCustomer.className = apakahSayaBisaAmbil ? "btn-customer btn-pulse" : "btn-customer btn-disabled";
+                btnCS.disabled = false; btnCS.className = "btn-purple";
+                btnIbadah.disabled = false; btnIbadah.className = "btn-indigo";
+                btnKeluar.disabled = false; btnKeluar.className = "btn-maroon";
+            }
+        } else if (statusSayaNyata === "Waktu Makan") {
+            btnCustomer.style.display = "none";
+            btnClosing.style.display = "none";
+            btnCS.style.display = "none";
+            btnIbadah.style.display = "none";
+            btnKeluar.style.display = "none";
+
+            btnMakan.style.display = "block";
+            btnMakan.innerText = "SELESAI MAKAN (KEMBALI ANTRI)";
+            btnMakan.className = "btn-teal";
+            btnMakan.disabled = false;
+        } else if (statusSayaNyata === "Melayani") {
+            btnCustomer.style.display = "none"; 
+            btnMakan.style.display = "none"; 
+            btnClosing.style.display = "block";
+            btnCS.style.display = "none"; btnIbadah.style.display = "none"; btnKeluar.style.display = "none";
+        } else if (statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") {
+            btnCustomer.style.display = "none"; 
+            btnMakan.style.display = "none"; 
+            btnClosing.style.display = "none";
+            btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal"; btnCS.disabled = false;
+            btnIbadah.style.display = "none";
+            btnKeluar.style.display = "none";
+        } else if (statusSayaNyata === "Ibadah") {
+            btnCustomer.style.display = "none";
+            btnMakan.style.display = "none";
+            btnClosing.style.display = "none";
+            btnCS.style.display = "none";
+            btnKeluar.style.display = "none";
+            
+            btnIbadah.style.display = "block"; 
+            btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)"; 
+            btnIbadah.className = "btn-teal"; 
+            btnIbadah.disabled = false;
+        }
+    }
+}
 
       function muatDataAntrian() {
     if (localActionActive) return;
