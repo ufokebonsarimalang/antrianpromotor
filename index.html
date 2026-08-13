@@ -1098,19 +1098,21 @@
             });
         }
 
-        function aksiDaftarAntrianNormal() {
+      function aksiDaftarAntrianNormal() {
             const btn = document.getElementById('btn-daftar-antrian');
             setButtonLoading(btn, true, "Daftar Antrian");
 
+            // Validasi GPS terlebih dahulu sebelum daftar antrian diizinkan
             validasiGpsDanJalankan(function() {
+                // Berhasil dalam radius toko
                 setButtonLoading(btn, false, "Daftar Antrian");
                 const kategoriPilih = document.getElementById('pilih-kategori-normal').value;
                 eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
             }, function() {
+                // Gagal / di luar radius toko
                 setButtonLoading(btn, false, "Daftar Antrian");
             });
         }
-
         function aksiUtamaCustomer() {
             tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
                 eksekusiAksiInstan('ambilAntrian', 'Melayani');
