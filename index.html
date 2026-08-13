@@ -712,6 +712,18 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
+        // FUNGSI KONVERSI WAKTU SINKRON DENGAN ADMIN SETTINGS
+        function hitungTargetEpochLock(rawWaktuSelesai) {
+            let val = Number(rawWaktuSelesai) || 0;
+            if (val <= 0) return 0;
+            
+            // Jika nilai dari admin berupa jumlah menit (misal kurang dari 100000000), kalikan dengan 60000 milidetik
+            if (val < 1000000000) {
+                return new Date().getTime() + (val * 60 * 1000);
+            }
+            return val; // Jika sudah berupa epoch timestamp murni
+        }
+
         function mulaiTimerHukumanPromotor() {
             const akunSaya = getAkunAktif().trim().toLowerCase();
             const btnTerima = document.getElementById('btn-terima-hukuman');
@@ -721,16 +733,16 @@
             if (wrapperCountdown) wrapperCountdown.style.display = 'block';
 
             const dataSalesSaya = masterSalesGlobal.find(s => s && s.nama && String(s.nama).trim().toLowerCase() === akunSaya);
-            let waktuSelesaiServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+            let waktuTarget = dataSalesSaya ? hitungTargetEpochLock(dataSalesSaya.waktuSelesaiLock) : 0;
 
-            if (!waktuSelesaiServer || waktuSelesaiServer <= new Date().getTime()) {
-                waktuSelesaiServer = new Date().getTime() + (5 * 60 * 1000);
+            if (!waktuTarget || waktuTarget <= new Date().getTime()) {
+                waktuTarget = new Date().getTime() + (5 * 60 * 1000); // Default aman 5 menit
             }
 
-            localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, waktuSelesaiServer);
+            localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, waktuTarget);
             localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
             
-            jalankanHitungMundur(waktuSelesaiServer);
+            jalankanHitungMundur(waktuTarget);
         }
 
         function jalankanHitungMundur(targetEpoch) {
@@ -837,11 +849,11 @@
             
             const dataSalesSaya = masterSalesGlobal.find(s => s && s.nama && String(s.nama).trim().toLowerCase() === akunSaya);
             let sudahMakanDariServer = false;
-            let waktuSelesaiServer = 0;
+            let waktuTargetServer = 0;
 
             if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
-                waktuSelesaiServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+                waktuTargetServer = hitungTargetEpochLock(dataSalesSaya.waktuSelesaiLock);
                 
                 let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
                 if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
@@ -851,8 +863,8 @@
             }
 
             let savedWaktuLock = Number(localStorage.getItem('ufo_waktu_selesai_lock_' + akunSaya)) || 0;
-            if (waktuSelesaiServer > 0 && waktuSelesaiServer !== savedWaktuLock) {
-                savedWaktuLock = waktuSelesaiServer;
+            if (waktuTargetServer > 0 && waktuTargetServer !== savedWaktuLock) {
+                savedWaktuLock = waktuTargetServer;
                 localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, savedWaktuLock);
             }
 
