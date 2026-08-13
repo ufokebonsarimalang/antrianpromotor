@@ -756,10 +756,9 @@
                 }).catch(() => { tutupModal(); selesai(); });
             });
         }
-
-        function bukaModalResetTotal() {
-            document.getElementById('modal-title').innerText = 'Reset Semua Antrian';
-            document.getElementById('modal-desc').innerHTML = `⚠️ <b>PERINGATAN:</b><br>Seluruh data antrian akan dihapus dari sistem.`;
+function bukaModalResetTotal() {
+            document.getElementById('modal-title').innerText = 'Reset Semua Antrian & Log';
+            document.getElementById('modal-desc').innerHTML = `⚠️ <b>PERINGATAN:</b><br>Seluruh data antrian aktif beserta log riwayat melayani akan dihapus secara total dari sistem. Lanjutkan?`;
             document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiResetTotal()">Reset Sekarang</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
@@ -768,17 +767,26 @@
             const btnOk = document.getElementById('btn-modal-action-ok');
             if (btnOk) {
                 btnOk.disabled = true;
-                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+                btnOk.innerHTML = `<span class="spinner"></span> Memproses Reset...`;
             }
             amanKlikAdmin(function(selesai) {
                 const pin = getActivePinAdmin();
                 if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
+                
                 fetch(`${SCRIPT_URL}?aksi=adminResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
                 .then(res => res.json()).then(res => {
                     tutupModal();
-                    tampilkanModal("Reset Total", res.pesan);
-                    muatDataAntrian(); selesai();
-                }).catch(() => { tutupModal(); selesai(); });
+                    tampilkanModal("Reset Total", res.pesan || "Semua antrian dan log berhasil direset.");
+                    
+                    // Bersihkan cache lokal admin juga agar tampilan langsung bersih
+                    localStorage.removeItem('ufo_admin_antrian_cache');
+                    
+                    muatDataAntrian(); 
+                    selesai();
+                }).catch(() => { 
+                    tutupModal(); 
+                    selesai(); 
+                });
             });
         }
 
