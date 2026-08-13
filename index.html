@@ -741,7 +741,7 @@
             jalankanHitungMundur();
         }
 
-        function jalankanHitungMundur() {
+       function jalankanHitungMundur() {
             if (intervalCountdownLock) return;
 
             intervalCountdownLock = setInterval(() => {
@@ -752,15 +752,26 @@
                 if (selisihDetik <= 0) {
                     clearInterval(intervalCountdownLock);
                     intervalCountdownLock = null;
+                    
                     const wrapperEl = document.getElementById('wrapper-countdown-lock');
-                    if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
+                    if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Membuka akses...</b>";
                     
-                    localStorage.removeItem('ufo_terima_hukuman_' + getAkunAktif());
+                    // 1. Bersihkan status hukuman di memori lokal HP secara instan
+                    const akunSaya = getAkunAktif().trim().toLowerCase();
+                    localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
                     
-                    // Panggil paksa refresh data server agar status lock bersih total
+                    // 2. Ubah variabel global agar UI langsung berubah tanpa menunggu reload
+                    window.waktuSelesaiLockGlobal = 0;
+                    
+                    // 3. Paksa ambil data terbaru dari server untuk memastikan database sudah bersih
                     muatMasterSales();
                     muatDataAntrian();
-                    setTimeout(() => { window.location.reload(); }, 1000);
+                    
+                    // 4. Beri jeda 2 detik agar server sempat memproses, lalu muat ulang bersih
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+
                 } else {
                     let menit = Math.floor(selisihDetik / 60);
                     let detik = selisihDetik % 60;
@@ -771,7 +782,6 @@
                 }
             }, 1000);
         }
-
         function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
             if (localActionActive) return;
 
