@@ -720,15 +720,14 @@
             if (btnTerima) btnTerima.style.display = 'none';
             if (wrapperCountdown) wrapperCountdown.style.display = 'block';
 
-            // Set durasi hukuman 5 menit (300 detik) dari sekarang secara lokal agar timer langsung jalan
-            let waktuSelesaiTarget = new Date().getTime() + (5 * 60 * 1000);
-            
             const dataSalesSaya = masterSalesGlobal.find(s => s && s.nama && String(s.nama).trim().toLowerCase() === akunSaya);
-            if (dataSalesSaya && dataSalesSaya.waktuSelesaiLock && Number(dataSalesSaya.waktuSelesaiLock) > 0) {
-                waktuSelesaiTarget = Number(dataSalesSaya.waktuSelesaiLock);
+            let waktuSelesaiServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+
+            if (!waktuSelesaiServer || waktuSelesaiServer <= new Date().getTime()) {
+                waktuSelesaiServer = new Date().getTime() + (5 * 60 * 1000);
             }
 
-            localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, waktuSelesaiTarget);
+            localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, waktuSelesaiServer);
             localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
             
             jalankanHitungMundur();
@@ -864,6 +863,13 @@
                 }
             }
 
+            let savedWaktuLock = Number(localStorage.getItem('ufo_waktu_selesai_lock_' + akunSaya)) || 0;
+            if (savedWaktuLock > 0 && savedWaktuLock <= new Date().getTime()) {
+                isDilockAdmin = false;
+                localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                localStorage.removeItem('ufo_waktu_selesai_lock_' + akunSaya);
+            }
+
             const btnDaftar = document.getElementById('btn-daftar-antrian');
             const btnHadir = document.getElementById('btn-hadir');
             const groupPilihKat = document.getElementById('group-pilih-kategori-normal');
@@ -873,13 +879,6 @@
             const btnCS = document.getElementById('btn-utama-cs');
             const btnIbadah = document.getElementById('btn-utama-ibadah');
             const btnKeluar = document.getElementById('btn-keluar-istirahat');
-
-            let savedWaktuLock = Number(localStorage.getItem('ufo_waktu_selesai_lock_' + akunSaya)) || 0;
-            if (savedWaktuLock > 0 && savedWaktuLock <= new Date().getTime()) {
-                isDilockAdmin = false;
-                localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
-                localStorage.removeItem('ufo_waktu_selesai_lock_' + akunSaya);
-            }
 
             if (isDilockAdmin) {
                 sectionCheckinAwal.style.display = 'none';
@@ -899,16 +898,7 @@
                     document.getElementById('btn-terima-hukuman').style.display = 'block';
                     document.getElementById('wrapper-countdown-lock').style.display = 'none';
                 }
-            } else {
-                if (sectionLocked) sectionLocked.style.display = 'none';
-                if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
-                if (intervalCountdownLock && !isDilockAdmin) {
-                    clearInterval(intervalCountdownLock);
-                    intervalCountdownLock = null;
-                }
-            }
 
-            if (isDilockAdmin) {
                 if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
                 if (btnCustomer) { btnCustomer.style.display = 'none'; }
                 if (btnMakan) { btnMakan.style.display = 'none'; }
@@ -918,6 +908,12 @@
                 if (btnKeluar) { btnKeluar.style.display = 'none'; }
                 if (btnDaftar) { btnDaftar.style.display = 'none'; }
                 return; 
+            } else {
+                if (sectionLocked) sectionLocked.style.display = 'none';
+                if (intervalCountdownLock) {
+                    clearInterval(intervalCountdownLock);
+                    intervalCountdownLock = null;
+                }
             }
             
             let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
