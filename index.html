@@ -730,34 +730,42 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
-        function mulaiTimerHukumanPromotor() {
-            const btnTerima = document.getElementById('btn-terima-hukuman');
-            const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
-            
-            if (btnTerima) btnTerima.style.display = 'none';
-            if (wrapperCountdown) wrapperCountdown.style.display = 'block';
+       function mulaiTimerHukumanPromotor() {
+    const btnTerima = document.getElementById('btn-terima-hukuman');
+    const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+    
+    if (btnTerima) btnTerima.style.display = 'none';
+    if (wrapperCountdown) wrapperCountdown.style.display = 'block';
 
-            const akunSaya = getAkunAktif().trim().toLowerCase();
-            localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
+    const akunSaya = getAkunAktif().trim().toLowerCase();
+    localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
 
-            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
-            let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
-            let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+    const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+    let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+    
+    // AMBIL DURASI DARI INPUTAN / CACHE SERVER ATAU SET 15 MENIT JIKA KOSONG
+    let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
 
-            if (waktuServer > new Date().getTime()) {
-                window.waktuSelesaiLockGlobal = waktuServer;
-            } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
-                window.waktuSelesaiLockGlobal = Number(savedDeadline);
-            } else if (waktuServer > 0) {
-                window.waktuSelesaiLockGlobal = waktuServer;
-            } else {
-                window.waktuSelesaiLockGlobal = new Date().getTime() + (15 * 60 * 1000);
-            }
-
-            localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
-
-            jalankanHitungMundur();
+    if (waktuServer > new Date().getTime()) {
+        window.waktuSelesaiLockGlobal = waktuServer;
+        localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
+    } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+        window.waktuSelesaiLockGlobal = Number(savedDeadline);
+    } else if (waktuServer > 0) {
+        window.waktuSelesaiLockGlobal = waktuServer;
+    } else {
+        // PERBAIKAN: Jika server mengirim 0 atau tidak ada, cek apakah ada sisa durasi atau gunakan waktu server murni
+        // Ambil dari data sales jika ada, jika tidak default ke durasi yang di-input admin
+        let durasiMenitAktif = 15; 
+        if (dataSalesSaya && dataSalesSaya.durasiMenit) {
+            durasiMenitAktif = Number(dataSalesSaya.durasiMenit);
         }
+        window.waktuSelesaiLockGlobal = new Date().getTime() + (durasiMenitAktif * 60 * 1000);
+        localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
+    }
+
+    jalankanHitungMundur();
+}
 
         function jalankanHitungMundur() {
             if (intervalCountdownLock) return;
