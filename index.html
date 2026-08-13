@@ -730,7 +730,7 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
-       function mulaiTimerHukumanPromotor() {
+    function mulaiTimerHukumanPromotor() {
     const btnTerima = document.getElementById('btn-terima-hukuman');
     const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
     
@@ -740,10 +740,13 @@
     const akunSaya = getAkunAktif();
     localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
 
-    // Pastikan window.waktuSelesaiLockGlobal memiliki nilai minimal 15 menit dari sekarang jika dari server masih 0
+    // Jika waktuSelesaiLockGlobal dari server belum ada, set default 15 menit
     if (!window.waktuSelesaiLockGlobal || window.waktuSelesaiLockGlobal <= new Date().getTime()) {
         window.waktuSelesaiLockGlobal = new Date().getTime() + (15 * 60 * 1000); 
     }
+
+    // Simpan waktu selesai ke localStorage khusus HP ini agar aman dari refresh data berkala
+    localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
 
     jalankanHitungMundur();
 }
@@ -751,7 +754,13 @@
 function jalankanHitungMundur() {
     if (intervalCountdownLock) return;
 
-    // Langsung hitung detik pertama agar tidak ada jeda 1 detik di awal
+    // Ambil deadline dari localStorage jika ada yang tersimpan agar konsisten
+    const akunSaya = getAkunAktif();
+    let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+    if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+        window.waktuSelesaiLockGlobal = Number(savedDeadline);
+    }
+
     updateTampilanTimer();
 
     intervalCountdownLock = setInterval(() => {
@@ -765,16 +774,26 @@ function updateTampilanTimer() {
     let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
 
     const spanEl = document.getElementById('span-waktu-mundur');
+    const btnTerima = document.getElementById('btn-terima-hukuman');
+    const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+
+    // Pastikan tombol terima hukuman tetap disembunyikan selama timer berjalan
+    if (btnTerima && btnTerima.style.display !== 'none') {
+        btnTerima.style.display = 'none';
+    }
+    if (wrapperCountdown && wrapperCountdown.style.display !== 'block') {
+        wrapperCountdown.style.display = 'block';
+    }
 
     if (selisihDetik <= 0) {
         if (intervalCountdownLock) {
             clearInterval(intervalCountdownLock);
             intervalCountdownLock = null;
         }
-        const wrapperEl = document.getElementById('wrapper-countdown-lock');
-        if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
+        if (wrapperCountdown) wrapperCountdown.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
         
         localStorage.removeItem('ufo_terima_hukuman_' + getAkunAktif());
+        localStorage.removeItem('ufo_lock_deadline_' + getAkunAktif());
         setTimeout(() => { window.location.reload(); }, 1500);
     } else {
         let menit = Math.floor(selisihDetik / 60);
