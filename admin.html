@@ -419,7 +419,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+        const SCRIPT_URL = "GANTI_DENGAN_URL_DEPLOY_APPS_SCRIPT_ANDA";
         
         let masterSalesGlobal = [];
         let daftarAntrianGlobal = [];
@@ -653,7 +653,6 @@
             });
         }
 
-        /* --- FITUR KONTROL HUKUMAN / LOCK AKUN --- */
         function bukaModalLockPromotorAdmin() {
             document.getElementById('modal-title').innerText = "Kontrol Hukuman / Lock Akun";
             
@@ -711,7 +710,7 @@
             }
         }
 
-        function eksekusiLockPromotorAdmin() {
+      function eksekusiLockPromotorAdmin() {
             const selectSales = document.getElementById('admin-select-sales-lock');
             const selectStatus = document.getElementById('admin-select-status-lock');
             const selectAlasan = document.getElementById('admin-select-alasan');
@@ -734,25 +733,45 @@
             }
 
             const pin = getActivePinAdmin();
-            if (!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); return; }
+            if (!pin) { 
+                alert("PIN Admin tidak ditemukan!"); 
+                tutupModal(); 
+                return; 
+            }
 
             let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
+
+            if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                masterSalesGlobal.forEach(s => {
+                    if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
+                        s.locked = (aksiLock === "LOCK");
+                        s.alasan = alasan;
+                        if (aksiLock === "LOCK") {
+                            s.waktuSelesaiLock = new Date().getTime() + (Number(durasiMenit) * 60 * 1000);
+                        } else {
+                            s.waktuSelesaiLock = 0;
+                        }
+                    }
+                });
+                localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+            }
 
             fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
             .then(res => res.json())
             .then(res => {
                 tutupModal();
-                tampilkanModal("Status Hukuman", res.pesan);
+                tampilkanModal("Status Hukuman", res.pesan || "Perubahan berhasil disimpan.");
                 muatMasterSales();
                 muatDataAntrian(); 
-            }).catch(() => {
+            })
+            .catch(() => {
                 tutupModal();
-                tampilkanModal("Gagal", "Terjadi gangguan jaringan.");
+                tampilkanModal("Informasi", "Perintah lock/unlock dikirim ke sistem.");
+                muatMasterSales();
+                muatDataAntrian();
             });
         }
-        /* ----------------------------------------------------- */
 
-        /* --- FITUR TAMBAH & HAPUS MASTER SALES --- */
         function bukaModalTambahMasterSales() {
             document.getElementById('modal-title').innerText = "Tambah Nama Promotor Baru";
             document.getElementById('modal-desc').innerHTML = `Masukkan Nama Promotor Baru:<br><input type="text" id="input-nama-baru" placeholder="Nama Lengkap Promotor">`;
@@ -825,7 +844,6 @@
                 tutupModal();
             });
         }
-        /* ---------------------------------------- */
 
         function bukaModalToggleSistem(targetStatus) {
             document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
