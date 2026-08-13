@@ -653,56 +653,7 @@
             });
         }
 
-        function bukaModalLockPromotorAdmin() {
-            document.getElementById('modal-title').innerText = "Kontrol Hukuman / Lock Akun";
-            
-            if (!masterSalesGlobal || masterSalesGlobal.length === 0) {
-                const cachedSales = localStorage.getItem('ufo_master_sales_cache');
-                if (cachedSales) { try { masterSalesGlobal = JSON.parse(cachedSales); } catch(e) {} }
-            }
-
-            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
-            if (masterSalesGlobal && masterSalesGlobal.length > 0) {
-                masterSalesGlobal.forEach(n => { 
-                    let nama = typeof n === 'object' ? n.nama : n; 
-                    optionsSales += `<option value="${nama}">${nama}</option>`; 
-                });
-            }
-
-            document.getElementById('modal-desc').innerHTML = `
-                Pilih Promotor:<br>
-                <select id="admin-select-sales-lock" style="margin-bottom: 12px;">${optionsSales}</select>
-                
-                Pilih Aksi:<br>
-                <select id="admin-select-status-lock" style="margin-bottom: 12px;" onchange="toggleAlasanLockField(this.value)">
-                    <option value="LOCK">🔒 Kunci Akun (Beri Hukuman)</option>
-                    <option value="UNLOCK">🔓 Buka Akun (Lepas Hukuman)</option>
-                </select>
-                
-                <div id="wrapper-alasan-hukuman">
-                    Pilih Alasan Hukuman:<br>
-                    <select id="admin-select-alasan" style="margin-bottom: 12px;">
-                        <option value="pulang tanpa keluar antrian">pulang tanpa keluar antrian</option>
-                        <option value="istirahat tanpa keluar antrian">istirahat tanpa keluar antrian</option>
-                        <option value="melayani tapi tidak menekan tombol sudah membawa customer">melayani tapi tidak menekan tombol sudah membawa customer</option>
-                        <option value="Terlambat Masuk / Absen">Terlambat Masuk / Absen</option>
-                        <option value="Meninggalkan Posisi Tanpa Izin">Meninggalkan Posisi Tanpa Izin</option>
-                        <option value="Melanggar Aturan Toko">Melanggar Aturan Toko</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-
-                    Durasi Hukuman (Menit):<br>
-                    <input type="number" id="admin-input-durasi-menit" value="15" min="1" max="1440" style="margin-top: 4px;">
-                </div>
-            `;
-
-            document.getElementById('modal-actions').innerHTML = `
-                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiLockPromotorAdmin()">Proses</button>
-            `;
-            document.getElementById('custom-modal').classList.add('active');
-        }
-
+       bukaModalLockPromotorAdmin
         function toggleAlasanLockField(nilaiAksi) {
             const wrapperAlasan = document.getElementById('wrapper-alasan-hukuman');
             if (wrapperAlasan) {
