@@ -687,7 +687,133 @@
             });
         }
 
-       bukaModalLockPromotorAdmin
+      function bukaModalLockPromotorAdmin() {
+            document.getElementById('modal-title').innerText = "Kontrol Hukuman / Lock Akun";
+            
+            if (!masterSalesGlobal || masterSalesGlobal.length === 0) {
+                const cachedSales = localStorage.getItem('ufo_master_sales_cache');
+                if (cachedSales) { try { masterSalesGlobal = JSON.parse(cachedSales); } catch(e) {} }
+            }
+
+            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
+            if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                masterSalesGlobal.forEach(n => { 
+                    let nama = typeof n === 'object' ? n.nama : n; 
+                    optionsSales += `<option value="${nama}">${nama}</option>`; 
+                });
+            }
+
+            document.getElementById('modal-desc').innerHTML = `
+                Pilih Promotor:<br>
+                <select id="admin-select-sales-lock" style="margin-bottom: 12px;">${optionsSales}</select>
+                
+                Pilih Aksi:<br>
+                <select id="admin-select-status-lock" style="margin-bottom: 12px;" onchange="toggleAlasanLockField(this.value)">
+                    <option value="LOCK">🔒 Kunci Akun (Beri Hukuman)</option>
+                    <option value="UNLOCK">🔓 Buka Akun (Lepas Hukuman)</option>
+                </select>
+                
+                <div id="wrapper-alasan-hukuman">
+                    Pilih Alasan Hukuman:<br>
+                    <select id="admin-select-alasan" style="margin-bottom: 12px;" onchange="updateDurasiOtomatis(this.value)">
+                        <option value="Melayani, tidak menekan tombol Sudah Membawa Customer">Melayani, tidak menekan tombol Sudah Membawa Customer</option>
+                        <option value="Istirahat, tanpa keluar antrian">Istirahat, tanpa keluar antrian</option>
+                        <option value="Pulang, tanpa keluar antrian">Pulang, tanpa keluar antrian</option>
+                    </select>
+
+                    Durasi Hukuman (Menit):<br>
+                    <input type="number" id="admin-input-durasi-menit" value="20" min="1" max="1440" style="margin-top: 4px;" readonly>
+                </div>
+            `;
+
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiLockPromotorAdmin()">Proses</button>
+            `;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function toggleAlasanLockField(nilaiAksi) {
+            const wrapperAlasan = document.getElementById('wrapper-alasan-hukuman');
+            if (wrapperAlasan) {
+                wrapperAlasan.style.display = (nilaiAksi === "UNLOCK") ? "none" : "block";
+            }
+        }
+
+        function updateDurasiOtomatis(alasanPilih) {
+            const inputDurasi = document.getElementById('admin-input-durasi-menit');
+            if (!inputDurasi) return;
+
+            if (alasanPilih.includes("Melayani")) {
+                inputDurasi.value = "20";
+            } else if (alasanPilih.includes("Istirahat")) {
+                inputDurasi.value = "30";
+            } else if (alasanPilih.includes("Pulang")) {
+                inputDurasi.value = "60";
+            }
+        }
+
+        function eksekusiLockPromotorAdmin() {
+            const selectSales = document.getElementById('admin-select-sales-lock');
+            const selectStatus = document.getElementById('admin-select-status-lock');
+            const selectAlasan = document.getElementById('admin-select-alasan');
+            const inputDurasi = document.getElementById('admin-input-durasi-menit');
+
+            const namaSales = selectSales ? selectSales.value : "";
+            const aksiLock = selectStatus ? selectStatus.value : "LOCK";
+            const alasan = (aksiLock === "LOCK" && selectAlasan) ? selectAlasan.value : "";
+            const durasiMenit = (aksiLock === "LOCK" && inputDurasi) ? inputDurasi.value : "20";
+
+            if (!namaSales) {
+                alert("Pilih promotor terlebih dahulu!");
+                return;
+            }
+
+            const btnOk = document.getElementById('btn-modal-action-ok');
+            if (btnOk) {
+                btnOk.disabled = true;
+                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            }
+
+            const pin = getActivePinAdmin();
+            if (!pin) { 
+                alert("PIN Admin tidak ditemukan!"); 
+                tutupModal(); 
+                return; 
+            }
+
+            let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
+
+            if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                masterSalesGlobal.forEach(s => {
+                    if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
+                        s.locked = (aksiLock === "LOCK") ? "LOCKED" : "";
+                        s.alasan = alasan;
+                        if (aksiLock === "LOCK") {
+                            s.waktuSelesaiLock = new Date().getTime() + (Number(durasiMenit) * 60 * 1000);
+                        } else {
+                            s.waktuSelesaiLock = 0;
+                        }
+                    }
+                });
+                localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+            }
+
+            fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                tutupModal();
+                tampilkanModal("Status Hukuman", res.pesan || "Perubahan berhasil disimpan.");
+                muatMasterSales();
+                muatDataAntrian(); 
+            })
+            .catch(() => {
+                tutupModal();
+                tampilkanModal("Informasi", "Perintah lock/unlock dikirim ke sistem.");
+                muatMasterSales();
+                muatDataAntrian();
+            });
+        }
         function toggleAlasanLockField(nilaiAksi) {
             const wrapperAlasan = document.getElementById('wrapper-alasan-hukuman');
             if (wrapperAlasan) {
