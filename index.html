@@ -487,7 +487,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         let daftarAntrianGlobal = [];
@@ -501,6 +501,7 @@
         let markerTokoPeta = null;
         let circleTokoPeta = null;
         let markerSayaPeta = null;
+        
         let intervalCountdownLock = null;
         window.waktuSelesaiLockGlobal = 0;
 
@@ -729,9 +730,6 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
-      let intervalCountdownLock = null;
-        window.waktuSelesaiLockGlobal = 0;
-
         function mulaiTimerHukumanPromotor() {
             const btnTerima = document.getElementById('btn-terima-hukuman');
             const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
@@ -757,34 +755,8 @@
                     const wrapperEl = document.getElementById('wrapper-countdown-lock');
                     if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
                     
-                    // Reset status lokal agar langsung terbuka
                     localStorage.removeItem('ufo_terima_hukuman_' + getAkunAktif());
                     setTimeout(() => { window.location.reload(); }, 1500);
-                } else {
-                    let menit = Math.floor(selisihDetik / 60);
-                    let detik = selisihDetik % 60;
-                    const spanEl = document.getElementById('span-waktu-mundur');
-                    if (spanEl) {
-                        spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
-                    }
-                }
-            }, 1000);
-        }
-
-        function jalankanHitungMundur() {
-            if (intervalCountdownLock) return; // Mencegah interval menumpuk dan reset
-
-            intervalCountdownLock = setInterval(() => {
-                let waktuSelesaiEpoch = window.waktuSelesaiLockGlobal || 0;
-                let sekarang = new Date().getTime();
-                let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
-
-                if (selisihDetik <= 0) {
-                    clearInterval(intervalCountdownLock);
-                    intervalCountdownLock = null;
-                    const wrapperEl = document.getElementById('wrapper-countdown-lock');
-                    if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
-                    setTimeout(() => { window.location.reload(); }, 2000);
                 } else {
                     let menit = Math.floor(selisihDetik / 60);
                     let detik = selisihDetik % 60;
@@ -1350,5 +1322,5 @@
         }
         function tutupModal() { document.getElementById('custom-modal').classList.remove('active'); }
     </script>
-</body>
+    </body>
 </html>
