@@ -551,8 +551,8 @@
                 document.getElementById('panel-menu-utama').style.display = 'none';
             }
 
-            cekServerBg();
             muatMasterSales();
+            muatDataAntrian();
             
             setInterval(() => {
                 muatDataAntrian();
@@ -602,31 +602,6 @@
             }
         }
 
-        function cekServerBg() {
-            const deviceId = getDeviceId();
-            Promise.all([
-                fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`).then(r => r.json()).catch(() => null),
-                fetch(`${SCRIPT_URL}?aksi=getAntrian`).then(r => r.json()).catch(() => null),
-                fetch(`${SCRIPT_URL}?aksi=getMasterSales`).then(r => r.json()).catch(() => null)
-            ]).then(([resBinding, resAntrian, resSales]) => {
-                if (resBinding && resBinding.status === "terkunci" && resBinding.nama) {
-                    namaSalesAktifGlobal = resBinding.nama;
-                    localStorage.setItem('ufo_nama_sales_aktif', resBinding.nama);
-                    document.getElementById('panel-login').style.display = 'none';
-                    document.getElementById('panel-menu-utama').style.display = 'block';
-                    document.getElementById('label-user-aktif').innerText = resBinding.nama;
-                }
-                if (resSales && resSales.status === "sukses" && resSales.data) {
-                    masterSalesGlobal = resSales.data;
-                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resSales.data));
-                }
-                if (resAntrian && resAntrian.status === "sukses") {
-                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
-                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat);
-                }
-            });
-        }
-
         function cekStatusPerangkatSaya() {
             const namaSaya = localStorage.getItem('ufo_nama_sales_aktif');
             const deviceId = getDeviceId();
@@ -674,6 +649,7 @@
                     document.getElementById('panel-menu-utama').style.display = 'block';
                     document.getElementById('label-user-aktif').innerText = namaPilih;
                     muatDataAntrian();
+                    muatMasterSales();
                 } else { 
                     tampilkanModal("Akses Ditolak", res.pesan); 
                 }
@@ -714,11 +690,9 @@
                         document.getElementById('pilih-sales').innerHTML = html;
                     }
                     
-                    if (daftarAntrianGlobal.length > 0 || getAkunAktif()) {
-                        renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
-                    }
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
                 }
-            });
+            }).catch(() => {});
         }
 
         function muatDataAntrian() {
@@ -739,7 +713,7 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
-      function mulaiTimerHukumanPromotor() {
+        function mulaiTimerHukumanPromotor() {
             const btnTerima = document.getElementById('btn-terima-hukuman');
             const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
             
@@ -750,7 +724,7 @@
             jalankanHitungMundur();
         }
 
-      function jalankanHitungMundur() {
+        function jalankanHitungMundur() {
             if (intervalCountdownLock) return;
 
             intervalCountdownLock = setInterval(() => {
@@ -764,25 +738,10 @@
                     
                     const akunSaya = getAkunAktif().trim().toLowerCase();
                     localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
-                    
                     window.waktuSelesaiLockGlobal = 0;
                     
-                    const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
-                    if (dataSalesSaya) {
-                        dataSalesSaya.locked = "";
-                        dataSalesSaya.waktuSelesaiLock = 0;
-                    }
-                    
-                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
-
-                    fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`).then(r => r.json()).then(res => {
-                        if (res.status === "sukses" && res.data) {
-                            masterSalesGlobal = res.data;
-                            localStorage.setItem('ufo_master_sales_cache', JSON.stringify(res.data));
-                            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
-                        }
-                    }).catch(() => {});
-
+                    muatMasterSales();
+                    muatDataAntrian();
                 } else {
                     let menit = Math.floor(selisihDetik / 60);
                     let detik = selisihDetik % 60;
