@@ -311,7 +311,6 @@
         button { width: 100%; padding: 12px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.3px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
         button:active { transform: scale(0.98); }
 
-        /* KELOMPOK TOMBOL DISERAGAMKAN MENJADI TEMA PROFESIONAL (GELAP / NETRAL) */
         .btn-success { background: #0f172a; color: white; }
         .btn-success:hover { background: #1e293b; }
 
@@ -437,7 +436,7 @@
                     <div class="locked-title" style="color: #991b1b; font-weight: 800; font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">
                         ⚠️ AKUN ANDA TERKUNCI
                     </div>
-                    <div id="teks-alasan-lock" style="color: #7f1d1d; font-size: 12px; font-weight: 600; line-height: 1.4;">
+                    <div id="teks-alasan-lock" style="color: #7f1d1d; font-size: 12px; font-weight: 600; line-height: 1.4; margin-bottom: 8px;">
                         -
                     </div>
                 </div>
@@ -508,7 +507,6 @@
         window.onload = function() {
             initDarkMode();
             
-            // Cek pergantian hari untuk reset status makan lokal
             const tanggalHariIni = getTanggalIndo();
             const tanggalMakanTerakhirHP = localStorage.getItem('ufo_tanggal_makan_terakhir') || "";
             if (tanggalMakanTerakhirHP !== tanggalHariIni) {
@@ -820,13 +818,6 @@
                 sectionNormal.style.display = 'block';
                 groupPilihKat.style.display = 'block';
                 
-                if (btnDaftar) { 
-                    btnDaftar.style.display = 'block'; 
-                    btnDaftar.disabled = true; 
-                    btnDaftar.className = "btn-success btn-disabled"; 
-                    btnDaftar.innerText = "OTOMATIS TERKUNCI"; 
-                }
-                
                 sectionLocked.style.display = 'block';
                 document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
 
@@ -837,6 +828,7 @@
                 if (btnCS) { btnCS.style.display = 'none'; }
                 if (btnIbadah) { btnIbadah.style.display = 'none'; }
                 if (btnKeluar) { btnKeluar.style.display = 'none'; }
+                if (btnDaftar) { btnDaftar.style.display = 'none'; }
                 return; 
             } else {
                 if (sectionLocked) sectionLocked.style.display = 'none';
@@ -895,7 +887,6 @@
                     if (apakahSayaUrutanPertama) {
                         btnMakan.style.display = "block";
                         
-                        // Cek cache lokal juga agar langsung responsif tanpa menunggu server
                         const cacheSudahMakan = localStorage.getItem('ufo_sudah_makan_' + akunSaya) === 'true';
 
                         if (sudahMakanDariServer || cacheSudahMakan) {
@@ -979,7 +970,7 @@
             }).catch(() => {});
         }
 
-       function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
+        function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
             const namaSales = getAkunAktif().trim();
             if (!namaSales) return;
 
@@ -987,10 +978,8 @@
             let katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
 
             if (targetStatusSimulasi === "belum_ada") {
-                // Hapus promotor dari array global secara lokal
                 daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
                 
-                // PERBAIKAN UTAMA: Hapus nama promotor dari cache antrian di localStorage
                 let cachedData = localStorage.getItem('ufo_antrian_cache');
                 if (cachedData) {
                     try {
@@ -1025,7 +1014,7 @@
                 localActionActive = false;
                 if (res && res.status === "sukses" && res.data) {
                     daftarAntrianGlobal = res.data;
-                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res)); // Perbarui cache server terbaru
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
                 } else if (res && (res.status === "locked" || res.status === "terkunci" || res.status === "gagal_lock")) {
                     muatDataAntrian(); 
@@ -1112,28 +1101,25 @@
             });
         }
 
-      function aksiDaftarAntrianNormal() {
+        function aksiDaftarAntrianNormal() {
             const btn = document.getElementById('btn-daftar-antrian');
             setButtonLoading(btn, true, "Daftar Antrian");
 
-            // Validasi GPS terlebih dahulu sebelum daftar antrian diizinkan
             validasiGpsDanJalankan(function() {
-                // Berhasil dalam radius toko
                 setButtonLoading(btn, false, "Daftar Antrian");
                 const kategoriPilih = document.getElementById('pilih-kategori-normal').value;
                 eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
             }, function() {
-                // Gagal / di luar radius toko
                 setButtonLoading(btn, false, "Daftar Antrian");
             });
         }
+
         function aksiUtamaCustomer() {
             tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
                 eksekusiAksiInstan('ambilAntrian', 'Melayani');
             });
         }
 
-        // --- LOGIKA WAKTU MAKAN & SELESAI MAKAN (SEKALI SEHARI) ---
         function aksiToggleMakan() {
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
             if (statusSekarang === "Standby") {
