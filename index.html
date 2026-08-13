@@ -229,9 +229,7 @@
             box-shadow: 0 0 25px rgba(255, 31, 61, 0.6), inset 0 0 10px rgba(255, 31, 61, 0.3) !important;
         }
 
-        .timer-badge-title { font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.4px; }
-        .ha .timer-badge-title { color: #0f172a; } 
-        .av .timer-badge-title { color: #0f172a; } 
+        .timer-badge-title { font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.4px; color: #0f172a; }
 
         body.dark-mode .timer-card-admin.ha .timer-badge-title,
         body.dark-mode .timer-card-admin.av .timer-badge-title { color: #ff99a8 !important; text-shadow: 0 0 10px rgba(255, 31, 61, 0.8); }
@@ -388,7 +386,7 @@
                 <span style="color: var(--text-muted);">Promotor:</span> <strong id="label-user-aktif" style="color:var(--primary); font-size: 14px;">-</strong>
             </div>
 
-            <!-- KOTAK GILIRAN HA & AV -->
+            <!-- KOTAK PROMOTOR HA & AV SAAT INI -->
             <div class="timer-box-wrapper">
                 <div class="timer-card-admin ha">
                     <div>
@@ -441,7 +439,7 @@
                     </div>
                     <!-- Tombol Terima Hukuman -->
                     <button type="button" id="btn-terima-hukuman" class="btn-closing" onclick="mulaiTimerHukumanPromotor()" style="margin-bottom: 8px;">Terima Hukuman</button>
-                    <!-- Teks Hitung Mundur -->
+                    <!-- Teks Hitung Mundur Hukuman -->
                     <div id="wrapper-countdown-lock" style="display: none; font-size: 14px; font-weight: 800; color: #dc2626; text-align: center; padding: 6px; background: #fee2e2; border-radius: 8px;">
                         Sisa Waktu Hukuman: <span id="span-waktu-mundur">--:--</span>
                     </div>
@@ -721,6 +719,17 @@
                     }
                 }
             });
+        }
+
+        function muatDataAntrian() {
+            fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === "sukses") {
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
+                    renderUIRental(res.data, res.statusAntrian, res.koordinatPusat);
+                }
+            }).catch(() => {});
         }
 
         function cekStatusSayaDariArray(dataAntrian) {
