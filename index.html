@@ -436,8 +436,14 @@
                     <div class="locked-title" style="color: #991b1b; font-weight: 800; font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">
                         ⚠️ AKUN ANDA TERKUNCI
                     </div>
-                    <div id="teks-alasan-lock" style="color: #7f1d1d; font-size: 12px; font-weight: 600; line-height: 1.4; margin-bottom: 8px;">
+                    <div id="teks-alasan-lock" style="color: #7f1d1d; font-size: 12px; font-weight: 600; line-height: 1.4; margin-bottom: 10px;">
                         -
+                    </div>
+                    <!-- Tombol Terima Hukuman -->
+                    <button type="button" id="btn-terima-hukuman" class="btn-closing" onclick="mulaiTimerHukumanPromotor()" style="margin-bottom: 8px;">Terima Hukuman</button>
+                    <!-- Teks Hitung Mundur -->
+                    <div id="wrapper-countdown-lock" style="display: none; font-size: 14px; font-weight: 800; color: #dc2626; text-align: center; padding: 6px; background: #fee2e2; border-radius: 8px;">
+                        Sisa Waktu Hukuman: <span id="span-waktu-mundur">--:--</span>
                     </div>
                 </div>
 
@@ -495,6 +501,8 @@
         let markerTokoPeta = null;
         let circleTokoPeta = null;
         let markerSayaPeta = null;
+        let intervalCountdownLock = null;
+        window.waktuSelesaiLockGlobal = 0;
 
         function getTanggalIndo() {
             const now = new Date();
@@ -716,6 +724,37 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
+        function mulaiTimerHukumanPromotor() {
+            document.getElementById('btn-terima-hukuman').style.display = 'none';
+            document.getElementById('wrapper-countdown-lock').style.display = 'block';
+            localStorage.setItem('ufo_terima_hukuman_' + getAkunAktif(), 'true');
+            jalankanHitungMundur();
+        }
+
+        function jalankanHitungMundur() {
+            if (intervalCountdownLock) clearInterval(intervalCountdownLock);
+
+            intervalCountdownLock = setInterval(() => {
+                let waktuSelesaiEpoch = window.waktuSelesaiLockGlobal || 0;
+                let sekarang = new Date().getTime();
+                let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
+
+                if (selisihDetik <= 0) {
+                    clearInterval(intervalCountdownLock);
+                    const wrapperEl = document.getElementById('wrapper-countdown-lock');
+                    if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
+                    setTimeout(() => { window.location.reload(); }, 2000);
+                } else {
+                    let menit = Math.floor(selisihDetik / 60);
+                    let detik = selisihDetik % 60;
+                    const spanEl = document.getElementById('span-waktu-mundur');
+                    if (spanEl) {
+                        spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
+                    }
+                }
+            }, 1000);
+        }
+
         function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
             if (localActionActive) return;
 
@@ -726,7 +765,6 @@
                 koordinatToko.lat = koordinatServer.lat;
                 koordinatToko.lng = koordinatServer.lng;
                 koordinatToko.radius = Number(koordinatServer.radius) || 50;
-                
                 localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
             }
 
@@ -796,6 +834,7 @@
             let sudahMakanDariServer = false;
             if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
+                window.waktuSelesaiLockGlobal = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
                 let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
                 if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
                     isDilockAdmin = true;
@@ -821,6 +860,16 @@
                 sectionLocked.style.display = 'block';
                 document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
 
+                let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
+                if (sudahTerimaHukumanHP && window.waktuSelesaiLockGlobal > 0) {
+                    document.getElementById('btn-terima-hukuman').style.display = 'none';
+                    document.getElementById('wrapper-countdown-lock').style.display = 'block';
+                    jalankanHitungMundur();
+                } else {
+                    document.getElementById('btn-terima-hukuman').style.display = 'block';
+                    document.getElementById('wrapper-countdown-lock').style.display = 'none';
+                }
+
                 if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
                 if (btnCustomer) { btnCustomer.style.display = 'none'; }
                 if (btnMakan) { btnMakan.style.display = 'none'; }
@@ -833,6 +882,7 @@
             } else {
                 if (sectionLocked) sectionLocked.style.display = 'none';
                 if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
+                localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
             }
 
             let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
