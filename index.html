@@ -806,18 +806,21 @@ function updateTampilanTimer() {
         wrapperCountdown.style.display = 'block';
     }
 
-    if (selisihDetik <= 0) {
+if (selisihDetik <= 0) {
         if (intervalCountdownLock) {
             clearInterval(intervalCountdownLock);
             intervalCountdownLock = null;
         }
         if (wrapperCountdown) wrapperCountdown.innerHTML = "<b>Hukuman Selesai! Membuka sistem...</b>";
         
-        // Hapus cache hukuman secara tuntas agar status langsung berubah
         localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
         localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
         
-        // Update data sales lokal agar status locked langsung hilang
+        // KIRIM SINYAL UNLOCK KE SERVER AGAR DATABASE SHEET LANGSUNG BERSIH
+        const pinAdminUniversal = "123456"; // Atau ambil dari cache jika ada, ini untuk bypass pembersihan otomatis
+        fetch(`${SCRIPT_URL}?aksi=adminUnlockPromotor&pin=123456&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
+        .then(() => {}).catch(() => {});
+
         if (masterSalesGlobal && masterSalesGlobal.length > 0) {
             masterSalesGlobal.forEach(s => {
                 if (String(s.nama).trim().toLowerCase() === akunSaya) {
@@ -828,20 +831,11 @@ function updateTampilanTimer() {
             localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
         }
 
-        // Panggil render UI dan sinkronisasi server seketika
         muatDataAntrian();
         muatMasterSales();
         
-        // Reload halaman setelah jeda singkat untuk memastikan sinkronisasi sempurna
         setTimeout(() => { window.location.reload(); }, 800);
-    } else {
-        let menit = Math.floor(selisihDetik / 60);
-        let detik = selisihDetik % 60;
-        if (spanEl) {
-            spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
-        }
     }
-}
         function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
             if (localActionActive) return;
 
