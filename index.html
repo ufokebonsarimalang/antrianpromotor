@@ -607,14 +607,19 @@
             const deviceId = getDeviceId();
             Promise.all([
                 fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`).then(r => r.json()).catch(() => null),
-                fetch(`${SCRIPT_URL}?aksi=getAntrian`).then(r => r.json()).catch(() => null)
-            ]).then(([resBinding, resAntrian]) => {
+                fetch(`${SCRIPT_URL}?aksi=getAntrian`).then(r => r.json()).catch(() => null),
+                fetch(`${SCRIPT_URL}?aksi=getMasterSales`).then(r => r.json()).catch(() => null)
+            ]).then(([resBinding, resAntrian, resSales]) => {
                 if (resBinding && resBinding.status === "terkunci" && resBinding.nama) {
                     namaSalesAktifGlobal = resBinding.nama;
                     localStorage.setItem('ufo_nama_sales_aktif', resBinding.nama);
                     document.getElementById('panel-login').style.display = 'none';
                     document.getElementById('panel-menu-utama').style.display = 'block';
                     document.getElementById('label-user-aktif').innerText = resBinding.nama;
+                }
+                if (resSales && resSales.status === "sukses" && resSales.data) {
+                    masterSalesGlobal = resSales.data;
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resSales.data));
                 }
                 if (resAntrian && resAntrian.status === "sukses") {
                     localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
@@ -840,7 +845,6 @@
             if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
                 
-                // Ambil waktu selesai dari database server
                 let waktuLockServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
                 if (waktuLockServer > 0) {
                     window.waktuSelesaiLockGlobal = waktuLockServer;
@@ -873,7 +877,6 @@
 
                 let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
                 
-                // Pastikan waktu server sinkron dan belum lewat
                 if (window.waktuSelesaiLockGlobal > new Date().getTime()) {
                     if (sudahTerimaHukumanHP) {
                         document.getElementById('btn-terima-hukuman').style.display = 'none';
