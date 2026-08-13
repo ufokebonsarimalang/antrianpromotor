@@ -741,7 +741,7 @@
             jalankanHitungMundur();
         }
 
-        function jalankanHitungMundur() {
+      function jalankanHitungMundur() {
             if (intervalCountdownLock) return;
 
             intervalCountdownLock = setInterval(() => {
@@ -752,11 +752,33 @@
                 if (selisihDetik <= 0) {
                     clearInterval(intervalCountdownLock);
                     intervalCountdownLock = null;
-                    const wrapperEl = document.getElementById('wrapper-countdown-lock');
-                    if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
                     
-                    localStorage.removeItem('ufo_terima_hukuman_' + getAkunAktif());
-                    setTimeout(() => { window.location.reload(); }, 1500);
+                    // 1. Bersihkan status hukuman di memori lokal HP secara instan
+                    const akunSaya = getAkunAktif().trim().toLowerCase();
+                    localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                    
+                    // 2. Reset variabel global lock agar dianggap sudah tidak terkunci
+                    window.waktuSelesaiLockGlobal = 0;
+                    
+                    // 3. Update status data di Master Sales lokal agar berubah jadi tidak terkunci
+                    const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+                    if (dataSalesSaya) {
+                        dataSalesSaya.locked = "";
+                        dataSalesSaya.waktuSelesaiLock = 0;
+                    }
+                    
+                    // 4. LANGSUNG RENDER ULANG TAMPILAN TANPA RELOAD MANUAL!
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+
+                    // 5. Kirim perintah di background ke server untuk memastikan database ikut bersih
+                    fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`).then(r => r.json()).then(res => {
+                        if (res.status === "sukses" && res.data) {
+                            masterSalesGlobal = res.data;
+                            localStorage.setItem('ufo_master_sales_cache', JSON.stringify(res.data));
+                            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+                        }
+                    }).catch(() => {});
+
                 } else {
                     let menit = Math.floor(selisihDetik / 60);
                     let detik = selisihDetik % 60;
@@ -767,7 +789,6 @@
                 }
             }, 1000);
         }
-
         function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
             if (localActionActive) return;
 
