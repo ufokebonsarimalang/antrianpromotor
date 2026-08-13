@@ -419,7 +419,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+        const SCRIPT_URL = "GANTI_DENGAN_URL_DEPLOY_APPS_SCRIPT_ANDA";
         
         let masterSalesGlobal = [];
         let daftarAntrianGlobal = [];
@@ -653,7 +653,6 @@
             });
         }
 
-        /* --- FITUR KONTROL HUKUMAN / LOCK AKUN --- */
         function bukaModalLockPromotorAdmin() {
             document.getElementById('modal-title').innerText = "Kontrol Hukuman / Lock Akun";
             
@@ -742,7 +741,6 @@
 
             let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
 
-            // Update cache master sales lokal agar admin langsung melihat perubahan instan
             if (masterSalesGlobal && masterSalesGlobal.length > 0) {
                 masterSalesGlobal.forEach(s => {
                     if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
@@ -773,7 +771,7 @@
                 muatDataAntrian();
             });
         }
-        /* --- FITUR TAMBAH & HAPUS MASTER SALES --- */
+
         function bukaModalTambahMasterSales() {
             document.getElementById('modal-title').innerText = "Tambah Nama Promotor Baru";
             document.getElementById('modal-desc').innerHTML = `Masukkan Nama Promotor Baru:<br><input type="text" id="input-nama-baru" placeholder="Nama Lengkap Promotor">`;
@@ -846,7 +844,6 @@
                 tutupModal();
             });
         }
-        /* ---------------------------------------- */
 
         function bukaModalToggleSistem(targetStatus) {
             document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
