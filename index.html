@@ -720,11 +720,17 @@
             if (btnTerima) btnTerima.style.display = 'none';
             if (wrapperCountdown) wrapperCountdown.style.display = 'block';
 
-            let waktuSelesaiTarget = new Date().getTime() + (5 * 60 * 1000);
-            localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, waktuSelesaiTarget);
+            const dataSalesSaya = masterSalesGlobal.find(s => s && s.nama && String(s.nama).trim().toLowerCase() === akunSaya);
+            let waktuSelesaiServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+
+            if (!waktuSelesaiServer || waktuSelesaiServer <= new Date().getTime()) {
+                waktuSelesaiServer = new Date().getTime() + (5 * 60 * 1000);
+            }
+
+            localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, waktuSelesaiServer);
             localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
             
-            jalankanHitungMundur(waktuSelesaiTarget);
+            jalankanHitungMundur(waktuSelesaiServer);
         }
 
         function jalankanHitungMundur(targetEpoch) {
@@ -831,9 +837,11 @@
             
             const dataSalesSaya = masterSalesGlobal.find(s => s && s.nama && String(s.nama).trim().toLowerCase() === akunSaya);
             let sudahMakanDariServer = false;
+            let waktuSelesaiServer = 0;
 
             if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
+                waktuSelesaiServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
                 
                 let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
                 if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
@@ -843,6 +851,11 @@
             }
 
             let savedWaktuLock = Number(localStorage.getItem('ufo_waktu_selesai_lock_' + akunSaya)) || 0;
+            if (waktuSelesaiServer > 0 && waktuSelesaiServer !== savedWaktuLock) {
+                savedWaktuLock = waktuSelesaiServer;
+                localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, savedWaktuLock);
+            }
+
             if (savedWaktuLock > 0) {
                 if (savedWaktuLock <= new Date().getTime()) {
                     localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
