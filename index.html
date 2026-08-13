@@ -730,7 +730,7 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
-     function mulaiTimerHukumanPromotor() {
+ function mulaiTimerHukumanPromotor() {
     const btnTerima = document.getElementById('btn-terima-hukuman');
     const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
     
@@ -743,28 +743,18 @@
     const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
     let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
     
-    let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+    // Hapus paksa cache deadline lama agar tidak membaca durasi 15 menit yang tersimpan di memori HP
+    localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
 
     if (waktuServer > new Date().getTime()) {
         window.waktuSelesaiLockGlobal = waktuServer;
         localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
-    } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
-        window.waktuSelesaiLockGlobal = Number(savedDeadline);
     } else if (waktuServer > 0) {
         window.waktuSelesaiLockGlobal = waktuServer;
+        localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
     } else {
-        // AMBIL DARI INPUTAN ADMIN ATAU SERVER SECARA DINAMIS (TIDAK LAGI 15)
-        let durasiMenitAktif = 15; 
-        
-        // Cek apakah admin mengirimkan durasi melalui data master sales atau elemen input
-        const inputDurasiAdmin = document.getElementById('admin-input-durasi-menit');
-        if (inputDurasiAdmin && inputDurasiAdmin.value) {
-            durasiMenitAktif = Number(inputDurasiAdmin.value);
-        } else if (dataSalesSaya && dataSalesSaya.durasiMenit) {
-            durasiMenitAktif = Number(dataSalesSaya.durasiMenit);
-        }
-        
-        window.waktuSelesaiLockGlobal = new Date().getTime() + (durasiMenitAktif * 60 * 1000);
+        // Fallback aman jika server belum merespon waktu epoch
+        window.waktuSelesaiLockGlobal = new Date().getTime() + (1 * 60 * 1000);
         localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
     }
 
