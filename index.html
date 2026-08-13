@@ -730,65 +730,60 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
-        function mulaiTimerHukumanPromotor() {
-            const btnTerima = document.getElementById('btn-terima-hukuman');
-            const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
-            
-            if (btnTerima) btnTerima.style.display = 'none';
-            if (wrapperCountdown) wrapperCountdown.style.display = 'block';
+       function mulaiTimerHukumanPromotor() {
+    const btnTerima = document.getElementById('btn-terima-hukuman');
+    const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+    
+    if (btnTerima) btnTerima.style.display = 'none';
+    if (wrapperCountdown) wrapperCountdown.style.display = 'block';
 
-            localStorage.setItem('ufo_terima_hukuman_' + getAkunAktif(), 'true');
-            jalankanHitungMundur();
+    const akunSaya = getAkunAktif();
+    localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
+
+    // Pastikan window.waktuSelesaiLockGlobal memiliki nilai minimal 15 menit dari sekarang jika dari server masih 0
+    if (!window.waktuSelesaiLockGlobal || window.waktuSelesaiLockGlobal <= new Date().getTime()) {
+        window.waktuSelesaiLockGlobal = new Date().getTime() + (15 * 60 * 1000); 
+    }
+
+    jalankanHitungMundur();
+}
+
+function jalankanHitungMundur() {
+    if (intervalCountdownLock) return;
+
+    // Langsung hitung detik pertama agar tidak ada jeda 1 detik di awal
+    updateTampilanTimer();
+
+    intervalCountdownLock = setInterval(() => {
+        updateTampilanTimer();
+    }, 1000);
+}
+
+function updateTampilanTimer() {
+    let waktuSelesaiEpoch = Number(window.waktuSelesaiLockGlobal) || 0;
+    let sekarang = new Date().getTime();
+    let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
+
+    const spanEl = document.getElementById('span-waktu-mundur');
+
+    if (selisihDetik <= 0) {
+        if (intervalCountdownLock) {
+            clearInterval(intervalCountdownLock);
+            intervalCountdownLock = null;
         }
-
-      function jalankanHitungMundur() {
-            if (intervalCountdownLock) return;
-
-            intervalCountdownLock = setInterval(() => {
-                let waktuSelesaiEpoch = Number(window.waktuSelesaiLockGlobal) || 0;
-                let sekarang = new Date().getTime();
-                let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
-
-                if (selisihDetik <= 0) {
-                    clearInterval(intervalCountdownLock);
-                    intervalCountdownLock = null;
-                    
-                    // 1. Bersihkan status hukuman di memori lokal HP secara instan
-                    const akunSaya = getAkunAktif().trim().toLowerCase();
-                    localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
-                    
-                    // 2. Reset variabel global lock agar dianggap sudah tidak terkunci
-                    window.waktuSelesaiLockGlobal = 0;
-                    
-                    // 3. Update status data di Master Sales lokal agar berubah jadi tidak terkunci
-                    const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
-                    if (dataSalesSaya) {
-                        dataSalesSaya.locked = "";
-                        dataSalesSaya.waktuSelesaiLock = 0;
-                    }
-                    
-                    // 4. LANGSUNG RENDER ULANG TAMPILAN TANPA RELOAD MANUAL!
-                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
-
-                    // 5. Kirim perintah di background ke server untuk memastikan database ikut bersih
-                    fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`).then(r => r.json()).then(res => {
-                        if (res.status === "sukses" && res.data) {
-                            masterSalesGlobal = res.data;
-                            localStorage.setItem('ufo_master_sales_cache', JSON.stringify(res.data));
-                            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
-                        }
-                    }).catch(() => {});
-
-                } else {
-                    let menit = Math.floor(selisihDetik / 60);
-                    let detik = selisihDetik % 60;
-                    const spanEl = document.getElementById('span-waktu-mundur');
-                    if (spanEl) {
-                        spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
-                    }
-                }
-            }, 1000);
+        const wrapperEl = document.getElementById('wrapper-countdown-lock');
+        if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
+        
+        localStorage.removeItem('ufo_terima_hukuman_' + getAkunAktif());
+        setTimeout(() => { window.location.reload(); }, 1500);
+    } else {
+        let menit = Math.floor(selisihDetik / 60);
+        let detik = selisihDetik % 60;
+        if (spanEl) {
+            spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
         }
+    }
+}
    // Ganti seluruh isi fungsi renderUIRental di halaman Promotor dengan ini:
 function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
     if (localActionActive) return;
