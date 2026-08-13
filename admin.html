@@ -360,7 +360,6 @@
                 </div>
             </div>
 
-            <!-- LIVE URUTAN KATEGORI HA & AV -->
             <div class="list-section-wrapper">
                 <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase;">LIVE URUTAN KATEGORI HA</div>
                 <ul id="list-HA" class="list-antrian"><li><span>Memuat...</span></li></ul>
@@ -396,10 +395,7 @@
             <div class="admin-grid">
                 <button type="button" class="btn-primary" onclick="bukaModalFormAdminKategori('adminAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
                 <button type="button" class="btn-warning" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
-                
-                <!-- TOMBOL KONTROL HUKUMAN / LOCK AKUN -->
                 <button type="button" class="btn-danger" onclick="bukaModalLockPromotorAdmin()">Kontrol Hukuman / Lock Akun</button>
-                
                 <button type="button" class="btn-darkred" onclick="bukaModalResetDeviceAdmin()">Reset Kunci Perangkat Promotor</button>
                 <button type="button" class="btn-danger" onclick="bukaModalResetTotal()">Reset Seluruh Antrian Aktif</button>
             </div>
@@ -611,7 +607,7 @@
             document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
         }
 
-    function toggleGPSAdmin(statusAktif) {
+        function toggleGPSAdmin(statusAktif) {
             amanKlikAdmin(function(selesai) {
                 const pin = getActivePinAdmin();
                 if (!pin) { alert("PIN Admin tidak ditemukan!"); selesai(); return; }
@@ -687,7 +683,7 @@
             });
         }
 
-      function bukaModalLockPromotorAdmin() {
+        function bukaModalLockPromotorAdmin() {
             document.getElementById('modal-title').innerText = "Kontrol Hukuman / Lock Akun";
             
             if (!masterSalesGlobal || masterSalesGlobal.length === 0) {
@@ -788,74 +784,6 @@
                 masterSalesGlobal.forEach(s => {
                     if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
                         s.locked = (aksiLock === "LOCK") ? "LOCKED" : "";
-                        s.alasan = alasan;
-                        if (aksiLock === "LOCK") {
-                            s.waktuSelesaiLock = new Date().getTime() + (Number(durasiMenit) * 60 * 1000);
-                        } else {
-                            s.waktuSelesaiLock = 0;
-                        }
-                    }
-                });
-                localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
-            }
-
-            fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                tutupModal();
-                tampilkanModal("Status Hukuman", res.pesan || "Perubahan berhasil disimpan.");
-                muatMasterSales();
-                muatDataAntrian(); 
-            })
-            .catch(() => {
-                tutupModal();
-                tampilkanModal("Informasi", "Perintah lock/unlock dikirim ke sistem.");
-                muatMasterSales();
-                muatDataAntrian();
-            });
-        }
-        function toggleAlasanLockField(nilaiAksi) {
-            const wrapperAlasan = document.getElementById('wrapper-alasan-hukuman');
-            if (wrapperAlasan) {
-                wrapperAlasan.style.display = (nilaiAksi === "UNLOCK") ? "none" : "block";
-            }
-        }
-
-      function eksekusiLockPromotorAdmin() {
-            const selectSales = document.getElementById('admin-select-sales-lock');
-            const selectStatus = document.getElementById('admin-select-status-lock');
-            const selectAlasan = document.getElementById('admin-select-alasan');
-            const inputDurasi = document.getElementById('admin-input-durasi-menit');
-
-            const namaSales = selectSales ? selectSales.value : "";
-            const aksiLock = selectStatus ? selectStatus.value : "LOCK";
-            const alasan = (aksiLock === "LOCK" && selectAlasan) ? selectAlasan.value : "";
-            const durasiMenit = (aksiLock === "LOCK" && inputDurasi) ? inputDurasi.value : "15";
-
-            if (!namaSales) {
-                alert("Pilih promotor terlebih dahulu!");
-                return;
-            }
-
-            const btnOk = document.getElementById('btn-modal-action-ok');
-            if (btnOk) {
-                btnOk.disabled = true;
-                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
-            }
-
-            const pin = getActivePinAdmin();
-            if (!pin) { 
-                alert("PIN Admin tidak ditemukan!"); 
-                tutupModal(); 
-                return; 
-            }
-
-            let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
-
-            if (masterSalesGlobal && masterSalesGlobal.length > 0) {
-                masterSalesGlobal.forEach(s => {
-                    if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
-                        s.locked = (aksiLock === "LOCK");
                         s.alasan = alasan;
                         if (aksiLock === "LOCK") {
                             s.waktuSelesaiLock = new Date().getTime() + (Number(durasiMenit) * 60 * 1000);
