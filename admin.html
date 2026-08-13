@@ -611,7 +611,7 @@
             document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
         }
 
-        function toggleGPSAdmin(statusAktif) {
+    function toggleGPSAdmin(statusAktif) {
             amanKlikAdmin(function(selesai) {
                 const pin = getActivePinAdmin();
                 if (!pin) { alert("PIN Admin tidak ditemukan!"); selesai(); return; }
@@ -622,33 +622,67 @@
                 if (!statusAktif) {
                     const textAsli = btnOff.innerHTML;
                     btnOff.innerHTML = `<span class="spinner"></span> Mematikan...`;
+                    
                     fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=&lng=&radius=50&t=${Date.now()}`)
-                    .then(r => r.json()).then(res => {
+                    .then(r => r.json())
+                    .then(res => {
                         btnOff.innerHTML = textAsli;
                         tampilkanModal("GPS Dinonaktifkan", "Validasi radius GPS toko berhasil dimatikan (OFF).");
-                        muatDataAntrian(); selesai();
-                    }).catch(() => { btnOff.innerHTML = textAsli; selesai(); });
+                        muatDataAntrian(); 
+                        selesai();
+                    })
+                    .catch(() => { 
+                        btnOff.innerHTML = textAsli; 
+                        tampilkanModal("Gagal", "Gagal menghubungi server. Periksa koneksi internet Anda.");
+                        selesai(); 
+                    });
                 } else {
                     const textAsli = btnOn.innerHTML;
                     btnOn.innerHTML = `<span class="spinner"></span> Mendeteksi GPS...`;
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(function(pos) {
+                    
+                    if (!navigator.geolocation) {
+                        btnOn.innerHTML = textAsli;
+                        tampilkanModal("Gagal", "Browser Anda tidak mendukung fitur lokasi GPS.");
+                        selesai();
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        function(pos) {
                             const lat = pos.coords.latitude;
                             const lng = pos.coords.longitude;
                             const radius = "50";
 
                             fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=${encodeURIComponent(radius)}&t=${Date.now()}`)
-                            .then(r => r.json()).then(res => {
+                            .then(r => r.json())
+                            .then(res => {
                                 btnOn.innerHTML = textAsli;
-                                tampilkanModal("GPS Diaktifkan", "Titik GPS & Radius Toko berhasil diset dari perangkat Anda.");
-                                muatDataAntrian(); selesai();
-                            }).catch(() => { btnOn.innerHTML = textAsli; selesai(); });
-                        }, function() {
+                                if(res.status === "sukses") {
+                                    tampilkanModal("GPS Diaktifkan", `Titik GPS Toko Berhasil Disimpan!\n\nLat: ${lat}\nLng: ${lng}`);
+                                } else {
+                                    tampilkanModal("Gagal Simpan", res.pesan || "Terjadi kesalahan pada server.");
+                                }
+                                muatDataAntrian(); 
+                                selesai();
+                            })
+                            .catch(() => { 
+                                btnOn.innerHTML = textAsli; 
+                                tampilkanModal("Gagal", "Terjadi kesalahan koneksi ke Apps Script.");
+                                selesai(); 
+                            });
+                        }, 
+                        function(error) {
                             btnOn.innerHTML = textAsli;
-                            alert("Gagal mendeteksi lokasi perangkat Anda.");
+                            let msg = "Gagal mendeteksi lokasi GPS.";
+                            if (error.code === 1) msg = "Izin GPS ditolak oleh browser. Silakan izinkan akses lokasi di pengaturan browser.";
+                            else if (error.code === 2) msg = "Sinyal GPS perangkat tidak ditemukan. Pastikan lokasi HP/Laptop menyala.";
+                            else if (error.code === 3) msg = "Pencarian lokasi terlalu lama (Timeout). Coba klik sekali lagi.";
+                            
+                            tampilkanModal("Peringatan GPS", msg);
                             selesai();
-                        }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
-                    } else { btnOn.innerHTML = textAsli; selesai(); }
+                        }, 
+                        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                    );
                 }
             });
         }
