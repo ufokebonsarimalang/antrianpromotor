@@ -653,7 +653,7 @@
             });
         }
 
-        /* --- FITUR KONTROL HUKUMAN / LOCK AKUN (DENGAN INPUT DURASI) --- */
+        /* --- FITUR KONTROL HUKUMAN / LOCK AKUN --- */
         function bukaModalLockPromotorAdmin() {
             document.getElementById('modal-title').innerText = "Kontrol Hukuman / Lock Akun";
             
@@ -733,25 +733,21 @@
                 btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
             }
 
-            amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                if (!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
+            const pin = getActivePinAdmin();
+            if (!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); return; }
 
-                let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
+            let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
 
-                fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
-                .then(res => res.json())
-                .then(res => {
-                    tutupModal();
-                    tampilkanModal("Status Hukuman", res.pesan);
-                    muatMasterSales();
-                    muatDataAntrian(); 
-                    selesai();
-                }).catch(() => {
-                    tutupModal();
-                    tampilkanModal("Gagal", "Terjadi gangguan jaringan.");
-                    selesai();
-                });
+            fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                tutupModal();
+                tampilkanModal("Status Hukuman", res.pesan);
+                muatMasterSales();
+                muatDataAntrian(); 
+            }).catch(() => {
+                tutupModal();
+                tampilkanModal("Gagal", "Terjadi gangguan jaringan.");
             });
         }
         /* ----------------------------------------------------- */
@@ -774,18 +770,14 @@
                 btnOk.innerHTML = `<span class="spinner"></span> Menyimpan...`;
             }
 
-            amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                fetch(`${SCRIPT_URL}?aksi=adminTambahMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaBaru)}&t=${Date.now()}`)
-                .then(r => r.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Master Sales", res.pesan);
-                    muatMasterSales();
-                    selesai();
-                }).catch(() => {
-                    tutupModal();
-                    selesai();
-                });
+            const pin = getActivePinAdmin();
+            fetch(`${SCRIPT_URL}?aksi=adminTambahMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaBaru)}&t=${Date.now()}`)
+            .then(r => r.json()).then(res => {
+                tutupModal();
+                tampilkanModal("Master Sales", res.pesan);
+                muatMasterSales();
+            }).catch(() => {
+                tutupModal();
             });
         }
 
@@ -823,18 +815,14 @@
                 btnOk.innerHTML = `<span class="spinner"></span> Menghapus...`;
             }
 
-            amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                fetch(`${SCRIPT_URL}?aksi=adminHapusMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaHapus)}&t=${Date.now()}`)
-                .then(r => r.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Master Sales", res.pesan);
-                    muatMasterSales();
-                    selesai();
-                }).catch(() => {
-                    tutupModal();
-                    selesai();
-                });
+            const pin = getActivePinAdmin();
+            fetch(`${SCRIPT_URL}?aksi=adminHapusMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaHapus)}&t=${Date.now()}`)
+            .then(r => r.json()).then(res => {
+                tutupModal();
+                tampilkanModal("Master Sales", res.pesan);
+                muatMasterSales();
+            }).catch(() => {
+                tutupModal();
             });
         }
         /* ---------------------------------------- */
@@ -852,16 +840,14 @@
                 btnOk.disabled = true;
                 btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
             }
-            amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
-                fetch(`${SCRIPT_URL}?aksi=adminSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}&t=${Date.now()}`)
-                .then(res => res.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Status Sistem", res.pesan);
-                    muatDataAntrian(); selesai();
-                }).catch(() => { tutupModal(); selesai(); });
-            });
+            const pin = getActivePinAdmin();
+            if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); return; }
+            fetch(`${SCRIPT_URL}?aksi=adminSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}&t=${Date.now()}`)
+            .then(res => res.json()).then(res => {
+                tutupModal();
+                tampilkanModal("Status Sistem", res.pesan);
+                muatDataAntrian();
+            }).catch(() => { tutupModal(); });
         }
 
         function bukaModalResetTotal() {
@@ -877,23 +863,17 @@
                 btnOk.disabled = true;
                 btnOk.innerHTML = `<span class="spinner"></span> Memproses Reset...`;
             }
-            amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
-                
-                fetch(`${SCRIPT_URL}?aksi=adminResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
-                .then(res => res.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Reset Total", res.pesan || "Semua antrian dan log berhasil direset.");
-                    
-                    localStorage.removeItem('ufo_admin_antrian_cache');
-                    
-                    muatDataAntrian(); 
-                    selesai();
-                }).catch(() => { 
-                    tutupModal(); 
-                    selesai(); 
-                });
+            const pin = getActivePinAdmin();
+            if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); return; }
+            
+            fetch(`${SCRIPT_URL}?aksi=adminResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
+            .then(res => res.json()).then(res => {
+                tutupModal();
+                tampilkanModal("Reset Total", res.pesan || "Semua antrian dan log berhasil direset.");
+                localStorage.removeItem('ufo_admin_antrian_cache');
+                muatDataAntrian(); 
+            }).catch(() => { 
+                tutupModal(); 
             });
         }
 
@@ -935,15 +915,13 @@
                 btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
             }
 
-            amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                fetch(`${SCRIPT_URL}?aksi=adminDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&t=${Date.now()}`)
-                .then(res => res.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Status Admin", res.pesan);
-                    muatDataAntrian(); selesai();
-                }).catch(() => { tutupModal(); selesai(); });
-            });
+            const pin = getActivePinAdmin();
+            fetch(`${SCRIPT_URL}?aksi=adminDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&t=${Date.now()}`)
+            .then(res => res.json()).then(res => {
+                tutupModal();
+                tampilkanModal("Status Admin", res.pesan);
+                muatDataAntrian();
+            }).catch(() => { tutupModal(); });
         }
 
         function bukaModalResetDeviceAdmin() {
@@ -983,19 +961,16 @@
                 btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
             }
 
-            amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
-                fetch(`${SCRIPT_URL}?aksi=adminResetDevice&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
-                .then(res => res.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Status Reset Perangkat", res.pesan);
-                    muatDataAntrian(); selesai();
-                }).catch(() => {
-                    tutupModal();
-                    tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mereset perangkat.");
-                    selesai();
-                });
+            const pin = getActivePinAdmin();
+            if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); return; }
+            fetch(`${SCRIPT_URL}?aksi=adminResetDevice&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
+            .then(res => res.json()).then(res => {
+                tutupModal();
+                tampilkanModal("Status Reset Perangkat", res.pesan);
+                muatDataAntrian();
+            }).catch(() => {
+                tutupModal();
+                tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mereset perangkat.");
             });
         }
 
@@ -1028,15 +1003,13 @@
                 btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
             }
 
-            amanKlikAdmin(function(selesai) {
-                const pin = getActivePinAdmin();
-                fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&t=${Date.now()}`)
-                .then(res => res.json()).then(res => {
-                    tutupModal();
-                    tampilkanModal("Status Admin", res.pesan);
-                    muatDataAntrian(); selesai();
-                }).catch(() => { tutupModal(); selesai(); });
-            });
+            const pin = getActivePinAdmin();
+            fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&t=${Date.now()}`)
+            .then(res => res.json()).then(res => {
+                tutupModal();
+                tampilkanModal("Status Admin", res.pesan);
+                muatDataAntrian();
+            }).catch(() => { tutupModal(); });
         }
 
         function muatMasterSales() {
