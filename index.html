@@ -487,8 +487,8 @@
         </div>
     </div>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
+   <script>
+        const SCRIPT_URL = "GANTI_DENGAN_URL_DEPLOY_APPS_SCRIPT_ANDA";
 
         let daftarAntrianGlobal = [];
         let masterSalesGlobal = [];
@@ -501,6 +501,7 @@
         let markerTokoPeta = null;
         let circleTokoPeta = null;
         let markerSayaPeta = null;
+        
         let intervalCountdownLock = null;
         window.waktuSelesaiLockGlobal = 0;
 
@@ -607,14 +608,19 @@
             const deviceId = getDeviceId();
             Promise.all([
                 fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`).then(r => r.json()).catch(() => null),
-                fetch(`${SCRIPT_URL}?aksi=getAntrian`).then(r => r.json()).catch(() => null)
-            ]).then(([resBinding, resAntrian]) => {
+                fetch(`${SCRIPT_URL}?aksi=getAntrian`).then(r => r.json()).catch(() => null),
+                fetch(`${SCRIPT_URL}?aksi=getMasterSales`).then(r => r.json()).catch(() => null)
+            ]).then(([resBinding, resAntrian, resSales]) => {
                 if (resBinding && resBinding.status === "terkunci" && resBinding.nama) {
                     namaSalesAktifGlobal = resBinding.nama;
                     localStorage.setItem('ufo_nama_sales_aktif', resBinding.nama);
                     document.getElementById('panel-login').style.display = 'none';
                     document.getElementById('panel-menu-utama').style.display = 'block';
                     document.getElementById('label-user-aktif').innerText = resBinding.nama;
+                }
+                if (resSales && resSales.status === "sukses" && resSales.data) {
+                    masterSalesGlobal = resSales.data;
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resSales.data));
                 }
                 if (resAntrian && resAntrian.status === "sukses") {
                     localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
@@ -736,10 +742,10 @@
         }
 
         function jalankanHitungMundur() {
-            if (intervalCountdownLock) return; // Mencegah interval menumpuk dan reset
+            if (intervalCountdownLock) return;
 
             intervalCountdownLock = setInterval(() => {
-                let waktuSelesaiEpoch = window.waktuSelesaiLockGlobal || 0;
+                let waktuSelesaiEpoch = Number(window.waktuSelesaiLockGlobal) || 0;
                 let sekarang = new Date().getTime();
                 let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
 
@@ -748,7 +754,9 @@
                     intervalCountdownLock = null;
                     const wrapperEl = document.getElementById('wrapper-countdown-lock');
                     if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
-                    setTimeout(() => { window.location.reload(); }, 2000);
+                    
+                    localStorage.removeItem('ufo_terima_hukuman_' + getAkunAktif());
+                    setTimeout(() => { window.location.reload(); }, 1500);
                 } else {
                     let menit = Math.floor(selisihDetik / 60);
                     let detik = selisihDetik % 60;
@@ -840,7 +848,6 @@
             if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
                 
-                // Ambil waktu selesai dari database server
                 let waktuLockServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
                 if (waktuLockServer > 0) {
                     window.waktuSelesaiLockGlobal = waktuLockServer;
@@ -873,7 +880,6 @@
 
                 let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
                 
-                // Pastikan waktu server sinkron dan belum lewat
                 if (window.waktuSelesaiLockGlobal > new Date().getTime()) {
                     if (sudahTerimaHukumanHP) {
                         document.getElementById('btn-terima-hukuman').style.display = 'none';
@@ -1316,5 +1322,5 @@
         }
         function tutupModal() { document.getElementById('custom-modal').classList.remove('active'); }
     </script>
-</body>
+    </body>
 </html>
