@@ -979,7 +979,7 @@
             }).catch(() => {});
         }
 
-        function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
+       function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
             const namaSales = getAkunAktif().trim();
             if (!namaSales) return;
 
@@ -987,7 +987,20 @@
             let katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
 
             if (targetStatusSimulasi === "belum_ada") {
+                // Hapus promotor dari array global secara lokal
                 daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
+                
+                // PERBAIKAN UTAMA: Hapus nama promotor dari cache antrian di localStorage
+                let cachedData = localStorage.getItem('ufo_antrian_cache');
+                if (cachedData) {
+                    try {
+                        let parsed = JSON.parse(cachedData);
+                        if (parsed.data) {
+                            parsed.data = parsed.data.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
+                            localStorage.setItem('ufo_antrian_cache', JSON.stringify(parsed));
+                        }
+                    } catch(e) {}
+                }
             } else {
                 let ketemu = false;
                 daftarAntrianGlobal.forEach(item => {
@@ -1012,6 +1025,7 @@
                 localActionActive = false;
                 if (res && res.status === "sukses" && res.data) {
                     daftarAntrianGlobal = res.data;
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res)); // Perbarui cache server terbaru
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
                 } else if (res && (res.status === "locked" || res.status === "terkunci" || res.status === "gagal_lock")) {
                     muatDataAntrian(); 
