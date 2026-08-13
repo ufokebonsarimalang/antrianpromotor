@@ -730,36 +730,34 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
- function mulaiTimerHukumanPromotor() {
-    const btnTerima = document.getElementById('btn-terima-hukuman');
-    const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
-    
-    if (btnTerima) btnTerima.style.display = 'none';
-    if (wrapperCountdown) wrapperCountdown.style.display = 'block';
+        function mulaiTimerHukumanPromotor() {
+            const btnTerima = document.getElementById('btn-terima-hukuman');
+            const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+            
+            if (btnTerima) btnTerima.style.display = 'none';
+            if (wrapperCountdown) wrapperCountdown.style.display = 'block';
 
-    const akunSaya = getAkunAktif().trim().toLowerCase();
-    localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
 
-    const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
-    let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
-    
-    // Hapus paksa cache deadline lama agar tidak membaca durasi 15 menit yang tersimpan di memori HP
-    localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
+            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+            let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+            
+            localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
 
-    if (waktuServer > new Date().getTime()) {
-        window.waktuSelesaiLockGlobal = waktuServer;
-        localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
-    } else if (waktuServer > 0) {
-        window.waktuSelesaiLockGlobal = waktuServer;
-        localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
-    } else {
-        // Fallback aman jika server belum merespon waktu epoch
-        window.waktuSelesaiLockGlobal = new Date().getTime() + (1 * 60 * 1000);
-        localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
-    }
+            if (waktuServer > new Date().getTime()) {
+                window.waktuSelesaiLockGlobal = waktuServer;
+                localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
+            } else if (waktuServer > 0) {
+                window.waktuSelesaiLockGlobal = waktuServer;
+                localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
+            } else {
+                window.waktuSelesaiLockGlobal = new Date().getTime() + (1 * 60 * 1000);
+                localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
+            }
 
-    jalankanHitungMundur();
-}
+            jalankanHitungMundur();
+        }
 
         function jalankanHitungMundur() {
             if (intervalCountdownLock) return;
@@ -783,59 +781,66 @@
                 updateTampilanTimer();
             }, 1000);
         }
-function updateTampilanTimer() {
-    const akunSaya = getAkunAktif().trim().toLowerCase();
-    let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
-    
-    if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
-        window.waktuSelesaiLockGlobal = Number(savedDeadline);
-    }
 
-    let waktuSelesaiEpoch = Number(window.waktuSelesaiLockGlobal) || 0;
-    let sekarang = new Date().getTime();
-    let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
+        function updateTampilanTimer() {
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+            
+            if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+                window.waktuSelesaiLockGlobal = Number(savedDeadline);
+            }
 
-    const spanEl = document.getElementById('span-waktu-mundur');
-    const btnTerima = document.getElementById('btn-terima-hukuman');
-    const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+            let waktuSelesaiEpoch = Number(window.waktuSelesaiLockGlobal) || 0;
+            let sekarang = new Date().getTime();
+            let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
 
-    if (btnTerima && btnTerima.style.display !== 'none') {
-        btnTerima.style.display = 'none';
-    }
-    if (wrapperCountdown && wrapperCountdown.style.display !== 'block') {
-        wrapperCountdown.style.display = 'block';
-    }
+            const spanEl = document.getElementById('span-waktu-mundur');
+            const btnTerima = document.getElementById('btn-terima-hukuman');
+            const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
 
-if (selisihDetik <= 0) {
-        if (intervalCountdownLock) {
-            clearInterval(intervalCountdownLock);
-            intervalCountdownLock = null;
-        }
-        if (wrapperCountdown) wrapperCountdown.innerHTML = "<b>Hukuman Selesai! Membuka sistem...</b>";
-        
-        localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
-        localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
-        
-        // KIRIM SINYAL UNLOCK KE SERVER AGAR DATABASE SHEET LANGSUNG BERSIH
-        const pinAdminUniversal = "123456"; // Atau ambil dari cache jika ada, ini untuk bypass pembersihan otomatis
-        fetch(`${SCRIPT_URL}?aksi=adminUnlockPromotor&pin=123456&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
-        .then(() => {}).catch(() => {});
+            if (btnTerima && btnTerima.style.display !== 'none') {
+                btnTerima.style.display = 'none';
+            }
+            if (wrapperCountdown && wrapperCountdown.style.display !== 'block') {
+                wrapperCountdown.style.display = 'block';
+            }
 
-        if (masterSalesGlobal && masterSalesGlobal.length > 0) {
-            masterSalesGlobal.forEach(s => {
-                if (String(s.nama).trim().toLowerCase() === akunSaya) {
-                    s.locked = "";
-                    s.waktuSelesaiLock = 0;
+            if (selisihDetik <= 0) {
+                if (intervalCountdownLock) {
+                    clearInterval(intervalCountdownLock);
+                    intervalCountdownLock = null;
                 }
-            });
-            localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+                if (wrapperCountdown) wrapperCountdown.innerHTML = "<b>Hukuman Selesai! Membuka sistem...</b>";
+                
+                localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
+                
+                fetch(`${SCRIPT_URL}?aksi=adminUnlockPromotor&pin=123456&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
+                .then(() => {}).catch(() => {});
+
+                if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                    masterSalesGlobal.forEach(s => {
+                        if (String(s.nama).trim().toLowerCase() === akunSaya) {
+                            s.locked = "";
+                            s.waktuSelesaiLock = 0;
+                        }
+                    });
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+                }
+
+                muatDataAntrian();
+                muatMasterSales();
+                
+                setTimeout(() => { window.location.reload(); }, 800);
+            } else {
+                let menit = Math.floor(selisihDetik / 60);
+                let detik = selisihDetik % 60;
+                if (spanEl) {
+                    spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
+                }
+            }
         }
 
-        muatDataAntrian();
-        muatMasterSales();
-        
-        setTimeout(() => { window.location.reload(); }, 800);
-    }
         function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
             if (localActionActive) return;
 
@@ -907,36 +912,36 @@ if (selisihDetik <= 0) {
             const sectionNormal = document.getElementById('section-normal');
             const sectionLocked = document.getElementById('section-akun-locked');
 
-          let isDilockAdmin = false;
-let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
+            let isDilockAdmin = false;
+            let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
+            let sudahMakanDariServer = false;
 
-const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
 
-if (dataSalesSaya) {
-    if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
-    
-    let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
-    let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+            if (dataSalesSaya) {
+                if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
+                
+                let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
+                let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
 
-    if (waktuServer > new Date().getTime()) {
-        window.waktuSelesaiLockGlobal = waktuServer;
-        localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
-    } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
-        window.waktuSelesaiLockGlobal = Number(savedDeadline);
-    }
+                if (waktuServer > new Date().getTime()) {
+                    window.waktuSelesaiLockGlobal = waktuServer;
+                    localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
+                } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+                    window.waktuSelesaiLockGlobal = Number(savedDeadline);
+                }
 
-    let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
-    
-    // CEK TAMBAHAN: Jika status terkunci tapi waktu server sudah lewat dari waktu sekarang, abaikan lock-nya!
-    if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
-        if (waktuServer > 0 && new Date().getTime() >= waktuServer) {
-            isDilockAdmin = false; // Waktu sudah habis, jangan dikunci!
-        } else {
-            isDilockAdmin = true;
-            pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
-        }
-    }
-}
+                let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
+                
+                if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
+                    if (waktuServer > 0 && new Date().getTime() >= waktuServer) {
+                        isDilockAdmin = false;
+                    } else {
+                        isDilockAdmin = true;
+                        pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
+                    }
+                }
+            }
 
             const btnDaftar = document.getElementById('btn-daftar-antrian');
             const btnHadir = document.getElementById('btn-hadir');
@@ -1401,7 +1406,10 @@ if (dataSalesSaya) {
             document.getElementById('custom-modal').classList.add('active');
             document.getElementById('btn-modal-ya').onclick = function() { tutupModal(); callbackYa(); };
         }
-        function tutupModal() { document.getElementById('custom-modal').classList.remove('active'); }
+
+        function tutupModal() { 
+            document.getElementById('custom-modal').classList.remove('active'); 
+        }
     </script>
 </body>
 </html>
