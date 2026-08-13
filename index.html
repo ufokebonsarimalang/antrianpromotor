@@ -487,7 +487,7 @@
         </div>
     </div>
 
- <script>
+   <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         let daftarAntrianGlobal = [];
@@ -740,20 +740,18 @@
             const akunSaya = getAkunAktif().trim().toLowerCase();
             localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
 
-            // Ambil waktu lock murni dari dataSalesSaya di MasterSales, jangan di-hardcode 15 menit
             const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
             let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+            let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
 
             if (waktuServer > new Date().getTime()) {
                 window.waktuSelesaiLockGlobal = waktuServer;
-            } else if (!window.waktuSelesaiLockGlobal || window.waktuSelesaiLockGlobal <= new Date().getTime()) {
-                // Jika dari server benar-benar kosong, ambil dari localStorage atau fallback 15 menit
-                let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
-                if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
-                    window.waktuSelesaiLockGlobal = Number(savedDeadline);
-                } else {
-                    window.waktuSelesaiLockGlobal = new Date().getTime() + (15 * 60 * 1000);
-                }
+            } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+                window.waktuSelesaiLockGlobal = Number(savedDeadline);
+            } else if (waktuServer > 0) {
+                window.waktuSelesaiLockGlobal = waktuServer;
+            } else {
+                window.waktuSelesaiLockGlobal = new Date().getTime() + (15 * 60 * 1000);
             }
 
             localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
@@ -767,7 +765,6 @@
             const akunSaya = getAkunAktif().trim().toLowerCase();
             let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
             
-            // Prioritaskan waktu server jika lebih valid/baru
             const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
             let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
 
@@ -785,43 +782,47 @@
             }, 1000);
         }
 
-      function updateTampilanTimer() {
-    let waktuSelesaiEpoch = Number(window.waktuSelesaiLockGlobal) || 0;
-    let sekarang = new Date().getTime();
-    let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
+        function updateTampilanTimer() {
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+            
+            if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+                window.waktuSelesaiLockGlobal = Number(savedDeadline);
+            }
 
-    const spanEl = document.getElementById('span-waktu-mundur');
-    const btnTerima = document.getElementById('btn-terima-hukuman');
-    const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+            let waktuSelesaiEpoch = Number(window.waktuSelesaiLockGlobal) || 0;
+            let sekarang = new Date().getTime();
+            let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
 
-    if (btnTerima && btnTerima.style.display !== 'none') {
-        btnTerima.style.display = 'none';
-    }
-    if (wrapperCountdown && wrapperCountdown.style.display !== 'block') {
-        wrapperCountdown.style.display = 'block';
-    }
+            const spanEl = document.getElementById('span-waktu-mundur');
+            const btnTerima = document.getElementById('btn-terima-hukuman');
+            const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
 
-    if (selisihDetik <= 0) {
-        if (intervalCountdownLock) {
-            clearInterval(intervalCountdownLock);
-            intervalCountdownLock = null;
+            if (btnTerima && btnTerima.style.display !== 'none') {
+                btnTerima.style.display = 'none';
+            }
+            if (wrapperCountdown && wrapperCountdown.style.display !== 'block') {
+                wrapperCountdown.style.display = 'block';
+            }
+
+            if (selisihDetik <= 0) {
+                if (intervalCountdownLock) {
+                    clearInterval(intervalCountdownLock);
+                    intervalCountdownLock = null;
+                }
+                if (wrapperCountdown) wrapperCountdown.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
+                
+                localStorage.removeItem('ufo_terima_hukuman_' + getAkunAktif());
+                localStorage.removeItem('ufo_lock_deadline_' + getAkunAktif());
+                setTimeout(() => { window.location.reload(); }, 1000);
+            } else {
+                let menit = Math.floor(selisihDetik / 60);
+                let detik = selisihDetik % 60;
+                if (spanEl) {
+                    spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
+                }
+            }
         }
-        if (wrapperCountdown) wrapperCountdown.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
-        
-        // Bersihkan seluruh cache hukuman
-        localStorage.removeItem('ufo_terima_hukuman_' + getAkunAktif());
-        localStorage.removeItem('ufo_lock_deadline_' + getAkunAktif());
-        
-        // Paksa refresh total agar tombol daftar antrian muncul normal
-        setTimeout(() => { window.location.reload(); }, 1000);
-    } else {
-        let menit = Math.floor(selisihDetik / 60);
-        let detik = selisihDetik % 60;
-        if (spanEl) {
-            spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
-        }
-    }
-}
 
         function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
             if (localActionActive) return;
