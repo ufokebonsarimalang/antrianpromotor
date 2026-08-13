@@ -229,7 +229,9 @@
             box-shadow: 0 0 25px rgba(255, 31, 61, 0.6), inset 0 0 10px rgba(255, 31, 61, 0.3) !important;
         }
 
-        .timer-badge-title { font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.4px; color: #0f172a; }
+        .timer-badge-title { font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.4px; }
+        .ha .timer-badge-title { color: #0f172a; } 
+        .av .timer-badge-title { color: #0f172a; } 
 
         body.dark-mode .timer-card-admin.ha .timer-badge-title,
         body.dark-mode .timer-card-admin.av .timer-badge-title { color: #ff99a8 !important; text-shadow: 0 0 10px rgba(255, 31, 61, 0.8); }
@@ -386,7 +388,7 @@
                 <span style="color: var(--text-muted);">Promotor:</span> <strong id="label-user-aktif" style="color:var(--primary); font-size: 14px;">-</strong>
             </div>
 
-            <!-- KOTAK PROMOTOR HA & AV SAAT INI -->
+            <!-- KOTAK GILIRAN HA & AV -->
             <div class="timer-box-wrapper">
                 <div class="timer-card-admin ha">
                     <div>
@@ -439,7 +441,7 @@
                     </div>
                     <!-- Tombol Terima Hukuman -->
                     <button type="button" id="btn-terima-hukuman" class="btn-closing" onclick="mulaiTimerHukumanPromotor()" style="margin-bottom: 8px;">Terima Hukuman</button>
-                    <!-- Teks Hitung Mundur Hukuman -->
+                    <!-- Teks Hitung Mundur -->
                     <div id="wrapper-countdown-lock" style="display: none; font-size: 14px; font-weight: 800; color: #dc2626; text-align: center; padding: 6px; background: #fee2e2; border-radius: 8px;">
                         Sisa Waktu Hukuman: <span id="span-waktu-mundur">--:--</span>
                     </div>
@@ -485,7 +487,7 @@
         </div>
     </div>
 
-   <script>
+    <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         let daftarAntrianGlobal = [];
@@ -499,8 +501,8 @@
         let markerTokoPeta = null;
         let circleTokoPeta = null;
         let markerSayaPeta = null;
-        
         let intervalCountdownLock = null;
+        window.waktuSelesaiLockGlobal = 0;
 
         function getTanggalIndo() {
             const now = new Date();
@@ -550,8 +552,8 @@
                 document.getElementById('panel-menu-utama').style.display = 'none';
             }
 
+            cekServerBg();
             muatMasterSales();
-            muatDataAntrian();
             
             setInterval(() => {
                 muatDataAntrian();
@@ -601,6 +603,26 @@
             }
         }
 
+        function cekServerBg() {
+            const deviceId = getDeviceId();
+            Promise.all([
+                fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`).then(r => r.json()).catch(() => null),
+                fetch(`${SCRIPT_URL}?aksi=getAntrian`).then(r => r.json()).catch(() => null)
+            ]).then(([resBinding, resAntrian]) => {
+                if (resBinding && resBinding.status === "terkunci" && resBinding.nama) {
+                    namaSalesAktifGlobal = resBinding.nama;
+                    localStorage.setItem('ufo_nama_sales_aktif', resBinding.nama);
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = resBinding.nama;
+                }
+                if (resAntrian && resAntrian.status === "sukses") {
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
+                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat);
+                }
+            });
+        }
+
         function cekStatusPerangkatSaya() {
             const namaSaya = localStorage.getItem('ufo_nama_sales_aktif');
             const deviceId = getDeviceId();
@@ -648,7 +670,6 @@
                     document.getElementById('panel-menu-utama').style.display = 'block';
                     document.getElementById('label-user-aktif').innerText = namaPilih;
                     muatDataAntrian();
-                    muatMasterSales();
                 } else { 
                     tampilkanModal("Akses Ditolak", res.pesan); 
                 }
@@ -689,20 +710,11 @@
                         document.getElementById('pilih-sales').innerHTML = html;
                     }
                     
-                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+                    if (daftarAntrianGlobal.length > 0 || getAkunAktif()) {
+                        renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+                    }
                 }
-            }).catch(() => {});
-        }
-
-        function muatDataAntrian() {
-            fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                if (res.status === "sukses") {
-                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
-                    renderUIRental(res.data, res.statusAntrian, res.koordinatPusat);
-                }
-            }).catch(() => {});
+            });
         }
 
         function cekStatusSayaDariArray(dataAntrian) {
@@ -713,43 +725,29 @@
         }
 
         function mulaiTimerHukumanPromotor() {
-            const akunSaya = getAkunAktif().trim().toLowerCase();
             const btnTerima = document.getElementById('btn-terima-hukuman');
             const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
             
             if (btnTerima) btnTerima.style.display = 'none';
             if (wrapperCountdown) wrapperCountdown.style.display = 'block';
 
-            const dataSalesSaya = masterSalesGlobal.find(s => s && s.nama && String(s.nama).trim().toLowerCase() === akunSaya);
-            let waktuSelesaiServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
-
-            if (!waktuSelesaiServer || waktuSelesaiServer <= new Date().getTime()) {
-                waktuSelesaiServer = new Date().getTime() + (5 * 60 * 1000);
-            }
-
-            localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, waktuSelesaiServer);
-            localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
-            
-            jalankanHitungMundur(waktuSelesaiServer);
+            localStorage.setItem('ufo_terima_hukuman_' + getAkunAktif(), 'true');
+            jalankanHitungMundur();
         }
 
-        function jalankanHitungMundur(targetEpoch) {
-            if (intervalCountdownLock) return;
+        function jalankanHitungMundur() {
+            if (intervalCountdownLock) clearInterval(intervalCountdownLock);
 
             intervalCountdownLock = setInterval(() => {
+                let waktuSelesaiEpoch = window.waktuSelesaiLockGlobal || 0;
                 let sekarang = new Date().getTime();
-                let selisihDetik = Math.floor((targetEpoch - sekarang) / 1000);
+                let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
 
                 if (selisihDetik <= 0) {
                     clearInterval(intervalCountdownLock);
-                    intervalCountdownLock = null;
-                    
-                    const akunSaya = getAkunAktif().trim().toLowerCase();
-                    localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
-                    localStorage.removeItem('ufo_waktu_selesai_lock_' + akunSaya);
-                    
-                    muatMasterSales();
-                    muatDataAntrian();
+                    const wrapperEl = document.getElementById('wrapper-countdown-lock');
+                    if (wrapperEl) wrapperEl.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
+                    setTimeout(() => { window.location.reload(); }, 2000);
                 } else {
                     let menit = Math.floor(selisihDetik / 60);
                     let detik = selisihDetik % 60;
@@ -835,35 +833,16 @@
             let isDilockAdmin = false;
             let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
             
-            const dataSalesSaya = masterSalesGlobal.find(s => s && s.nama && String(s.nama).trim().toLowerCase() === akunSaya);
+            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+            
             let sudahMakanDariServer = false;
-            let waktuSelesaiServer = 0;
-
             if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
-                waktuSelesaiServer = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
-                
+                window.waktuSelesaiLockGlobal = dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
                 let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
                 if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
                     isDilockAdmin = true;
-                    // PERBAIKAN: Mengambil alasan spesifik dari database admin jika tersedia
-                    pesanLockAdmin = dataSalesSaya.alasan || dataSalesSaya.keterangan || dataSalesSaya.pesanLock || pesanLockAdmin;
-                }
-            }
-
-            let savedWaktuLock = Number(localStorage.getItem('ufo_waktu_selesai_lock_' + akunSaya)) || 0;
-            if (waktuSelesaiServer > 0 && waktuSelesaiServer !== savedWaktuLock) {
-                savedWaktuLock = waktuSelesaiServer;
-                localStorage.setItem('ufo_waktu_selesai_lock_' + akunSaya, savedWaktuLock);
-            }
-
-            if (savedWaktuLock > 0) {
-                if (savedWaktuLock <= new Date().getTime()) {
-                    localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
-                    localStorage.removeItem('ufo_waktu_selesai_lock_' + akunSaya);
-                    isDilockAdmin = false;
-                } else {
-                    isDilockAdmin = true;
+                    pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
                 }
             }
 
@@ -886,13 +865,10 @@
                 document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
 
                 let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
-                
-                if (sudahTerimaHukumanHP) {
+                if (sudahTerimaHukumanHP && window.waktuSelesaiLockGlobal > 0) {
                     document.getElementById('btn-terima-hukuman').style.display = 'none';
                     document.getElementById('wrapper-countdown-lock').style.display = 'block';
-                    if (savedWaktuLock > 0) {
-                        jalankanHitungMundur(savedWaktuLock);
-                    }
+                    jalankanHitungMundur();
                 } else {
                     document.getElementById('btn-terima-hukuman').style.display = 'block';
                     document.getElementById('wrapper-countdown-lock').style.display = 'none';
@@ -909,12 +885,10 @@
                 return; 
             } else {
                 if (sectionLocked) sectionLocked.style.display = 'none';
-                if (intervalCountdownLock) {
-                    clearInterval(intervalCountdownLock);
-                    intervalCountdownLock = null;
-                }
+                if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
+                localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
             }
-            
+
             let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
 
             if (statusSayaNyata !== "belum_ada") {
@@ -1036,6 +1010,18 @@
                     btnIbadah.disabled = false;
                 }
             }
+        }
+
+        function muatDataAntrian() {
+            if (localActionActive) return;
+            fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res && res.status === "sukses" && !localActionActive) {
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
+                    renderUIRental(res.data, res.statusAntrian, res.koordinatPusat);
+                }
+            }).catch(() => {});
         }
 
         function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
@@ -1313,5 +1299,5 @@
         }
         function tutupModal() { document.getElementById('custom-modal').classList.remove('active'); }
     </script>
-    </body>
+</body>
 </html>
