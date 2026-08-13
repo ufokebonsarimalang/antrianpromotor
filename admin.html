@@ -710,7 +710,7 @@
             }
         }
 
-    function eksekusiLockPromotorAdmin() {
+ function eksekusiLockPromotorAdmin() {
     const selectSales = document.getElementById('admin-select-sales-lock');
     const selectStatus = document.getElementById('admin-select-status-lock');
     const selectAlasan = document.getElementById('admin-select-alasan');
@@ -719,7 +719,12 @@
     const namaSales = selectSales ? selectSales.value : "";
     const aksiLock = selectStatus ? selectStatus.value : "LOCK";
     const alasan = (aksiLock === "LOCK" && selectAlasan) ? selectAlasan.value : "";
-    const durasiMenit = (aksiLock === "LOCK" && inputDurasi) ? inputDurasi.value : "15";
+    
+    // Pastikan mengambil nilai input dengan aman dan default minimal 1 (bukan 15)
+    let durasiMenit = "15";
+    if (aksiLock === "LOCK" && inputDurasi && inputDurasi.value) {
+        durasiMenit = String(inputDurasi.value).trim();
+    }
 
     if (!namaSales) {
         alert("Pilih promotor terlebih dahulu!");
@@ -741,7 +746,7 @@
 
     let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
 
-    // PERBAIKAN: Update state lokal secara instan agar UI tidak terasa lag/lambat
+    // Update state lokal secara instan dengan durasi yang diinput
     if (masterSalesGlobal && masterSalesGlobal.length > 0) {
         masterSalesGlobal.forEach(s => {
             if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
@@ -757,14 +762,12 @@
         localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
     }
 
-    // Tutup modal lebih cepat agar admin merasa responsif
     tutupModal();
 
-    // Kirim fetch di background tanpa blocking UI yang lama
+    // Kirim parameter durasi ke Google Apps Script
     fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
     .then(res => res.json())
     .then(res => {
-        // Silent update di background
         muatMasterSales();
         muatDataAntrian(); 
     })
