@@ -785,40 +785,43 @@
             }, 1000);
         }
 
-        function updateTampilanTimer() {
-            let waktuSelesaiEpoch = Number(window.waktuSelesaiLockGlobal) || 0;
-            let sekarang = new Date().getTime();
-            let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
+      function updateTampilanTimer() {
+    let waktuSelesaiEpoch = Number(window.waktuSelesaiLockGlobal) || 0;
+    let sekarang = new Date().getTime();
+    let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
 
-            const spanEl = document.getElementById('span-waktu-mundur');
-            const btnTerima = document.getElementById('btn-terima-hukuman');
-            const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+    const spanEl = document.getElementById('span-waktu-mundur');
+    const btnTerima = document.getElementById('btn-terima-hukuman');
+    const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
 
-            if (btnTerima && btnTerima.style.display !== 'none') {
-                btnTerima.style.display = 'none';
-            }
-            if (wrapperCountdown && wrapperCountdown.style.display !== 'block') {
-                wrapperCountdown.style.display = 'block';
-            }
+    if (btnTerima && btnTerima.style.display !== 'none') {
+        btnTerima.style.display = 'none';
+    }
+    if (wrapperCountdown && wrapperCountdown.style.display !== 'block') {
+        wrapperCountdown.style.display = 'block';
+    }
 
-            if (selisihDetik <= 0) {
-                if (intervalCountdownLock) {
-                    clearInterval(intervalCountdownLock);
-                    intervalCountdownLock = null;
-                }
-                if (wrapperCountdown) wrapperCountdown.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
-                
-                localStorage.removeItem('ufo_terima_hukuman_' + getAkunAktif());
-                localStorage.removeItem('ufo_lock_deadline_' + getAkunAktif());
-                setTimeout(() => { window.location.reload(); }, 1500);
-            } else {
-                let menit = Math.floor(selisihDetik / 60);
-                let detik = selisihDetik % 60;
-                if (spanEl) {
-                    spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
-                }
-            }
+    if (selisihDetik <= 0) {
+        if (intervalCountdownLock) {
+            clearInterval(intervalCountdownLock);
+            intervalCountdownLock = null;
         }
+        if (wrapperCountdown) wrapperCountdown.innerHTML = "<b>Hukuman Selesai! Memuat ulang...</b>";
+        
+        // Bersihkan seluruh cache hukuman
+        localStorage.removeItem('ufo_terima_hukuman_' + getAkunAktif());
+        localStorage.removeItem('ufo_lock_deadline_' + getAkunAktif());
+        
+        // Paksa refresh total agar tombol daftar antrian muncul normal
+        setTimeout(() => { window.location.reload(); }, 1000);
+    } else {
+        let menit = Math.floor(selisihDetik / 60);
+        let detik = selisihDetik % 60;
+        if (spanEl) {
+            spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
+        }
+    }
+}
 
         function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
             if (localActionActive) return;
