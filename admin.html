@@ -21,7 +21,6 @@
             --danger: #dc2626;
         }
 
-        /* STYLING MODE GELAP: TETAP NEON MERAH MENYALA */
         body.dark-mode {
             --bg: #050102 !important;
             --card-bg: #1a0205 !important;
@@ -62,7 +61,6 @@
             box-shadow: 0 0 50px rgba(255, 31, 61, 0.9), inset 0 0 20px rgba(255, 31, 61, 0.4) !important; 
         }
 
-        /* TOMBOL GANTI TEMA */
         .top-controls { display: flex; justify-content: flex-end; margin-bottom: 20px; }
         .dark-mode-btn {
             background: #0f172a;
@@ -206,7 +204,6 @@
             cursor: text;
         }
 
-        /* SISTEM TOMBOL PROFESIONAL (DISERAGAMKAN MENJADI CLEAN & MODERN) */
         button { 
             width: 100%; 
             padding: 12px 16px; 
@@ -229,7 +226,6 @@
         button:hover { background: #f8fafc; border-color: #cbd5e1; }
         button:active { transform: scale(0.99); }
         
-        /* Aksen Khusus Tombol Utama / Penting */
         .btn-purple, .btn-success, .btn-teal, .btn-primary { 
             background: #0f172a; 
             color: white; 
@@ -239,7 +235,6 @@
             background: #1e293b; 
         }
 
-        /* Tombol Peringatan / Hapus / Darurat */
         .btn-warning, .btn-danger, .btn-darkred { 
             background: #ffffff; 
             color: #dc2626; 
@@ -401,6 +396,10 @@
             <div class="admin-grid">
                 <button type="button" class="btn-primary" onclick="bukaModalFormAdminKategori('adminAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
                 <button type="button" class="btn-warning" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
+                
+                <!-- TOMBOL KONTROL HUKUMAN / LOCK AKUN -->
+                <button type="button" class="btn-danger" onclick="bukaModalLockPromotorAdmin()">Kontrol Hukuman / Lock Akun</button>
+                
                 <button type="button" class="btn-darkred" onclick="bukaModalResetDeviceAdmin()">Reset Kunci Perangkat Promotor</button>
                 <button type="button" class="btn-danger" onclick="bukaModalResetTotal()">Reset Seluruh Antrian Aktif</button>
             </div>
@@ -649,6 +648,101 @@
             });
         }
 
+        /* --- FITUR KONTROL HUKUMAN / LOCK AKUN --- */
+        function bukaModalLockPromotorAdmin() {
+            document.getElementById('modal-title').innerText = "Kontrol Hukuman / Lock Akun";
+            
+            if (!masterSalesGlobal || masterSalesGlobal.length === 0) {
+                const cachedSales = localStorage.getItem('ufo_master_sales_cache');
+                if (cachedSales) { try { masterSalesGlobal = JSON.parse(cachedSales); } catch(e) {} }
+            }
+
+            let optionsSales = '<option value="">-- Pilih Promotor --</option>';
+            if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                masterSalesGlobal.forEach(n => { 
+                    let nama = typeof n === 'object' ? n.nama : n; 
+                    optionsSales += `<option value="${nama}">${nama}</option>`; 
+                });
+            }
+
+            document.getElementById('modal-desc').innerHTML = `
+                Pilih Promotor:<br>
+                <select id="admin-select-sales-lock" style="margin-bottom: 12px;">${optionsSales}</select>
+                
+                Pilih Aksi:<br>
+                <select id="admin-select-status-lock" style="margin-bottom: 12px;" onchange="toggleAlasanLockField(this.value)">
+                    <option value="LOCK">🔒 Kunci Akun (Beri Hukuman)</option>
+                    <option value="UNLOCK">🔓 Buka Akun (Lepas Hukuman)</option>
+                </select>
+                
+                <div id="wrapper-alasan-hukuman">
+                    Pilih Alasan Hukuman:<br>
+                    <select id="admin-select-alasan">
+                        <option value="Terlambat Masuk / Absen">Terlambat Masuk / Absen</option>
+                        <option value="Meninggalkan Posisi Tanpa Izin">Meninggalkan Posisi Tanpa Izin</option>
+                        <option value="Melanggar Aturan Toko">Melanggar Aturan Toko</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+            `;
+
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiLockPromotorAdmin()">Proses</button>
+            `;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function toggleAlasanLockField(nilaiAksi) {
+            const wrapperAlasan = document.getElementById('wrapper-alasan-hukuman');
+            if (wrapperAlasan) {
+                wrapperAlasan.style.display = (nilaiAksi === "UNLOCK") ? "none" : "block";
+            }
+        }
+
+        function eksekusiLockPromotorAdmin() {
+            const selectSales = document.getElementById('admin-select-sales-lock');
+            const selectStatus = document.getElementById('admin-select-status-lock');
+            const selectAlasan = document.getElementById('admin-select-alasan');
+
+            const namaSales = selectSales ? selectSales.value : "";
+            const aksiLock = selectStatus ? selectStatus.value : "LOCK";
+            const alasan = (aksiLock === "LOCK" && selectAlasan) ? selectAlasan.value : "";
+
+            if (!namaSales) {
+                alert("Pilih promotor terlebih dahulu!");
+                return;
+            }
+
+            const btnOk = document.getElementById('btn-modal-action-ok');
+            if (btnOk) {
+                btnOk.disabled = true;
+                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            }
+
+            amanKlikAdmin(function(selesai) {
+                const pin = getActivePinAdmin();
+                if (!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); selesai(); return; }
+
+                let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
+
+                fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(res => {
+                    tutupModal();
+                    tampilkanModal("Status Hukuman", res.pesan);
+                    muatMasterSales();
+                    muatDataAntrian(); 
+                    selesai();
+                }).catch(() => {
+                    tutupModal();
+                    tampilkanModal("Gagal", "Terjadi gangguan jaringan.");
+                    selesai();
+                });
+            });
+        }
+        /* ----------------------------------------------------- */
+
         /* --- FITUR TAMBAH & HAPUS MASTER SALES --- */
         function bukaModalTambahMasterSales() {
             document.getElementById('modal-title').innerText = "Tambah Nama Promotor Baru";
@@ -756,7 +850,8 @@
                 }).catch(() => { tutupModal(); selesai(); });
             });
         }
-function bukaModalResetTotal() {
+
+        function bukaModalResetTotal() {
             document.getElementById('modal-title').innerText = 'Reset Semua Antrian & Log';
             document.getElementById('modal-desc').innerHTML = `⚠️ <b>PERINGATAN:</b><br>Seluruh data antrian aktif beserta log riwayat melayani akan dihapus secara total dari sistem. Lanjutkan?`;
             document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiResetTotal()">Reset Sekarang</button>`;
@@ -778,7 +873,6 @@ function bukaModalResetTotal() {
                     tutupModal();
                     tampilkanModal("Reset Total", res.pesan || "Semua antrian dan log berhasil direset.");
                     
-                    // Bersihkan cache lokal admin juga agar tampilan langsung bersih
                     localStorage.removeItem('ufo_admin_antrian_cache');
                     
                     muatDataAntrian(); 
