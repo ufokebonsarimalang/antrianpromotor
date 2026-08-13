@@ -488,7 +488,7 @@
     </div>
 
    <script>
-        const SCRIPT_URL = "GANTI_DENGAN_URL_DEPLOY_APPS_SCRIPT_ANDA";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
         let daftarAntrianGlobal = [];
         let masterSalesGlobal = [];
@@ -891,6 +891,10 @@
                     }
                 } else {
                     localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                    if (intervalCountdownLock) {
+                        clearInterval(intervalCountdownLock);
+                        intervalCountdownLock = null;
+                    }
                 }
 
                 if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
