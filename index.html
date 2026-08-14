@@ -828,7 +828,7 @@ body.dark-mode .list-antrian li b {
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
-        function mulaiTimerHukumanPromotor() {
+      function mulaiTimerHukumanPromotor() {
             const btnTerima = document.getElementById('btn-terima-hukuman');
             const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
             const teksAlasan = document.getElementById('teks-alasan-lock');
@@ -852,13 +852,12 @@ body.dark-mode .list-antrian li b {
                 window.waktuSelesaiLockGlobal = waktuServer;
                 localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
             } else {
-                window.waktuSelesaiLockGlobal = new Date().getTime() + (15 * 60 * 1000);
+                window.waktuSelesaiLockGlobal = new Date().getTime() + (2 * 60 * 1000);
                 localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
             }
 
             jalankanHitungMundur();
         }
-
         function jalankanHitungMundur() {
             if (intervalCountdownLock) return;
 
