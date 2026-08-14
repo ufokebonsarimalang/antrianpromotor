@@ -211,7 +211,7 @@
             font-size: 12px; 
             font-weight: 600; 
             cursor: pointer; 
-            border: 1px solid var(--border); 
+            border: 1px solid #dc2626; 
             text-transform: uppercase; 
             transition: all 0.2s ease; 
             display: inline-flex; 
@@ -219,13 +219,15 @@
             align-items: center; 
             gap: 8px; 
             letter-spacing: 0.5px;
-            background: #ffffff;
-            color: var(--text-main);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            /* PERUBAHAN UTAMA: TOMBOL YANG SEMULA PUTIH KINI MENJADI MERAH DENGAN FONT PUTIH */
+            background: #dc2626;
+            color: #ffffff;
+            box-shadow: 0 1px 2px rgba(220, 38, 38, 0.2);
         }
-        button:hover { background: #f8fafc; border-color: #cbd5e1; }
+        button:hover { background: #b91c1c; border-color: #991b1b; }
         button:active { transform: scale(0.99); }
         
+        /* TOMBOL KHUSUS TERTENTU TETAP MEMILIKI WARNA SPESIFIKNYA MASING-MASING */
         .btn-purple, .btn-success, .btn-teal, .btn-primary { 
             background: #0f172a; 
             color: white; 
@@ -684,9 +686,8 @@
                     <select id="admin-select-alasan" style="margin-bottom: 12px;">
                         <option value="Pulang tanpa keluar antrian">Pulang tanpa keluar antrian</option>
                         <option value="Istirahat tanpa keluar antrian">Istirahat tanpa keluar antrian</option>
-                        <option value="Melayani tapi tidak menekan tombol Sudah Membawa Customer">"Melayani tapi tidak menekan tombol Sudah Membawa Customer</option>
+                        <option value="Melayani tapi tidak menekan tombol Sudah Membawa Customer">Melayani tapi tidak menekan tombol Sudah Membawa Customer</option>
                         <option value="Meninggalkan Posisi Tanpa Izin">Meninggalkan Antrian Tanpa Keterangan</option>
-                        
                     </select>
 
                     Durasi Hukuman (Menit):<br>
@@ -708,72 +709,69 @@
             }
         }
 
- function eksekusiLockPromotorAdmin() {
-    const selectSales = document.getElementById('admin-select-sales-lock');
-    const selectStatus = document.getElementById('admin-select-status-lock');
-    const selectAlasan = document.getElementById('admin-select-alasan');
-    const inputDurasi = document.getElementById('admin-input-durasi-menit');
+        function eksekusiLockPromotorAdmin() {
+            const selectSales = document.getElementById('admin-select-sales-lock');
+            const selectStatus = document.getElementById('admin-select-status-lock');
+            const selectAlasan = document.getElementById('admin-select-alasan');
+            const inputDurasi = document.getElementById('admin-input-durasi-menit');
 
-    const namaSales = selectSales ? selectSales.value : "";
-    const aksiLock = selectStatus ? selectStatus.value : "LOCK";
-    const alasan = (aksiLock === "LOCK" && selectAlasan) ? selectAlasan.value : "";
-    
-    // Pastikan mengambil nilai input dengan aman dan default minimal 1 (bukan 15)
-    let durasiMenit = "15";
-    if (aksiLock === "LOCK" && inputDurasi && inputDurasi.value) {
-        durasiMenit = String(inputDurasi.value).trim();
-    }
-
-    if (!namaSales) {
-        alert("Pilih promotor terlebih dahulu!");
-        return;
-    }
-
-    const btnOk = document.getElementById('btn-modal-action-ok');
-    if (btnOk) {
-        btnOk.disabled = true;
-        btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
-    }
-
-    const pin = getActivePinAdmin();
-    if (!pin) { 
-        alert("PIN Admin tidak ditemukan!"); 
-        tutupModal(); 
-        return; 
-    }
-
-    let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
-
-    // Update state lokal secara instan dengan durasi yang diinput
-    if (masterSalesGlobal && masterSalesGlobal.length > 0) {
-        masterSalesGlobal.forEach(s => {
-            if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
-                s.locked = (aksiLock === "LOCK") ? "LOCKED" : "";
-                s.alasan = alasan;
-                if (aksiLock === "LOCK") {
-                    s.waktuSelesaiLock = new Date().getTime() + (Number(durasiMenit) * 60 * 1000);
-                } else {
-                    s.waktuSelesaiLock = 0;
-                }
+            const namaSales = selectSales ? selectSales.value : "";
+            const aksiLock = selectStatus ? selectStatus.value : "LOCK";
+            const alasan = (aksiLock === "LOCK" && selectAlasan) ? selectAlasan.value : "";
+            
+            let durasiMenit = "15";
+            if (aksiLock === "LOCK" && inputDurasi && inputDurasi.value) {
+                durasiMenit = String(inputDurasi.value).trim();
             }
-        });
-        localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
-    }
 
-    tutupModal();
+            if (!namaSales) {
+                alert("Pilih promotor terlebih dahulu!");
+                return;
+            }
 
-    // Kirim parameter durasi ke Google Apps Script
-    fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
-    .then(res => res.json())
-    .then(res => {
-        muatMasterSales();
-        muatDataAntrian(); 
-    })
-    .catch(() => {
-        muatMasterSales();
-        muatDataAntrian();
-    });
-}
+            const btnOk = document.getElementById('btn-modal-action-ok');
+            if (btnOk) {
+                btnOk.disabled = true;
+                btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            }
+
+            const pin = getActivePinAdmin();
+            if (!pin) { 
+                alert("PIN Admin tidak ditemukan!"); 
+                tutupModal(); 
+                return; 
+            }
+
+            let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
+
+            if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                masterSalesGlobal.forEach(s => {
+                    if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
+                        s.locked = (aksiLock === "LOCK") ? "LOCKED" : "";
+                        s.alasan = alasan;
+                        if (aksiLock === "LOCK") {
+                            s.waktuSelesaiLock = new Date().getTime() + (Number(durasiMenit) * 60 * 1000);
+                        } else {
+                            s.waktuSelesaiLock = 0;
+                        }
+                    }
+                });
+                localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+            }
+
+            tutupModal();
+
+            fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                muatMasterSales();
+                muatDataAntrian(); 
+            })
+            .catch(() => {
+                muatMasterSales();
+                muatDataAntrian();
+            });
+        }
 
         function bukaModalTambahMasterSales() {
             document.getElementById('modal-title').innerText = "Tambah Nama Promotor Baru";
