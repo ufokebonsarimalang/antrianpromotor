@@ -204,7 +204,7 @@
             cursor: text;
         }
 
-        /* UTAMA: SEMUA TOMBOL STANDAR MENJADI MERAH DENGAN FONT PUTIH */
+        /* DEFAULT TOMBOL LAINNYA MENJADI MERAH */
         button { 
             width: 100%; 
             padding: 12px 16px; 
@@ -227,7 +227,16 @@
         button:hover { background: #b91c1c !important; border-color: #991b1b !important; }
         button:active { transform: scale(0.99); }
         
-        /* PENGECUALIAN UNTUK TOMBOL KHUSUS TERTENTU */
+        /* KELAS KHUSUS UNTUK TOMBOL HITAM (Buka Sistem, Masukkan Promotor, Paksa Bawa Customer, Paksa Selesai Melayani) */
+        .btn-black-custom {
+            background: #0f172a !important;
+            color: #ffffff !important;
+            border-color: #0f172a !important;
+        }
+        .btn-black-custom:hover {
+            background: #1e293b !important;
+        }
+
         .btn-cancel { background: #f1f5f9 !important; color: #475569 !important; border-color: #cbd5e1 !important; }
         .btn-cancel:hover { background: #e2e8f0 !important; }
 
@@ -241,6 +250,12 @@
         }
         body.dark-mode button:hover {
             background: #cc0029 !important;
+        }
+        
+        body.dark-mode .btn-black-custom {
+            background: #99001f !important;
+            color: #ffffff !important;
+            border: 2px solid #ff1f3d !important;
         }
 
         body.dark-mode .btn-cancel {
@@ -330,7 +345,7 @@
                 <label>Masukkan PIN Admin Khusus</label>
                 <input type="password" id="input-pin-admin" placeholder="••••" style="text-align: center; font-size: 18px; letter-spacing: 4px;">
             </div>
-            <button type="button" id="btn-login-admin" onclick="prosesLoginAdmin()">Autentikasi & Masuk</button>
+            <button type="button" id="btn-login-admin" class="btn-black-custom" onclick="prosesLoginAdmin()">Autentikasi & Masuk</button>
         </div>
 
         <div id="controls-admin-box" style="display: none;">
@@ -363,13 +378,15 @@
 
             <div class="section-title">1. Manajemen Operasional Sistem</div>
             <div class="admin-grid">
-                <button type="button" onclick="bukaModalToggleSistem('BUKA')">Buka Sistem Antrian</button>
+                <!-- Tombol Buka Sistem Antrian: Warna Hitam Teks Putih -->
+                <button type="button" class="btn-black-custom" onclick="bukaModalToggleSistem('BUKA')">Buka Sistem Antrian</button>
                 <button type="button" onclick="bukaModalToggleSistem('TUTUP')">Tutup Sistem Antrian</button>
             </div>
 
             <div class="section-title">2. Manajemen Urutan Antrian</div>
             <div class="admin-grid">
-                <button type="button" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Promotor ke Antrian</button>
+                <!-- Tombol Masukkan Promotor: Warna Hitam Teks Putih -->
+                <button type="button" class="btn-black-custom" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Promotor ke Antrian</button>
                 <button type="button" onclick="bukaModalTambahMasterSales()">+ Tambah Nama Baru (Master Sales)</button>
                 <button type="button" onclick="bukaModalHapusMasterSales()">- Hapus Nama Permanen (Master Sales)</button>
                 <button type="button" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
@@ -377,8 +394,9 @@
 
             <div class="section-title">3. Tindakan Darurat & Kontrol Khusus</div>
             <div class="admin-grid">
-                <button type="button" onclick="bukaModalFormAdminKategori('adminAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
-                <button type="button" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
+                <!-- Tombol Paksa Bawa Customer & Paksa Selesai Melayani: Warna Hitam Teks Putih -->
+                <button type="button" class="btn-black-custom" onclick="bukaModalFormAdminKategori('adminAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
+                <button type="button" class="btn-black-custom" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
                 
                 <!-- TOMBOL KONTROL HUKUMAN / LOCK AKUN -->
                 <button type="button" onclick="bukaModalLockPromotorAdmin()">Kontrol Hukuman / Lock Akun</button>
@@ -571,9 +589,9 @@
 
                         let badgeHtml = "";
                         if (item.status === "Waktu Makan") {
-                            badgeHtml = `<span class="badge-status-item badge-standby">Waktu Makan (${urut})</span>`;
+                            badgeHtml = `<span class="badge-status-item badge-standby">Waktu Makan</span>`;
                         } else {
-                            badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
+                            badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby</span>`;
                         }
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
                     } else if (item.status === "Melayani") {
