@@ -870,19 +870,32 @@
                 localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
             }
 
-            // CEK DAN TAMPILKAN PENGUMUMAN DARI KOLOM D SETTING (HANYA JIKA BERBEDA DARI YANG SUDAH DIBACA)
+         // CEK DAN TAMPILKAN PENGUMUMAN DARI KOLOM D SETTING
+            const modalPengumuman = document.getElementById('modal-pengumuman-admin');
             if (pengumumanAdminServer && String(pengumumanAdminServer).trim() !== "") {
                 let teksP = String(pengumumanAdminServer).trim();
-                let cacheP = localStorage.getItem('ufo_cache_pengumuman_admin') || "";
-                
-                // Pop-up hanya muncul jika teks baru atau belum pernah ditutup oleh user
-                if (cacheP !== teksP) {
+                let rawCache = localStorage.getItem('ufo_cache_pengumuman_admin');
+                let sudahDibaca = false;
+
+                if (rawCache) {
+                    try {
+                        let parsedCache = JSON.parse(rawCache);
+                        if (parsedCache.teks === teksP && parsedCache.tanggal === new Date().toDateString()) {
+                            sudahDibaca = true;
+                        }
+                    } catch(e) {
+                        if (rawCache === teksP) sudahDibaca = true;
+                    }
+                }
+
+                if (!sudahDibaca) {
                     document.getElementById('isi-pengumuman-admin').innerText = teksP;
-                    document.getElementById('modal-pengumuman-admin').classList.add('active');
+                    if (modalPengumuman) modalPengumuman.classList.add('active');
+                } else {
+                    if (modalPengumuman) modalPengumuman.classList.remove('active');
                 }
             } else {
-                // Jika sel D1 dikosongkan oleh admin, pastikan modal tertutup
-                document.getElementById('modal-pengumuman-admin').classList.remove('active');
+                if (modalPengumuman) modalPengumuman.classList.remove('active');
             }
 
             const badge = document.getElementById('badge-status-sistem');
