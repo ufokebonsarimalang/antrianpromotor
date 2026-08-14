@@ -805,7 +805,7 @@
                 wrapperCountdown.style.display = 'block';
             }
 
-            if (selisihDetik <= 0) {
+            if (selisihDetik <= 3) {
                 if (intervalCountdownLock) {
                     clearInterval(intervalCountdownLock);
                     intervalCountdownLock = null;
@@ -814,6 +814,7 @@
                 
                 localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
                 localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
+                localStorage.setItem('ufo_hukuman_selesai_lock_' + akunSaya, 'true');
                 
                 fetch(`${SCRIPT_URL}?aksi=adminUnlockPromotor&pin=123456&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
                 .then(() => {}).catch(() => {});
@@ -831,7 +832,7 @@
                 muatDataAntrian();
                 muatMasterSales();
                 
-                setTimeout(() => { window.location.reload(); }, 800);
+                setTimeout(() => { window.location.reload(); }, 600);
             } else {
                 let menit = Math.floor(selisihDetik / 60);
                 let detik = selisihDetik % 60;
@@ -917,8 +918,11 @@
             let sudahMakanDariServer = false;
 
             const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+            let hukumanSelesaiLokal = localStorage.getItem('ufo_hukuman_selesai_lock_' + akunSaya) === 'true';
 
-            if (dataSalesSaya) {
+            if (hukumanSelesaiLokal) {
+                isDilockAdmin = false;
+            } else if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
                 
                 let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
@@ -934,7 +938,7 @@
                 let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
                 
                 if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
-                    if (waktuServer > 0 && new Date().getTime() >= waktuServer) {
+                    if (waktuServer > 0 && (new Date().getTime() + 3000) >= waktuServer) {
                         isDilockAdmin = false;
                     } else {
                         isDilockAdmin = true;
@@ -1031,12 +1035,21 @@
                 groupPilihKat.style.display = "none";
                 btnDaftar.style.display = "none";
 
+                // PASTIKAN TOMBOL SELALU MUNCUL BERDASARKAN STATUS NYATA PROMOTOR
+                btnCustomer.style.display = (statusSayaNyata === "Standby") ? "block" : "none";
+                btnClosing.style.display = (statusSayaNyata === "Melayani") ? "block" : "none";
+                btnCS.style.display = (statusSayaNyata === "Standby" || statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") ? "block" : "none";
+                btnIbadah.style.display = (statusSayaNyata === "Standby" || statusSayaNyata === "Ibadah") ? "block" : "none";
+                btnKeluar.style.display = (statusSayaNyata === "Standby") ? "block" : "none";
+
                 if (statusSayaNyata === "Standby") {
-                    btnCustomer.style.display = "block"; 
-                    btnClosing.style.display = "none";
-                    btnCS.style.display = "block"; btnCS.innerText = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; btnCS.className = "btn-purple"; btnCS.disabled = false;
-                    btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
-                    btnKeluar.style.display = "block";
+                    btnCS.innerText = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; 
+                    btnCS.className = "btn-purple"; 
+                    btnCS.disabled = false;
+
+                    btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; 
+                    btnIbadah.className = "btn-indigo"; 
+                    btnIbadah.disabled = false;
 
                     let listSubStandby = daftarAntrianGlobal.filter(it => (it.status === "Standby" || it.status === "Waktu Makan") && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
                     let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
@@ -1044,7 +1057,6 @@
 
                     if (apakahSayaUrutanPertama) {
                         btnMakan.style.display = "block";
-                        
                         const cacheSudahMakan = localStorage.getItem('ufo_sudah_makan_' + akunSaya) === 'true';
 
                         if (sudahMakanDariServer || cacheSudahMakan) {
@@ -1071,7 +1083,6 @@
                         btnKeluar.disabled = true; btnKeluar.className = "btn-maroon btn-disabled";
                     } else {
                         let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
-
                         btnCustomer.disabled = !apakahSayaBisaAmbil; 
                         btnCustomer.className = apakahSayaBisaAmbil ? "btn-customer btn-pulse" : "btn-customer btn-disabled";
                         btnCS.disabled = false; btnCS.className = "btn-purple";
@@ -1079,35 +1090,16 @@
                         btnKeluar.disabled = false; btnKeluar.className = "btn-maroon";
                     }
                 } else if (statusSayaNyata === "Waktu Makan") {
-                    btnCustomer.style.display = "none";
-                    btnClosing.style.display = "none";
-                    btnCS.style.display = "none";
-                    btnIbadah.style.display = "none";
-                    btnKeluar.style.display = "none";
-
                     btnMakan.style.display = "block";
                     btnMakan.innerText = "SELESAI MAKAN (KEMBALI ANTRI)";
                     btnMakan.className = "btn-teal";
                     btnMakan.disabled = false;
-                } else if (statusSayaNyata === "Melayani") {
-                    btnCustomer.style.display = "none"; 
-                    btnMakan.style.display = "none"; 
-                    btnClosing.style.display = "block";
-                    btnCS.style.display = "none"; btnIbadah.style.display = "none"; btnKeluar.style.display = "none";
                 } else if (statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") {
-                    btnCustomer.style.display = "none"; 
-                    btnMakan.style.display = "none"; 
-                    btnClosing.style.display = "none";
-                    btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal"; btnCS.disabled = false;
-                    btnIbadah.style.display = "none";
-                    btnKeluar.style.display = "none";
+                    btnCS.style.display = "block"; 
+                    btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; 
+                    btnCS.className = "btn-teal"; 
+                    btnCS.disabled = false;
                 } else if (statusSayaNyata === "Ibadah") {
-                    btnCustomer.style.display = "none";
-                    btnMakan.style.display = "none";
-                    btnClosing.style.display = "none";
-                    btnCS.style.display = "none";
-                    btnKeluar.style.display = "none";
-                    
                     btnIbadah.style.display = "block"; 
                     btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)"; 
                     btnIbadah.className = "btn-teal"; 
@@ -1139,6 +1131,19 @@
 
             localActionActive = true;
             let katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
+
+            if (aksiServer === 'daftarAntri') {
+                localStorage.removeItem('ufo_hukuman_selesai_lock_' + namaSales.toLowerCase());
+                if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                    masterSalesGlobal.forEach(s => {
+                        if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
+                            s.locked = "";
+                            s.waktuSelesaiLock = 0;
+                        }
+                    });
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+                }
+            }
 
             if (targetStatusSimulasi === "belum_ada") {
                 daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
