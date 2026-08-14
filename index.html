@@ -200,23 +200,23 @@
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.6), inset 0 0 8px rgba(255, 31, 61, 0.3) !important;
         }
 
+        /* BOX AKUN TERKUNCI (FULL MERAH, FONT PUTIH, RATA TENGAH) */
         #section-akun-locked {
-            background: #fee2e2;
-            border: 2px solid #f87171;
-            border-radius: 12px;
-            padding: 14px;
+            background: #dc2626;
+            border: 2px solid #b91c1c;
+            border-radius: 14px;
+            padding: 20px 16px;
             margin-top: 10px;
             margin-bottom: 16px;
-            text-align: left;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            color: #ffffff;
+            box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);
         }
         body.dark-mode #section-akun-locked {
-            background: #2a0808 !important;
+            background: #99001f !important;
             border: 2px solid #ff1f3d !important;
-            box-shadow: 0 0 25px rgba(255, 31, 61, 0.6) !important;
+            box-shadow: 0 0 30px rgba(255, 31, 61, 0.7) !important;
         }
-        body.dark-mode #section-akun-locked .locked-title { color: #ff667a !important; }
-        body.dark-mode #section-akun-locked #teks-alasan-lock { color: #ff99a8 !important; }
 
         .timer-box-wrapper { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
         .timer-card-admin { background: #f8fafc; border-radius: 14px; padding: 14px; text-align: center; border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
@@ -432,18 +432,20 @@
 
                 <button type="button" id="btn-daftar-antrian" class="btn-success btn-pulse" onclick="aksiDaftarAntrianNormal()" style="display: none; margin-top: 4px;">Daftar Antrian</button>
                 
+                <!-- BOX AKUN TERKUNCI (FULL MERAH, FONT PUTIH, CENTER) -->
                 <div id="section-akun-locked" style="display: none;">
-                    <div class="locked-title" style="color: #991b1b; font-weight: 800; font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">
+                    <div class="locked-title" style="color: #ffffff; font-weight: 800; font-size: 15px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
                         ⚠️ AKUN ANDA TERKUNCI
                     </div>
-                    <div id="teks-alasan-lock" style="color: #7f1d1d; font-size: 12px; font-weight: 600; line-height: 1.4; margin-bottom: 10px;">
+                    <div id="teks-alasan-lock" style="color: #fef2f2; font-size: 13px; font-weight: 600; line-height: 1.4; margin-bottom: 16px;">
                         -
                     </div>
                     <!-- Tombol Terima Hukuman -->
-                    <button type="button" id="btn-terima-hukuman" class="btn-closing" onclick="mulaiTimerHukumanPromotor()" style="margin-bottom: 8px;">Terima Hukuman</button>
-                    <!-- Teks Hitung Mundur -->
-                    <div id="wrapper-countdown-lock" style="display: none; font-size: 14px; font-weight: 800; color: #dc2626; text-align: center; padding: 6px; background: #fee2e2; border-radius: 8px;">
-                        Sisa Waktu Hukuman: <span id="span-waktu-mundur">--:--</span>
+                    <button type="button" id="btn-terima-hukuman" class="btn-success" style="background: #ffffff; color: #dc2626; font-weight: 800;" onclick="mulaiTimerHukumanPromotor()">Terima Hukuman</button>
+                    <!-- Teks Hitung Mundur Besar di dalam Box Penuh -->
+                    <div id="wrapper-countdown-lock" style="display: none; font-size: 36px; font-weight: 800; color: #ffffff; text-align: center; padding: 10px 0; letter-spacing: 2px;">
+                        <div style="font-size: 11px; text-transform: uppercase; color: #fecaca; margin-bottom: 2px; font-weight: 700; letter-spacing: 0.5px;">Sisa Waktu Hukuman</div>
+                        <span id="span-waktu-mundur">--:--</span>
                     </div>
                 </div>
 
@@ -733,8 +735,10 @@
         function mulaiTimerHukumanPromotor() {
             const btnTerima = document.getElementById('btn-terima-hukuman');
             const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+            const teksAlasan = document.getElementById('teks-alasan-lock');
             
             if (btnTerima) btnTerima.style.display = 'none';
+            if (teksAlasan) teksAlasan.style.display = 'none';
             if (wrapperCountdown) wrapperCountdown.style.display = 'block';
 
             const akunSaya = getAkunAktif().trim().toLowerCase();
@@ -797,26 +801,23 @@
             const spanEl = document.getElementById('span-waktu-mundur');
             const btnTerima = document.getElementById('btn-terima-hukuman');
             const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+            const teksAlasan = document.getElementById('teks-alasan-lock');
 
-            if (btnTerima && btnTerima.style.display !== 'none') {
-                btnTerima.style.display = 'none';
-            }
-            if (wrapperCountdown && wrapperCountdown.style.display !== 'block') {
-                wrapperCountdown.style.display = 'block';
-            }
+            if (btnTerima && btnTerima.style.display !== 'none') btnTerima.style.display = 'none';
+            if (teksAlasan && teksAlasan.style.display !== 'none') teksAlasan.style.display = 'none';
+            if (wrapperCountdown && wrapperCountdown.style.display !== 'block') wrapperCountdown.style.display = 'block';
 
             if (selisihDetik <= 3) {
                 if (intervalCountdownLock) {
                     clearInterval(intervalCountdownLock);
                     intervalCountdownLock = null;
                 }
-                if (wrapperCountdown) wrapperCountdown.innerHTML = "<b>Hukuman Selesai! Membuka sistem...</b>";
+                if (wrapperCountdown) wrapperCountdown.innerHTML = "<div style='font-size: 16px; font-weight: 800;'>Hukuman Selesai! Membuka sistem...</div>";
                 
                 localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
                 localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
                 localStorage.setItem('ufo_hukuman_selesai_lock_' + akunSaya, 'true');
                 
-                // KIRIM SINYAL UNLOCK KE SERVER PUSAT AGAR DATABASE IKUT TERBUKA
                 fetch(`${SCRIPT_URL}?aksi=adminUnlockPromotor&pin=123456&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
                 .then(r => r.json())
                 .then(() => {
@@ -973,10 +974,12 @@
                 if (sudahTerimaHukumanHP || (window.waktuSelesaiLockGlobal > new Date().getTime())) {
                     localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
                     document.getElementById('btn-terima-hukuman').style.display = 'none';
+                    document.getElementById('teks-alasan-lock').style.display = 'none';
                     document.getElementById('wrapper-countdown-lock').style.display = 'block';
                     jalankanHitungMundur();
                 } else {
                     document.getElementById('btn-terima-hukuman').style.display = 'block';
+                    document.getElementById('teks-alasan-lock').style.display = 'block';
                     document.getElementById('wrapper-countdown-lock').style.display = 'none';
                 }
 
@@ -1038,7 +1041,6 @@
                 groupPilihKat.style.display = "none";
                 btnDaftar.style.display = "none";
 
-                // Menampilkan tombol sesuai status nyata secara benar
                 btnCustomer.style.display = (statusSayaNyata === "Standby") ? "block" : "none";
                 btnClosing.style.display = (statusSayaNyata === "Melayani") ? "block" : "none";
                 btnCS.style.display = (statusSayaNyata === "Standby" || statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") ? "block" : "none";
