@@ -816,23 +816,26 @@
                 localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
                 localStorage.setItem('ufo_hukuman_selesai_lock_' + akunSaya, 'true');
                 
+                // KIRIM SINYAL UNLOCK KE SERVER PUSAT AGAR DATABASE IKUT TERBUKA
                 fetch(`${SCRIPT_URL}?aksi=adminUnlockPromotor&pin=123456&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
-                .then(() => {}).catch(() => {});
+                .then(r => r.json())
+                .then(() => {
+                    if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                        masterSalesGlobal.forEach(s => {
+                            if (String(s.nama).trim().toLowerCase() === akunSaya) {
+                                s.locked = "";
+                                s.waktuSelesaiLock = 0;
+                            }
+                        });
+                        localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+                    }
+                    muatDataAntrian();
+                    muatMasterSales();
+                    setTimeout(() => { window.location.reload(); }, 500);
+                }).catch(() => {
+                    setTimeout(() => { window.location.reload(); }, 500);
+                });
 
-                if (masterSalesGlobal && masterSalesGlobal.length > 0) {
-                    masterSalesGlobal.forEach(s => {
-                        if (String(s.nama).trim().toLowerCase() === akunSaya) {
-                            s.locked = "";
-                            s.waktuSelesaiLock = 0;
-                        }
-                    });
-                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
-                }
-
-                muatDataAntrian();
-                muatMasterSales();
-                
-                setTimeout(() => { window.location.reload(); }, 600);
             } else {
                 let menit = Math.floor(selisihDetik / 60);
                 let detik = selisihDetik % 60;
@@ -1074,7 +1077,6 @@
                         btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
                         btnKeluar.disabled = true; btnKeluar.className = "btn-maroon btn-disabled";
                     } else {
-                        // Logika Tombol Utama (Urutan 1 s.d 3 aktif, urutan 4 ke bawah tidak aktif dengan teks khusus)
                         let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
 
                         if (apakahSayaBisaAmbil) {
@@ -1087,7 +1089,6 @@
                             btnCustomer.innerText = "Anda Sudah Berada di Antrian";
                         }
 
-                        // TOMBOL PENDUKUNG (CS, IBADAH, KELUAR) SELALU AKTIF NORMAL DI POSISI STANDBY
                         btnCS.style.display = "block";
                         btnCS.innerText = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; 
                         btnCS.className = "btn-purple"; 
