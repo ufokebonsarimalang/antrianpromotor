@@ -479,6 +479,17 @@
         </a>
     </div>
 
+    <!-- MODAL POPUP PENGUMUMAN DARI KOLOM D SETTING -->
+    <div id="modal-pengumuman-admin" class="modal-overlay">
+        <div class="modal-box" style="border-left: 4px solid #d97706;">
+            <div class="modal-title" style="color: #d97706;">📢 PENGUMUMAN PENTING</div>
+            <div id="isi-pengumuman-admin" class="modal-desc" style="white-space: pre-line; font-weight: 600;">-</div>
+            <div class="modal-actions">
+                <button type="button" class="btn-customer" onclick="tutupModalPengumumanAdmin()">Telah Dibaca & Mengerti</button>
+            </div>
+        </div>
+    </div>
+
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
@@ -503,7 +514,7 @@
         let markerTokoPeta = null;
         let circleTokoPeta = null;
         let markerSayaPeta = null;
-        
+         
         let intervalCountdownLock = null;
         window.waktuSelesaiLockGlobal = 0;
 
@@ -517,7 +528,7 @@
 
         window.onload = function() {
             initDarkMode();
-            
+             
             const tanggalHariIni = getTanggalIndo();
             const tanggalMakanTerakhirHP = localStorage.getItem('ufo_tanggal_makan_terakhir') || "";
             if (tanggalMakanTerakhirHP !== tanggalHariIni) {
@@ -529,7 +540,7 @@
                 }
                 localStorage.setItem('ufo_tanggal_makan_terakhir', tanggalHariIni);
             }
-            
+             
             const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
             if (cachedKoordinat) {
                 try { koordinatToko = JSON.parse(cachedKoordinat); } catch(e) {}
@@ -537,13 +548,13 @@
 
             muatMasterSalesInstant();
             muatCacheAntrianInstan();
-            
+             
             const tanggalCheckinTerakhir = localStorage.getItem('ufo_checkin_tanggal') || "";
             if (tanggalCheckinTerakhir !== tanggalHariIni) {
                 localStorage.removeItem('ufo_checkin_hari_ini');
                 localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
             }
-            
+             
             const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
             if (cachedNama) {
                 namaSalesAktifGlobal = cachedNama;
@@ -557,7 +568,7 @@
 
             cekServerBg();
             muatMasterSales();
-            
+             
             setInterval(() => {
                 muatDataAntrian();
                 cekStatusPerangkatSaya();
@@ -626,7 +637,7 @@
                 }
                 if (resAntrian && resAntrian.status === "sukses") {
                     localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
-                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat);
+                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat, resAntrian.pengumumanAdmin);
                 }
             });
         }
@@ -711,13 +722,13 @@
                 if(res.status === "sukses" && res.data) {
                     masterSalesGlobal = res.data;
                     localStorage.setItem('ufo_master_sales_cache', JSON.stringify(res.data));
-                    
+                     
                     if (document.getElementById('pilih-sales').options.length <= 1) {
                         let html = '<option value="">-- Pilih Nama Anda --</option>';
                         res.data.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
                         document.getElementById('pilih-sales').innerHTML = html;
                     }
-                    
+                     
                     if (daftarAntrianGlobal.length > 0 || getAkunAktif()) {
                         renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
                     }
@@ -736,7 +747,7 @@
             const btnTerima = document.getElementById('btn-terima-hukuman');
             const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
             const teksAlasan = document.getElementById('teks-alasan-lock');
-            
+             
             if (btnTerima) btnTerima.style.display = 'none';
             if (teksAlasan) teksAlasan.style.display = 'none';
             if (wrapperCountdown) wrapperCountdown.style.display = 'block';
@@ -746,7 +757,7 @@
 
             const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
             let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
-            
+             
             localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
 
             if (waktuServer > new Date().getTime()) {
@@ -768,7 +779,7 @@
 
             const akunSaya = getAkunAktif().trim().toLowerCase();
             let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
-            
+             
             const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
             let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
 
@@ -789,7 +800,7 @@
         function updateTampilanTimer() {
             const akunSaya = getAkunAktif().trim().toLowerCase();
             let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
-            
+             
             if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
                 window.waktuSelesaiLockGlobal = Number(savedDeadline);
             }
@@ -813,11 +824,11 @@
                     intervalCountdownLock = null;
                 }
                 if (wrapperCountdown) wrapperCountdown.innerHTML = "<div style='font-size: 16px; font-weight: 800;'>Hukuman Selesai! Membuka sistem...</div>";
-                
+                 
                 localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
                 localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
                 localStorage.setItem('ufo_hukuman_selesai_lock_' + akunSaya, 'true');
-                
+                 
                 fetch(`${SCRIPT_URL}?aksi=adminUnlockPromotor&pin=123456&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
                 .then(r => r.json())
                 .then(() => {
@@ -846,17 +857,27 @@
             }
         }
 
-        function renderUIRental(dataAntrian, statusSistem, koordinatServer) {
+        function renderUIRental(dataAntrian, statusSistem, koordinatServer, pengumumanAdminServer) {
             if (localActionActive) return;
 
             daftarAntrianGlobal = dataAntrian || [];
             statusSistemGlobal = statusSistem || "BUKA";
-            
+             
             if (koordinatServer && koordinatServer.lat && koordinatServer.lng) {
                 koordinatToko.lat = koordinatServer.lat;
                 koordinatToko.lng = koordinatServer.lng;
                 koordinatToko.radius = Number(koordinatServer.radius) || 50;
                 localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
+            }
+
+            // CEK DAN TAMPILKAN PENGUMUMAN DARI KOLOM D SETTING
+            if (pengumumanAdminServer && String(pengumumanAdminServer).trim() !== "") {
+                let teksP = String(pengumumanAdminServer).trim();
+                let cacheP = localStorage.getItem('ufo_cache_pengumuman_admin') || "";
+                if (cacheP !== teksP) {
+                    document.getElementById('isi-pengumuman-admin').innerText = teksP;
+                    document.getElementById('modal-pengumuman-admin').classList.add('active');
+                }
             }
 
             const badge = document.getElementById('badge-status-sistem');
@@ -928,7 +949,7 @@
                 isDilockAdmin = false;
             } else if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
-                
+                 
                 let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
                 let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
 
@@ -940,7 +961,7 @@
                 }
 
                 let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
-                
+                 
                 if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
                     if (waktuServer > 0 && (new Date().getTime() + 3000) >= waktuServer) {
                         isDilockAdmin = false;
@@ -965,12 +986,12 @@
                 sectionCheckinAwal.style.display = 'none';
                 sectionNormal.style.display = 'block';
                 groupPilihKat.style.display = 'block';
-                
+                 
                 sectionLocked.style.display = 'block';
                 document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
 
                 let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
-                
+                 
                 if (sudahTerimaHukumanHP || (window.waktuSelesaiLockGlobal > new Date().getTime())) {
                     localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
                     document.getElementById('btn-terima-hukuman').style.display = 'none';
@@ -1011,7 +1032,7 @@
             } else if (!sudahCheckinPernahHariIni) {
                 sectionCheckinAwal.style.display = 'block';
                 sectionNormal.style.display = 'none';
-                
+                 
                 if (navigator.geolocation && koordinatToko.lat) {
                     navigator.geolocation.getCurrentPosition(pos => {
                         initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, pos.coords.latitude, pos.coords.longitude);
@@ -1124,6 +1145,12 @@
             }
         }
 
+        function tutupModalPengumumanAdmin() {
+            const isiTeks = document.getElementById('isi-pengumuman-admin').innerText;
+            localStorage.setItem('ufo_cache_pengumuman_admin', isiTeks);
+            document.getElementById('modal-pengumuman-admin').classList.remove('active');
+        }
+
         function muatDataAntrian() {
             if (localActionActive) return;
             Promise.all([
@@ -1136,7 +1163,7 @@
                 }
                 if (resAntrian && resAntrian.status === "sukses" && !localActionActive) {
                     localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
-                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat);
+                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat, resAntrian.pengumumanAdmin);
                 }
             });
         }
@@ -1163,7 +1190,7 @@
 
             if (targetStatusSimulasi === "belum_ada") {
                 daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
-                
+                 
                 let cachedData = localStorage.getItem('ufo_antrian_cache');
                 if (cachedData) {
                     try {
@@ -1199,7 +1226,7 @@
                 if (res && res.status === "sukses" && res.data) {
                     daftarAntrianGlobal = res.data;
                     localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
-                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko, res.pengumumanAdmin);
                 } else if (res && (res.status === "locked" || res.status === "terkunci" || res.status === "gagal_lock")) {
                     muatDataAntrian(); 
                     muatMasterSales(); 
@@ -1254,7 +1281,7 @@
                             tampilkanModal("Di Luar Radius Toko", `Gagal melakukan check-in!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda harus berada di area toko untuk absen.`);
                             return; 
                         }
-                        
+                         
                         if (typeof callbackBerhasil === 'function') callbackBerhasil();
                     },
                     function(error) {
@@ -1274,7 +1301,7 @@
             validasiGpsDanJalankan(function() {
                 setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
                 const kategoriPilih = document.getElementById('pilih-kategori-hadir').value;
-                
+                 
                 const tanggalHariIni = getTanggalIndo();
                 localStorage.setItem('ufo_checkin_hari_ini', 'true');
                 localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
@@ -1311,7 +1338,7 @@
                     const akun = getAkunAktif().trim().toLowerCase();
                     localStorage.setItem('ufo_sudah_makan_' + akun, 'true');
                     localStorage.setItem('ufo_tanggal_makan_terakhir', getTanggalIndo());
-                    
+                     
                     eksekusiAksiInstan('panggilMakan', 'Waktu Makan');
                 });
             } else {
@@ -1361,7 +1388,7 @@
             if (!mapPromotor) {
                 const mapContainer = document.getElementById('map-promotor');
                 if (!mapContainer) return;
-                
+                 
                 mapPromotor = L.map('map-promotor', { zoomControl: false }).setView([latToko, lngToko], 18);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
@@ -1398,7 +1425,7 @@
                     markerSayaPeta.setLatLng([latUser, lngUser]);
                 }
             }
-            
+             
             setTimeout(() => { if (mapPromotor) mapPromotor.invalidateSize(); }, 150);
         }
 
