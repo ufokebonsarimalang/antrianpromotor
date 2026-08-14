@@ -227,7 +227,7 @@
         button:hover { background: #b91c1c !important; border-color: #991b1b !important; }
         button:active { transform: scale(0.99); }
         
-        /* KELAS KHUSUS UNTUK TOMBOL HITAM (Buka Sistem, Masukkan Promotor, Tambah Nama Baru, Paksa Bawa Customer, Paksa Selesai Melayani) */
+        /* KELAS KHUSUS UNTUK TOMBOL HITAM */
         .btn-black-custom {
             background: #0f172a !important;
             color: #ffffff !important;
@@ -285,7 +285,10 @@
 
         .badge-status-item { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
         .badge-giliran-anda { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .badge-standby { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        
+        /* TOMBOL / BADGE STANDBY DIUBAH JADI KUNING (BACKGROUND KUNING, TEKS GELAP/COKLAT TUA) */
+        .badge-standby { background: #fef08a !important; color: #854d0e !important; border: 1px solid #fde047 !important; }
+
         .badge-melayani { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
         .badge-cs { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
         .badge-ibadah { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
@@ -294,6 +297,14 @@
             background: #50000e !important;
             color: #ffb3bc !important;
             border: 1px solid #ff1f3d !important;
+        }
+
+        /* KHUSUS BADGE STANDBY DI DARK MODE TETAP KUNING JELAS */
+        body.dark-mode .badge-standby {
+            background: #facc15 !important;
+            color: #422006 !important;
+            border: 2px solid #fef08a !important;
+            font-weight: 800 !important;
         }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: all 0.2s; padding: 16px; }
@@ -378,16 +389,13 @@
 
             <div class="section-title">1. Manajemen Operasional Sistem</div>
             <div class="admin-grid">
-                <!-- Tombol Buka Sistem Antrian: Warna Hitam Teks Putih -->
                 <button type="button" class="btn-black-custom" onclick="bukaModalToggleSistem('BUKA')">Buka Sistem Antrian</button>
                 <button type="button" onclick="bukaModalToggleSistem('TUTUP')">Tutup Sistem Antrian</button>
             </div>
 
             <div class="section-title">2. Manajemen Urutan Antrian</div>
             <div class="admin-grid">
-                <!-- Tombol Masukkan Promotor: Warna Hitam Teks Putih -->
                 <button type="button" class="btn-black-custom" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Promotor ke Antrian</button>
-                <!-- Tombol Tambah Nama Baru (Master Sales): Warna Hitam Teks Putih -->
                 <button type="button" class="btn-black-custom" onclick="bukaModalTambahMasterSales()">+ Tambah Nama Baru (Master Sales)</button>
                 <button type="button" onclick="bukaModalHapusMasterSales()">- Hapus Nama Permanen (Master Sales)</button>
                 <button type="button" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
@@ -395,11 +403,9 @@
 
             <div class="section-title">3. Tindakan Darurat & Kontrol Khusus</div>
             <div class="admin-grid">
-                <!-- Tombol Paksa Bawa Customer & Paksa Selesai Melayani: Warna Hitam Teks Putih -->
                 <button type="button" class="btn-black-custom" onclick="bukaModalFormAdminKategori('adminAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
                 <button type="button" class="btn-black-custom" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
                 
-                <!-- TOMBOL KONTROL HUKUMAN / LOCK AKUN -->
                 <button type="button" onclick="bukaModalLockPromotorAdmin()">Kontrol Hukuman / Lock Akun</button>
                 
                 <button type="button" onclick="bukaModalResetDeviceAdmin()">Reset Kunci Perangkat Promotor</button>
@@ -590,9 +596,9 @@
 
                         let badgeHtml = "";
                         if (item.status === "Waktu Makan") {
-                            badgeHtml = `<span class="badge-status-item badge-standby">Waktu Makan (${urut})</span>`;
+                            badgeHtml = `<span class="badge-status-item badge-standby">Waktu Makan</span>`;
                         } else {
-                            badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
+                            badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby</span>`;
                         }
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
                     } else if (item.status === "Melayani") {
@@ -1014,7 +1020,7 @@
         function eksekusiAksiAdminKategori(aksiName, butuhPilihPromotor) {
             const kategori = document.getElementById('admin-select-kategori').value; 
             let namaSales = butuhPilihPromotor ? document.getElementById('admin-select-sales').value : ""; 
-            if(butuhPilihPromotor && !namaSales) return alert("Pilih promotor!"); 
+            if(butuhPilinPromotor && !namaSales) return alert("Pilih promotor!"); 
 
             const btnOk = document.getElementById('btn-modal-action-ok');
             if (btnOk) {
