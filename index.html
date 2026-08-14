@@ -1150,12 +1150,18 @@
             }
         }
 
-        function tutupModalPengumumanAdmin() {
+      function tutupModalPengumumanAdmin() {
             const isiTeks = document.getElementById('isi-pengumuman-admin').innerText;
-            localStorage.setItem('ufo_cache_pengumuman_admin', isiTeks);
+            if (isiTeks) {
+                // Simpan teks pengumuman beserta penanda waktu (timestamp) hari ini
+                const payloadCache = {
+                    teks: isiTeks,
+                    tanggal: new Date().toDateString()
+                };
+                localStorage.setItem('ufo_cache_pengumuman_admin', JSON.stringify(payloadCache));
+            }
             document.getElementById('modal-pengumuman-admin').classList.remove('active');
         }
-
         function muatDataAntrian() {
             if (localActionActive) return;
             Promise.all([
