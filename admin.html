@@ -227,7 +227,7 @@
         button:hover { background: #b91c1c !important; border-color: #991b1b !important; }
         button:active { transform: scale(0.99); }
         
-        /* KELAS KHUSUS UNTUK TOMBOL HITAM (Buka Sistem, Masukkan Promotor, Paksa Bawa Customer, Paksa Selesai Melayani) */
+        /* KELAS KHUSUS UNTUK TOMBOL HITAM (Buka Sistem, Masukkan Promotor, Tambah Nama Baru, Paksa Bawa Customer, Paksa Selesai Melayani) */
         .btn-black-custom {
             background: #0f172a !important;
             color: #ffffff !important;
@@ -387,7 +387,8 @@
             <div class="admin-grid">
                 <!-- Tombol Masukkan Promotor: Warna Hitam Teks Putih -->
                 <button type="button" class="btn-black-custom" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Promotor ke Antrian</button>
-                <button type="button" onclick="bukaModalTambahMasterSales()">+ Tambah Nama Baru (Master Sales)</button>
+                <!-- Tombol Tambah Nama Baru (Master Sales): Warna Hitam Teks Putih -->
+                <button type="button" class="btn-black-custom" onclick="bukaModalTambahMasterSales()">+ Tambah Nama Baru (Master Sales)</button>
                 <button type="button" onclick="bukaModalHapusMasterSales()">- Hapus Nama Permanen (Master Sales)</button>
                 <button type="button" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
             </div>
@@ -589,9 +590,9 @@
 
                         let badgeHtml = "";
                         if (item.status === "Waktu Makan") {
-                            badgeHtml = `<span class="badge-status-item badge-standby">Waktu Makan</span>`;
+                            badgeHtml = `<span class="badge-status-item badge-standby">Waktu Makan (${urut})</span>`;
                         } else {
-                            badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby</span>`;
+                            badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby (${urut})</span>`;
                         }
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
                     } else if (item.status === "Melayani") {
