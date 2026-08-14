@@ -747,7 +747,7 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
-     function mulaiTimerHukumanPromotor() {
+        function mulaiTimerHukumanPromotor() {
             const btnTerima = document.getElementById('btn-terima-hukuman');
             const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
             const teksAlasan = document.getElementById('teks-alasan-lock');
@@ -764,7 +764,6 @@
              
             localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
 
-            // AMBIL WAKTU DARI SERVER (MASTER SALES) JIKA ADA, JANGAN DI-HARDCODE 1 MENIT
             if (waktuServer > new Date().getTime()) {
                 window.waktuSelesaiLockGlobal = waktuServer;
                 localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
@@ -772,13 +771,13 @@
                 window.waktuSelesaiLockGlobal = waktuServer;
                 localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
             } else {
-                // Fallback aman jika data server kosong, gunakan default 15 menit atau sesuaikan
                 window.waktuSelesaiLockGlobal = new Date().getTime() + (15 * 60 * 1000);
                 localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
             }
 
             jalankanHitungMundur();
         }
+
         function jalankanHitungMundur() {
             if (intervalCountdownLock) return;
 
@@ -862,7 +861,7 @@
             }
         }
 
-      function renderUIRental(dataAntrian, statusSistem, koordinatServer, pengumumanAdminServer) {
+        function renderUIRental(dataAntrian, statusSistem, koordinatServer, pengumumanAdminServer) {
             if (localActionActive) return;
 
             daftarAntrianGlobal = dataAntrian || [];
@@ -880,13 +879,11 @@
             if (pengumumanAdminServer && String(pengumumanAdminServer).trim() !== "") {
                 let teksP = String(pengumumanAdminServer).trim();
 
-                // Jika admin mengubah isi teks di D1, reset status tutup agar muncul lagi
                 if (teksPengumumanTerakhir !== teksP) {
                     teksPengumumanTerakhir = teksP;
                     pengumumanSudahDitutupHariIni = false;
                 }
 
-                // Tampilkan hanya jika belum ditutup oleh user pada sesi ini
                 if (!pengumumanSudahDitutupHariIni) {
                     document.getElementById('isi-pengumuman-admin').innerText = teksP;
                     if (modalPengumuman) modalPengumuman.classList.add('active');
@@ -952,6 +949,21 @@
             document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
 
             let statusSayaNyata = cekStatusSayaDariArray(daftarAntrianGlobal);
+            if (statusSayaNyata === "belum_ada") {
+                const cachedAntrian = localStorage.getItem('ufo_antrian_cache');
+                if (cachedAntrian) {
+                    try {
+                        const parsed = JSON.parse(cachedAntrian);
+                        if (parsed && parsed.data) {
+                            const itemCache = parsed.data.find(item => String(item.nama).trim().toLowerCase() === akunSaya);
+                            if (itemCache) {
+                                statusSayaNyata = itemCache.status;
+                            }
+                        }
+                    } catch(e) {}
+                }
+            }
+
             const sectionCheckinAwal = document.getElementById('section-checkin-awal');
             const sectionNormal = document.getElementById('section-normal');
             const sectionLocked = document.getElementById('section-akun-locked');
@@ -1163,7 +1175,7 @@
             }
         }
 
-      function tutupModalPengumumanAdmin() {
+        function tutupModalPengumumanAdmin() {
             pengumumanSudahDitutupHariIni = true;
             document.getElementById('modal-pengumuman-admin').classList.remove('active');
         }
@@ -1205,7 +1217,7 @@
                 }
             }
 
-          if (targetStatusSimulasi === "belum_ada") {
+            if (targetStatusSimulasi === "belum_ada") {
                 daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
                  
                 let cachedData = localStorage.getItem('ufo_antrian_cache');
@@ -1218,7 +1230,6 @@
                         }
                     } catch(e) {}
                 }
-            }
             } else {
                 let ketemu = false;
                 daftarAntrianGlobal.forEach(item => {
