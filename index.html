@@ -1205,7 +1205,7 @@
                 }
             }
 
-            if (targetStatusSimulasi === "belum_ada") {
+          if (targetStatusSimulasi === "belum_ada") {
                 daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
                  
                 let cachedData = localStorage.getItem('ufo_antrian_cache');
@@ -1218,6 +1218,7 @@
                         }
                     } catch(e) {}
                 }
+            }
             } else {
                 let ketemu = false;
                 daftarAntrianGlobal.forEach(item => {
