@@ -942,7 +942,7 @@ body.dark-mode .list-antrian li b {
             }
         }
 
-        function renderUIRental(dataAntrian, statusSistem, koordinatServer, pengumumanAdminServer) {
+       function renderUIRental(dataAntrian, statusSistem, koordinatServer, pengumumanAdminServer) {
             if (localActionActive) return;
 
             daftarAntrianGlobal = dataAntrian || [];
@@ -959,7 +959,6 @@ body.dark-mode .list-antrian li b {
         if (pengumumanAdminServer && String(pengumumanAdminServer).trim() !== "") {
             let teksP = String(pengumumanAdminServer).trim();
 
-            // Jika teks pengumuman dari server berbeda dengan yang terakhir disimpan di memori browser, reset status tutup
             let savedTeksPengumuman = localStorage.getItem('ufo_saved_teks_pengumuman') || "";
             if (savedTeksPengumuman !== teksP) {
                 localStorage.setItem('ufo_saved_teks_pengumuman', teksP);
@@ -987,7 +986,7 @@ body.dark-mode .list-antrian li b {
             const akunSaya = getAkunAktif().trim().toLowerCase();
             let kategoriSayaAktif = "";
 
-            const dataStandby = daftarAntrianGlobal.filter(item => item.status === "Standby" || item.status === "Waktu Makan");
+            const dataStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
             const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
             const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
 
@@ -1001,19 +1000,16 @@ body.dark-mode .list-antrian li b {
                         kategoriSayaAktif = kat;
                     }
 
-                   let itemHtml = "";
-                    if (item.status === "Standby" || item.status === "Waktu Makan") {
+                    let itemHtml = "";
+                    if (item.status === "Standby") {
                         let urut = 1;
                         if (kat === "HA") urut = urutHA++;
                         else if (kat === "AV") urut = urutAV++;
 
-                        let badgeHtml = "";
-                        if (item.status === "Waktu Makan") {
-                            badgeHtml = `<span class="badge-status-item badge-makan">Waktu Makan (${urut})</span>`;
-                        } else {
-                            badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby</span>`;
-                        }
+                        let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby</span>`;
                         itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
+                    } else if (item.status === "Waktu Makan") {
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-makan">Waktu Makan</span></li>`;
                     } else if (item.status === "Melayani") {
                         itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
                     } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
@@ -1257,7 +1253,6 @@ body.dark-mode .list-antrian li b {
                 }
             }
         }
-
       function tutupModalPengumumanAdmin() {
             localStorage.setItem('ufo_pengumuman_sudah_dibaca', 'true');
             document.getElementById('modal-pengumuman-admin').classList.remove('active');
