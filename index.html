@@ -857,12 +857,12 @@
             }
         }
 
-        function renderUIRental(dataAntrian, statusSistem, koordinatServer, pengumumanAdminServer) {
+      function renderUIRental(dataAntrian, statusSistem, koordinatServer, pengumumanAdminServer) {
             if (localActionActive) return;
 
             daftarAntrianGlobal = dataAntrian || [];
             statusSistemGlobal = statusSistem || "BUKA";
-             
+            
             if (koordinatServer && koordinatServer.lat && koordinatServer.lng) {
                 koordinatToko.lat = koordinatServer.lat;
                 koordinatToko.lng = koordinatServer.lng;
@@ -870,14 +870,19 @@
                 localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
             }
 
-            // CEK DAN TAMPILKAN PENGUMUMAN DARI KOLOM D SETTING
+            // CEK DAN TAMPILKAN PENGUMUMAN DARI KOLOM D SETTING (HANYA JIKA BERBEDA DARI YANG SUDAH DIBACA)
             if (pengumumanAdminServer && String(pengumumanAdminServer).trim() !== "") {
                 let teksP = String(pengumumanAdminServer).trim();
                 let cacheP = localStorage.getItem('ufo_cache_pengumuman_admin') || "";
+                
+                // Pop-up hanya muncul jika teks baru atau belum pernah ditutup oleh user
                 if (cacheP !== teksP) {
                     document.getElementById('isi-pengumuman-admin').innerText = teksP;
                     document.getElementById('modal-pengumuman-admin').classList.add('active');
                 }
+            } else {
+                // Jika sel D1 dikosongkan oleh admin, pastikan modal tertutup
+                document.getElementById('modal-pengumuman-admin').classList.remove('active');
             }
 
             const badge = document.getElementById('badge-status-sistem');
@@ -949,7 +954,7 @@
                 isDilockAdmin = false;
             } else if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
-                 
+                
                 let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
                 let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
 
@@ -961,7 +966,7 @@
                 }
 
                 let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
-                 
+                
                 if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
                     if (waktuServer > 0 && (new Date().getTime() + 3000) >= waktuServer) {
                         isDilockAdmin = false;
@@ -986,12 +991,12 @@
                 sectionCheckinAwal.style.display = 'none';
                 sectionNormal.style.display = 'block';
                 groupPilihKat.style.display = 'block';
-                 
+                
                 sectionLocked.style.display = 'block';
                 document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
 
                 let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
-                 
+                
                 if (sudahTerimaHukumanHP || (window.waktuSelesaiLockGlobal > new Date().getTime())) {
                     localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
                     document.getElementById('btn-terima-hukuman').style.display = 'none';
@@ -1032,7 +1037,7 @@
             } else if (!sudahCheckinPernahHariIni) {
                 sectionCheckinAwal.style.display = 'block';
                 sectionNormal.style.display = 'none';
-                 
+                
                 if (navigator.geolocation && koordinatToko.lat) {
                     navigator.geolocation.getCurrentPosition(pos => {
                         initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, pos.coords.latitude, pos.coords.longitude);
