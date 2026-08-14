@@ -747,7 +747,7 @@
             return itemSaya ? itemSaya.status : "belum_ada";
         }
 
-        function mulaiTimerHukumanPromotor() {
+     function mulaiTimerHukumanPromotor() {
             const btnTerima = document.getElementById('btn-terima-hukuman');
             const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
             const teksAlasan = document.getElementById('teks-alasan-lock');
@@ -764,6 +764,7 @@
              
             localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
 
+            // AMBIL WAKTU DARI SERVER (MASTER SALES) JIKA ADA, JANGAN DI-HARDCODE 1 MENIT
             if (waktuServer > new Date().getTime()) {
                 window.waktuSelesaiLockGlobal = waktuServer;
                 localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
@@ -771,13 +772,13 @@
                 window.waktuSelesaiLockGlobal = waktuServer;
                 localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
             } else {
-                window.waktuSelesaiLockGlobal = new Date().getTime() + (1 * 60 * 1000);
+                // Fallback aman jika data server kosong, gunakan default 15 menit atau sesuaikan
+                window.waktuSelesaiLockGlobal = new Date().getTime() + (15 * 60 * 1000);
                 localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
             }
 
             jalankanHitungMundur();
         }
-
         function jalankanHitungMundur() {
             if (intervalCountdownLock) return;
 
