@@ -955,24 +955,28 @@ body.dark-mode .list-antrian li b {
                 localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
             }
 
-            const modalPengumuman = document.getElementById('modal-pengumuman-admin');
-            if (pengumumanAdminServer && String(pengumumanAdminServer).trim() !== "") {
-                let teksP = String(pengumumanAdminServer).trim();
+           const modalPengumuman = document.getElementById('modal-pengumuman-admin');
+        if (pengumumanAdminServer && String(pengumumanAdminServer).trim() !== "") {
+            let teksP = String(pengumumanAdminServer).trim();
 
-                if (teksPengumumanTerakhir !== teksP) {
-                    teksPengumumanTerakhir = teksP;
-                    pengumumanSudahDitutupHariIni = false;
-                }
+            // Jika teks pengumuman dari server berbeda dengan yang terakhir disimpan di memori browser, reset status tutup
+            let savedTeksPengumuman = localStorage.getItem('ufo_saved_teks_pengumuman') || "";
+            if (savedTeksPengumuman !== teksP) {
+                localStorage.setItem('ufo_saved_teks_pengumuman', teksP);
+                localStorage.setItem('ufo_pengumuman_sudah_dibaca', 'false');
+            }
 
-                if (!pengumumanSudahDitutupHariIni) {
-                    document.getElementById('isi-pengumuman-admin').innerText = teksP;
-                    if (modalPengumuman) modalPengumuman.classList.add('active');
-                } else {
-                    if (modalPengumuman) modalPengumuman.classList.remove('active');
-                }
+            let sudahDibacaHP = localStorage.getItem('ufo_pengumuman_sudah_dibaca') === 'true';
+
+            if (!sudahDibacaHP) {
+                document.getElementById('isi-pengumuman-admin').innerText = teksP;
+                if (modalPengumuman) modalPengumuman.classList.add('active');
             } else {
                 if (modalPengumuman) modalPengumuman.classList.remove('active');
             }
+        } else {
+            if (modalPengumuman) modalPengumuman.classList.remove('active');
+        }
 
             const badge = document.getElementById('badge-status-sistem');
             badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
@@ -1254,8 +1258,8 @@ body.dark-mode .list-antrian li b {
             }
         }
 
-        function tutupModalPengumumanAdmin() {
-            pengumumanSudahDitutupHariIni = true;
+      function tutupModalPengumumanAdmin() {
+            localStorage.setItem('ufo_pengumuman_sudah_dibaca', 'true');
             document.getElementById('modal-pengumuman-admin').classList.remove('active');
         }
 
