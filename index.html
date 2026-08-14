@@ -200,7 +200,6 @@
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.6), inset 0 0 8px rgba(255, 31, 61, 0.3) !important;
         }
 
-        /* BOX AKUN TERKUNCI (FULL MERAH, FONT PUTIH, RATA TENGAH) */
         #section-akun-locked {
             background: #dc2626;
             border: 2px solid #b91c1c;
@@ -241,9 +240,9 @@
         body.dark-mode .timer-card-admin.ha .promotor-nama-aktif,
         body.dark-mode .timer-card-admin.av .promotor-nama-aktif { color: #ffffff !important; text-shadow: 0 0 15px rgba(255, 31, 61, 0.9); }
 
-   .list-antrian { list-style: none; padding: 0; margin: 6px 0 0 0; text-align: left; }
+        /* PENGATURAN LIST ANTRIAN & SATU BARIS (FLEXBOX) */
+        .list-antrian { list-style: none; padding: 0; margin: 6px 0 0 0; text-align: left; }
         
-        /* DIPERBARUI: Ditambahkan flex-wrap: nowrap dan gap agar nama & badge tetap 1 baris rapi */
         .list-antrian li { 
             padding: 10px 14px; 
             background: #f8fafc; 
@@ -259,7 +258,6 @@
             overflow: hidden;
         }
 
-        /* BARU: Memastikan teks nama terpotong rapi dengan titik-titik (...) jika terlalu panjang */
         .list-antrian li b {
             white-space: nowrap;
             overflow: hidden;
@@ -275,7 +273,6 @@
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.5) !important;
         }
 
-        /* BARU: Mencegah badge ikut mengecil atau turun ke bawah */
         .badge-status-item { 
             font-size: 11px; 
             font-weight: 800; 
@@ -284,6 +281,65 @@
             white-space: nowrap; 
             flex-shrink: 0;
         }
+
+        .badge-giliran-anda { background: #dc2626 !important; color: #ffffff !important; border: 1px solid #b91c1c !important; }
+        .badge-standby { background: #eab308 !important; color: #ffffff !important; border: 1px solid #ca8a04 !important; font-weight: 700 !important; }
+        .badge-melayani { background: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important; }
+        .badge-cs { background: #7c3aed !important; color: #ffffff !important; border: 1px solid #6d28d9 !important; }
+        .badge-ibadah { background: #7c3aed !important; color: #ffffff !important; border: 1px solid #6d28d9 !important; }
+        .badge-makan { background: #0d9488 !important; color: #ffffff !important; border: 1px solid #0f766e !important; }
+
+        /* EFEK NEON KHUSUS DARK MODE UNTUK SEMUA BADGE DI LIST ANTRIAN */
+        body.dark-mode .badge-status-item {
+            background: #2b0007 !important;
+            color: #ff99a8 !important;
+            border: 2px solid #ff1f3d !important;
+            box-shadow: 0 0 12px rgba(255, 31, 61, 0.7), inset 0 0 5px rgba(255, 31, 61, 0.4) !important;
+            text-shadow: 0 0 8px rgba(255, 31, 61, 0.8);
+        }
+
+        body.dark-mode .badge-giliran-anda { 
+            background: #99001f !important; 
+            color: #ffffff !important; 
+            border: 2px solid #ff1f3d !important; 
+            box-shadow: 0 0 15px rgba(255, 31, 61, 0.9), inset 0 0 6px rgba(255, 255, 255, 0.5) !important;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+        }
+        
+        body.dark-mode .badge-standby { 
+            background: #422006 !important; 
+            color: #fef08a !important; 
+            border: 2px solid #facc15 !important; 
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.8), inset 0 0 6px rgba(250, 204, 21, 0.4) !important;
+            text-shadow: 0 0 8px rgba(250, 204, 21, 0.9);
+            font-weight: 800 !important; 
+        }
+
+        body.dark-mode .badge-melayani { 
+            background: #022c22 !important; 
+            color: #34d399 !important; 
+            border: 2px solid #059669 !important; 
+            box-shadow: 0 0 15px rgba(5, 150, 105, 0.8), inset 0 0 6px rgba(52, 211, 153, 0.4) !important;
+            text-shadow: 0 0 8px rgba(52, 211, 153, 0.9);
+        }
+
+        body.dark-mode .badge-cs, 
+        body.dark-mode .badge-ibadah { 
+            background: #3b0764 !important; 
+            color: #e9d5ff !important; 
+            border: 2px solid #a855f7 !important; 
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.8), inset 0 0 6px rgba(233, 213, 255, 0.4) !important;
+            text-shadow: 0 0 8px rgba(233, 213, 255, 0.9);
+        }
+
+        body.dark-mode .badge-makan { 
+            background: #042f2e !important; 
+            color: #5eead4 !important; 
+            border: 2px solid #0d9488 !important; 
+            box-shadow: 0 0 15px rgba(13, 148, 136, 0.8), inset 0 0 6px rgba(94, 234, 212, 0.4) !important;
+            text-shadow: 0 0 8px rgba(94, 234, 212, 0.9);
+        }
+
         body.dark-mode .modal-box { 
             background: #090204 !important; 
             border: 2px solid #ff1f3d !important; 
@@ -369,14 +425,6 @@
         .btn-indigo:hover { background: #1e293b; }
 
         .btn-disabled { background: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed !important; box-shadow: none !important; animation: none !important; transform: none !important; pointer-events: none !important; }
-
-        .badge-status-item { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
-      .badge-giliran-anda { background: #dc2626 !important; color: #ffffff !important; border: 1px solid #b91c1c !important; }
-       .badge-standby { background: #eab308 !important; color: #ffffff !important; border: 1px solid #ca8a04 !important; font-weight: 700 !important; }
-       .badge-melayani { background: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important; }
-        .badge-cs { background: #7c3aed !important; color: #ffffff !important; border: 1px solid #6d28d9 !important; }
-       .badge-ibadah { background: #7c3aed !important; color: #ffffff !important; border: 1px solid #6d28d9 !important; }
-       .badge-makan { background: #0d9488 !important; color: #ffffff !important; border: 1px solid #0f766e !important; }
 
         .wa-report-btn { margin-top: 14px; background: #0f172a; border: none; color: white; font-size: 12px; padding: 12px; border-radius: 12px; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .wa-report-btn:hover { background: #1e293b; }
@@ -465,7 +513,7 @@
 
                 <button type="button" id="btn-daftar-antrian" class="btn-success btn-pulse" onclick="aksiDaftarAntrianNormal()" style="display: none; margin-top: 4px;">Daftar Antrian</button>
                 
-                <!-- BOX AKUN TERKUNCI (FULL MERAH, FONT PUTIH, CENTER) -->
+                <!-- BOX AKUN TERKUNCI -->
                 <div id="section-akun-locked" style="display: none;">
                     <div class="locked-title" style="color: #ffffff; font-weight: 800; font-size: 15px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
                         ⚠️ AKUN ANDA TERKUNCI
@@ -473,9 +521,7 @@
                     <div id="teks-alasan-lock" style="color: #fef2f2; font-size: 13px; font-weight: 600; line-height: 1.4; margin-bottom: 16px;">
                         -
                     </div>
-                    <!-- Tombol Terima Hukuman -->
                     <button type="button" id="btn-terima-hukuman" class="btn-success" style="background: #ffffff; color: #dc2626; font-weight: 800;" onclick="mulaiTimerHukumanPromotor()">Terima Hukuman</button>
-                    <!-- Teks Hitung Mundur Besar di dalam Box Penuh -->
                     <div id="wrapper-countdown-lock" style="display: none; font-size: 36px; font-weight: 800; color: #ffffff; text-align: center; padding: 10px 0; letter-spacing: 2px;">
                         <div style="font-size: 11px; text-transform: uppercase; color: #fecaca; margin-bottom: 2px; font-weight: 700; letter-spacing: 0.5px;">Sisa Waktu Hukuman</div>
                         <span id="span-waktu-mundur">--:--</span>
@@ -492,7 +538,7 @@
                 
                 <button type="button" id="btn-utama-ibadah" class="btn-indigo" onclick="aksiToggleIbadah()" style="display: none; margin-top: 10px;">SEDANG IBADAH (KUNCI POSISI)</button>
 
-                <!-- TOMBOL KELUAR ANTRIAN (WARNA MAROON) -->
+                <!-- TOMBOL KELUAR ANTRIAN -->
                 <button type="button" id="btn-keluar-istirahat" class="btn-maroon" onclick="bukaModalKeluarIstirahat()" style="display: none; margin-top: 10px;">KELUAR ANTRIAN (ISTIRAHAT)</button>
             </div>
         </div>
@@ -512,7 +558,7 @@
         </a>
     </div>
 
-    <!-- MODAL POPUP PENGUMUMAN DARI KOLOM D SETTING -->
+    <!-- MODAL POPUP PENGUMUMAN -->
     <div id="modal-pengumuman-admin" class="modal-overlay">
         <div class="modal-box" style="border-left: 4px solid #d97706;">
             <div class="modal-title" style="color: #d97706;">📢 PENGUMUMAN PENTING</div>
@@ -551,7 +597,6 @@
         let intervalCountdownLock = null;
         window.waktuSelesaiLockGlobal = 0;
 
-        // VARIABEL MEMORI STATE PENGUMUMAN ADMIN (ANTI-LOOPING)
         let pengumumanSudahDitutupHariIni = false;
         let teksPengumumanTerakhir = "";
 
@@ -899,7 +944,7 @@
 
             daftarAntrianGlobal = dataAntrian || [];
             statusSistemGlobal = statusSistem || "BUKA";
-            
+             
             if (koordinatServer && koordinatServer.lat && koordinatServer.lng) {
                 koordinatToko.lat = koordinatServer.lat;
                 koordinatToko.lng = koordinatServer.lng;
@@ -907,7 +952,6 @@
                 localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
             }
 
-            // === PENGATURAN PENGUMUMAN ADMIN (MEMORI STATE ANTI-LOOP) ===
             const modalPengumuman = document.getElementById('modal-pengumuman-admin');
             if (pengumumanAdminServer && String(pengumumanAdminServer).trim() !== "") {
                 let teksP = String(pengumumanAdminServer).trim();
@@ -926,7 +970,6 @@
             } else {
                 if (modalPengumuman) modalPengumuman.classList.remove('active');
             }
-            // ==========================================================
 
             const badge = document.getElementById('badge-status-sistem');
             badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
