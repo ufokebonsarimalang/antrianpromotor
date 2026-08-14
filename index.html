@@ -518,6 +518,10 @@
         let intervalCountdownLock = null;
         window.waktuSelesaiLockGlobal = 0;
 
+        // VARIABEL MEMORI STATE PENGUMUMAN ADMIN (ANTI-LOOPING)
+        let pengumumanSudahDitutupHariIni = false;
+        let teksPengumumanTerakhir = "";
+
         function getTanggalIndo() {
             const now = new Date();
             const dd = String(now.getDate()).padStart(2, '0');
@@ -612,7 +616,7 @@
             if (cachedAntrian) {
                 try {
                     const parsed = JSON.parse(cachedAntrian);
-                    renderUIRental(parsed.data, parsed.statusAntrian, parsed.koordinatPusat);
+                    renderUIRental(parsed.data, parsed.statusAntrian, parsed.koordinatPusat, parsed.pengumumanAdmin);
                 } catch(e) {}
             }
         }
@@ -870,25 +874,19 @@
                 localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
             }
 
-         // CEK DAN TAMPILKAN PENGUMUMAN DARI KOLOM D SETTING
+            // === PENGATURAN PENGUMUMAN ADMIN (MEMORI STATE ANTI-LOOP) ===
             const modalPengumuman = document.getElementById('modal-pengumuman-admin');
             if (pengumumanAdminServer && String(pengumumanAdminServer).trim() !== "") {
                 let teksP = String(pengumumanAdminServer).trim();
-                let rawCache = localStorage.getItem('ufo_cache_pengumuman_admin');
-                let sudahDibaca = false;
 
-                if (rawCache) {
-                    try {
-                        let parsedCache = JSON.parse(rawCache);
-                        if (parsedCache.teks === teksP && parsedCache.tanggal === new Date().toDateString()) {
-                            sudahDibaca = true;
-                        }
-                    } catch(e) {
-                        if (rawCache === teksP) sudahDibaca = true;
-                    }
+                // Jika admin mengubah isi teks di D1, reset status tutup agar muncul lagi
+                if (teksPengumumanTerakhir !== teksP) {
+                    teksPengumumanTerakhir = teksP;
+                    pengumumanSudahDitutupHariIni = false;
                 }
 
-                if (!sudahDibaca) {
+                // Tampilkan hanya jika belum ditutup oleh user pada sesi ini
+                if (!pengumumanSudahDitutupHariIni) {
                     document.getElementById('isi-pengumuman-admin').innerText = teksP;
                     if (modalPengumuman) modalPengumuman.classList.add('active');
                 } else {
@@ -897,6 +895,7 @@
             } else {
                 if (modalPengumuman) modalPengumuman.classList.remove('active');
             }
+            // ==========================================================
 
             const badge = document.getElementById('badge-status-sistem');
             badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
@@ -1164,17 +1163,10 @@
         }
 
       function tutupModalPengumumanAdmin() {
-            const isiTeks = document.getElementById('isi-pengumuman-admin').innerText;
-            if (isiTeks) {
-                // Simpan teks pengumuman beserta penanda waktu (timestamp) hari ini
-                const payloadCache = {
-                    teks: isiTeks,
-                    tanggal: new Date().toDateString()
-                };
-                localStorage.setItem('ufo_cache_pengumuman_admin', JSON.stringify(payloadCache));
-            }
+            pengumumanSudahDitutupHariIni = true;
             document.getElementById('modal-pengumuman-admin').classList.remove('active');
         }
+
         function muatDataAntrian() {
             if (localActionActive) return;
             Promise.all([
