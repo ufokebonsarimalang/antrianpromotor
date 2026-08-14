@@ -1035,7 +1035,7 @@
                 groupPilihKat.style.display = "none";
                 btnDaftar.style.display = "none";
 
-                // PASTIKAN TOMBOL SELALU MUNCUL BERDASARKAN STATUS NYATA PROMOTOR
+                // Menampilkan tombol sesuai status nyata secara benar
                 btnCustomer.style.display = (statusSayaNyata === "Standby") ? "block" : "none";
                 btnClosing.style.display = (statusSayaNyata === "Melayani") ? "block" : "none";
                 btnCS.style.display = (statusSayaNyata === "Standby" || statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") ? "block" : "none";
@@ -1082,9 +1082,19 @@
                         btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
                         btnKeluar.disabled = true; btnKeluar.className = "btn-maroon btn-disabled";
                     } else {
+                        // Logika Tombol Utama (Urutan 1 s.d 3 atau 4 ke bawah)
                         let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
-                        btnCustomer.disabled = !apakahSayaBisaAmbil; 
-                        btnCustomer.className = apakahSayaBisaAmbil ? "btn-customer btn-pulse" : "btn-customer btn-disabled";
+
+                        if (apakahSayaBisaAmbil) {
+                            btnCustomer.disabled = false;
+                            btnCustomer.className = "btn-customer btn-pulse";
+                            btnCustomer.innerText = "Sudah Membawa Customer";
+                        } else {
+                            btnCustomer.disabled = true;
+                            btnCustomer.className = "btn-customer btn-disabled";
+                            btnCustomer.innerText = "Anda Sudah Berada di Antrian";
+                        }
+
                         btnCS.disabled = false; btnCS.className = "btn-purple";
                         btnIbadah.disabled = false; btnIbadah.className = "btn-indigo";
                         btnKeluar.disabled = false; btnKeluar.className = "btn-maroon";
