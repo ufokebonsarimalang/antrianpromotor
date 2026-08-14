@@ -204,6 +204,7 @@
             cursor: text;
         }
 
+        /* UTAMA: SEMUA TOMBOL STANDAR MENJADI MERAH DENGAN FONT PUTIH */
         button { 
             width: 100%; 
             padding: 12px 16px; 
@@ -211,7 +212,7 @@
             font-size: 12px; 
             font-weight: 600; 
             cursor: pointer; 
-            border: 1px solid #dc2626; 
+            border: 1px solid #b91c1c; 
             text-transform: uppercase; 
             transition: all 0.2s ease; 
             display: inline-flex; 
@@ -219,47 +220,27 @@
             align-items: center; 
             gap: 8px; 
             letter-spacing: 0.5px;
-            /* PERUBAHAN UTAMA: TOMBOL YANG SEMULA PUTIH KINI MENJADI MERAH DENGAN FONT PUTIH */
-            background: #dc2626;
-            color: #ffffff;
-            box-shadow: 0 1px 2px rgba(220, 38, 38, 0.2);
+            background: #dc2626 !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
         }
-        button:hover { background: #b91c1c; border-color: #991b1b; }
+        button:hover { background: #b91c1c !important; border-color: #991b1b !important; }
         button:active { transform: scale(0.99); }
         
-        /* TOMBOL KHUSUS TERTENTU TETAP MEMILIKI WARNA SPESIFIKNYA MASING-MASING */
-        .btn-purple, .btn-success, .btn-teal, .btn-primary { 
-            background: #0f172a; 
-            color: white; 
-            border-color: #0f172a; 
-        }
-        .btn-purple:hover, .btn-success:hover, .btn-teal:hover, .btn-primary:hover { 
-            background: #1e293b; 
-        }
+        /* PENGECUALIAN UNTUK TOMBOL KHUSUS TERTENTU */
+        .btn-cancel { background: #f1f5f9 !important; color: #475569 !important; border-color: #cbd5e1 !important; }
+        .btn-cancel:hover { background: #e2e8f0 !important; }
 
-        .btn-warning, .btn-danger, .btn-darkred { 
-            background: #ffffff; 
-            color: #dc2626; 
-            border-color: #fecaca; 
-        }
-        .btn-warning:hover, .btn-danger:hover, .btn-darkred:hover { 
-            background: #fef2f2; 
-        }
-
-        .btn-cancel { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
         .btn-disabled { background: #e2e8f0 !important; color: #94a3b8 !important; border-color: #cbd5e1 !important; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; }
 
-        body.dark-mode .btn-purple,
-        body.dark-mode .btn-success,
-        body.dark-mode .btn-warning,
-        body.dark-mode .btn-danger,
-        body.dark-mode .btn-primary,
-        body.dark-mode .btn-teal,
-        body.dark-mode .btn-darkred {
+        body.dark-mode button {
             background: #99001f !important;
             color: #ffffff !important;
             border: 2px solid #ff1f3d !important;
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.7) !important;
+        }
+        body.dark-mode button:hover {
+            background: #cc0029 !important;
         }
 
         body.dark-mode .btn-cancel {
@@ -349,7 +330,7 @@
                 <label>Masukkan PIN Admin Khusus</label>
                 <input type="password" id="input-pin-admin" placeholder="••••" style="text-align: center; font-size: 18px; letter-spacing: 4px;">
             </div>
-            <button type="button" id="btn-login-admin" class="btn-purple" onclick="prosesLoginAdmin()">Autentikasi & Masuk</button>
+            <button type="button" id="btn-login-admin" onclick="prosesLoginAdmin()">Autentikasi & Masuk</button>
         </div>
 
         <div id="controls-admin-box" style="display: none;">
@@ -374,36 +355,36 @@
             <div class="section-title">Konfigurasi Validasi GPS Toko</div>
             <div class="admin-grid" style="margin-bottom: 15px;">
                 <div style="display: flex; gap: 8px;">
-                    <button type="button" id="btn-on-gps" class="btn-success" style="flex:1;" onclick="toggleGPSAdmin(true)">Aktifkan GPS</button>
-                    <button type="button" id="btn-off-gps" class="btn-danger" style="flex:1;" onclick="toggleGPSAdmin(false)">Matikan GPS</button>
+                    <button type="button" id="btn-on-gps" style="flex:1;" onclick="toggleGPSAdmin(true)">Aktifkan GPS</button>
+                    <button type="button" id="btn-off-gps" style="flex:1;" onclick="toggleGPSAdmin(false)">Matikan GPS</button>
                 </div>
                 <div id="label-status-gps" style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-align: center; margin-top: 4px;">Status GPS: Memeriksa...</div>
             </div>
 
             <div class="section-title">1. Manajemen Operasional Sistem</div>
             <div class="admin-grid">
-                <button type="button" class="btn-success" onclick="bukaModalToggleSistem('BUKA')">Buka Sistem Antrian</button>
-                <button type="button" class="btn-danger" onclick="bukaModalToggleSistem('TUTUP')">Tutup Sistem Antrian</button>
+                <button type="button" onclick="bukaModalToggleSistem('BUKA')">Buka Sistem Antrian</button>
+                <button type="button" onclick="bukaModalToggleSistem('TUTUP')">Tutup Sistem Antrian</button>
             </div>
 
             <div class="section-title">2. Manajemen Urutan Antrian</div>
             <div class="admin-grid">
-                <button type="button" class="btn-teal" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Promotor ke Antrian</button>
-                <button type="button" class="btn-success" onclick="bukaModalTambahMasterSales()">+ Tambah Nama Baru (Master Sales)</button>
-                <button type="button" class="btn-warning" onclick="bukaModalHapusMasterSales()">- Hapus Nama Permanen (Master Sales)</button>
-                <button type="button" class="btn-warning" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
+                <button type="button" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Promotor ke Antrian</button>
+                <button type="button" onclick="bukaModalTambahMasterSales()">+ Tambah Nama Baru (Master Sales)</button>
+                <button type="button" onclick="bukaModalHapusMasterSales()">- Hapus Nama Permanen (Master Sales)</button>
+                <button type="button" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Keluarkan dari Antrian', true)">- Keluarkan dari Antrian</button>
             </div>
 
             <div class="section-title">3. Tindakan Darurat & Kontrol Khusus</div>
             <div class="admin-grid">
-                <button type="button" class="btn-primary" onclick="bukaModalFormAdminKategori('adminAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
-                <button type="button" class="btn-warning" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
+                <button type="button" onclick="bukaModalFormAdminKategori('adminAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
+                <button type="button" onclick="bukaModalFormAdminKategori('adminSelesaiMelayani', 'Paksa Selesai Melayani', true)">Paksa Selesai Melayani</button>
                 
                 <!-- TOMBOL KONTROL HUKUMAN / LOCK AKUN -->
-                <button type="button" class="btn-danger" onclick="bukaModalLockPromotorAdmin()">Kontrol Hukuman / Lock Akun</button>
+                <button type="button" onclick="bukaModalLockPromotorAdmin()">Kontrol Hukuman / Lock Akun</button>
                 
-                <button type="button" class="btn-darkred" onclick="bukaModalResetDeviceAdmin()">Reset Kunci Perangkat Promotor</button>
-                <button type="button" class="btn-danger" onclick="bukaModalResetTotal()">Reset Seluruh Antrian Aktif</button>
+                <button type="button" onclick="bukaModalResetDeviceAdmin()">Reset Kunci Perangkat Promotor</button>
+                <button type="button" onclick="bukaModalResetTotal()">Reset Seluruh Antrian Aktif</button>
             </div>
 
             <button type="button" class="btn-cancel" style="margin-top: 28px; font-weight: 700;" onclick="logoutAdmin()">Keluar (Lock Panel Admin)</button>
@@ -415,7 +396,7 @@
             <div id="modal-title" class="modal-title">Pemberitahuan</div>
             <div id="modal-desc" class="modal-desc">Isi pesan...</div>
             <div id="modal-actions" class="modal-actions">
-                <button type="button" class="btn-primary" onclick="tutupModal()">OK</button>
+                <button type="button" onclick="tutupModal()">OK</button>
             </div>
         </div>
     </div>
@@ -553,14 +534,14 @@
                 if (koordinatTokoAdmin.lat && koordinatTokoAdmin.lat !== "") {
                     statusGpsLabel.innerHTML = `Status GPS: <b style="color:#059669;">AKTIF</b> (Radius: ${koordinatTokoAdmin.radius}m)`;
                     if (btnOn && btnOff && !sedangDiprosesGlobal) {
-                        btnOn.disabled = true; btnOn.className = "btn-success btn-disabled";
-                        btnOff.disabled = false; btnOff.className = "btn-danger";
+                        btnOn.disabled = true; btnOn.className = "btn-disabled";
+                        btnOff.disabled = false; btnOff.className = "";
                     }
                 } else {
                     statusGpsLabel.innerHTML = `Status GPS: <b style="color:#dc2626;">NONAKTIF (OFF)</b>`;
                     if (btnOn && btnOff && !sedangDiprosesGlobal) {
-                        btnOn.disabled = false; btnOn.className = "btn-success";
-                        btnOff.disabled = true; btnOff.className = "btn-danger btn-disabled";
+                        btnOn.disabled = false; btnOn.className = "";
+                        btnOff.disabled = true; btnOff.className = "btn-disabled";
                     }
                 }
             }
@@ -697,7 +678,7 @@
 
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiLockPromotorAdmin()">Proses</button>
+                <button type="button" id="btn-modal-action-ok" onclick="eksekusiLockPromotorAdmin()">Proses</button>
             `;
             document.getElementById('custom-modal').classList.add('active');
         }
@@ -776,7 +757,7 @@
         function bukaModalTambahMasterSales() {
             document.getElementById('modal-title').innerText = "Tambah Nama Promotor Baru";
             document.getElementById('modal-desc').innerHTML = `Masukkan Nama Promotor Baru:<br><input type="text" id="input-nama-baru" placeholder="Nama Lengkap Promotor">`;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiTambahMasterSales()">Simpan</button>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-action-ok" onclick="eksekusiTambahMasterSales()">Simpan</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
@@ -819,7 +800,7 @@
             document.getElementById('modal-desc').innerHTML = `Pilih promotor yang akan dihapus dari sistem:<br><select id="select-hapus-sales">${optionsSales}</select>`;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiHapusMasterSales()">Hapus Permanen</button>
+                <button type="button" id="btn-modal-action-ok" onclick="eksekusiHapusMasterSales()">Hapus Permanen</button>
             `;
             document.getElementById('custom-modal').classList.add('active');
         }
@@ -849,7 +830,7 @@
         function bukaModalToggleSistem(targetStatus) {
             document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
             document.getElementById('modal-desc').innerHTML = `Status baru sistem: <b>${targetStatus}</b>`;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-action-ok" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
@@ -872,7 +853,7 @@
         function bukaModalResetTotal() {
             document.getElementById('modal-title').innerText = 'Reset Semua Antrian & Log';
             document.getElementById('modal-desc').innerHTML = `⚠️ <b>PERINGATAN:</b><br>Seluruh data antrian aktif beserta log riwayat melayani akan dihapus secara total dari sistem. Lanjutkan?`;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiResetTotal()">Reset Sekarang</button>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-action-ok" onclick="eksekusiResetTotal()">Reset Sekarang</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
@@ -917,7 +898,7 @@
                 Posisi Urutan:<br>
                 <input type="number" id="admin-input-posisi" value="1" min="1">
             `;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiTambahAntriAdmin()">Proses</button>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-action-ok" onclick="eksekusiTambahAntriAdmin()">Proses</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
@@ -964,7 +945,7 @@
             `;
             document.getElementById('modal-actions').innerHTML = `
                 <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-                <button type="button" class="btn-danger" id="btn-modal-action-ok" onclick="eksekusiResetDeviceAdmin()">Reset Perangkat</button>
+                <button type="button" id="btn-modal-action-ok" onclick="eksekusiResetDeviceAdmin()">Reset Perangkat</button>
             `;
             document.getElementById('custom-modal').classList.add('active');
         }
@@ -1007,7 +988,7 @@
             if (butuhPilihPromotor) htmlContent += `Promotor:<br><select id="admin-select-sales">${optionsSales}</select>`;
             
             document.getElementById('modal-desc').innerHTML = htmlContent;
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" class="btn-primary" id="btn-modal-action-ok" onclick="eksekusiAksiAdminKategori('${aksiName}', ${butuhPilihPromotor})">Proses</button>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-action-ok" onclick="eksekusiAksiAdminKategori('${aksiName}', ${butuhPilihPromotor})">Proses</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
@@ -1052,7 +1033,7 @@
         function tampilkanModal(judul, pesan) {
             document.getElementById('modal-title').innerText = judul;
             document.getElementById('modal-desc').innerHTML = String(pesan).replace(/\n/g, '<br>');
-            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-primary" onclick="tutupModal()">OK</button>`;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" onclick="tutupModal()">OK</button>`;
             document.getElementById('custom-modal').classList.add('active');
         }
 
