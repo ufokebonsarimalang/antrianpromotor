@@ -1043,14 +1043,6 @@
                 btnKeluar.style.display = (statusSayaNyata === "Standby") ? "block" : "none";
 
                 if (statusSayaNyata === "Standby") {
-                    btnCS.innerText = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; 
-                    btnCS.className = "btn-purple"; 
-                    btnCS.disabled = false;
-
-                    btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; 
-                    btnIbadah.className = "btn-indigo"; 
-                    btnIbadah.disabled = false;
-
                     let listSubStandby = daftarAntrianGlobal.filter(it => (it.status === "Standby" || it.status === "Waktu Makan") && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
                     let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
                     let apakahSayaUrutanPertama = (indexSaya === 0);
@@ -1082,7 +1074,7 @@
                         btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
                         btnKeluar.disabled = true; btnKeluar.className = "btn-maroon btn-disabled";
                     } else {
-                        // Logika Tombol Utama (Urutan 1 s.d 3 atau 4 ke bawah)
+                        // Logika Tombol Utama (Urutan 1 s.d 3 aktif, urutan 4 ke bawah tidak aktif dengan teks khusus)
                         let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
 
                         if (apakahSayaBisaAmbil) {
@@ -1095,9 +1087,20 @@
                             btnCustomer.innerText = "Anda Sudah Berada di Antrian";
                         }
 
-                        btnCS.disabled = false; btnCS.className = "btn-purple";
-                        btnIbadah.disabled = false; btnIbadah.className = "btn-indigo";
-                        btnKeluar.disabled = false; btnKeluar.className = "btn-maroon";
+                        // TOMBOL PENDUKUNG (CS, IBADAH, KELUAR) SELALU AKTIF NORMAL DI POSISI STANDBY
+                        btnCS.style.display = "block";
+                        btnCS.innerText = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; 
+                        btnCS.className = "btn-purple"; 
+                        btnCS.disabled = false;
+
+                        btnIbadah.style.display = "block";
+                        btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; 
+                        btnIbadah.className = "btn-indigo"; 
+                        btnIbadah.disabled = false;
+
+                        btnKeluar.style.display = "block";
+                        btnKeluar.className = "btn-maroon";
+                        btnKeluar.disabled = false;
                     }
                 } else if (statusSayaNyata === "Waktu Makan") {
                     btnMakan.style.display = "block";
