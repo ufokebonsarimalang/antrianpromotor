@@ -583,15 +583,8 @@ body.dark-mode .list-antrian li b {
     </div>
 
    <script>
-       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
-        const KODE_TOKO = "UFO-KEBONSARI-01"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
-
-        function fetchUfo(endpointUrl) {
-            const separator = endpointUrl.includes('?') ? '&' : '?';
-            const finalUrl = `${endpointUrl}${separator}kodeToko=${KODE_TOKO}&t=${Date.now()}`;
-            return fetch(finalUrl);
-        }
         let daftarAntrianGlobal = [];
         let masterSalesGlobal = [];
         let statusSistemGlobal = "BUKA";
