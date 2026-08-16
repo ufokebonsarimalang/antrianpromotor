@@ -1360,7 +1360,7 @@ body.dark-mode .list-antrian li b {
             }
         }
 
-        function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
+                function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
             if (!koordinatToko.lat || !koordinatToko.lng) {
                 const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
                 if (cachedKoordinat) {
@@ -1390,7 +1390,7 @@ body.dark-mode .list-antrian li b {
                          
                         if (typeof callbackBerhasil === 'function') callbackBerhasil();
                     },
-                  function(error) {
+                    function(error) {
                         if (typeof callbackBatal === 'function') callbackBatal();
                         tampilkanModal("Gagal Deteksi GPS", "Pastikan GPS / Lokasi HP Anda aktif dan berikan izin akses lokasi untuk melanjutkan.");
                         return;
@@ -1401,6 +1401,8 @@ body.dark-mode .list-antrian li b {
                 if (typeof callbackBatal === 'function') callbackBatal();
                 tampilkanModal("Gagal", "Browser Anda tidak mendukung fitur GPS.");
             }
+        }
+
 
         function aksiHadirKerja() {
             const btn = document.getElementById('btn-hadir');
