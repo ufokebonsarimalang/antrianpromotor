@@ -1404,12 +1404,13 @@ body.dark-mode .list-antrian li b {
         }
 
 
-        function aksiHadirKerja() {
+     function aksiHadirKerja() {
             const btn = document.getElementById('btn-hadir');
             setButtonLoading(btn, true, "Konfirmasi Kehadiran & Masuk Antri");
 
             validasiGpsDanJalankan(function() {
-                setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
+                // JANGAN kembalikan teks tombol ke awal dulu, 
+                // langsung proses dan masukkan ke antrean secara otomatis!
                 const kategoriPilih = document.getElementById('pilih-kategori-hadir').value;
                  
                 const tanggalHariIni = getTanggalIndo();
@@ -1418,6 +1419,7 @@ body.dark-mode .list-antrian li b {
 
                 eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
             }, function() {
+                // Blok ini hanya berjalan jika GPS gagal / di luar radius
                 setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
             });
         }
@@ -1427,10 +1429,12 @@ body.dark-mode .list-antrian li b {
             setButtonLoading(btn, true, "Daftar Antrian");
 
             validasiGpsDanJalankan(function() {
-                setButtonLoading(btn, false, "Daftar Antrian");
+                // JANGAN kembalikan teks tombol ke awal dulu, 
+                // langsung eksekusi pendaftaran antrean secara otomatis!
                 const kategoriPilih = document.getElementById('pilih-kategori-normal').value;
                 eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
             }, function() {
+                // Blok ini hanya berjalan jika GPS gagal / di luar radius
                 setButtonLoading(btn, false, "Daftar Antrian");
             });
         }
