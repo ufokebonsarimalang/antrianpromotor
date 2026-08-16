@@ -1375,16 +1375,19 @@ body.dark-mode .list-antrian li b {
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        const jarakMeter = hitungJarakHaversine(
-                            position.coords.latitude, position.coords.longitude, 
-                            Number(koordinatToko.lat), Number(koordinatToko.lng)
-                        );
+                   function(position) {
+                        const latUser = Number(position.coords.latitude);
+                        const lonUser = Number(position.coords.longitude);
+                        const latStore = Number(koordinatToko.lat);
+                        const lonStore = Number(koordinatToko.lng);
                         const batasRadius = Number(koordinatToko.radius) || 50;
 
-                        if (jarakMeter > (batasRadius + 30)) {
+                        const jarakMeter = hitungJarakHaversine(latUser, lonUser, latStore, lonStore);
+
+                        // Tanpa toleransi + 30 meter, benar-benar murni sesuai batas radius lingkaran toko
+                        if (jarakMeter > batasRadius) {
                             if (typeof callbackBatal === 'function') callbackBatal();
-                            tampilkanModal("Di Luar Radius Toko", `Gagal melakukan check-in!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda harus berada di area toko untuk absen.`);
+                            tampilkanModal("Di Luar Radius Toko", `Gagal melakukan check-in!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar lingkaran radius toko.`);
                             return; 
                         }
                          
