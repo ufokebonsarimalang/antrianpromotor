@@ -1390,15 +1390,17 @@ body.dark-mode .list-antrian li b {
                          
                         if (typeof callbackBerhasil === 'function') callbackBerhasil();
                     },
-                    function(error) {
-                        if (typeof callbackBerhasil === 'function') callbackBerhasil();
+                  function(error) {
+                        if (typeof callbackBatal === 'function') callbackBatal();
+                        tampilkanModal("Gagal Deteksi GPS", "Pastikan GPS / Lokasi HP Anda aktif dan berikan izin akses lokasi untuk melanjutkan.");
+                        return;
                     },
-                    { enableHighAccuracy: false, timeout: 5000, maximumAge: 30000 }
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
                 );
             } else {
-                if (typeof callbackBerhasil === 'function') callbackBerhasil();
+                if (typeof callbackBatal === 'function') callbackBatal();
+                tampilkanModal("Gagal", "Browser Anda tidak mendukung fitur GPS.");
             }
-        }
 
         function aksiHadirKerja() {
             const btn = document.getElementById('btn-hadir');
