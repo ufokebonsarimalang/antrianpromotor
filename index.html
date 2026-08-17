@@ -1387,7 +1387,7 @@ body.dark-mode .list-antrian li b {
                         // Tanpa toleransi + 30 meter, benar-benar murni sesuai batas radius lingkaran toko
                         if (jarakMeter > batasRadius) {
                             if (typeof callbackBatal === 'function') callbackBatal();
-                            tampilkanModal("Di Luar Radius Antrian", `Gagal melakukan check-in!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar lingkaran radius antrian.`);
+                            tampilkanModal("Di Luar Radius Antrian", `Gagal Daftar Antrian!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar lingkaran radius antrian.`);
                             return; 
                         }
                          
