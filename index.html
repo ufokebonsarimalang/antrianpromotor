@@ -1427,21 +1427,19 @@ body.dark-mode .list-antrian li b {
             });
         }
 
-        function aksiDaftarAntrianNormal() {
+       function aksiDaftarAntrianNormal() {
             const btn = document.getElementById('btn-daftar-antrian');
             setButtonLoading(btn, true, "Daftar Antrian");
 
             validasiGpsDanJalankan(function() {
-                // JANGAN kembalikan teks tombol ke awal dulu, 
-                // langsung eksekusi pendaftaran antrean secara otomatis!
+                // Berhasil dalam radius: Eksekusi pendaftaran antrean
                 const kategoriPilih = document.getElementById('pilih-kategori-normal').value;
                 eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
             }, function() {
-                // Blok ini hanya berjalan jika GPS gagal / di luar radius
+                // Gagal / Di luar radius: Kembalikan tombol seperti semula agar bisa diklik lagi
                 setButtonLoading(btn, false, "Daftar Antrian");
             });
         }
-
         function aksiUtamaCustomer() {
             tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
                 eksekusiAksiInstan('ambilAntrian', 'Melayani');
