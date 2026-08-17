@@ -491,7 +491,7 @@ body.dark-mode .list-antrian li b {
             <!-- CHECK-IN KEDATANGAN -->
             <div id="section-checkin-awal" style="display: none;">
                 <div class="input-group">
-                    <label>Peta Posisi Toko & Radius Check-In</label>
+                    <label>Peta Posisi Toko & Radius Antrian</label>
                     <div id="map-promotor" style="width: 100%; height: 150px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 12px; z-index: 1;"></div>
                     
                     <label>Check-in Kehadiran (Awal Masuk Kerja)</label>
@@ -1387,7 +1387,7 @@ body.dark-mode .list-antrian li b {
                         // Tanpa toleransi + 30 meter, benar-benar murni sesuai batas radius lingkaran toko
                         if (jarakMeter > batasRadius) {
                             if (typeof callbackBatal === 'function') callbackBatal();
-                            tampilkanModal("Di Luar Radius Toko", `Gagal melakukan check-in!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar lingkaran radius toko.`);
+                            tampilkanModal("Di Luar Radius Antrian", `Gagal melakukan check-in!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar lingkaran radius toko.`);
                             return; 
                         }
                          
@@ -1519,8 +1519,8 @@ body.dark-mode .list-antrian li b {
                     radius: radiusToko || 50
                 }).addTo(mapPromotor);
 
-                markerTokoPeta = L.marker([latToko, lngToko]).addTo(mapPromotor)
-                    .bindPopup("<b>Titik Pusat Toko UFO</b>");
+               markerTokoPeta = L.marker([latToko, lngToko]).addTo(mapPromotor)
+    .bindPopup("<b>Titik Pusat Area Antrian</b>");
             } else {
                 circleTokoPeta.setLatLng([latToko, lngToko]);
                 circleTokoPeta.setRadius(radiusToko || 50);
