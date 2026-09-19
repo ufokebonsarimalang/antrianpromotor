@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - UFO Kebonsari</title>
     <link rel="shortcut icon" href="#">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Mengganti font ke Google Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -29,7 +32,8 @@
             --border: #ff1f3d !important;
         }
 
-        *, body, button, select, input { font-family: 'Plus Jakarta Sans', sans-serif !important; box-sizing: border-box; }
+        /* Menggunakan font Inter secara menyeluruh */
+        *, body, button, select, input { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; box-sizing: border-box; }
         
         body { 
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
@@ -85,18 +89,35 @@
             box-shadow: 0 0 30px rgba(255, 31, 61, 1), inset 0 0 12px rgba(255, 255, 255, 0.6) !important; 
         }
 
+        /* MEMPERBAIKI HEADER AGAR TIDAK TURUN KEBAWAH / PATAH BERANTAKAN */
         .header-admin { 
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
             border-radius: 14px; 
-            padding: 24px; 
+            padding: 24px 20px; 
             color: white; 
             text-align: center; 
             margin-bottom: 24px; 
             border: none;
             box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1); 
+            width: 100%;
         }
-        .header-admin h2 { margin: 0 0 6px 0; font-size: 20px; font-weight: 700; letter-spacing: -0.2px; text-shadow: none; }
-        .header-admin p { margin: 0; font-size: 13px; opacity: 0.85; font-weight: 500; letter-spacing: 0.3px; }
+        .header-admin h2 { 
+            margin: 0 0 6px 0; 
+            font-size: 20px; 
+            font-weight: 700; 
+            letter-spacing: -0.3px; 
+            white-space: nowrap; /* Mencegah teks judul terpotong aneh */
+        }
+        .header-admin p { 
+            margin: 0; 
+            font-size: 12.5px; 
+            opacity: 0.85; 
+            font-weight: 500; 
+            letter-spacing: 0.2px; 
+            white-space: nowrap; /* Mencegah teks subtitle turun ke bawah secara berantakan */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         body.dark-mode .header-admin { 
             background: linear-gradient(135deg, #7f0015 0%, #300008 100%) !important; 
@@ -160,7 +181,7 @@
             text-shadow: 0 0 15px rgba(255, 31, 61, 1); 
         }
 
-        .admin-nama-promotor { font-size: 16px; font-weight: 700; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 32px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
+        .admin-nama-promotor { font-size: 15px; font-weight: 700; color: var(--text-main); margin-top: 2px; line-height: 1.3; min-height: 32px; display: flex; align-items: center; justify-content: center; word-break: break-word; }
         
         body.dark-mode .timer-card-admin.ha .admin-nama-promotor,
         body.dark-mode .timer-card-admin.av .admin-nama-promotor { color: #ffffff !important; text-shadow: 0 0 20px rgba(255, 31, 61, 1); }
@@ -262,7 +283,6 @@
             border: 2px solid #ff1f3d !important;
         }
 
-        /* Styling khusus untuk tombol disabled di Dark Mode */
         body.dark-mode button.btn-disabled {
             background: #3d000a !important;
             color: #80404a !important;
@@ -421,7 +441,6 @@
 
             <div class="section-title">1. Manajemen Operasional Sistem</div>
             <div class="admin-grid">
-                <!-- Tombol Buka & Tutup Sistem Antrian dengan Aturan Disabled Dinamis -->
                 <button type="button" id="btn-buka-sistem" class="btn-black-custom" onclick="bukaModalToggleSistem('BUKA')">Buka Sistem Antrian</button>
                 <button type="button" id="btn-tutup-sistem" onclick="bukaModalToggleSistem('TUTUP')">Tutup Sistem Antrian</button>
             </div>
@@ -580,18 +599,15 @@
             badge.innerText = statusSistem === "BUKA" ? "STATUS: OPEN" : "STATUS: CLOSED";
             badge.className = statusSistem === "BUKA" ? "status-badge status-open" : "status-badge status-closed";
 
-            // LOGIKA DINAMIS UNTUK TOMBOL BUKA & TUTUP SISTEM ANTRIAN
             const btnBuka = document.getElementById('btn-buka-sistem');
             const btnTutup = document.getElementById('btn-tutup-sistem');
             if (btnBuka && btnTutup) {
                 if (statusSistem === "BUKA") {
-                    // Jika Buka: Tombol Buka dimatikan, Tombol Tutup diaktifkan
                     btnBuka.disabled = true;
                     btnBuka.className = "btn-black-custom btn-disabled";
                     btnTutup.disabled = false;
                     btnTutup.className = "";
                 } else {
-                    // Jika Tutup: Tombol Buka diaktifkan, Tombol Tutup dimatikan
                     btnBuka.disabled = false;
                     btnBuka.className = "btn-black-custom";
                     btnTutup.disabled = true;
