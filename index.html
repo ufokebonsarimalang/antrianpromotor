@@ -582,599 +582,997 @@ body.dark-mode .list-antrian li b {
         </div>
     </div>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
-    
-    let masterSalesGlobal = [];
-    let daftarAntrianGlobal = [];
-    let savedPinAdmin = "";
-    let koordinatTokoAdmin = { lat: "", lng: "", radius: 50 };
-    let sedangDiprosesGlobal = false;
+   <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
 
-    window.onload = function() {
-        initDarkMode();
-        
-        // Hapus cache lama agar data tidak pernah nyangkut
-        localStorage.removeItem('ufo_admin_antrian_cache');
+        let daftarAntrianGlobal = [];
+        let masterSalesGlobal = [];
+        let statusSistemGlobal = "BUKA";
+        let namaSalesAktifGlobal = "";
+        let koordinatToko = { lat: "", lng: "", radius: 50 }; 
+        let localActionActive = false;
 
-        savedPinAdmin = localStorage.getItem('ufo_admin_pin') || "";
-        if (savedPinAdmin) {
-            document.getElementById('input-pin-admin').value = savedPinAdmin;
-            document.getElementById('login-admin-box').style.display = 'none';
-            document.getElementById('controls-admin-box').style.display = 'block';
-        } else {
-            document.getElementById('login-admin-box').style.display = 'block';
-            document.getElementById('controls-admin-box').style.display = 'none';
+        let mapPromotor = null;
+        let markerTokoPeta = null;
+        let circleTokoPeta = null;
+        let markerSayaPeta = null;
+         
+        let intervalCountdownLock = null;
+        window.waktuSelesaiLockGlobal = 0;
+
+        let pengumumanSudahDitutupHariIni = false;
+        let teksPengumumanTerakhir = "";
+
+        function getTanggalIndo() {
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yyyy = now.getFullYear();
+            return `${dd}-${mm}-${yyyy}`;
         }
 
-        muatMasterSales();
-        muatDataAntrian();
-        
-        // Polling setiap 3 detik secara real-time dari server
-        setInterval(muatDataAntrian, 3000); 
-    };
+        window.onload = function() {
+            initDarkMode();
+             
+            const tanggalHariIni = getTanggalIndo();
+            const tanggalMakanTerakhirHP = localStorage.getItem('ufo_tanggal_makan_terakhir') || "";
+            if (tanggalMakanTerakhirHP !== tanggalHariIni) {
+                for (let i = 0; i < localStorage.length; i++) {
+                    let key = localStorage.key(i);
+                    if (key && key.startsWith('ufo_sudah_makan_')) {
+                        localStorage.removeItem(key);
+                    }
+                }
+                localStorage.setItem('ufo_tanggal_makan_terakhir', tanggalHariIni);
+            }
+             
+            const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
+            if (cachedKoordinat) {
+                try { koordinatToko = JSON.parse(cachedKoordinat); } catch(e) {}
+            }
 
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        localStorage.setItem('ufo_admin_dark_mode', isDark ? 'true' : 'false');
-        updateDarkButtonText(isDark);
-    }
+            muatMasterSalesInstant();
+            muatCacheAntrianInstan();
+             
+            const tanggalCheckinTerakhir = localStorage.getItem('ufo_checkin_tanggal') || "";
+            if (tanggalCheckinTerakhir !== tanggalHariIni) {
+                localStorage.removeItem('ufo_checkin_hari_ini');
+                localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
+            }
+             
+            const cachedNama = localStorage.getItem('ufo_nama_sales_aktif');
+            if (cachedNama) {
+                namaSalesAktifGlobal = cachedNama;
+                document.getElementById('panel-login').style.display = 'none';
+                document.getElementById('panel-menu-utama').style.display = 'block';
+                document.getElementById('label-user-aktif').innerText = cachedNama;
+            } else {
+                document.getElementById('panel-login').style.display = 'block';
+                document.getElementById('panel-menu-utama').style.display = 'none';
+            }
 
-    function initDarkMode() {
-        const isDark = localStorage.getItem('ufo_admin_dark_mode') === 'true';
-        if (isDark) document.body.classList.add('dark-mode');
-        updateDarkButtonText(isDark);
-    }
+            cekServerBg();
+            muatMasterSales();
+             
+            setInterval(() => {
+                muatDataAntrian();
+                cekStatusPerangkatSaya();
+                muatMasterSales(); 
+            }, 3000); 
+        };
 
-    function updateDarkButtonText(isDark) {
-        const btn = document.getElementById('btn-toggle-dark');
-        if (btn) btn.innerHTML = isDark ? '☀️ Mode Terang' : '🌙 Mode Gelap';
-    }
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('ufo_dark_mode', isDark ? 'true' : 'false');
+            updateDarkButtonText(isDark);
+        }
 
-    function amanKlikAdmin(callbackAksi) {
-        if (sedangDiprosesGlobal) return;
-        sedangDiprosesGlobal = true;
-        const semuaTombol = document.querySelectorAll('button');
-        semuaTombol.forEach(b => b.disabled = true);
+        function initDarkMode() {
+            const isDark = localStorage.getItem('ufo_dark_mode') === 'true';
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+            }
+            updateDarkButtonText(isDark);
+        }
 
-        callbackAksi(function() {
-            sedangDiprosesGlobal = false;
-            semuaTombol.forEach(b => b.disabled = false);
-        });
-    }
+        function updateDarkButtonText(isDark) {
+            const btn = document.getElementById('btn-toggle-dark');
+            if (btn) btn.innerHTML = isDark ? '☀️ Terang' : '🌙 Gelap';
+        }
 
-    function getActivePinAdmin() { 
-        return savedPinAdmin || document.getElementById('input-pin-admin').value || localStorage.getItem('ufo_admin_pin') || ""; 
-    }
+        function getDeviceId() {
+            let localSalt = localStorage.getItem('ufo_device_salt');
+            if (!localSalt) {
+                localSalt = Math.random().toString(36).substring(2) + Date.now().toString(36);
+                localStorage.setItem('ufo_device_salt', localSalt);
+            }
+            let hash = 0;
+            for (let i = 0; i < localSalt.length; i++) { hash = (hash << 5) - hash + localSalt.charCodeAt(i); hash |= 0; }
+            return "DEV-" + Math.abs(hash).toString().padStart(9, '0').substring(0, 9);
+        }
 
-    function prosesLoginAdmin() {
-        amanKlikAdmin(function(selesai) {
-            const pin = document.getElementById('input-pin-admin').value.trim();
-            if(!pin) {
-                tampilkanModal("Perhatian", "Masukkan PIN Admin!");
-                selesai();
+        function muatCacheAntrianInstan() {
+            const cachedAntrian = localStorage.getItem('ufo_antrian_cache');
+            if (cachedAntrian) {
+                try {
+                    const parsed = JSON.parse(cachedAntrian);
+                    renderUIRental(parsed.data, parsed.statusAntrian, parsed.koordinatPusat, parsed.pengumumanAdmin);
+                } catch(e) {}
+            }
+        }
+
+        function cekServerBg() {
+            const deviceId = getDeviceId();
+            Promise.all([
+                fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}`).then(r => r.json()).catch(() => null),
+                fetch(`${SCRIPT_URL}?aksi=getAntrian`).then(r => r.json()).catch(() => null),
+                fetch(`${SCRIPT_URL}?aksi=getMasterSales`).then(r => r.json()).catch(() => null)
+            ]).then(([resBinding, resAntrian, resSales]) => {
+                if (resBinding && resBinding.status === "terkunci" && resBinding.nama) {
+                    namaSalesAktifGlobal = resBinding.nama;
+                    localStorage.setItem('ufo_nama_sales_aktif', resBinding.nama);
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = resBinding.nama;
+                }
+                if (resSales && resSales.status === "sukses" && resSales.data) {
+                    masterSalesGlobal = resSales.data;
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resSales.data));
+                }
+                if (resAntrian && resAntrian.status === "sukses") {
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
+                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat, resAntrian.pengumumanAdmin);
+                }
+            });
+        }
+
+        function cekStatusPerangkatSaya() {
+            const namaSaya = localStorage.getItem('ufo_nama_sales_aktif');
+            const deviceId = getDeviceId();
+            if (!namaSaya) return;
+
+            fetch(`${SCRIPT_URL}?aksi=cekBinding&deviceId=${encodeURIComponent(deviceId)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.status !== "terkunci" || !res.nama || res.nama.trim().toLowerCase() !== namaSaya.trim().toLowerCase()) {
+                    localStorage.removeItem('ufo_nama_sales_aktif');
+                    localStorage.removeItem('ufo_checkin_hari_ini');
+                    alert("Perangkat Anda telah di-reset oleh Admin. Silakan pilih ulang nama Anda.");
+                    window.location.reload();
+                }
+            }).catch(() => {});
+        }
+
+        function simpanAkunHP() {
+            const namaPilih = document.getElementById('pilih-sales').value;
+            const deviceId = getDeviceId();
+            if(!namaPilih) {
+                tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
                 return;
             }
 
-            const btn = document.getElementById('btn-login-admin');
-            const textAsli = btn.innerHTML;
-            btn.innerHTML = `<span class="spinner"></span> Memeriksa...`;
+            const btn = document.getElementById('btn-simpan-hp');
+            setButtonLoading(btn, true, "Menyimpan Perangkat...");
 
-            fetch(`${SCRIPT_URL}?aksi=loginAdmin&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
+            validasiGpsDanJalankan(function() {
+                lanjutkanSimpanAkun(namaPilih, deviceId, btn);
+            }, function() {
+                setButtonLoading(btn, false, "Simpan & Kunci di HP Ini");
+            });
+        }
+
+        function lanjutkanSimpanAkun(namaPilih, deviceId, btnElement) {
+            fetch(`${SCRIPT_URL}?aksi=kunciPerangkat&namaSales=${encodeURIComponent(namaPilih)}&deviceId=${encodeURIComponent(deviceId)}&t=${Date.now()}`)
             .then(res => res.json())
             .then(res => {
-                btn.innerHTML = textAsli;
+                setButtonLoading(btnElement, false, "Simpan & Kunci di HP Ini");
                 if(res.status === "sukses") {
-                    savedPinAdmin = pin; 
-                    localStorage.setItem('ufo_admin_pin', pin);
-                    document.getElementById('login-admin-box').style.display = 'none';
-                    document.getElementById('controls-admin-box').style.display = 'block';
+                    namaSalesAktifGlobal = namaPilih;
+                    localStorage.setItem('ufo_nama_sales_aktif', namaPilih);
+                    document.getElementById('panel-login').style.display = 'none';
+                    document.getElementById('panel-menu-utama').style.display = 'block';
+                    document.getElementById('label-user-aktif').innerText = namaPilih;
                     muatDataAntrian();
                 } else { 
-                    tampilkanModal("Gagal Login", res.pesan); 
+                    tampilkanModal("Akses Ditolak", res.pesan); 
                 }
-                selesai();
             }).catch(() => {
-                btn.innerHTML = textAsli;
-                tampilkanModal("Gagal", "Terjadi gangguan jaringan saat login.");
-                selesai();
+                setButtonLoading(btnElement, false, "Simpan & Kunci di HP Ini");
+                tampilkanModal("Gagal", "Terjadi gangguan jaringan saat menyimpan perangkat.");
             });
-        });
-    }
-
-    function logoutAdmin() {
-        localStorage.removeItem('ufo_admin_pin'); 
-        savedPinAdmin = "";
-        document.getElementById('input-pin-admin').value = "";
-        document.getElementById('login-admin-box').style.display = 'block';
-        document.getElementById('controls-admin-box').style.display = 'none';
-    }
-
-    // Mengambil data MURNI & SEGAR langsung dari server tanpa membaca cache
-    function muatDataAntrian() {
-        fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
-        .then(res => res.json())
-        .then(res => { 
-            if (res && res.status === "sukses") { 
-                renderUIWithData(res); 
-            } 
-        })
-        .catch(() => {});
-    }
-
-    function renderUIWithData(res) {
-        if (!res || !res.status) return;
-
-        const statusSistem = res.statusAntrian || "BUKA";
-        const badge = document.getElementById('badge-status-sistem');
-        if (badge) {
-            badge.innerText = statusSistem === "BUKA" ? "STATUS: OPEN" : "STATUS: CLOSED";
-            badge.className = statusSistem === "BUKA" ? "status-badge status-open" : "status-badge status-closed";
         }
 
-        const btnBuka = document.getElementById('btn-buka-sistem');
-        const btnTutup = document.getElementById('btn-tutup-sistem');
-        if (btnBuka && btnTutup && !sedangDiprosesGlobal) {
-            if (statusSistem === "BUKA") {
-                btnBuka.disabled = true;
-                btnBuka.className = "btn-black-custom btn-disabled";
-                btnTutup.disabled = false;
-                btnTutup.className = "";
-            } else {
-                btnBuka.disabled = false;
-                btnBuka.className = "btn-black-custom";
-                btnTutup.disabled = true;
-                btnTutup.className = "btn-disabled";
+        function getAkunAktif() {
+            if (!namaSalesAktifGlobal) namaSalesAktifGlobal = localStorage.getItem('ufo_nama_sales_aktif') || "";
+            return namaSalesAktifGlobal;
+        }
+
+        function muatMasterSalesInstant() {
+            const cachedSales = localStorage.getItem('ufo_master_sales_cache');
+            if (cachedSales) {
+                try {
+                    masterSalesGlobal = JSON.parse(cachedSales);
+                    let html = '<option value="">-- Pilih Nama Anda --</option>';
+                    masterSalesGlobal.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
+                    document.getElementById('pilih-sales').innerHTML = html;
+                } catch(e) {}
             }
         }
 
-        if (res.koordinatPusat) {
-            koordinatTokoAdmin.lat = res.koordinatPusat.lat || "";
-            koordinatTokoAdmin.lng = res.koordinatPusat.lng || "";
-            koordinatTokoAdmin.radius = res.koordinatPusat.radius || 50;
-
-            const statusGpsLabel = document.getElementById('label-status-gps');
-            const btnOn = document.getElementById('btn-on-gps');
-            const btnOff = document.getElementById('btn-off-gps');
-
-            if (statusGpsLabel) {
-                if (koordinatTokoAdmin.lat && koordinatTokoAdmin.lat !== "") {
-                    statusGpsLabel.innerHTML = `Status GPS: <b style="color:#059669;">AKTIF</b> (Radius: ${koordinatTokoAdmin.radius}m)`;
-                    if (btnOn && btnOff && !sedangDiprosesGlobal) {
-                        btnOn.disabled = true; btnOn.className = "btn-disabled";
-                        btnOff.disabled = false; btnOff.className = "";
+        function muatMasterSales() {
+            fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "sukses" && res.data) {
+                    masterSalesGlobal = res.data;
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(res.data));
+                     
+                    if (document.getElementById('pilih-sales').options.length <= 1) {
+                        let html = '<option value="">-- Pilih Nama Anda --</option>';
+                        res.data.forEach(item => { html += `<option value="${item.nama}">${item.nama}</option>`; });
+                        document.getElementById('pilih-sales').innerHTML = html;
                     }
-                } else {
-                    statusGpsLabel.innerHTML = `Status GPS: <b style="color:#dc2626;">NONAKTIF (OFF)</b>`;
-                    if (btnOn && btnOff && !sedangDiprosesGlobal) {
-                        btnOn.disabled = false; btnOn.className = "";
-                        btnOff.disabled = true; btnOff.className = "btn-disabled";
+                     
+                    if (daftarAntrianGlobal.length > 0 || getAkunAktif()) {
+                        renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
                     }
+                }
+            });
+        }
+
+        function cekStatusSayaDariArray(dataAntrian) {
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            if (!akunSaya) return "belum_ada";
+            const itemSaya = (dataAntrian || []).find(item => String(item.nama).trim().toLowerCase() === akunSaya);
+            return itemSaya ? itemSaya.status : "belum_ada";
+        }
+
+      function mulaiTimerHukumanPromotor() {
+            const btnTerima = document.getElementById('btn-terima-hukuman');
+            const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+            const teksAlasan = document.getElementById('teks-alasan-lock');
+             
+            if (btnTerima) btnTerima.style.display = 'none';
+            if (teksAlasan) teksAlasan.style.display = 'none';
+            if (wrapperCountdown) wrapperCountdown.style.display = 'block';
+
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
+
+            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+            let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+             
+            localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
+
+            if (waktuServer > new Date().getTime()) {
+                window.waktuSelesaiLockGlobal = waktuServer;
+                localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
+            } else if (waktuServer > 0) {
+                window.waktuSelesaiLockGlobal = waktuServer;
+                localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
+            } else {
+                window.waktuSelesaiLockGlobal = new Date().getTime() + (2 * 60 * 1000);
+                localStorage.setItem('ufo_lock_deadline_' + akunSaya, window.waktuSelesaiLockGlobal);
+            }
+
+            jalankanHitungMundur();
+        }
+        function jalankanHitungMundur() {
+            if (intervalCountdownLock) return;
+
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+             
+            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+            let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
+
+            if (waktuServer > new Date().getTime()) {
+                window.waktuSelesaiLockGlobal = waktuServer;
+                localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
+            } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+                window.waktuSelesaiLockGlobal = Number(savedDeadline);
+            }
+
+            updateTampilanTimer();
+
+            intervalCountdownLock = setInterval(() => {
+                updateTampilanTimer();
+            }, 1000);
+        }
+
+        function updateTampilanTimer() {
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+             
+            if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+                window.waktuSelesaiLockGlobal = Number(savedDeadline);
+            }
+
+            let waktuSelesaiEpoch = Number(window.waktuSelesaiLockGlobal) || 0;
+            let sekarang = new Date().getTime();
+            let selisihDetik = Math.floor((waktuSelesaiEpoch - sekarang) / 1000);
+
+            const spanEl = document.getElementById('span-waktu-mundur');
+            const btnTerima = document.getElementById('btn-terima-hukuman');
+            const wrapperCountdown = document.getElementById('wrapper-countdown-lock');
+            const teksAlasan = document.getElementById('teks-alasan-lock');
+
+            if (btnTerima && btnTerima.style.display !== 'none') btnTerima.style.display = 'none';
+            if (teksAlasan && teksAlasan.style.display !== 'none') teksAlasan.style.display = 'none';
+            if (wrapperCountdown && wrapperCountdown.style.display !== 'block') wrapperCountdown.style.display = 'block';
+
+            if (selisihDetik <= 3) {
+                if (intervalCountdownLock) {
+                    clearInterval(intervalCountdownLock);
+                    intervalCountdownLock = null;
+                }
+                if (wrapperCountdown) wrapperCountdown.innerHTML = "<div style='font-size: 16px; font-weight: 800;'>Hukuman Selesai! Membuka sistem...</div>";
+                 
+                localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
+                localStorage.setItem('ufo_hukuman_selesai_lock_' + akunSaya, 'true');
+                 
+                fetch(`${SCRIPT_URL}?aksi=adminUnlockPromotor&pin=123456&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
+                .then(r => r.json())
+                .then(() => {
+                    if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                        masterSalesGlobal.forEach(s => {
+                            if (String(s.nama).trim().toLowerCase() === akunSaya) {
+                                s.locked = "";
+                                s.waktuSelesaiLock = 0;
+                            }
+                        });
+                        localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+                    }
+                    muatDataAntrian();
+                    muatMasterSales();
+                    setTimeout(() => { window.location.reload(); }, 500);
+                }).catch(() => {
+                    setTimeout(() => { window.location.reload(); }, 500);
+                });
+
+            } else {
+                let menit = Math.floor(selisihDetik / 60);
+                let detik = selisihDetik % 60;
+                if (spanEl) {
+                    spanEl.innerText = String(menit).padStart(2, '0') + ":" + String(detik).padStart(2, '0');
                 }
             }
         }
 
-        let listHA = "", listAV = "";
-        let urutHA = 1, urutAV = 1;
-        
-        const data = res.data || [];
-        daftarAntrianGlobal = data;
+       function renderUIRental(dataAntrian, statusSistem, koordinatServer, pengumumanAdminServer) {
+            if (localActionActive) return;
 
-        const dataStandby = data.filter(item => item.status === "Standby" || item.status === "Waktu Makan");
-        const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
-        const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
+            daftarAntrianGlobal = dataAntrian || [];
+            statusSistemGlobal = statusSistem || "BUKA";
+             
+            if (koordinatServer && koordinatServer.lat && koordinatServer.lng) {
+                koordinatToko.lat = koordinatServer.lat;
+                koordinatToko.lng = koordinatServer.lng;
+                koordinatToko.radius = Number(koordinatServer.radius) || 50;
+                localStorage.setItem('ufo_koordinat_toko_cache', JSON.stringify(koordinatToko));
+            }
 
-        document.getElementById('admin-nama-ha').textContent = promotorHA ? promotorHA.nama : "Belum Ada";
-        document.getElementById('admin-nama-av').textContent = promotorAV ? promotorAV.nama : "Belum Ada";
+           const modalPengumuman = document.getElementById('modal-pengumuman-admin');
+        if (pengumumanAdminServer && String(pengumumanAdminServer).trim() !== "") {
+            let teksP = String(pengumumanAdminServer).trim();
 
-        if (data.length > 0) {
-            data.forEach((item) => {
-                let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
-                let itemHtml = "";
+            let savedTeksPengumuman = localStorage.getItem('ufo_saved_teks_pengumuman') || "";
+            if (savedTeksPengumuman !== teksP) {
+                localStorage.setItem('ufo_saved_teks_pengumuman', teksP);
+                localStorage.setItem('ufo_pengumuman_sudah_dibaca', 'false');
+            }
 
-                if (item.status === "Standby" || item.status === "Waktu Makan") {
-                    let urut = (kat === "HA") ? urutHA++ : urutAV++;
-                    let badgeHtml = "";
-                    if (item.status === "Waktu Makan") {
-                        badgeHtml = `<span class="badge-status-item badge-makan">Waktu Makan</span>`;
+            let sudahDibacaHP = localStorage.getItem('ufo_pengumuman_sudah_dibaca') === 'true';
+
+            if (!sudahDibacaHP) {
+                document.getElementById('isi-pengumuman-admin').innerText = teksP;
+                if (modalPengumuman) modalPengumuman.classList.add('active');
+            } else {
+                if (modalPengumuman) modalPengumuman.classList.remove('active');
+            }
+        } else {
+            if (modalPengumuman) modalPengumuman.classList.remove('active');
+        }
+
+            const badge = document.getElementById('badge-status-sistem');
+            badge.innerText = statusSistemGlobal === "BUKA" ? "STATUS ANTRIAN: OPEN" : "STATUS ANTRIAN: CLOSED";
+            badge.className = statusSistemGlobal === "BUKA" ? "status-badge-sistem status-open" : "status-badge-sistem status-closed";
+
+            let listHA = "", listAV = "";
+            let urutHA = 1, urutAV = 1;
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            let kategoriSayaAktif = "";
+
+            const dataStandby = daftarAntrianGlobal.filter(item => item.status === "Standby");
+            const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
+            const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
+
+            document.getElementById('promotor-nama-ha').textContent = promotorHA ? promotorHA.nama : "Belum Ada";
+            document.getElementById('promotor-nama-av').textContent = promotorAV ? promotorAV.nama : "Belum Ada";
+
+            if (daftarAntrianGlobal.length > 0) {
+                daftarAntrianGlobal.forEach((item) => {
+                    let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
+                    if (String(item.nama).trim().toLowerCase() === akunSaya) {
+                        kategoriSayaAktif = kat;
+                    }
+
+                    let itemHtml = "";
+                    if (item.status === "Standby") {
+                        let urut = 1;
+                        if (kat === "HA") urut = urutHA++;
+                        else if (kat === "AV") urut = urutAV++;
+
+                        let badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby</span>`;
+                        itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
+                    } else if (item.status === "Waktu Makan") {
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-makan">Waktu Makan</span></li>`;
+                    } else if (item.status === "Melayani") {
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
+                    } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/Gudang</span></li>`;
+                    } else if (item.status === "Ibadah") {
+                        itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-ibadah">Sedang Ibadah</span></li>`;
+                    }
+
+                    if (kat === "HA") listHA += itemHtml;
+                    else if (kat === "AV") listAV += itemHtml;
+                });
+            }
+
+            const kosongHtml = "<li><span style='color:#64748b; font-style:italic;'>Belum ada antrian</span></li>";
+            document.getElementById('list-HA').innerHTML = listHA || kosongHtml;
+            document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
+
+            let statusSayaNyata = cekStatusSayaDariArray(daftarAntrianGlobal);
+            if (statusSayaNyata === "belum_ada") {
+                const cachedAntrian = localStorage.getItem('ufo_antrian_cache');
+                if (cachedAntrian) {
+                    try {
+                        const parsed = JSON.parse(cachedAntrian);
+                        if (parsed && parsed.data) {
+                            const itemCache = parsed.data.find(item => String(item.nama).trim().toLowerCase() === akunSaya);
+                            if (itemCache) {
+                                statusSayaNyata = itemCache.status;
+                            }
+                        }
+                    } catch(e) {}
+                }
+            }
+
+            const sectionCheckinAwal = document.getElementById('section-checkin-awal');
+            const sectionNormal = document.getElementById('section-normal');
+            const sectionLocked = document.getElementById('section-akun-locked');
+
+            let isDilockAdmin = false;
+            let pesanLockAdmin = "Akun Anda sedang dibekukan oleh Admin.";
+            let sudahMakanDariServer = false;
+
+            const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+            let hukumanSelesaiLokal = localStorage.getItem('ufo_hukuman_selesai_lock_' + akunSaya) === 'true';
+
+            if (hukumanSelesaiLokal) {
+                isDilockAdmin = false;
+            } else if (dataSalesSaya) {
+                if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
+                
+                let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
+                let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+
+                if (waktuServer > new Date().getTime()) {
+                    window.waktuSelesaiLockGlobal = waktuServer;
+                    localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
+                } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+                    window.waktuSelesaiLockGlobal = Number(savedDeadline);
+                }
+
+                let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
+                
+                if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
+                    if (waktuServer > 0 && (new Date().getTime() + 3000) >= waktuServer) {
+                        isDilockAdmin = false;
                     } else {
-                        badgeHtml = (urut === 1) ? `<span class="badge-status-item badge-giliran-anda">Giliran Utama</span>` : `<span class="badge-status-item badge-standby">Standby</span>`;
+                        isDilockAdmin = true;
+                        pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
                     }
-                    itemHtml = `<li><b>${urut}. ${item.nama}</b> ${badgeHtml}</li>`;
-                } else if (item.status === "Melayani") {
-                    itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-melayani">Melayani</span></li>`;
-                } else if (item.status === "Dipanggil CS/GUDANG" || item.status === "Dipanggil CS") {
-                    itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-cs">Dipanggil CS/Gudang</span></li>`;
-                } else if (item.status === "Ibadah") {
-                    itemHtml = `<li><b>${item.nama}</b> <span class="badge-status-item badge-ibadah">Sedang Ibadah</span></li>`;
+                }
+            }
+
+            const btnDaftar = document.getElementById('btn-daftar-antrian');
+            const btnHadir = document.getElementById('btn-hadir');
+            const groupPilihKat = document.getElementById('group-pilih-kategori-normal');
+            const btnCustomer = document.getElementById('btn-utama-customer');
+            const btnMakan = document.getElementById('btn-waktu-makan');
+            const btnClosing = document.getElementById('btn-selesai-closing');
+            const btnCS = document.getElementById('btn-utama-cs');
+            const btnIbadah = document.getElementById('btn-utama-ibadah');
+            const btnKeluar = document.getElementById('btn-keluar-istirahat');
+
+            if (isDilockAdmin) {
+                sectionCheckinAwal.style.display = 'none';
+                sectionNormal.style.display = 'block';
+                groupPilihKat.style.display = 'block';
+                
+                sectionLocked.style.display = 'block';
+                document.getElementById('teks-alasan-lock').innerText = pesanLockAdmin;
+
+                let sudahTerimaHukumanHP = localStorage.getItem('ufo_terima_hukuman_' + akunSaya) === 'true';
+                
+                if (sudahTerimaHukumanHP || (window.waktuSelesaiLockGlobal > new Date().getTime())) {
+                    localStorage.setItem('ufo_terima_hukuman_' + akunSaya, 'true');
+                    document.getElementById('btn-terima-hukuman').style.display = 'none';
+                    document.getElementById('teks-alasan-lock').style.display = 'none';
+                    document.getElementById('wrapper-countdown-lock').style.display = 'block';
+                    jalankanHitungMundur();
+                } else {
+                    document.getElementById('btn-terima-hukuman').style.display = 'block';
+                    document.getElementById('teks-alasan-lock').style.display = 'block';
+                    document.getElementById('wrapper-countdown-lock').style.display = 'none';
                 }
 
-                if (kat === "HA") listHA += itemHtml;
-                else if (kat === "AV") listAV += itemHtml;
-            });
-        }
-
-        const kosongHtml = "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian</span></li>";
-        document.getElementById('list-HA').innerHTML = listHA || kosongHtml;
-        document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
-    }
-
-    function muatMasterSales() {
-        fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`)
-        .then(res => res.json())
-        .then(res => {
-            if(res.status === "sukses") { 
-                masterSalesGlobal = res.data || []; 
-            }
-        })
-        .catch(() => {});
-    }
-
-    function toggleGPSAdmin(statusAktif) {
-        amanKlikAdmin(function(selesai) {
-            const pin = getActivePinAdmin();
-            if (!pin) { alert("PIN Admin tidak ditemukan!"); selesai(); return; }
-
-            const btnOn = document.getElementById('btn-on-gps');
-            const btnOff = document.getElementById('btn-off-gps');
-
-            if (!statusAktif) {
-                const textAsli = btnOff.innerHTML;
-                btnOff.innerHTML = `<span class="spinner"></span> Mematikan...`;
-                fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=&lng=&radius=50&t=${Date.now()}`)
-                .then(r => r.json()).then(res => {
-                    btnOff.innerHTML = textAsli;
-                    tampilkanModal("GPS Dinonaktifkan", "Validasi radius GPS toko berhasil dimatikan (OFF).");
-                    muatDataAntrian(); selesai();
-                }).catch(() => { btnOff.innerHTML = textAsli; selesai(); });
+                if (btnHadir) { btnHadir.disabled = true; btnHadir.className = "btn-success btn-disabled"; }
+                if (btnCustomer) { btnCustomer.style.display = 'none'; }
+                if (btnMakan) { btnMakan.style.display = 'none'; }
+                if (btnClosing) { btnClosing.style.display = 'none'; }
+                if (btnCS) { btnCS.style.display = 'none'; }
+                if (btnIbadah) { btnIbadah.style.display = 'none'; }
+                if (btnKeluar) { btnKeluar.style.display = 'none'; }
+                if (btnDaftar) { btnDaftar.style.display = 'none'; }
+                return; 
             } else {
-                const textAsli = btnOn.innerHTML;
-                btnOn.innerHTML = `<span class="spinner"></span> Mendeteksi GPS...`;
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(pos) {
-                        const lat = pos.coords.latitude;
-                        const lng = pos.coords.longitude;
-                        const radius = "50";
-
-                        fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=${encodeURIComponent(radius)}&t=${Date.now()}`)
-                        .then(r => r.json()).then(res => {
-                            btnOn.innerHTML = textAsli;
-                            tampilkanModal("GPS Diaktifkan", "Titik GPS & Radius Toko berhasil diset dari perangkat Anda.");
-                            muatDataAntrian(); selesai();
-                        }).catch(() => { btnOn.innerHTML = textAsli; selesai(); });
-                    }, function() {
-                        btnOn.innerHTML = textAsli;
-                        alert("Gagal mendeteksi lokasi perangkat Anda.");
-                        selesai();
-                    }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
-                } else { btnOn.innerHTML = textAsli; selesai(); }
+                if (sectionLocked) sectionLocked.style.display = 'none';
+                if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
+                localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
+                if (intervalCountdownLock) {
+                    clearInterval(intervalCountdownLock);
+                    intervalCountdownLock = null;
+                }
             }
-        });
-    }
 
-    function bukaModalLockPromotorAdmin() {
-        document.getElementById('modal-title').innerText = "Kontrol Hukuman / Lock Akun";
-        
-        let optionsSales = '<option value="">-- Pilih Promotor --</option>';
-        if (masterSalesGlobal && masterSalesGlobal.length > 0) {
-            masterSalesGlobal.forEach(n => { 
-                let nama = typeof n === 'object' ? n.nama : n; 
-                optionsSales += `<option value="${nama}">${nama}</option>`; 
+            let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
+
+            if (statusSayaNyata !== "belum_ada") {
+                sectionCheckinAwal.style.display = 'none';
+                sectionNormal.style.display = 'block';
+            } else if (!sudahCheckinPernahHariIni) {
+                sectionCheckinAwal.style.display = 'block';
+                sectionNormal.style.display = 'none';
+                
+                if (navigator.geolocation && koordinatToko.lat) {
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        initAtauUpdatePetaPromotor(Number(koordinatToko.lat), Number(koordinatToko.lng), Number(koordinatToko.radius) || 50, pos.coords.latitude, pos.coords.longitude);
+                    }, () => {}, {maximumAge: 30000});
+                }
+            } else {
+                sectionCheckinAwal.style.display = 'none';
+                sectionNormal.style.display = 'block';
+            }
+
+            if (statusSayaNyata === "belum_ada") {
+                groupPilihKat.style.display = "block";
+                btnDaftar.style.display = "block";
+                btnCustomer.style.display = "none";
+                btnMakan.style.display = "none";
+                btnClosing.style.display = "none";
+                btnCS.style.display = "none";
+                btnIbadah.style.display = "none";
+                btnKeluar.style.display = "none";
+
+                if (statusSistemGlobal === "TUTUP") {
+                    btnDaftar.disabled = true; btnDaftar.className = "btn-success btn-disabled";
+                } else {
+                    btnDaftar.disabled = false; btnDaftar.className = "btn-success btn-pulse";
+                }
+            } else {
+                groupPilihKat.style.display = "none";
+                btnDaftar.style.display = "none";
+
+                btnCustomer.style.display = (statusSayaNyata === "Standby") ? "block" : "none";
+                btnClosing.style.display = (statusSayaNyata === "Melayani") ? "block" : "none";
+                btnCS.style.display = (statusSayaNyata === "Standby" || statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") ? "block" : "none";
+                btnIbadah.style.display = (statusSayaNyata === "Standby" || statusSayaNyata === "Ibadah") ? "block" : "none";
+                btnKeluar.style.display = (statusSayaNyata === "Standby") ? "block" : "none";
+
+                if (statusSayaNyata === "Standby") {
+                    let listSubStandby = daftarAntrianGlobal.filter(it => (it.status === "Standby" || it.status === "Waktu Makan") && String(it.kategori || "").trim().toUpperCase() === kategoriSayaAktif);
+                    let indexSaya = listSubStandby.findIndex(it => String(it.nama).trim().toLowerCase() === akunSaya);
+                    let apakahSayaUrutanPertama = (indexSaya === 0);
+
+                    if (apakahSayaUrutanPertama) {
+                        btnMakan.style.display = "block";
+                        const cacheSudahMakan = localStorage.getItem('ufo_sudah_makan_' + akunSaya) === 'true';
+
+                        if (sudahMakanDariServer || cacheSudahMakan) {
+                            btnMakan.disabled = true;
+                            btnMakan.className = "btn-success btn-disabled";
+                            btnMakan.innerText = "SUDAH MAKAN HARI INI";
+                        } else if (statusSistemGlobal === "TUTUP") {
+                            btnMakan.disabled = true;
+                            btnMakan.className = "btn-gold-pulse btn-disabled";
+                            btnMakan.innerText = "WAKTU MAKAN";
+                        } else {
+                            btnMakan.disabled = false;
+                            btnMakan.className = "btn-gold-pulse";
+                            btnMakan.innerText = "WAKTU MAKAN";
+                        }
+                    } else {
+                        btnMakan.style.display = "none"; 
+                    }
+
+                    if (statusSistemGlobal === "TUTUP") {
+                        btnCustomer.disabled = true; btnCustomer.className = "btn-customer btn-disabled";
+                        btnCS.disabled = true; btnCS.className = "btn-purple btn-disabled";
+                        btnIbadah.disabled = true; btnIbadah.className = "btn-indigo btn-disabled";
+                        btnKeluar.disabled = true; btnKeluar.className = "btn-maroon btn-disabled";
+                    } else {
+                        let apakahSayaBisaAmbil = (indexSaya >= 0 && indexSaya <= 2);
+
+                        if (apakahSayaBisaAmbil) {
+                            btnCustomer.disabled = false;
+                            btnCustomer.className = "btn-customer btn-pulse";
+                            btnCustomer.innerText = "Sudah Membawa Customer";
+                        } else {
+                            btnCustomer.disabled = true;
+                            btnCustomer.className = "btn-customer btn-disabled";
+                            btnCustomer.innerText = "Anda Sudah Berada di Antrian";
+                        }
+
+                        btnCS.style.display = "block";
+                        btnCS.innerText = "DIPANGGIL CS/GUDANG (KUNCI POSISI)"; 
+                        btnCS.className = "btn-purple"; 
+                        btnCS.disabled = false;
+
+                        btnIbadah.style.display = "block";
+                        btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; 
+                        btnIbadah.className = "btn-indigo"; 
+                        btnIbadah.disabled = false;
+
+                        btnKeluar.style.display = "block";
+                        btnKeluar.className = "btn-maroon";
+                        btnKeluar.disabled = false;
+                    }
+                } else if (statusSayaNyata === "Waktu Makan") {
+                    btnMakan.style.display = "block";
+                    btnMakan.innerText = "SELESAI MAKAN (KEMBALI ANTRI)";
+                    btnMakan.className = "btn-teal";
+                    btnMakan.disabled = false;
+                } else if (statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") {
+                    btnCS.style.display = "block"; 
+                    btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; 
+                    btnCS.className = "btn-teal"; 
+                    btnCS.disabled = false;
+                } else if (statusSayaNyata === "Ibadah") {
+                    btnIbadah.style.display = "block"; 
+                    btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)"; 
+                    btnIbadah.className = "btn-teal"; 
+                    btnIbadah.disabled = false;
+                }
+            }
+        }
+      function tutupModalPengumumanAdmin() {
+            localStorage.setItem('ufo_pengumuman_sudah_dibaca', 'true');
+            document.getElementById('modal-pengumuman-admin').classList.remove('active');
+        }
+
+        function muatDataAntrian() {
+            if (localActionActive) return;
+            Promise.all([
+                fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`).then(r => r.json()).catch(() => null),
+                fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`).then(r => r.json()).catch(() => null)
+            ]).then(([resAntrian, resSales]) => {
+                if (resSales && resSales.status === "sukses" && resSales.data) {
+                    masterSalesGlobal = resSales.data;
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resSales.data));
+                }
+                if (resAntrian && resAntrian.status === "sukses" && !localActionActive) {
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(resAntrian));
+                    renderUIRental(resAntrian.data, resAntrian.statusAntrian, resAntrian.koordinatPusat, resAntrian.pengumumanAdmin);
+                }
             });
         }
 
-        document.getElementById('modal-desc').innerHTML = `
-            Pilih Promotor:<br>
-            <select id="admin-select-sales-lock" style="margin-bottom: 12px;">${optionsSales}</select>
-            
-            Pilih Aksi:<br>
-            <select id="admin-select-status-lock" style="margin-bottom: 12px;" onchange="toggleAlasanLockField(this.value)">
-                <option value="LOCK">🔒 Kunci Akun (Beri Hukuman)</option>
-                <option value="UNLOCK">🔓 Buka Akun (Lepas Hukuman)</option>
-            </select>
-            
-            <div id="wrapper-alasan-hukuman">
-                Pilih Alasan Hukuman:<br>
-                <select id="admin-select-alasan" style="margin-bottom: 12px;">
-                    <option value="Pulang tanpa keluar antrian">Pulang tanpa keluar antrian</option>
-                    <option value="Istirahat tanpa keluar antrian">Istirahat tanpa keluar antrian</option>
-                    <option value="Melayani tapi tidak menekan tombol Sudah Membawa Customer">Melayani tapi tidak menekan tombol Sudah Membawa Customer</option>
-                    <option value="Meninggalkan Posisi Tanpa Izin">Tidak isi form pengiriman</option>
-                </select>
+        function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null) {
+            const namaSales = getAkunAktif().trim();
+            if (!namaSales) return;
 
-                Durasi Hukuman (Menit):<br>
-                <input type="number" id="admin-input-durasi-menit" value="15" min="1" max="1440" style="margin-top: 4px;">
-            </div>
-        `;
+            localActionActive = true;
+            let katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
 
-        document.getElementById('modal-actions').innerHTML = `
-            <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-            <button type="button" id="btn-modal-action-ok" onclick="eksekusiLockPromotorAdmin()">Proses</button>
-        `;
-        document.getElementById('custom-modal').classList.add('active');
-    }
+            if (aksiServer === 'daftarAntri') {
+                localStorage.removeItem('ufo_hukuman_selesai_lock_' + namaSales.toLowerCase());
+                if (masterSalesGlobal && masterSalesGlobal.length > 0) {
+                    masterSalesGlobal.forEach(s => {
+                        if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
+                            s.locked = "";
+                            s.waktuSelesaiLock = 0;
+                        }
+                    });
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+                }
+            }
 
-    function toggleAlasanLockField(nilaiAksi) {
-        const wrapperAlasan = document.getElementById('wrapper-alasan-hukuman');
-        if (wrapperAlasan) {
-            wrapperAlasan.style.display = (nilaiAksi === "UNLOCK") ? "none" : "block";
-        }
-    }
+            if (targetStatusSimulasi === "belum_ada") {
+                daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
+                 
+                let cachedData = localStorage.getItem('ufo_antrian_cache');
+                if (cachedData) {
+                    try {
+                        let parsed = JSON.parse(cachedData);
+                        if (parsed.data) {
+                            parsed.data = parsed.data.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
+                            localStorage.setItem('ufo_antrian_cache', JSON.stringify(parsed));
+                        }
+                    } catch(e) {}
+                }
+            } else {
+                let ketemu = false;
+                daftarAntrianGlobal.forEach(item => {
+                    if (String(item.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
+                        item.status = targetStatusSimulasi;
+                        if (katBaru) item.kategori = katBaru;
+                        ketemu = true;
+                    }
+                });
+                if (!ketemu) {
+                    daftarAntrianGlobal.push({ nama: namaSales, status: targetStatusSimulasi, kategori: katAktif });
+                }
+            }
 
-    function eksekusiLockPromotorAdmin() {
-        const selectSales = document.getElementById('admin-select-sales-lock');
-        const selectStatus = document.getElementById('admin-select-status-lock');
-        const selectAlasan = document.getElementById('admin-select-alasan');
-        const inputDurasi = document.getElementById('admin-input-durasi-menit');
+            localActionActive = false;
+            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+            localActionActive = true;
 
-        const namaSales = selectSales ? selectSales.value : "";
-        const aksiLock = selectStatus ? selectStatus.value : "LOCK";
-        const alasan = (aksiLock === "LOCK" && selectAlasan) ? selectAlasan.value : "";
-        let durasiMenit = (aksiLock === "LOCK" && inputDurasi && inputDurasi.value) ? String(inputDurasi.value).trim() : "15";
-
-        if (!namaSales) return alert("Pilih promotor terlebih dahulu!");
-
-        const btnOk = document.getElementById('btn-modal-action-ok');
-        if (btnOk) {
-            btnOk.disabled = true;
-            btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
-        }
-
-        const pin = getActivePinAdmin();
-        let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
-
-        tutupModal();
-
-        fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
-        .then(res => res.json())
-        .then(() => {
-            muatMasterSales();
-            muatDataAntrian(); 
-        })
-        .catch(() => {
-            muatMasterSales();
-            muatDataAntrian();
-        });
-    }
-
-    function bukaModalTambahMasterSales() {
-        document.getElementById('modal-title').innerText = "Tambah Nama Promotor Baru";
-        document.getElementById('modal-desc').innerHTML = `Masukkan Nama Promotor Baru:<br><input type="text" id="input-nama-baru" placeholder="Nama Lengkap Promotor">`;
-        document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-action-ok" onclick="eksekusiTambahMasterSales()">Simpan</button>`;
-        document.getElementById('custom-modal').classList.add('active');
-    }
-
-    function eksekusiTambahMasterSales() {
-        const namaBaru = document.getElementById('input-nama-baru').value.trim();
-        if (!namaBaru) return alert("Nama tidak boleh kosong!");
-        
-        const btnOk = document.getElementById('btn-modal-action-ok');
-        if (btnOk) {
-            btnOk.disabled = true;
-            btnOk.innerHTML = `<span class="spinner"></span> Menyimpan...`;
-        }
-
-        const pin = getActivePinAdmin();
-        fetch(`${SCRIPT_URL}?aksi=adminTambahMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaBaru)}&t=${Date.now()}`)
-        .then(r => r.json()).then(res => {
-            tutupModal();
-            tampilkanModal("Master Sales", res.pesan);
-            muatMasterSales();
-        }).catch(() => { tutupModal(); });
-    }
-
-    function bukaModalHapusMasterSales() {
-        document.getElementById('modal-title').innerText = "Hapus Nama Permanen";
-        let optionsSales = '<option value="">-- Pilih Promotor --</option>';
-        if (masterSalesGlobal && masterSalesGlobal.length > 0) {
-            masterSalesGlobal.forEach(n => { 
-                let nama = typeof n === 'object' ? n.nama : n; 
-                optionsSales += `<option value="${nama}">${nama}</option>`; 
+            fetch(`${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(katAktif)}&subkategori=${encodeURIComponent(katAktif)}&t=${Date.now()}`)
+            .then(res => res.json())
+            .then(res => {
+                localActionActive = false;
+                if (res && res.status === "sukses" && res.data) {
+                    daftarAntrianGlobal = res.data;
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko, res.pengumumanAdmin);
+                } else if (res && (res.status === "locked" || res.status === "terkunci" || res.status === "gagal_lock")) {
+                    muatDataAntrian(); 
+                    muatMasterSales(); 
+                } else if (res && res.status === "gagal") {
+                    muatDataAntrian();
+                    tampilkanModal("Gagal", res.pesan || "Aksi ditolak sistem.");
+                } else {
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+                }
+            }).catch(() => { 
+                localActionActive = false; 
             });
         }
 
-        document.getElementById('modal-desc').innerHTML = `Pilih promotor yang akan dihapus dari sistem:<br><select id="select-hapus-sales">${optionsSales}</select>`;
-        document.getElementById('modal-actions').innerHTML = `
-            <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-            <button type="button" id="btn-modal-action-ok" onclick="eksekusiHapusMasterSales()">Hapus Permanen</button>
-        `;
-        document.getElementById('custom-modal').classList.add('active');
-    }
-
-    function eksekusiHapusMasterSales() {
-        const selectEl = document.getElementById('select-hapus-sales');
-        const namaHapus = selectEl ? selectEl.value : "";
-        if (!namaHapus) return alert("Pilih promotor terlebih dahulu!");
-
-        const btnOk = document.getElementById('btn-modal-action-ok');
-        if (btnOk) {
-            btnOk.disabled = true;
-            btnOk.innerHTML = `<span class="spinner"></span> Menghapus...`;
+        function setButtonLoading(btnElement, isLoading, defaultText) {
+            if (!btnElement) return;
+            if (isLoading) {
+                btnElement.disabled = true;
+                btnElement.classList.add('btn-disabled');
+                btnElement.innerHTML = `<span class="spinner"></span> Memeriksa Lokasi GPS...`;
+            } else {
+                btnElement.disabled = false;
+                btnElement.classList.remove('btn-disabled');
+                btnElement.innerHTML = defaultText;
+            }
         }
 
-        const pin = getActivePinAdmin();
-        fetch(`${SCRIPT_URL}?aksi=adminHapusMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaHapus)}&t=${Date.now()}`)
-        .then(r => r.json()).then(res => {
-            tutupModal();
-            tampilkanModal("Master Sales", res.pesan);
-            muatMasterSales();
-        }).catch(() => { tutupModal(); });
-    }
+                function validasiGpsDanJalankan(callbackBerhasil, callbackBatal) {
+            if (!koordinatToko.lat || !koordinatToko.lng) {
+                const cachedKoordinat = localStorage.getItem('ufo_koordinat_toko_cache');
+                if (cachedKoordinat) {
+                    try { koordinatToko = JSON.parse(cachedKoordinat); } catch(e) {}
+                }
+            }
 
-    function bukaModalToggleSistem(targetStatus) {
-        document.getElementById('modal-title').innerText = targetStatus === 'BUKA' ? 'Mulai Antrian' : 'Hentikan Antrian';
-        document.getElementById('modal-desc').innerHTML = `Status baru sistem: <b>${targetStatus}</b>`;
-        document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-action-ok" onclick="eksekusiToggleSistem('${targetStatus}')">Proses</button>`;
-        document.getElementById('custom-modal').classList.add('active');
-    }
+            if (!koordinatToko.lat || !koordinatToko.lng || koordinatToko.lat === "" || koordinatToko.lng === "") {
+                if (typeof callbackBerhasil === 'function') callbackBerhasil();
+                return;
+            }
 
-    function eksekusiToggleSistem(targetStatus) {
-        const btnOk = document.getElementById('btn-modal-action-ok');
-        if (btnOk) {
-            btnOk.disabled = true;
-            btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
-        }
-        const pin = getActivePinAdmin();
-        fetch(`${SCRIPT_URL}?aksi=adminSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}&t=${Date.now()}`)
-        .then(res => res.json()).then(res => {
-            tutupModal();
-            tampilkanModal("Status Sistem", res.pesan);
-            muatDataAntrian();
-        }).catch(() => { tutupModal(); });
-    }
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                   function(position) {
+                        const latUser = Number(position.coords.latitude);
+                        const lonUser = Number(position.coords.longitude);
+                        const latStore = Number(koordinatToko.lat);
+                        const lonStore = Number(koordinatToko.lng);
+                        const batasRadius = Number(koordinatToko.radius) || 50;
 
-    function bukaModalResetTotal() {
-        document.getElementById('modal-title').innerText = 'Reset Semua Antrian & Log';
-        document.getElementById('modal-desc').innerHTML = `⚠️ <b>PERINGATAN:</b><br>Seluruh data antrian aktif beserta log riwayat melayani akan dihapus secara total dari sistem. Lanjutkan?`;
-        document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-action-ok" onclick="eksekusiResetTotal()">Reset Sekarang</button>`;
-        document.getElementById('custom-modal').classList.add('active');
-    }
+                        const jarakMeter = hitungJarakHaversine(latUser, lonUser, latStore, lonStore);
 
-    function eksekusiResetTotal() {
-        const btnOk = document.getElementById('btn-modal-action-ok');
-        if (btnOk) {
-            btnOk.disabled = true;
-            btnOk.innerHTML = `<span class="spinner"></span> Memproses Reset...`;
-        }
-        const pin = getActivePinAdmin();
-        fetch(`${SCRIPT_URL}?aksi=adminResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
-        .then(res => res.json()).then(res => {
-            tutupModal();
-            tampilkanModal("Reset Total", res.pesan || "Semua antrian dan log berhasil direset.");
-            muatDataAntrian(); 
-        }).catch(() => { tutupModal(); });
-    }
-
-    function bukaModalTambahAntriAdmin() {
-        document.getElementById('modal-title').innerText = "Masukkan Promotor ke Antrian";
-        let optionsSales = '<option value="">-- Pilih Promotor --</option>';
-        masterSalesGlobal.forEach(n => { let nama = typeof n === 'object' ? n.nama : n; optionsSales += `<option value="${nama}">${nama}</option>`; });
-        
-        document.getElementById('modal-desc').innerHTML = `
-            Kategori:<br>
-            <select id="admin-select-kategori">
-                <option value="HA">HA (Home Appliance)</option>
-                <option value="AV">AV (Audio Video)</option>
-            </select><br><br>
-            Promotor:<br>
-            <select id="admin-select-sales">${optionsSales}</select><br><br>
-            Posisi Urutan:<br>
-            <input type="number" id="admin-input-posisi" value="1" min="1">
-        `;
-        document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-action-ok" onclick="eksekusiTambahAntriAdmin()">Proses</button>`;
-        document.getElementById('custom-modal').classList.add('active');
-    }
-
-    function eksekusiTambahAntriAdmin() {
-        const kategori = document.getElementById('admin-select-kategori').value; 
-        const namaSales = document.getElementById('admin-select-sales').value; 
-        const posisi = document.getElementById('admin-input-posisi').value || "1"; 
-        
-        if(!namaSales) return alert("Pilih promotor!"); 
-
-        const btnOk = document.getElementById('btn-modal-action-ok');
-        if (btnOk) {
-            btnOk.disabled = true;
-            btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+                        // Tanpa toleransi + 30 meter, benar-benar murni sesuai batas radius lingkaran toko
+                        if (jarakMeter > batasRadius) {
+                            if (typeof callbackBatal === 'function') callbackBatal();
+                            tampilkanModal("Di Luar Radius Antrian", `Gagal Daftar Antrian!\n\nJarak Anda: ${Math.round(jarakMeter)} meter\nBatas Maksimal: ${batasRadius} meter.\n\nAnda berada di luar lingkaran radius antrian.`);
+                            return; 
+                        }
+                         
+                        if (typeof callbackBerhasil === 'function') callbackBerhasil();
+                    },
+                    function(error) {
+                        if (typeof callbackBatal === 'function') callbackBatal();
+                        tampilkanModal("Gagal Deteksi GPS", "Pastikan GPS / Lokasi HP Anda aktif dan berikan izin akses lokasi untuk melanjutkan.");
+                        return;
+                    },
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+                );
+            } else {
+                if (typeof callbackBatal === 'function') callbackBatal();
+                tampilkanModal("Gagal", "Browser Anda tidak mendukung fitur GPS.");
+            }
         }
 
-        const pin = getActivePinAdmin();
-        fetch(`${SCRIPT_URL}?aksi=adminDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&t=${Date.now()}`)
-        .then(res => res.json()).then(res => {
-            tutupModal();
-            tampilkanModal("Status Admin", res.pesan);
-            muatDataAntrian();
-        }).catch(() => { tutupModal(); });
-    }
 
-    function bukaModalResetDeviceAdmin() {
-        document.getElementById('modal-title').innerText = "Reset Perangkat Promotor";
-        let optionsSales = '<option value="">-- Pilih Promotor --</option>';
-        if (masterSalesGlobal && masterSalesGlobal.length > 0) {
-            masterSalesGlobal.forEach(n => { 
-                let nama = typeof n === 'object' ? n.nama : n; 
-                optionsSales += `<option value="${nama}">${nama}</option>`; 
+     function aksiHadirKerja() {
+            const btn = document.getElementById('btn-hadir');
+            setButtonLoading(btn, true, "Konfirmasi Kehadiran & Masuk Antri");
+
+            validasiGpsDanJalankan(function() {
+                // JANGAN kembalikan teks tombol ke awal dulu, 
+                // langsung proses dan masukkan ke antrean secara otomatis!
+                const kategoriPilih = document.getElementById('pilih-kategori-hadir').value;
+                 
+                const tanggalHariIni = getTanggalIndo();
+                localStorage.setItem('ufo_checkin_hari_ini', 'true');
+                localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
+
+                eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
+            }, function() {
+                // Blok ini hanya berjalan jika GPS gagal / di luar radius
+                setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
             });
         }
 
-        document.getElementById('modal-desc').innerHTML = `
-            Pilih Promotor yang perangkatnya akan di-reset:<br><br>
-            <select id="admin-select-sales-reset">${optionsSales}</select>
-        `;
-        document.getElementById('modal-actions').innerHTML = `
-            <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-            <button type="button" id="btn-modal-action-ok" onclick="eksekusiResetDeviceAdmin()">Reset Perangkat</button>
-        `;
-        document.getElementById('custom-modal').classList.add('active');
-    }
+       function aksiDaftarAntrianNormal() {
+            const btn = document.getElementById('btn-daftar-antrian');
+            setButtonLoading(btn, true, "Daftar Antrian");
 
-    function eksekusiResetDeviceAdmin() {
-        const selectEl = document.getElementById('admin-select-sales-reset');
-        const namaSales = selectEl ? selectEl.value : "";
-        if (!namaSales) return alert("Pilih nama promotor terlebih dahulu!");
-
-        const btnOk = document.getElementById('btn-modal-action-ok');
-        if (btnOk) {
-            btnOk.disabled = true;
-            btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+            validasiGpsDanJalankan(function() {
+                // Berhasil dalam radius: Eksekusi pendaftaran antrean
+                const kategoriPilih = document.getElementById('pilih-kategori-normal').value;
+                eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
+            }, function() {
+                // Gagal / Di luar radius: Kembalikan tombol seperti semula agar bisa diklik lagi
+                setButtonLoading(btn, false, "Daftar Antrian");
+            });
+        }
+        function aksiUtamaCustomer() {
+            tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
+                eksekusiAksiInstan('ambilAntrian', 'Melayani');
+            });
         }
 
-        const pin = getActivePinAdmin();
-        fetch(`${SCRIPT_URL}?aksi=adminResetDevice&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
-        .then(res => res.json()).then(res => {
-            tutupModal();
-            tampilkanModal("Status Reset Perangkat", res.pesan);
-            muatDataAntrian();
-        }).catch(() => {
-            tutupModal();
-            tampilkanModal("Gagal", "Terjadi gangguan jaringan saat mereset perangkat.");
-        });
-    }
-
-    function bukaModalFormAdminKategori(aksiName, judulAksi, butuhPilihPromotor = true) {
-        document.getElementById('modal-title').innerText = judulAksi;
-        let optionsSales = '<option value="">-- Pilih Promotor --</option>';
-        masterSalesGlobal.forEach(n => { let nama = typeof n === 'object' ? n.nama : n; optionsSales += `<option value="${nama}">${nama}</option>`; });
-        
-        let htmlContent = `Kategori:<br><select id="admin-select-kategori"><option value="HA">HA (Home Appliance)</option><option value="AV">AV (Audio Video)</option></select><br><br>`;
-        if (butuhPilihPromotor) htmlContent += `Promotor:<br><select id="admin-select-sales">${optionsSales}</select>`;
-        
-        document.getElementById('modal-desc').innerHTML = htmlContent;
-        document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button><button type="button" id="btn-modal-action-ok" onclick="eksekusiAksiAdminKategori('${aksiName}', ${butuhPilihPromotor})">Proses</button>`;
-        document.getElementById('custom-modal').classList.add('active');
-    }
-
-    function eksekusiAksiAdminKategori(aksiName, butuhPilihPromotor) {
-        const kategori = document.getElementById('admin-select-kategori').value; 
-        let namaSales = butuhPilihPromotor ? document.getElementById('admin-select-sales').value : ""; 
-        if(butuhPilihPromotor && !namaSales) return alert("Pilih promotor!"); 
-
-        const btnOk = document.getElementById('btn-modal-action-ok');
-        if (btnOk) {
-            btnOk.disabled = true;
-            btnOk.innerHTML = `<span class="spinner"></span> Memproses...`;
+        function aksiToggleMakan() {
+            const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
+            if (statusSekarang === "Standby") {
+                tampilkanModalKonfirmasi("Waktu Makan", "Posisi antrian utama Anda akan dikunci sementara selama waktu makan, dan promotor di bawah Anda akan naik menggantikan sementara. Lanjutkan?", function() {
+                    const akun = getAkunAktif().trim().toLowerCase();
+                    localStorage.setItem('ufo_sudah_makan_' + akun, 'true');
+                    localStorage.setItem('ufo_tanggal_makan_terakhir', getTanggalIndo());
+                     
+                    eksekusiAksiInstan('panggilMakan', 'Waktu Makan');
+                });
+            } else {
+                tampilkanModalKonfirmasi("Selesai Makan", "Kembali aktif ke antrian utama?", function() {
+                    eksekusiAksiInstan('selesaiMakan', 'Standby');
+                });
+            }
         }
 
-        const pin = getActivePinAdmin();
-        fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&t=${Date.now()}`)
-        .then(res => res.json()).then(res => {
-            tutupModal();
-            tampilkanModal("Status Admin", res.pesan);
-            muatDataAntrian();
-        }).catch(() => { tutupModal(); });
-    }
+        function aksiSelesaiClosing() {
+            tampilkanModalKonfirmasi("Konfirmasi Selesai", "Selesai melayani customer?", function() {
+                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
+            });
+        }
 
-    function tampilkanModal(judul, pesan) {
-        document.getElementById('modal-title').innerText = judul;
-        document.getElementById('modal-desc').innerHTML = String(pesan).replace(/\n/g, '<br>');
-        document.getElementById('modal-actions').innerHTML = `<button type="button" onclick="tutupModal()">OK</button>`;
-        document.getElementById('custom-modal').classList.add('active');
-    }
+        function aksiToggleCS() {
+            const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
+            if (statusSekarang === "Standby") {
+                tampilkanModalKonfirmasi("Dipanggil CS/Gudang", "Posisi antrian Anda akan dikunci sementara.", function() {
+                    eksekusiAksiInstan('panggilCS', 'Dipanggil CS');
+                });
+            } else {
+                eksekusiAksiInstan('selesaiCS', 'Standby');
+            }
+        }
 
-    function tutupModal() { 
-        document.getElementById('custom-modal').classList.remove('active'); 
-    }
-</script>
+        function aksiToggleIbadah() {
+            const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
+            if (statusSekarang === "Standby") {
+                tampilkanModalKonfirmasi("Ibadah", "Posisi antrian Anda akan dikunci sementara selama ibadah.", function() {
+                    eksekusiAksiInstan('panggilIbadah', 'Ibadah');
+                });
+            } else {
+                eksekusiAksiInstan('selesaiIbadah', 'Standby');
+            }
+        }
+
+        function bukaModalKeluarIstirahat() {
+            tampilkanModalKonfirmasi("Keluar Antrian", "Yakin ingin keluar dari antrian?", function() {
+                eksekusiAksiInstan('selesaiMelayani', 'belum_ada');
+            });
+        }
+
+        function initAtauUpdatePetaPromotor(latToko, lngToko, radiusToko, latUser, lngUser) {
+            if (!latToko || !lngToko || isNaN(latToko) || isNaN(lngToko)) return;
+
+            if (!mapPromotor) {
+                const mapContainer = document.getElementById('map-promotor');
+                if (!mapContainer) return;
+                 
+                mapPromotor = L.map('map-promotor', { zoomControl: false }).setView([latToko, lngToko], 18);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(mapPromotor);
+            }
+
+            if (!circleTokoPeta) {
+                circleTokoPeta = L.circle([latToko, lngToko], {
+                    color: '#0284c7',
+                    fillColor: '#0284c7',
+                    fillOpacity: 0.15,
+                    radius: radiusToko || 50
+                }).addTo(mapPromotor);
+
+               markerTokoPeta = L.marker([latToko, lngToko]).addTo(mapPromotor)
+    .bindPopup("<b>Titik Pusat Area Antrian</b>");
+            } else {
+                circleTokoPeta.setLatLng([latToko, lngToko]);
+                circleTokoPeta.setRadius(radiusToko || 50);
+                markerTokoPeta.setLatLng([latToko, lngToko]);
+            }
+
+            if (latUser && lngUser && !isNaN(latUser) && !isNaN(lngUser)) {
+                if (!markerSayaPeta) {
+                    markerSayaPeta = L.circleMarker([latUser, lngUser], {
+                        radius: 8,
+                        fillColor: "#0284c7",
+                        color: "#ffffff",
+                        weight: 2,
+                        fillOpacity: 1
+                    }).addTo(mapPromotor).bindPopup("<b>Posisi Anda Sekarang</b>");
+                } else {
+                    markerSayaPeta.setLatLng([latUser, lngUser]);
+                }
+            }
+             
+            setTimeout(() => { if (mapPromotor) mapPromotor.invalidateSize(); }, 150);
+        }
+
+        function hitungJarakHaversine(lat1, lon1, lat2, lon2) {
+            const R = 6371000; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+        }
+
+        function tampilkanModal(judul, desc) {
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-actions').innerHTML = `<button type="button" class="btn-customer" onclick="tutupModal()">OK</button>`;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function tampilkanModalKonfirmasi(judul, desc, callbackYa) {
+            document.getElementById('modal-title').innerText = judul;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-actions').innerHTML = `
+                <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+                <button type="button" class="btn-customer" id="btn-modal-ya">Ya</button>
+            `;
+            document.getElementById('custom-modal').classList.add('active');
+            document.getElementById('btn-modal-ya').onclick = function() { tutupModal(); callbackYa(); };
+        }
+
+        function tutupModal() { 
+            document.getElementById('custom-modal').classList.remove('active'); 
+        }
+    </script>
 </body>
 </html>
