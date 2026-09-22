@@ -88,7 +88,6 @@
             box-shadow: 0 0 30px rgba(255, 31, 61, 1), inset 0 0 12px rgba(255, 255, 255, 0.6) !important; 
         }
 
-        /* HEADER DIBUAT 2 BARIS TERSENDIRI AGAR TIDAK KEPOTONG */
         .header-admin { 
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
             border-radius: 14px; 
@@ -297,8 +296,8 @@
         .admin-grid { display: flex; flex-direction: column; gap: 10px; }
 
         .list-section-wrapper { margin-bottom: 24px; text-align: left; }
-       .list-antrian { list-style: none; padding: 0; margin: 0 0 16px 0; }
-       
+        .list-antrian { list-style: none; padding: 0; margin: 0 0 16px 0; }
+        
         .list-antrian li { 
             padding: 10px 16px; 
             background: #ffffff; 
@@ -394,7 +393,6 @@
             <button type="button" class="dark-mode-btn" id="btn-toggle-dark" onclick="toggleDarkMode()">🌙 Mode Gelap</button>
         </div>
 
-        <!-- HEADER DIBUAT DUA BARIS TERPISAH AGAR RAPI DAN TIDAK KEPOTONG -->
         <div class="header-admin">
             <h2>Dashboard Admin</h2>
             <span class="header-sub-text">Sistem Antrian Promotor</span>
@@ -447,7 +445,6 @@
             <div class="section-title">2. Manajemen Urutan Antrian</div>
             <div class="admin-grid">
                 <button type="button" class="btn-black-custom" onclick="bukaModalTambahAntriAdmin()">+ Masukkan Promotor ke Antrian</button>
-                <!-- Keterangan Master Sales dipindah ke baris bawahnya agar rapi -->
                 <button type="button" class="btn-black-custom" style="flex-direction: column; padding: 10px 16px;" onclick="bukaModalTambahMasterSales()">
                     <span>+ Tambah Nama Baru</span>
                     <span style="font-size: 9.5px; opacity: 0.75; font-weight: 500; text-transform: none;">(Master Sales)</span>
@@ -485,6 +482,12 @@
     </div>
 
     <script>
+        // Tangkap semua Unhandled Promise Rejection agar aplikasi tidak freeze/crash saat ada gangguan sinyal
+        window.addEventListener('unhandledrejection', function(event) {
+            event.preventDefault();
+            console.warn("Gangguan koneksi/server Google sementara (Promise Handled):", event.reason);
+        });
+
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRAVavq87AMEX40cM3-3SsIMP89CeW6kJT_MSpxxILasQ4gohb_sMKtG50zt8kpyye/exec";
         
         let masterSalesGlobal = [];
@@ -514,6 +517,18 @@
             
             setInterval(muatDataAntrian, 3000); 
         };
+
+        // Helper Fetch Aman dengan Pengecekan HTTP Response
+        function fetchAman(url) {
+            return fetch(url).then(r => {
+                if (!r.ok) throw new Error("Server HTTP Error Status: " + r.status);
+                const contentType = r.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Server mengembalikan data non-JSON (mungkin timeout/error page).");
+                }
+                return r.json();
+            });
+        }
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
@@ -562,17 +577,18 @@
                 const textAsli = btn.innerHTML;
                 btn.innerHTML = `<span class="spinner"></span> Memeriksa...`;
 
-                fetch(`${SCRIPT_URL}?aksi=loginAdmin&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
-                .then(res => res.json())
+                fetchAman(`${SCRIPT_URL}?aksi=loginAdmin&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
                 .then(res => {
                     btn.innerHTML = textAsli;
-                    if(res.status === "sukses") {
+                    if(res && res.status === "sukses") {
                         savedPinAdmin = pin; localStorage.setItem('ufo_admin_pin', pin);
                         document.getElementById('login-admin-box').style.display = 'none';
                         document.getElementById('controls-admin-box').style.display = 'block';
-                    } else { tampilkanModal("Gagal Login", res.pesan); }
+                    } else { 
+                        tampilkanModal("Gagal Login", res ? res.pesan : "PIN Salah"); 
+                    }
                     selesai();
-                }).catch(() => {
+                }).catch(err => {
                     btn.innerHTML = textAsli;
                     tampilkanModal("Gagal", "Terjadi gangguan jaringan saat login.");
                     selesai();
@@ -598,7 +614,7 @@
         }
 
         function renderUIWithData(res) {
-            if (sedangProsesAksiAdmin) return;
+            if (sedangProsesAksiAdmin || !res) return;
 
             const statusSistem = res.statusAntrian || "BUKA";
             const badge = document.getElementById('badge-status-sistem');
@@ -704,8 +720,8 @@
                 if (!statusAktif) {
                     const textAsli = btnOff.innerHTML;
                     btnOff.innerHTML = `<span class="spinner"></span> Mematikan...`;
-                    fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=&lng=&radius=50&t=${Date.now()}`)
-                    .then(r => r.json()).then(res => {
+                    fetchAman(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=&lng=&radius=50&t=${Date.now()}`)
+                    .then(res => {
                         btnOff.innerHTML = textAsli;
                         tampilkanModal("GPS Dinonaktifkan", "Validasi radius GPS toko berhasil dimatikan (OFF).");
                         muatDataAntrian(); selesai();
@@ -719,8 +735,8 @@
                             const lng = pos.coords.longitude;
                             const radius = "50";
 
-                            fetch(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=${encodeURIComponent(radius)}&t=${Date.now()}`)
-                            .then(r => r.json()).then(res => {
+                            fetchAman(`${SCRIPT_URL}?aksi=adminSetLokasiToko&pin=${encodeURIComponent(pin)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radius=${encodeURIComponent(radius)}&t=${Date.now()}`)
+                            .then(res => {
                                 btnOn.innerHTML = textAsli;
                                 tampilkanModal("GPS Diaktifkan", "Titik GPS & Radius Toko berhasil diset dari perangkat Anda.");
                                 muatDataAntrian(); selesai();
@@ -841,8 +857,7 @@
 
             tutupModal();
 
-            fetch(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
-            .then(res => res.json())
+            fetchAman(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
             .then(res => {
                 muatMasterSales();
                 muatDataAntrian(); 
@@ -871,10 +886,10 @@
             }
 
             const pin = getActivePinAdmin();
-            fetch(`${SCRIPT_URL}?aksi=adminTambahMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaBaru)}&t=${Date.now()}`)
-            .then(r => r.json()).then(res => {
+            fetchAman(`${SCRIPT_URL}?aksi=adminTambahMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaBaru)}&t=${Date.now()}`)
+            .then(res => {
                 tutupModal();
-                tampilkanModal("Master Sales", res.pesan);
+                tampilkanModal("Master Sales", res ? res.pesan : "Berhasil disimpan");
                 muatMasterSales();
             }).catch(() => {
                 tutupModal();
@@ -916,10 +931,10 @@
             }
 
             const pin = getActivePinAdmin();
-            fetch(`${SCRIPT_URL}?aksi=adminHapusMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaHapus)}&t=${Date.now()}`)
-            .then(r => r.json()).then(res => {
+            fetchAman(`${SCRIPT_URL}?aksi=adminHapusMasterSales&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaHapus)}&t=${Date.now()}`)
+            .then(res => {
                 tutupModal();
-                tampilkanModal("Master Sales", res.pesan);
+                tampilkanModal("Master Sales", res ? res.pesan : "Berhasil dihapus");
                 muatMasterSales();
             }).catch(() => {
                 tutupModal();
@@ -941,10 +956,10 @@
             }
             const pin = getActivePinAdmin();
             if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); return; }
-            fetch(`${SCRIPT_URL}?aksi=adminSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}&t=${Date.now()}`)
-            .then(res => res.json()).then(res => {
+            fetchAman(`${SCRIPT_URL}?aksi=adminSetStatusAntrian&pin=${encodeURIComponent(pin)}&statusBaru=${targetStatus}&t=${Date.now()}`)
+            .then(res => {
                 tutupModal();
-                tampilkanModal("Status Sistem", res.pesan);
+                tampilkanModal("Status Sistem", res ? res.pesan : "Status berhasil diperbarui");
                 muatDataAntrian();
             }).catch(() => { tutupModal(); });
         }
@@ -965,10 +980,10 @@
             const pin = getActivePinAdmin();
             if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); return; }
             
-            fetch(`${SCRIPT_URL}?aksi=adminResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
-            .then(res => res.json()).then(res => {
+            fetchAman(`${SCRIPT_URL}?aksi=adminResetAntrian&pin=${encodeURIComponent(pin)}&t=${Date.now()}`)
+            .then(res => {
                 tutupModal();
-                tampilkanModal("Reset Total", res.pesan || "Semua antrian dan log berhasil direset.");
+                tampilkanModal("Reset Total", (res && res.pesan) ? res.pesan : "Semua antrian dan log berhasil direset.");
                 localStorage.removeItem('ufo_admin_antrian_cache');
                 muatDataAntrian(); 
             }).catch(() => { 
@@ -1015,10 +1030,10 @@
             }
 
             const pin = getActivePinAdmin();
-            fetch(`${SCRIPT_URL}?aksi=adminDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&t=${Date.now()}`)
-            .then(res => res.json()).then(res => {
+            fetchAman(`${SCRIPT_URL}?aksi=adminDaftarAntri&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&posisi=${encodeURIComponent(posisi)}&t=${Date.now()}`)
+            .then(res => {
                 tutupModal();
-                tampilkanModal("Status Admin", res.pesan);
+                tampilkanModal("Status Admin", res ? res.pesan : "Berhasil dimasukkan ke antrian");
                 muatDataAntrian();
             }).catch(() => { tutupModal(); });
         }
@@ -1062,10 +1077,10 @@
 
             const pin = getActivePinAdmin();
             if(!pin) { alert("PIN Admin tidak ditemukan!"); tutupModal(); return; }
-            fetch(`${SCRIPT_URL}?aksi=adminResetDevice&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
-            .then(res => res.json()).then(res => {
+            fetchAman(`${SCRIPT_URL}?aksi=adminResetDevice&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
+            .then(res => {
                 tutupModal();
-                tampilkanModal("Status Reset Perangkat", res.pesan);
+                tampilkanModal("Status Reset Perangkat", res ? res.pesan : "Berhasil direset");
                 muatDataAntrian();
             }).catch(() => {
                 tutupModal();
@@ -1103,30 +1118,33 @@
             }
 
             const pin = getActivePinAdmin();
-            fetch(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&t=${Date.now()}`)
-            .then(res => res.json()).then(res => {
+            fetchAman(`${SCRIPT_URL}?aksi=${aksiName}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategori)}&t=${Date.now()}`)
+            .then(res => {
                 tutupModal();
-                tampilkanModal("Status Admin", res.pesan);
+                tampilkanModal("Status Admin", res ? res.pesan : "Berhasil diproses");
                 muatDataAntrian();
             }).catch(() => { tutupModal(); });
         }
 
         function muatMasterSales() {
-            fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`)
-            .then(res => res.json())
+            fetchAman(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`)
             .then(res => {
-                if(res.status === "sukses") { 
+                if(res && res.status === "sukses") { 
                     masterSalesGlobal = res.data || []; 
                     localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal)); 
                 }
-            });
+            }).catch(() => {});
         }
 
         function muatDataAntrian() {
             if(sedangProsesAksiAdmin) return; 
-            fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => { if(!sedangProsesAksiAdmin && res.status === "sukses") { localStorage.setItem('ufo_admin_antrian_cache', JSON.stringify(res)); renderUIWithData(res); } });
+            fetchAman(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`)
+            .then(res => { 
+                if(!sedangProsesAksiAdmin && res && res.status === "sukses") { 
+                    localStorage.setItem('ufo_admin_antrian_cache', JSON.stringify(res)); 
+                    renderUIWithData(res); 
+                } 
+            }).catch(() => {});
         }
 
         function tampilkanModal(judul, pesan) {
