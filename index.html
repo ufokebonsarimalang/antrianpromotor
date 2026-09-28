@@ -842,7 +842,6 @@ body.dark-mode .list-antrian li b {
 
             const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
             let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
-            if (waktuServer > 0 && waktuServer < 1000000000000) waktuServer = waktuServer * 1000;
              
             localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
 
@@ -867,7 +866,6 @@ body.dark-mode .list-antrian li b {
              
             const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
             let waktuServer = dataSalesSaya && dataSalesSaya.waktuSelesaiLock ? Number(dataSalesSaya.waktuSelesaiLock) : 0;
-            if (waktuServer > 0 && waktuServer < 1000000000000) waktuServer = waktuServer * 1000;
 
             if (waktuServer > new Date().getTime()) {
                 window.waktuSelesaiLockGlobal = waktuServer;
@@ -915,8 +913,7 @@ body.dark-mode .list-antrian li b {
                 localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
                 localStorage.setItem('ufo_hukuman_selesai_lock_' + akunSaya, 'true');
                  
-                // ✅ FIX: Pakai endpoint baru promotorTimerSelesai (bukan adminUnlockPromotor&pin=123456)
-                fetch(`${SCRIPT_URL}?aksi=promotorTimerSelesai&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
+                fetch(`${SCRIPT_URL}?aksi=adminUnlockPromotor&pin=123456&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
                 .then(r => r.json())
                 .then(() => {
                     if (masterSalesGlobal && masterSalesGlobal.length > 0) {
@@ -1054,48 +1051,32 @@ body.dark-mode .list-antrian li b {
             let sudahMakanDariServer = false;
 
             const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunSaya);
+            let hukumanSelesaiLokal = localStorage.getItem('ufo_hukuman_selesai_lock_' + akunSaya) === 'true';
 
-            if (dataSalesSaya) {
+            if (hukumanSelesaiLokal) {
+                isDilockAdmin = false;
+            } else if (dataSalesSaya) {
                 if (dataSalesSaya.sudahMakan === true) sudahMakanDariServer = true;
                 
-                // Normalisasi timestamp: kalau < 10^12, berarti dalam detik → konversi ke ms
                 let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
-                if (waktuServer > 0 && waktuServer < 1000000000000) waktuServer = waktuServer * 1000;
+                let savedDeadline = localStorage.getItem('ufo_lock_deadline_' + akunSaya);
+
+                if (waktuServer > new Date().getTime()) {
+                    window.waktuSelesaiLockGlobal = waktuServer;
+                    localStorage.setItem('ufo_lock_deadline_' + akunSaya, waktuServer);
+                } else if (savedDeadline && Number(savedDeadline) > new Date().getTime()) {
+                    window.waktuSelesaiLockGlobal = Number(savedDeadline);
+                }
+
+                let statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
                 
-                let savedDeadline = Number(localStorage.getItem('ufo_lock_deadline_' + akunSaya)) || 0;
-                
-                // Ambil deadline TERBESAR (server vs lokal) untuk safety
-                const deadlineAktif = Math.max(waktuServer, savedDeadline);
-                const sekarang = new Date().getTime();
-                const hukumanSelesai = deadlineAktif > 0 && sekarang >= deadlineAktif;
-                
-                const statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
-                const isServerLocked = (
-                    statusLockVal === true || 
-                    String(statusLockVal).trim().toUpperCase() === "LOCKED" || 
-                    String(statusLockVal).trim().toUpperCase() === "YA"
-                );
-                
-                if (isServerLocked && !hukumanSelesai) {
-                    // Masih dalam hukuman
-                    isDilockAdmin = true;
-                    pesanLockAdmin = dataSalesSaya.alasan || "Akun Anda sedang dibekukan oleh Admin.";
-                    
-                    // Simpan deadline ke localStorage untuk timer lokal
-                    if (deadlineAktif > 0) {
-                        localStorage.setItem('ufo_lock_deadline_' + akunSaya, deadlineAktif);
-                        window.waktuSelesaiLockGlobal = deadlineAktif;
+                if (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA") {
+                    if (waktuServer > 0 && (new Date().getTime() + 3000) >= waktuServer) {
+                        isDilockAdmin = false;
+                    } else {
+                        isDilockAdmin = true;
+                        pesanLockAdmin = dataSalesSaya.alasan || pesanLockAdmin;
                     }
-                } else if (isServerLocked && hukumanSelesai) {
-                    // Server masih lock, tapi timer sudah habis → panggil unlock via endpoint baru
-                    localStorage.setItem('ufo_hukuman_selesai_lock_' + akunSaya, 'true');
-                    fetch(`${SCRIPT_URL}?aksi=promotorTimerSelesai&namaSales=${encodeURIComponent(getAkunAktif())}&t=${Date.now()}`)
-                        .then(r => r.json())
-                        .then(() => { muatDataAntrian(); muatMasterSales(); })
-                        .catch(() => {});
-                } else {
-                    // Tidak lock → bersihkan localStorage
-                    localStorage.removeItem('ufo_hukuman_selesai_lock_' + akunSaya);
                 }
             }
 
@@ -1144,6 +1125,7 @@ body.dark-mode .list-antrian li b {
                 if (sectionLocked) sectionLocked.style.display = 'none';
                 if (btnDaftar) btnDaftar.innerText = "Daftar Antrian";
                 localStorage.removeItem('ufo_terima_hukuman_' + akunSaya);
+                localStorage.removeItem('ufo_lock_deadline_' + akunSaya);
                 if (intervalCountdownLock) {
                     clearInterval(intervalCountdownLock);
                     intervalCountdownLock = null;
@@ -1151,14 +1133,10 @@ body.dark-mode .list-antrian li b {
             }
 
             let sudahCheckinPernahHariIni = localStorage.getItem('ufo_checkin_hari_ini') === 'true';
-            const sudahAdaDiAntrianServer = daftarAntrianGlobal.some(
-                item => String(item.nama).trim().toLowerCase() === akunSaya
-            );
 
-            if (statusSayaNyata !== "belum_ada" || sudahAdaDiAntrianServer) {
+            if (statusSayaNyata !== "belum_ada") {
                 sectionCheckinAwal.style.display = 'none';
                 sectionNormal.style.display = 'block';
-                localStorage.setItem('ufo_checkin_hari_ini', 'true');
             } else if (!sudahCheckinPernahHariIni) {
                 sectionCheckinAwal.style.display = 'block';
                 sectionNormal.style.display = 'none';
@@ -1300,44 +1278,7 @@ body.dark-mode .list-antrian li b {
             const namaSales = getAkunAktif().trim();
             if (!namaSales) return;
 
-            // ✅ GUARD 1: Cegah klik dobel
-            if (localActionActive) return;
             localActionActive = true;
-            
-            // ✅ GUARD 2: Auto-reset setelah 8 detik untuk cegah stuck
-            const timeoutId = setTimeout(() => { 
-                localActionActive = false; 
-                console.warn("localActionActive auto-reset karena timeout");
-            }, 8000);
-
-            // ✅ GUARD 3: Cek lock dari cache
-            const akunLower = namaSales.toLowerCase();
-            const dataSalesSaya = masterSalesGlobal.find(
-                s => String(s.nama).trim().toLowerCase() === akunLower
-            );
-            if (dataSalesSaya) {
-                let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
-                if (waktuServer > 0 && waktuServer < 1000000000000) waktuServer *= 1000;
-                
-                const savedDeadline = Number(localStorage.getItem('ufo_lock_deadline_' + akunLower)) || 0;
-                const deadlineAktif = Math.max(waktuServer, savedDeadline);
-                
-                const statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
-                const isServerLocked = (
-                    statusLockVal === true || 
-                    String(statusLockVal).trim().toUpperCase() === "LOCKED" || 
-                    String(statusLockVal).trim().toUpperCase() === "YA"
-                );
-                
-                if (isServerLocked && deadlineAktif > Date.now()) {
-                    clearTimeout(timeoutId);
-                    localActionActive = false;
-                    tampilkanModal("Akun Terkunci", "Anda masih dalam masa hukuman. Tunggu hingga timer selesai.");
-                    muatDataAntrian();
-                    return;
-                }
-            }
-
             let katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
 
             if (aksiServer === 'daftarAntri') {
@@ -1387,7 +1328,6 @@ body.dark-mode .list-antrian li b {
             fetch(`${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(katAktif)}&subkategori=${encodeURIComponent(katAktif)}&t=${Date.now()}`)
             .then(res => res.json())
             .then(res => {
-                clearTimeout(timeoutId);
                 localActionActive = false;
                 if (res && res.status === "sukses" && res.data) {
                     daftarAntrianGlobal = res.data;
@@ -1403,7 +1343,6 @@ body.dark-mode .list-antrian li b {
                     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
                 }
             }).catch(() => { 
-                clearTimeout(timeoutId);
                 localActionActive = false; 
             });
         }
@@ -1473,53 +1412,18 @@ body.dark-mode .list-antrian li b {
             setButtonLoading(btn, true, "Konfirmasi Kehadiran & Masuk Antri");
 
             validasiGpsDanJalankan(function() {
+                // JANGAN kembalikan teks tombol ke awal dulu, 
+                // langsung proses dan masukkan ke antrean secara otomatis!
                 const kategoriPilih = document.getElementById('pilih-kategori-hadir').value;
-                
-                // ✅ FIX: Set flag check-in HANYA setelah server konfirmasi sukses
-                eksekusiAksiHadirDenganCallback(kategoriPilih, btn);
-            }, function() {
-                setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
-            });
-        }
+                 
+                const tanggalHariIni = getTanggalIndo();
+                localStorage.setItem('ufo_checkin_hari_ini', 'true');
+                localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
 
-        function eksekusiAksiHadirDenganCallback(kategoriPilih, btn) {
-            const namaSales = getAkunAktif().trim();
-            if (!namaSales) return;
-            
-            if (localActionActive) return;
-            localActionActive = true;
-            
-            const timeoutId = setTimeout(() => { localActionActive = false; }, 8000);
-            
-            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}&subkategori=${encodeURIComponent(kategoriPilih)}&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                clearTimeout(timeoutId);
-                localActionActive = false;
-                
-                if (res && res.status === "sukses") {
-                    // ✅ Set flag check-in HANYA setelah server sukses
-                    const tanggalHariIni = getTanggalIndo();
-                    localStorage.setItem('ufo_checkin_hari_ini', 'true');
-                    localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
-                    
-                    if (res.data) {
-                        daftarAntrianGlobal = res.data;
-                        localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
-                    }
-                    muatDataAntrian();
-                    muatMasterSales();
-                } else {
-                    setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
-                    tampilkanModal("Gagal Daftar", res ? res.pesan : "Tidak bisa masuk antrian.");
-                    muatDataAntrian();
-                }
-            })
-            .catch(() => {
-                clearTimeout(timeoutId);
-                localActionActive = false;
+                eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
+            }, function() {
+                // Blok ini hanya berjalan jika GPS gagal / di luar radius
                 setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
-                tampilkanModal("Gagal", "Gangguan jaringan. Coba lagi.");
             });
         }
 
@@ -1528,9 +1432,11 @@ body.dark-mode .list-antrian li b {
             setButtonLoading(btn, true, "Daftar Antrian");
 
             validasiGpsDanJalankan(function() {
+                // Berhasil dalam radius: Eksekusi pendaftaran antrean
                 const kategoriPilih = document.getElementById('pilih-kategori-normal').value;
                 eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
             }, function() {
+                // Gagal / Di luar radius: Kembalikan tombol seperti semula agar bisa diklik lagi
                 setButtonLoading(btn, false, "Daftar Antrian");
             });
         }
