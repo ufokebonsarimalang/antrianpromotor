@@ -41,11 +41,8 @@
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
             background-size: cover;
             color: var(--text-main); 
-            margin: 0; 
-            padding: 16px; 
-            display: flex; 
-            justify-content: center; 
-            min-height: 100vh; 
+            margin: 0; padding: 16px; 
+            display: flex; justify-content: center; min-height: 100vh; 
         }
 
         body.dark-mode { background: #050102 !important; }
@@ -261,113 +258,64 @@
         .modal-actions { display: flex; gap: 8px; }
         .modal-actions button { flex: 1; padding: 10px; font-size: 12px; }
 
-        /* ===== STATISTIK MODERN ===== */
-        .stat-promotor-card {
-            display: flex !important; flex-direction: column !important; align-items: stretch !important;
-            padding: 14px 16px !important; gap: 10px !important;
-            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%) !important;
-            border-radius: 14px !important; border: 1px solid var(--border) !important;
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02) !important;
-            transition: all 0.2s ease;
+        /* ===== STATISTIK PER KATEGORI ===== */
+        .stat-kategori-card {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 0 !important;
+            gap: 0 !important;
+            background: #ffffff !important;
+            border-radius: 14px !important;
+            border: 1px solid var(--border) !important;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+            overflow: hidden;
+            margin-bottom: 10px !important;
         }
         
-        .stat-promotor-card:hover { box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06) !important; }
-        .stat-promotor-card.stat-mine { border-left: 4px solid #0f172a !important; background: linear-gradient(145deg, #f1f5f9 0%, #f8fafc 100%) !important; }
-        
-        body.dark-mode .stat-promotor-card {
+        body.dark-mode .stat-kategori-card {
             background: linear-gradient(145deg, #140205 0%, #0a0103 100%) !important;
             border: 2px solid #ff1f3d !important;
-            box-shadow: 0 0 20px rgba(255, 31, 61, 0.3) !important;
         }
         
-        body.dark-mode .stat-promotor-card.stat-mine {
-            background: linear-gradient(145deg, #2b0007 0%, #1a0205 100%) !important;
-            border-left: 4px solid #ff1f3d !important;
-        }
-        
-        .stat-promotor-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-        
-        .stat-promotor-name { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: var(--text-main); flex: 1; min-width: 0; letter-spacing: -0.2px; }
-        .stat-promotor-name b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        body.dark-mode .stat-promotor-name { color: #ffffff !important; }
-        
-        .stat-dot {
-            width: 12px; height: 12px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #10b981, #059669 70%);
-            flex-shrink: 0;
-            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15), 0 0 8px rgba(5, 150, 105, 0.5), inset 0 -1px 2px rgba(0, 0, 0, 0.15);
-            position: relative;
-        }
-        .stat-dot::after { content: ''; position: absolute; top: 2px; left: 2px; width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, 0.7); }
-        body.dark-mode .stat-dot { background: radial-gradient(circle at 30% 30%, #34d399, #059669 70%) !important; box-shadow: 0 0 0 3px rgba(255, 31, 61, 0.3), 0 0 12px rgba(255, 31, 61, 0.8), inset 0 -1px 2px rgba(0, 0, 0, 0.3) !important; }
-        
-        .stat-you { font-size: 9px; font-weight: 800; color: #0f172a; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); padding: 2px 7px; border-radius: 6px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.3px; }
-        body.dark-mode .stat-you { background: linear-gradient(135deg, #50000e, #3d000a) !important; color: #ffb3bc !important; border: 1px solid #ff1f3d; }
-        
-        .stat-promotor-summary { display: flex; gap: 4px; flex-wrap: wrap; flex-shrink: 0; }
-        
-        /* Section header di dalam card (misal BAWA CUSTOMER) */
-        .stat-section {
+        .stat-kategori-header {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 10px;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 11px;
             font-weight: 800;
-            color: #64748b;
+            color: #334155;
             text-transform: uppercase;
-            letter-spacing: 0.6px;
-            margin-top: 6px;
-            margin-bottom: 2px;
-            padding-bottom: 6px;
-            border-bottom: 1px dashed #e2e8f0;
+            letter-spacing: 0.5px;
         }
         
-        .stat-section:first-of-type { margin-top: 4px; }
-        
-        body.dark-mode .stat-section {
+        body.dark-mode .stat-kategori-header {
+            background: linear-gradient(135deg, #2b0007, #140205) !important;
+            border-bottom: 1px solid #ff1f3d !important;
             color: #ffb3bc !important;
-            border-bottom: 1px dashed #ff1f3d !important;
         }
         
-        .stat-section-title {
-            flex: 1;
-        }
-        
-        .stat-promotor-details { display: flex; flex-direction: column; gap: 4px; padding-left: 4px; }
-        
-        .stat-detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
-            padding: 4px 0;
-        }
-        
-        body.dark-mode .stat-detail-row { color: #ffb3bc !important; }
-        
-        .stat-detail-time { display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-        
-        .stat-action-label { display: inline-flex; align-items: center; gap: 5px; color: #475569; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
-        body.dark-mode .stat-action-label { color: #ffb3bc !important; }
-        
-        /* ✅ MODERN SVG ICON */
-        .stat-icon {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
+        .stat-kategori-icon {
+            width: 26px;
+            height: 26px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            border-radius: 8px;
             flex-shrink: 0;
-            position: relative;
         }
         
-        .stat-icon svg {
-            width: 12px;
-            height: 12px;
+        .stat-kategori-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+        .stat-kategori-icon.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .stat-kategori-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .stat-kategori-icon.amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        
+        .stat-kategori-icon svg {
+            width: 14px;
+            height: 14px;
             stroke: #ffffff;
             stroke-width: 3;
             fill: none;
@@ -375,53 +323,70 @@
             stroke-linejoin: round;
         }
         
-        .stat-icon-play {
-            background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        .stat-kategori-header b { flex: 1; }
+        
+        .stat-kategori-count {
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 800;
         }
         
-        .stat-icon-check {
-            background: linear-gradient(135deg, #10b981, #047857);
-            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        body.dark-mode .stat-kategori-count {
+            background: #99001f;
+            border: 1px solid #ff1f3d;
         }
         
-        .stat-icon-eye {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        .stat-kategori-body {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 6px 14px 10px 14px;
         }
         
-        .stat-icon-exit {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        .stat-detail-row {
+            display: flex; justify-content: space-between; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 600; color: #64748b; padding: 6px 0;
+            border-bottom: 1px dashed #f1f5f9;
         }
         
-        .stat-icon-cs {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        .stat-detail-row:last-child { border-bottom: none; }
+        
+        body.dark-mode .stat-detail-row { color: #ffb3bc !important; border-bottom-color: #50000e !important; }
+        
+        .stat-detail-time {
+            display: flex; align-items: center; gap: 6px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
         }
         
-        .stat-icon-pray {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        .stat-action-name {
+            color: #0f172a;
+            font-weight: 800;
+            font-size: 12px;
+            margin-right: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px;
         }
         
-        .stat-icon-food {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        body.dark-mode .stat-action-name {
+            color: #ffffff !important;
         }
         
-        body.dark-mode .stat-icon-play,
-        body.dark-mode .stat-icon-check { box-shadow: 0 0 12px rgba(52, 211, 153, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important; }
-        body.dark-mode .stat-icon-eye,
-        body.dark-mode .stat-icon-food { box-shadow: 0 0 12px rgba(250, 204, 21, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important; }
-        body.dark-mode .stat-icon-exit { box-shadow: 0 0 12px rgba(239, 68, 68, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important; }
-        body.dark-mode .stat-icon-cs,
-        body.dark-mode .stat-icon-pray { box-shadow: 0 0 12px rgba(168, 85, 247, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important; }
+        .stat-action-time {
+            color: #0f172a; font-weight: 800; font-size: 12px;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            letter-spacing: 0.3px;
+        }
         
-        .stat-action-time { color: #0f172a; font-weight: 800; font-size: 12px; font-family: 'SF Mono', 'Monaco', 'Consolas', monospace; letter-spacing: 0.3px; }
-        body.dark-mode .stat-action-time { color: #ffffff !important; text-shadow: 0 0 8px rgba(255, 31, 61, 0.4); }
+        body.dark-mode .stat-action-time {
+            color: #ffffff !important;
+            text-shadow: 0 0 8px rgba(255, 31, 61, 0.4);
+        }
         
-        /* ✅ MODERN BADGES */
         .stat-badge-deal,
         .stat-badge-lihat,
         .stat-badge-selesai,
@@ -823,6 +788,7 @@
         const SVG_CS = `<span class="stat-icon stat-icon-cs"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h.01"/><path d="M9 13h.01"/><path d="M9 17h.01"/></svg></span>`;
         const SVG_PRAY = `<span class="stat-icon stat-icon-pray"><svg viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M5 8l7-4 7 4"/><path d="M5 16l7-4 7 4"/></svg></span>`;
         const SVG_FOOD = `<span class="stat-icon stat-icon-food"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 3v8a2 2 0 0 0 4 0V3"/><path d="M15 3v18"/></svg></span>`;
+        const SVG_ADMIN = `<span class="stat-icon stat-icon-admin"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>`;
 
         function renderStatistikAktivitas(res) {
             const tanggalEl = document.getElementById('tanggal-statistik');
@@ -858,7 +824,15 @@
             const data = res.data || [];
             const akunSaya = getAkunAktif().trim().toLowerCase();
             
-            // ✅ GROUP per promotor
+            let bawaDealList = [];
+            let bawaMasihJalanList = [];
+            let selesaiLihatList = [];
+            let keluarList = [];
+            let adminList = [];
+            let csList = [];
+            let ibadahList = [];
+            let makanList = [];
+            
             const grouped = {};
             data.forEach(item => {
                 const namaKey = String(item.nama).trim();
@@ -866,225 +840,286 @@
                 grouped[namaKey].aktivitas.push(item);
             });
             
-            // Sort aktivitas dalam group dari lama ke baru
             Object.values(grouped).forEach(g => {
                 g.aktivitas.sort((a, b) => a.waktu - b.waktu);
             });
             
-            // Sort promotor: yang punya aktivitas terbaru dulu
-            const promotorSorted = Object.values(grouped).sort((a, b) => {
-                const latestA = Math.max(...a.aktivitas.map(x => x.waktu));
-                const latestB = Math.max(...b.aktivitas.map(x => x.waktu));
-                return latestB - latestA;
-            });
-            
-            let html = '';
-            
-            promotorSorted.forEach(g => {
-                const isSayaSendiri = g.nama.toLowerCase() === akunSaya;
-                
-                // ✅ PISAHKAN aktivitas per kategori
-                let bawaCustomerList = [];
-                let selesaiList = [];
-                let keluarList = [];
-                let csList = [];
-                let ibadahList = [];
-                let makanList = [];
-                
-                let totalDealP = 0;
-                let totalLihatP = 0;
+            Object.values(grouped).forEach(g => {
+                let currentBawa = null;
                 
                 g.aktivitas.forEach(item => {
                     if (item.aksi === "BawaCustomer") {
-                        bawaCustomerList.push(item);
+                        if (currentBawa) {
+                            bawaMasihJalanList.push({ nama: g.nama, waktu: currentBawa.waktu });
+                        }
+                        currentBawa = item;
                     } else if (item.aksi === "SelesaiMelayani") {
-                        selesaiList.push(item);
-                        if (item.hasil === "Deal") totalDealP++;
-                        else if (item.hasil === "Lihat") totalLihatP++;
+                        if (currentBawa) {
+                            if (item.hasil === "Deal") {
+                                bawaDealList.push({ nama: g.nama, waktuBawa: currentBawa.waktu, waktuSelesai: item.waktu });
+                            } else if (item.hasil === "Lihat") {
+                                selesaiLihatList.push({ nama: g.nama, waktuBawa: currentBawa.waktu, waktuSelesai: item.waktu, label: "Lihat" });
+                            } else {
+                                selesaiLihatList.push({ nama: g.nama, waktuBawa: currentBawa.waktu, waktuSelesai: item.waktu, label: "Selesai" });
+                            }
+                            currentBawa = null;
+                        } else {
+                            selesaiLihatList.push({ nama: g.nama, waktuBawa: null, waktuSelesai: item.waktu, label: item.hasil === "Deal" ? "Deal" : (item.hasil === "Lihat" ? "Lihat" : "Selesai") });
+                        }
                     } else if (item.aksi === "KeluarAntrian") {
-                        keluarList.push(item);
+                        if (currentBawa) {
+                            bawaMasihJalanList.push({ nama: g.nama, waktu: currentBawa.waktu });
+                            currentBawa = null;
+                        }
+                        keluarList.push({ nama: g.nama, waktu: item.waktu });
+                    } else if (item.aksi === "DikeluarkanAdmin") {
+                        if (currentBawa) {
+                            bawaMasihJalanList.push({ nama: g.nama, waktu: currentBawa.waktu });
+                            currentBawa = null;
+                        }
+                        adminList.push({ nama: g.nama, waktu: item.waktu });
                     } else if (item.aksi === "PanggilCS" || item.aksi === "SelesaiCS") {
-                        csList.push(item);
+                        csList.push({ nama: g.nama, waktu: item.waktu, aksi: item.aksi });
                     } else if (item.aksi === "MulaiIbadah" || item.aksi === "SelesaiIbadah") {
-                        ibadahList.push(item);
+                        ibadahList.push({ nama: g.nama, waktu: item.waktu, aksi: item.aksi });
                     } else if (item.aksi === "MulaiMakan" || item.aksi === "SelesaiMakan") {
-                        makanList.push(item);
+                        makanList.push({ nama: g.nama, waktu: item.waktu, aksi: item.aksi });
                     }
                 });
                 
-                const formatWaktu = (epoch) => {
-                    const w = new Date(epoch);
-                    return `${String(w.getHours()).padStart(2, '0')}:${String(w.getMinutes()).padStart(2, '0')}`;
-                };
-                
-                // Summary badge per promotor
-                let summaryBadge = '';
-                if (totalDealP > 0) summaryBadge += `<span class="stat-badge-deal">✓ ${totalDealP}x Deal</span> `;
-                if (totalLihatP > 0) summaryBadge += `<span class="stat-badge-lihat">◉ ${totalLihatP}x Lihat</span>`;
-                if (!summaryBadge) summaryBadge = '<span class="stat-badge-pending">Aktif</span>';
-                
-                let detailHtml = '';
-                
-                // ✅ BAWA CUSTOMER SECTION
-                if (bawaCustomerList.length > 0) {
-                    detailHtml += `<div class="stat-section"><span class="stat-section-title">🟢 Bawa Customer</span></div>`;
-                    
-                    // Pasangkan dengan Selesai (jika ada)
-                    let selesaiCopy = [...selesaiList];
-                    let rows = [];
-                    
-                    bawaCustomerList.forEach(bawaItem => {
-                        // Cari selesai setelah bawa ini
-                        let matchSelesai = null;
-                        let matchIdx = -1;
-                        for (let i = 0; i < selesaiCopy.length; i++) {
-                            if (selesaiCopy[i].waktu > bawaItem.waktu) {
-                                matchSelesai = selesaiCopy[i];
-                                matchIdx = i;
-                                break;
-                            }
-                        }
-                        
-                        let selesaiStr = '';
-                        let hasilLabel = '';
-                        let hasilClass = '';
-                        
-                        if (matchSelesai) {
-                            selesaiStr = formatWaktu(matchSelesai.waktu);
-                            if (matchSelesai.hasil === "Deal") { hasilLabel = '✓ Deal'; hasilClass = 'stat-badge-deal'; }
-                            else if (matchSelesai.hasil === "Lihat") { hasilLabel = '◉ Lihat'; hasilClass = 'stat-badge-lihat'; }
-                            else { hasilLabel = '✓ Selesai'; hasilClass = 'stat-badge-selesai'; }
-                            selesaiCopy.splice(matchIdx, 1);
-                        } else {
-                            selesaiStr = 'Masih jalan';
-                            hasilLabel = 'Belum Selesai';
-                            hasilClass = 'stat-badge-pending';
-                        }
-                        
-                        rows.push(`
-                            <div class="stat-detail-row">
-                                <span class="stat-detail-time">
-                                    ${SVG_PLAY}
-                                    <b class="stat-action-time">${formatWaktu(bawaItem.waktu)}</b>
-                                    <span style="color: #94a3b8; margin: 0 4px;">→</span>
-                                    <b class="stat-action-time" style="color: #64748b;">${selesaiStr}</b>
-                                </span>
-                                <span class="${hasilClass}">${hasilLabel}</span>
-                            </div>
-                        `);
-                    });
-                    
-                    detailHtml += rows.join('');
+                if (currentBawa) {
+                    bawaMasihJalanList.push({ nama: g.nama, waktu: currentBawa.waktu });
                 }
-                
-                // ✅ SELESAI SECTION (yang tidak berpasangan)
-                if (selesaiList.length > 0) {
-                    detailHtml += `<div class="stat-section"><span class="stat-section-title">✅ Selesai</span></div>`;
-                    selesaiList.forEach(item => {
-                        let hasilLabel = '', hasilClass = '';
-                        if (item.hasil === "Deal") { hasilLabel = '✓ Deal'; hasilClass = 'stat-badge-deal'; }
-                        else if (item.hasil === "Lihat") { hasilLabel = '◉ Lihat'; hasilClass = 'stat-badge-lihat'; }
-                        else { hasilLabel = '✓ Selesai'; hasilClass = 'stat-badge-selesai'; }
-                        
-                        detailHtml += `
-                            <div class="stat-detail-row">
-                                <span class="stat-detail-time">
-                                    ${SVG_CHECK}
-                                    <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
-                                </span>
-                                <span class="${hasilClass}">${hasilLabel}</span>
-                            </div>
-                        `;
-                    });
-                }
-                
-                // ✅ KELUAR ANTRIAN SECTION
-                if (keluarList.length > 0) {
-                    detailHtml += `<div class="stat-section"><span class="stat-section-title">🚪 Keluar Antrian / Istirahat</span></div>`;
-                    keluarList.forEach(item => {
-                        detailHtml += `
-                            <div class="stat-detail-row">
-                                <span class="stat-detail-time">
-                                    ${SVG_EXIT}
-                                    <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
-                                </span>
-                                <span class="stat-badge-info">Keluar</span>
-                            </div>
-                        `;
-                    });
-                }
-                
-                // ✅ CS/GUDANG SECTION
-                if (csList.length > 0) {
-                    detailHtml += `<div class="stat-section"><span class="stat-section-title">🏪 CS / Gudang</span></div>`;
-                    csList.forEach(item => {
-                        let label = item.aksi === "PanggilCS" ? "Dipanggil" : "Selesai";
-                        detailHtml += `
-                            <div class="stat-detail-row">
-                                <span class="stat-detail-time">
-                                    ${SVG_CS}
-                                    <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
-                                </span>
-                                <span class="stat-badge-info">${label}</span>
-                            </div>
-                        `;
-                    });
-                }
-                
-                // ✅ IBADAH SECTION
-                if (ibadahList.length > 0) {
-                    detailHtml += `<div class="stat-section"><span class="stat-section-title">🕌 Ibadah</span></div>`;
-                    ibadahList.forEach(item => {
-                        let label = item.aksi === "MulaiIbadah" ? "Mulai" : "Selesai";
-                        detailHtml += `
-                            <div class="stat-detail-row">
-                                <span class="stat-detail-time">
-                                    ${SVG_PRAY}
-                                    <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
-                                </span>
-                                <span class="stat-badge-info">${label}</span>
-                            </div>
-                        `;
-                    });
-                }
-                
-                // ✅ MAKAN SECTION
-                if (makanList.length > 0) {
-                    detailHtml += `<div class="stat-section"><span class="stat-section-title">🍽️ Waktu Makan</span></div>`;
-                    makanList.forEach(item => {
-                        let label = item.aksi === "MulaiMakan" ? "Mulai" : "Selesai";
-                        detailHtml += `
-                            <div class="stat-detail-row">
-                                <span class="stat-detail-time">
-                                    ${SVG_FOOD}
-                                    <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
-                                </span>
-                                <span class="stat-badge-info">${label}</span>
-                            </div>
-                        `;
-                    });
-                }
-                
-                html += `
-                    <li class="stat-promotor-card ${isSayaSendiri ? 'stat-mine' : ''}">
-                        <div class="stat-promotor-header">
-                            <div class="stat-promotor-name">
-                                <span class="stat-dot"></span>
-                                <b>${g.nama}</b>
-                                ${isSayaSendiri ? '<span class="stat-you">Anda</span>' : ''}
-                            </div>
-                            <div class="stat-promotor-summary">
-                                ${summaryBadge}
-                            </div>
-                        </div>
-                        <div class="stat-promotor-details">
-                            ${detailHtml || '<div style="font-size:11px; color:#94a3b8; font-style:italic; padding: 4px 0;">Belum ada aktivitas</div>'}
-                        </div>
-                    </li>
-                `;
             });
             
-            listEl.innerHTML = html;
+            const formatWaktu = (epoch) => {
+                const w = new Date(epoch);
+                return `${String(w.getHours()).padStart(2, '0')}:${String(w.getMinutes()).padStart(2, '0')}`;
+            };
+            
+            let html = '';
+            
+            // ===== KATEGORI: BAWA CUSTOMER =====
+            if (bawaDealList.length > 0 || bawaMasihJalanList.length > 0) {
+                html += `<li class="stat-kategori-card">
+                    <div class="stat-kategori-header">
+                        <span class="stat-kategori-icon green">${SVG_PLAY}</span>
+                        <b>BAWA CUSTOMER</b>
+                        <span class="stat-kategori-count">${bawaDealList.length + bawaMasihJalanList.length}</span>
+                    </div>
+                    <div class="stat-kategori-body">`;
+                
+                bawaDealList.forEach(item => {
+                    const isSaya = item.nama.toLowerCase() === akunSaya;
+                    html += `
+                        <div class="stat-detail-row">
+                            <span class="stat-detail-time">
+                                <b class="stat-action-name">${item.nama}${isSaya ? ' (Anda)' : ''}</b>
+                                <b class="stat-action-time">${formatWaktu(item.waktuBawa)}</b>
+                                <span style="color: #94a3b8; margin: 0 4px;">→</span>
+                                <b class="stat-action-time" style="color: #64748b;">${formatWaktu(item.waktuSelesai)}</b>
+                            </span>
+                            <span class="stat-badge-deal">✓ Deal</span>
+                        </div>
+                    `;
+                });
+                
+                bawaMasihJalanList.forEach(item => {
+                    const isSaya = item.nama.toLowerCase() === akunSaya;
+                    html += `
+                        <div class="stat-detail-row">
+                            <span class="stat-detail-time">
+                                <b class="stat-action-name">${item.nama}${isSaya ? ' (Anda)' : ''}</b>
+                                <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
+                                <span style="color: #94a3b8; margin: 0 4px;">→</span>
+                                <span style="color: #64748b; font-weight: 700; font-size: 11px;">Masih jalan</span>
+                            </span>
+                            <span class="stat-badge-pending">Belum Selesai</span>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></li>`;
+            }
+            
+            // ===== KATEGORI: SELESAI (Lihat) =====
+            if (selesaiLihatList.length > 0) {
+                html += `<li class="stat-kategori-card">
+                    <div class="stat-kategori-header">
+                        <span class="stat-kategori-icon green">${SVG_CHECK}</span>
+                        <b>SELESAI</b>
+                        <span class="stat-kategori-count">${selesaiLihatList.length}</span>
+                    </div>
+                    <div class="stat-kategori-body">`;
+                
+                selesaiLihatList.forEach(item => {
+                    const isSaya = item.nama.toLowerCase() === akunSaya;
+                    const label = item.label || "Lihat";
+                    const badgeClass = label === "Deal" ? "stat-badge-deal" : (label === "Lihat" ? "stat-badge-lihat" : "stat-badge-selesai");
+                    const iconLabel = label === "Deal" ? "✓ Deal" : (label === "Lihat" ? "◉ Lihat" : "✓ Selesai");
+                    
+                    if (item.waktuBawa) {
+                        html += `
+                            <div class="stat-detail-row">
+                                <span class="stat-detail-time">
+                                    <b class="stat-action-name">${item.nama}${isSaya ? ' (Anda)' : ''}</b>
+                                    <b class="stat-action-time">${formatWaktu(item.waktuBawa)}</b>
+                                    <span style="color: #94a3b8; margin: 0 4px;">→</span>
+                                    <b class="stat-action-time" style="color: #64748b;">${formatWaktu(item.waktuSelesai)}</b>
+                                </span>
+                                <span class="${badgeClass}">${iconLabel}</span>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="stat-detail-row">
+                                <span class="stat-detail-time">
+                                    <b class="stat-action-name">${item.nama}${isSaya ? ' (Anda)' : ''}</b>
+                                    <b class="stat-action-time">${formatWaktu(item.waktuSelesai)}</b>
+                                </span>
+                                <span class="${badgeClass}">${iconLabel}</span>
+                            </div>
+                        `;
+                    }
+                });
+                
+                html += `</div></li>`;
+            }
+            
+            // ===== KATEGORI: KELUAR ANTRIAN =====
+            if (keluarList.length > 0) {
+                html += `<li class="stat-kategori-card">
+                    <div class="stat-kategori-header">
+                        <span class="stat-kategori-icon red">${SVG_EXIT}</span>
+                        <b>KELUAR ANTRIAN / ISTIRAHAT</b>
+                        <span class="stat-kategori-count">${keluarList.length}</span>
+                    </div>
+                    <div class="stat-kategori-body">`;
+                
+                keluarList.forEach(item => {
+                    const isSaya = item.nama.toLowerCase() === akunSaya;
+                    html += `
+                        <div class="stat-detail-row">
+                            <span class="stat-detail-time">
+                                <b class="stat-action-name">${item.nama}${isSaya ? ' (Anda)' : ''}</b>
+                                <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
+                            </span>
+                            <span class="stat-badge-info">Keluar</span>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></li>`;
+            }
+            
+            // ===== KATEGORI: AKSI ADMIN =====
+            if (adminList.length > 0) {
+                html += `<li class="stat-kategori-card">
+                    <div class="stat-kategori-header">
+                        <span class="stat-kategori-icon purple">${SVG_ADMIN}</span>
+                        <b>AKSI ADMIN</b>
+                        <span class="stat-kategori-count">${adminList.length}</span>
+                    </div>
+                    <div class="stat-kategori-body">`;
+                
+                adminList.forEach(item => {
+                    const isSaya = item.nama.toLowerCase() === akunSaya;
+                    html += `
+                        <div class="stat-detail-row">
+                            <span class="stat-detail-time">
+                                <b class="stat-action-name">${item.nama}${isSaya ? ' (Anda)' : ''}</b>
+                                <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
+                            </span>
+                            <span class="stat-badge-info">Dikeluarkan Admin</span>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></li>`;
+            }
+            
+            // ===== KATEGORI: CS / GUDANG =====
+            if (csList.length > 0) {
+                html += `<li class="stat-kategori-card">
+                    <div class="stat-kategori-header">
+                        <span class="stat-kategori-icon purple">${SVG_CS}</span>
+                        <b>CS / GUDANG</b>
+                        <span class="stat-kategori-count">${csList.length}</span>
+                    </div>
+                    <div class="stat-kategori-body">`;
+                
+                csList.forEach(item => {
+                    const isSaya = item.nama.toLowerCase() === akunSaya;
+                    const label = item.aksi === "PanggilCS" ? "Dipanggil" : "Selesai";
+                    html += `
+                        <div class="stat-detail-row">
+                            <span class="stat-detail-time">
+                                <b class="stat-action-name">${item.nama}${isSaya ? ' (Anda)' : ''}</b>
+                                <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
+                            </span>
+                            <span class="stat-badge-info">${label}</span>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></li>`;
+            }
+            
+            // ===== KATEGORI: IBADAH =====
+            if (ibadahList.length > 0) {
+                html += `<li class="stat-kategori-card">
+                    <div class="stat-kategori-header">
+                        <span class="stat-kategori-icon purple">${SVG_PRAY}</span>
+                        <b>IBADAH</b>
+                        <span class="stat-kategori-count">${ibadahList.length}</span>
+                    </div>
+                    <div class="stat-kategori-body">`;
+                
+                ibadahList.forEach(item => {
+                    const isSaya = item.nama.toLowerCase() === akunSaya;
+                    const label = item.aksi === "MulaiIbadah" ? "Mulai" : "Selesai";
+                    html += `
+                        <div class="stat-detail-row">
+                            <span class="stat-detail-time">
+                                <b class="stat-action-name">${item.nama}${isSaya ? ' (Anda)' : ''}</b>
+                                <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
+                            </span>
+                            <span class="stat-badge-info">${label}</span>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></li>`;
+            }
+            
+            // ===== KATEGORI: WAKTU MAKAN =====
+            if (makanList.length > 0) {
+                html += `<li class="stat-kategori-card">
+                    <div class="stat-kategori-header">
+                        <span class="stat-kategori-icon amber">${SVG_FOOD}</span>
+                        <b>WAKTU MAKAN</b>
+                        <span class="stat-kategori-count">${makanList.length}</span>
+                    </div>
+                    <div class="stat-kategori-body">`;
+                
+                makanList.forEach(item => {
+                    const isSaya = item.nama.toLowerCase() === akunSaya;
+                    const label = item.aksi === "MulaiMakan" ? "Mulai" : "Selesai";
+                    html += `
+                        <div class="stat-detail-row">
+                            <span class="stat-detail-time">
+                                <b class="stat-action-name">${item.nama}${isSaya ? ' (Anda)' : ''}</b>
+                                <b class="stat-action-time">${formatWaktu(item.waktu)}</b>
+                            </span>
+                            <span class="stat-badge-info">${label}</span>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></li>`;
+            }
+            
+            listEl.innerHTML = html || `<li><span style="color:#94a3b8; font-style:italic;">Belum ada aktivitas</span></li>`;
         }
 
         function cekStatusSayaDariArray(dataAntrian) {
@@ -1716,7 +1751,6 @@
         }
 
         function aksiUtamaCustomer() {
-            // ✅ GUARD: kalau sudah Melayani, tolak
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
             if (statusSekarang === "Melayani") {
                 tampilkanModal("Info", "Anda sudah dalam status Melayani. Tidak bisa klik dobel.");
@@ -1800,12 +1834,27 @@
 
         function bukaModalKeluarIstirahat() {
             tampilkanModalKonfirmasi("Keluar Antrian", "Yakin ingin keluar dari antrian?", function() {
-                // ✅ Catat aktivitas keluar antrian
                 const namaSales = getAkunAktif().trim();
-                if (namaSales) {
-                    fetch(`${SCRIPT_URL}?aksi=catatKeluarAntrian&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`).catch(() => {});
-                }
-                eksekusiAksiInstan('selesaiMelayani', 'belum_ada', null, 'Keluar');
+                if (!namaSales) return;
+                if (localActionActive) return;
+                localActionActive = true;
+                
+                const timeoutId = setTimeout(() => { localActionActive = false; }, 8000);
+                
+                daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
+                renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+                
+                fetch(`${SCRIPT_URL}?aksi=keluarAntrian&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(res => {
+                    clearTimeout(timeoutId);
+                    localActionActive = false;
+                    muatDataAntrian();
+                })
+                .catch(() => {
+                    clearTimeout(timeoutId);
+                    localActionActive = false;
+                });
             });
         }
 
