@@ -691,6 +691,7 @@
         let namaSalesAktifGlobal = "";
         let koordinatToko = { lat: "", lng: "", radius: 50 }; 
         let localActionActive = false;
+        let serverActionPending = false;
 
         let mapPromotor = null;
         let markerTokoPeta = null;
@@ -750,7 +751,7 @@
              
             // ✅ Fetch data (antrian + master sales + statistik) — tiap 5 detik
             setInterval(() => {
-                if (localActionActive) return;
+                if (localActionActive || serverActionPending) return;
                 muatDataAntrian();
                 muatMasterSales(); 
                 muatStatistikAktivitas();
@@ -758,7 +759,7 @@
             
             // ✅ Cek binding perangkat — tiap 15 detik (dipisah)
             setInterval(() => {
-                if (localActionActive) return;
+                if (localActionActive || serverActionPending) return;
                 cekStatusPerangkatSaya();
             }, 15000);
             
@@ -771,7 +772,7 @@
         // ✅ Fungsi update timer di tombol (anti ganggu klik)
         function updateTimerTombol() {
             // ✅ SKIP kalau ada aksi sedang diproses
-            if (localActionActive) return;
+            if (localActionActive || serverActionPending) return;
             
             const akunSaya = getAkunAktif().trim().toLowerCase();
             if (!akunSaya) return;
@@ -1811,7 +1812,7 @@
         }
 
         function muatDataAntrian() {
-            if (localActionActive) return;
+            if (localActionActive || serverActionPending) return;
             Promise.all([
                 fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`).then(r => r.json()).catch(() => null),
                 fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`).then(r => r.json()).catch(() => null)
@@ -1830,72 +1831,109 @@
         function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, hasilMelayani = null) {
             const namaSales = getAkunAktif().trim();
             if (!namaSales) return;
-
-            if (localActionActive) return;
-            localActionActive = true;
-            
-            const timeoutId = setTimeout(() => { localActionActive = false; }, 8000);
+            if (localActionActive || serverActionPending) return;
 
             const akunLower = namaSales.toLowerCase();
             const dataSalesSaya = masterSalesGlobal.find(s => String(s.nama).trim().toLowerCase() === akunLower);
             if (dataSalesSaya) {
                 let waktuServer = Number(dataSalesSaya.waktuSelesaiLock) || 0;
                 if (waktuServer > 0 && waktuServer < 1000000000000) waktuServer *= 1000;
-                
+
                 const savedDeadline = Number(localStorage.getItem('ufo_lock_deadline_' + akunLower)) || 0;
                 const deadlineAktif = Math.max(waktuServer, savedDeadline);
-                
                 const statusLockVal = dataSalesSaya.locked !== undefined ? dataSalesSaya.locked : "";
                 const isServerLocked = (statusLockVal === true || String(statusLockVal).trim().toUpperCase() === "LOCKED" || String(statusLockVal).trim().toUpperCase() === "YA");
-                
+
                 if (isServerLocked && deadlineAktif > Date.now()) {
-                    clearTimeout(timeoutId);
-                    localActionActive = false;
                     tampilkanModal("Akun Terkunci", "Anda masih dalam masa hukuman. Tunggu hingga timer selesai.");
-                    muatDataAntrian();
                     return;
                 }
             }
 
-            let katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
+            const katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
+            const snapshotAntrian = JSON.parse(JSON.stringify(daftarAntrianGlobal || []));
+            const snapshotMasterSales = JSON.parse(JSON.stringify(masterSalesGlobal || []));
+
+            // ===== UPDATE UI INSTANT =====
+            let itemSaya = daftarAntrianGlobal.find(it => String(it.nama).trim().toLowerCase() === akunLower);
 
             if (aksiServer === 'daftarAntri') {
-                localStorage.removeItem('ufo_hukuman_selesai_lock_' + namaSales.toLowerCase());
-                if (masterSalesGlobal && masterSalesGlobal.length > 0) {
-                    masterSalesGlobal.forEach(s => {
-                        if (String(s.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
-                            s.locked = ""; s.waktuSelesaiLock = 0;
-                        }
-                    });
-                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+                localStorage.removeItem('ufo_hukuman_selesai_lock_' + akunLower);
+                if (!itemSaya) {
+                    itemSaya = { nama: namaSales, status: 'Standby', kategori: katAktif, subkategori: katAktif };
+                    daftarAntrianGlobal.push(itemSaya);
+                } else {
+                    itemSaya.status = 'Standby';
+                    itemSaya.kategori = katAktif;
+                    itemSaya.subkategori = katAktif;
+                }
+                masterSalesGlobal.forEach(s => {
+                    if (String(s.nama).trim().toLowerCase() === akunLower) {
+                        s.locked = "";
+                        s.waktuSelesaiLock = 0;
+                    }
+                });
+                localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal));
+                localStorage.setItem('ufo_checkin_hari_ini', 'true');
+                localStorage.setItem('ufo_checkin_tanggal', getTanggalIndo());
+            } else if (itemSaya) {
+                if (targetStatusSimulasi === 'belum_ada') {
+                    // Selesai melayani: keluar dari antrian lokal sekarang juga.
+                    daftarAntrianGlobal = daftarAntrianGlobal.filter(it => String(it.nama).trim().toLowerCase() !== akunLower);
+                    localStorage.setItem('ufo_checkin_hari_ini', 'true');
+                } else {
+                    itemSaya.status = targetStatusSimulasi;
+                    if (targetStatusSimulasi === 'Waktu Makan' || targetStatusSimulasi === 'Ibadah') {
+                        itemSaya.timerMulai = Date.now();
+                    } else if (targetStatusSimulasi === 'Standby' || targetStatusSimulasi === 'Melayani' || targetStatusSimulasi === 'Dipanggil CS' || targetStatusSimulasi === 'Dipanggil CS/GUDANG') {
+                        if (targetStatusSimulasi !== 'Ibadah' && targetStatusSimulasi !== 'Waktu Makan') itemSaya.timerMulai = 0;
+                    }
                 }
             }
 
-            // ✅ HAPUS SIMULASI OPTIMIS: Jangan update UI lokal dulu
-            // Tunggu server konfirmasi baru refresh
-            let urlFetch = `${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(katAktif)}&subkategori=${encodeURIComponent(katAktif)}&t=${Date.now()}`;
-            if (hasilMelayani) urlFetch += `&hasilMelayani=${encodeURIComponent(hasilMelayani)}`;
-            
+            // Render sekarang, bukan setelah Apps Script selesai.
+            serverActionPending = true;
+            localActionActive = false;
+            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+
+            // Tombol langsung kembali normal/aktif sesuai status baru.
+            const tombolUtama = document.querySelectorAll('#btn-daftar-antrian, #btn-utama-customer, #btn-waktu-makan, #btn-selesai-closing, #btn-utama-cs, #btn-utama-ibadah');
+            tombolUtama.forEach(btn => {
+                if (btn && btn.style.display !== 'none') btn.disabled = false;
+            });
+
+            const urlFetchBase = `${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(katAktif)}&subkategori=${encodeURIComponent(katAktif)}&t=${Date.now()}`;
+            const urlFetch = hasilMelayani ? `${urlFetchBase}&hasilMelayani=${encodeURIComponent(hasilMelayani)}` : urlFetchBase;
+
+            // ===== SERVER BERJALAN DI BACKGROUND =====
             fetch(urlFetch)
             .then(res => res.json())
             .then(res => {
-                clearTimeout(timeoutId);
-                localActionActive = false;
+                serverActionPending = false;
+
                 if (res && res.status === "sukses") {
-                    // ✅ Server sukses → refresh data dari server
+                    // Server sudah sah → sinkronkan data terbaru tanpa menahan klik sebelumnya.
                     muatDataAntrian();
-                } else if (res && (res.status === "locked" || res.status === "terkunci" || res.status === "gagal_lock")) {
-                    muatDataAntrian(); 
-                    muatMasterSales(); 
-                } else if (res && res.status === "gagal") {
-                    muatDataAntrian();
-                    tampilkanModal("Gagal", res.pesan || "Aksi ditolak sistem.");
+                    muatMasterSales();
                 } else {
+                    // Server menolak → kembalikan kondisi sebelum klik.
+                    daftarAntrianGlobal = snapshotAntrian;
+                    masterSalesGlobal = snapshotMasterSales;
+                    localStorage.setItem('ufo_antrian_cache', JSON.stringify({data: snapshotAntrian, status: 'sukses'}));
+                    localStorage.setItem('ufo_master_sales_cache', JSON.stringify(snapshotMasterSales));
+                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+
+                    if (res && (res.status === "locked" || res.status === "terkunci" || res.status === "gagal_lock")) {
+                        muatMasterSales();
+                    } else if (res && res.status === "gagal") {
+                        tampilkanModal("Gagal", res.pesan || "Aksi ditolak sistem.");
+                    }
                     muatDataAntrian();
                 }
-            }).catch(() => { 
-                clearTimeout(timeoutId);
-                localActionActive = false; 
+            })
+            .catch(() => {
+                serverActionPending = false;
+                // Jika jaringan putus, pertahankan UI sesaat tetapi sinkronkan kembali dari server.
                 muatDataAntrian();
             });
         }
@@ -1970,40 +2008,11 @@
         function eksekusiAksiHadirDenganCallback(kategoriPilih, btn) {
             const namaSales = getAkunAktif().trim();
             if (!namaSales) return;
-            
-            if (localActionActive) return;
-            localActionActive = true;
-            
-            const timeoutId = setTimeout(() => { localActionActive = false; }, 8000);
-            
-            fetch(`${SCRIPT_URL}?aksi=daftarAntri&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(kategoriPilih)}&subkategori=${encodeURIComponent(kategoriPilih)}&t=${Date.now()}`)
-            .then(res => res.json())
-            .then(res => {
-                clearTimeout(timeoutId);
-                localActionActive = false;
-                
-                if (res && res.status === "sukses") {
-                    const tanggalHariIni = getTanggalIndo();
-                    localStorage.setItem('ufo_checkin_hari_ini', 'true');
-                    localStorage.setItem('ufo_checkin_tanggal', tanggalHariIni);
-                    if (res.data) {
-                        daftarAntrianGlobal = res.data;
-                        localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
-                    }
-                    muatDataAntrian();
-                    muatMasterSales();
-                } else {
-                    setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
-                    tampilkanModal("Gagal Daftar", res ? res.pesan : "Tidak bisa masuk antrian.");
-                    muatDataAntrian();
-                }
-            })
-            .catch(() => {
-                clearTimeout(timeoutId);
-                localActionActive = false;
-                setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
-                tampilkanModal("Gagal", "Gangguan jaringan. Coba lagi.");
-            });
+            if (localActionActive || serverActionPending) return;
+
+            // Gunakan jalur yang sama dengan tombol antrian normal agar hasilnya instant.
+            setButtonLoading(btn, false, "Konfirmasi Kehadiran & Masuk Antri");
+            eksekusiAksiInstan('daftarAntri', 'Standby', kategoriPilih);
         }
 
         function aksiDaftarAntrianNormal() {
@@ -2024,7 +2033,7 @@
                 tampilkanModal("Info", "Anda sudah dalam status Melayani. Tidak bisa klik dobel.");
                 return;
             }
-            if (localActionActive) return;
+            if (localActionActive || serverActionPending) return;
             
             tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
                 // ✅ GUARD: Cek status saat konfirmasi
@@ -2039,7 +2048,7 @@
 
         function aksiToggleMakan() {
             // ✅ GUARD 1: Cegah klik dobel
-            if (localActionActive) return;
+            if (localActionActive || serverActionPending) return;
             
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
             if (statusSekarang === "Standby") {
@@ -2076,7 +2085,7 @@
             
             document.getElementById('btn-pilih-deal').onclick = function() {
                 tutupModal();
-                if (localActionActive) return;
+                if (localActionActive || serverActionPending) return;
                 if (cekStatusSayaDariArray(daftarAntrianGlobal) !== "Melayani") {
                     tampilkanModal("Info", "Status Anda bukan Melayani. Tidak bisa selesai."); return;
                 }
@@ -2085,7 +2094,7 @@
             
             document.getElementById('btn-pilih-lihat').onclick = function() {
                 tutupModal();
-                if (localActionActive) return;
+                if (localActionActive || serverActionPending) return;
                 if (cekStatusSayaDariArray(daftarAntrianGlobal) !== "Melayani") {
                     tampilkanModal("Info", "Status Anda bukan Melayani. Tidak bisa selesai."); return;
                 }
@@ -2095,7 +2104,7 @@
 
         function aksiToggleCS() {
             // ✅ GUARD 1: Cegah klik dobel
-            if (localActionActive) return;
+            if (localActionActive || serverActionPending) return;
             
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
             if (statusSekarang === "Standby") {
@@ -2117,7 +2126,7 @@
 
         function aksiToggleIbadah() {
             // ✅ GUARD 1: Cegah klik dobel
-            if (localActionActive) return;
+            if (localActionActive || serverActionPending) return;
             
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
             if (statusSekarang === "Standby") {
@@ -2139,7 +2148,7 @@
 
         function bukaModalKeluarIstirahat() {
             // ✅ GUARD: cegah klik dobel
-            if (localActionActive) return;
+            if (localActionActive || serverActionPending) return;
             
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
             if (statusSekarang !== "Standby") {
@@ -2150,7 +2159,7 @@
             tampilkanModalKonfirmasi("Keluar Antrian", "Yakin ingin keluar dari antrian?", function() {
                 const namaSales = getAkunAktif().trim();
                 if (!namaSales) return;
-                if (localActionActive) return;
+                if (localActionActive || serverActionPending) return;
                 localActionActive = true;
                 
                 const timeoutId = setTimeout(() => { localActionActive = false; }, 8000);
