@@ -1812,12 +1812,15 @@
             document.getElementById('modal-pengumuman-admin').classList.remove('active');
         }
 
-        function muatDataAntrian() {
-            if (localActionActive || serverActionPending) return;
-            Promise.all([
-                fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`).then(r => r.json()).catch(() => null),
-                fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`).then(r => r.json()).catch(() => null)
-            ]).then(([resAntrian, resSales]) => {
+       function muatDataAntrian() {
+    // 🛑 Jika tombol baru saja diklik (sedang dikunci), jangan jalankan sinkronisasi background
+    if (serverActionPending) return; 
+
+    Promise.all([
+        fetch(`${SCRIPT_URL}?aksi=getAntrian&t=${Date.now()}`).then(r => r.json()).catch(() => null),
+        fetch(`${SCRIPT_URL}?aksi=getMasterSales&t=${Date.now()}`).then(r => r.json()).catch(() => null)
+    ]).then(([resAntrian, resSales]) => {
+        // ... sisa kode di bawahnya biarkan tetap sama ...
                 if (resSales && resSales.status === "sukses" && resSales.data) {
                     masterSalesGlobal = resSales.data;
                     localStorage.setItem('ufo_master_sales_cache', JSON.stringify(resSales.data));
