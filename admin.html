@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - UFO Kebonsari</title>
     <link rel="shortcut icon" href="#">
-    <!-- Google Font: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -420,7 +419,6 @@
                 </div>
             </div>
 
-            <!-- LIVE URUTAN KATEGORI HA & AV -->
             <div class="list-section-wrapper">
                 <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase;">LIVE URUTAN KATEGORI HA</div>
                 <ul id="list-HA" class="list-antrian"><li><span>Memuat...</span></li></ul>
@@ -429,7 +427,6 @@
                 <ul id="list-AV" class="list-antrian"><li><span>Memuat...</span></li></ul>
             </div>
 
-            <!-- 📊 STATISTIK AKTIVITAS HARI INI (ADMIN) -->
             <div id="section-statistik-aktivitas-admin" class="list-section-wrapper">
                 <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase;">
                     📊 AKTIVITAS HARI INI (<span id="tanggal-statistik-admin">-</span>)
@@ -498,7 +495,6 @@
     </div>
 
     <script>
-        // Tangkap semua Unhandled Promise Rejection agar aplikasi tidak freeze/crash saat ada gangguan sinyal
         window.addEventListener('unhandledrejection', function(event) {
             event.preventDefault();
             console.warn("Gangguan koneksi/server Google sementara (Promise Handled):", event.reason);
@@ -538,7 +534,6 @@
             }, 3000); 
         };
 
-        // Helper Fetch Aman dengan Pengecekan HTTP Response
         function fetchAman(url) {
             return fetch(url).then(r => {
                 if (!r.ok) throw new Error("Server HTTP Error Status: " + r.status);
@@ -633,7 +628,6 @@
             if (cachedSales) { try { masterSalesGlobal = JSON.parse(cachedSales) || []; } catch(e) {} }
         }
 
-        // Helper: Cek apakah promotor locked dari masterSalesGlobal
         function cekLockPromotor(nama) {
             const data = masterSalesGlobal.find(s => 
                 String(s.nama).trim().toLowerCase() === String(nama).trim().toLowerCase()
@@ -708,7 +702,6 @@
             const data = res.data || [];
             daftarAntrianGlobal = data;
 
-            // Filter HANYA "Standby" untuk giliran utama (bukan "Waktu Makan")
             const dataStandby = data.filter(item => item.status === "Standby");
             const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
             const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
@@ -721,7 +714,6 @@
                     let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
                     let itemHtml = "";
                     
-                    // Cek status lock promotor ini
                     const lockInfo = cekLockPromotor(item.nama);
                     const prefixLock = lockInfo.isLocked ? "🔒 " : "";
 
@@ -755,9 +747,6 @@
             document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
         }
 
-        // ============================================================
-        // 📊 STATISTIK AKTIVITAS (ADMIN)
-        // ============================================================
         function muatStatistikAktivitasAdmin() {
             fetchAman(`${SCRIPT_URL}?aksi=getStatistikAktivitas&t=${Date.now()}`)
             .then(res => {
@@ -786,19 +775,27 @@
                 return;
             }
             
-            ringkasanEl.innerHTML = `Total: <b>${totalPromotor} promotor</b> melayani, <b>${totalTransaksi} transaksi</b>`;
+            const totalDeal = res.totalDeal || 0;
+            const totalLihat = res.totalLihat || 0;
+            let ringkasanHtml = `Total: <b>${totalPromotor} promotor</b> melayani, <b>${totalTransaksi} transaksi</b>`;
+            
+            if (totalDeal > 0 || totalLihat > 0) {
+                ringkasanHtml += `<br><span style="color: #059669; font-weight: 700;">✅ Deal: ${totalDeal}</span>`;
+                ringkasanHtml += ` <span style="color: #94a3b8;">|</span> `;
+                ringkasanHtml += `<span style="color: #d97706; font-weight: 700;">👀 Lihat: ${totalLihat}</span>`;
+            }
+            
+            ringkasanEl.innerHTML = ringkasanHtml;
             
             let html = '';
             const data = res.data || [];
             
             data.slice(0, 30).forEach(item => {
-                // Format waktu
                 const waktu = new Date(item.waktu);
                 const jam = String(waktu.getHours()).padStart(2, '0');
                 const menit = String(waktu.getMinutes()).padStart(2, '0');
                 const waktuStr = `${jam}:${menit}`;
                 
-                // Icon + label
                 let icon = '';
                 let label = '';
                 let badgeClass = '';
@@ -808,9 +805,19 @@
                     label = 'Bawa Customer';
                     badgeClass = 'badge-melayani';
                 } else if (item.aksi === "SelesaiMelayani") {
-                    icon = '✅';
-                    label = 'Selesai Melayani';
-                    badgeClass = 'badge-makan';
+                    if (item.hasil === "Deal") {
+                        icon = '✅';
+                        label = 'DEAL';
+                        badgeClass = 'badge-melayani';
+                    } else if (item.hasil === "Lihat") {
+                        icon = '👀';
+                        label = 'Lihat-lihat';
+                        badgeClass = 'badge-makan';
+                    } else {
+                        icon = '✅';
+                        label = 'Selesai';
+                        badgeClass = 'badge-standby';
+                    }
                 } else {
                     icon = '❓';
                     label = item.aksi;
@@ -929,7 +936,6 @@
             }
         }
 
-        // Update cache lokal HANYA setelah server konfirmasi SUKSES
         function eksekusiLockPromotorAdmin() {
             const selectSales = document.getElementById('admin-select-sales-lock');
             const selectStatus = document.getElementById('admin-select-status-lock');
@@ -965,13 +971,10 @@
 
             let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
 
-            // JANGAN update cache lokal di sini! Tunggu server konfirmasi.
-
             tutupModal();
 
             fetchAman(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
             .then(res => {
-                // Update cache lokal HANYA setelah server konfirmasi SUKSES
                 if (res && res.status === "sukses") {
                     if (masterSalesGlobal && masterSalesGlobal.length > 0) {
                         masterSalesGlobal.forEach(s => {
@@ -1265,7 +1268,6 @@
                 if(res && res.status === "sukses") { 
                     masterSalesGlobal = res.data || []; 
                     localStorage.setItem('ufo_master_sales_cache', JSON.stringify(masterSalesGlobal)); 
-                    // Refresh UI list antrian kalau ada perubahan lock
                     if (daftarAntrianGlobal.length > 0) {
                         renderUIWithData({
                             data: daftarAntrianGlobal,
