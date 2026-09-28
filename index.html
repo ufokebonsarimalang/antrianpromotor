@@ -1492,11 +1492,12 @@
             }
         }
 
-        function renderUIRental(dataAntrian, statusSistem, koordinatServer, pengumumanAdminServer) {
-            if (localActionActive) return;
-
-            daftarAntrianGlobal = dataAntrian || [];
-            statusSistemGlobal = statusSistem || "BUKA";
+      function renderUIRental(dataAntrian, statusSistem, koordinatServer, pengumumanAdminServer) {
+    // Hapus baris "if (Date.now() < lockUIUntil) return;" agar tidak ada penundaan sama sekali
+    
+    daftarAntrianGlobal = dataAntrian || [];
+    statusSistemGlobal = statusSistem || "BUKA";
+    // ... sisa kode di bawahnya biarkan apa adanya ...
              
             if (koordinatServer && koordinatServer.lat && koordinatServer.lng) {
                 koordinatToko.lat = koordinatServer.lat;
