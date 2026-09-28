@@ -1755,12 +1755,13 @@
                             btnIbadah.disabled = true;
                             btnIbadah.className = "btn-success btn-disabled";
                         }
-                    } else {
-                                               btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)";
+                                               } else {
+                                btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)";
+                            }
+                        }
                     }
                 }
-            }
-        }
+       }
 
         function tutupModalPengumumanAdmin() {
             localStorage.setItem('ufo_pengumuman_sudah_dibaca', 'true');
