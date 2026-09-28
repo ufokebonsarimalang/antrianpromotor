@@ -1829,24 +1829,18 @@
         }
 
       let lockUIUntil = 0; // ⏱️ Variabel penanda waktu imunitas tampilan
-
 function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, hasilMelayani = null) {
     const namaSales = getAkunAktif().trim();
     if (!namaSales) return;
 
-    if (serverActionPending) return; 
-    serverActionPending = true;
-
     const akunLower = namaSales.toLowerCase();
     const katAktif = katBaru || document.getElementById('pilih-kategori-normal').value || "HA";
     
-    // Simpan snapshot untuk jaga-jaga jika nanti rollback
+    // 1. SIMPAN CADANGAN (SNAPSHOT) UNTUK JAGA-JAGA JIKA SERVER GAGAL
     const snapshotAntrian = JSON.parse(JSON.stringify(daftarAntrianGlobal || []));
     const snapshotMasterSales = JSON.parse(JSON.stringify(masterSalesGlobal || []));
 
-    // ==========================================
-    // 1. UPDATE UI SECARA INSTAN (OPTIMISTIC UI)
-    // ==========================================
+    // 2. DIMENSIKAN TAMPILAN LOKAL SECARA PAKSA & INSTAN (TANPA TAPI, TANPA TUNGGU)
     let itemSaya = daftarAntrianGlobal.find(it => String(it.nama).trim().toLowerCase() === akunLower);
 
     if (aksiServer === 'daftarAntri') {
@@ -1863,6 +1857,7 @@ function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, ha
         localStorage.setItem('ufo_checkin_tanggal', getTanggalIndo());
     } else if (itemSaya) {
         if (targetStatusSimulasi === 'belum_ada') {
+            // Jika keluar atau selesai melayani, langsung buang dari daftar antrian lokal
             daftarAntrianGlobal = daftarAntrianGlobal.filter(it => String(it.nama).trim().toLowerCase() !== akunLower);
             localStorage.setItem('ufo_checkin_hari_ini', 'true');
         } else {
@@ -1875,17 +1870,14 @@ function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, ha
         }
     }
 
-    // ✅ Lindungi UI agar tidak ditimpa server selama 4 detik ke depan
-    lockUIUntil = Date.now() + 4000; 
-
-    // Langsung render perubahan ke layar detik ini juga
+    // 3. MATIKAN IMUNITAS LAMA, PAKSA LAYAR LANGSUNG MERENDER STATUS TERBARU DETIK INI JUGA
+    lockUIUntil = 0; 
+    serverActionPending = false;
+    localActionActive = false;
+    
     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
 
-    setTimeout(() => { serverActionPending = false; }, 400);
-
-    // ==========================================
-    // 2. KIRIM DATA KE SERVER DI BACKGROUND
-    // ==========================================
+    // 4. TEMBAK SERVER DI BELAKANG LAYAR (SILENT SYNC)
     const urlFetchBase = `${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(katAktif)}&subkategori=${encodeURIComponent(katAktif)}&t=${Date.now()}`;
     const urlFetch = hasilMelayani ? `${urlFetchBase}&hasilMelayani=${encodeURIComponent(hasilMelayani)}` : urlFetchBase;
 
@@ -1893,10 +1885,14 @@ function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, ha
     .then(res => res.json())
     .then(res => {
         if (res && res.status === "sukses") {
-            // Berhasil disimpan server, biarkan imunitas berjalan habis secara alami
+            // Berhasil di-save server. Panggil pembaruan data secara senyap di background
+            setTimeout(() => {
+                muatDataAntrian();
+                muatMasterSales();
+                muatStatistikAktivitas(true); // Paksa statistik ikut memperbarui diri
+            }, 500);
         } else {
-            // Jika server menolak, kembalikan (rollback) data asli
-            lockUIUntil = 0; // Lepas imunitas agar data kembali sinkron
+            // Jika server menolak (gagal), kembalikan data asli (rollback)
             daftarAntrianGlobal = snapshotAntrian;
             masterSalesGlobal = snapshotMasterSales;
             renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
@@ -1906,10 +1902,19 @@ function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, ha
         }
     })
     .catch(() => {
-        lockUIUntil = 0;
+        // Jika jaringan terputus total, biarkan state lokal yang sudah berubah tetap tampil di HP
     });
-}
-        function setButtonLoading(btnElement, isLoading, defaultText) {
+}  
+       // 3. MATIKAN IMUNITAS LAMA, PAKSA LAYAR LANGSUNG MERENDER STATUS TERBARU DETIK INI JUGA
+    lockUIUntil = 0; 
+    serverActionPending = false;
+    localActionActive = false;
+    
+    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+
+    // ✅ TAMBAHAN: Paksa tarik data statistik lokal/cache terbaru agar aktivitas langsung ter-refresh seketika
+    muatStatistikAktivitas(true);
+       function setButtonLoading(btnElement, isLoading, defaultText) {
             if (!btnElement) return;
             if (isLoading) {
                 btnElement.disabled = true;
