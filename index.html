@@ -1738,7 +1738,7 @@
                     btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; 
                     btnCS.className = "btn-teal"; 
                     btnCS.disabled = false;
-                } else if (statusSayaNyata === "Ibadah") {
+                              } else if (statusSayaNyata === "Ibadah") {
                     btnIbadah.style.display = "block";
                     btnIbadah.className = "btn-teal";
                     btnIbadah.disabled = false;
@@ -1755,13 +1755,12 @@
                             btnIbadah.disabled = true;
                             btnIbadah.className = "btn-success btn-disabled";
                         }
-                                               } else {
-                                btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)";
-                            }
-                        }
+                    } else {
+                        btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)";
                     }
                 }
-       }
+            }
+        }
 
         function tutupModalPengumumanAdmin() {
             localStorage.setItem('ufo_pengumuman_sudah_dibaca', 'true');
