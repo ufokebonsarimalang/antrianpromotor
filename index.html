@@ -1828,11 +1828,12 @@
             });
         }
 
-        function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, hasilMelayani = null) {
+      let lockUIUntil = 0; // ⏱️ Variabel penanda waktu imunitas tampilan
+
+function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, hasilMelayani = null) {
     const namaSales = getAkunAktif().trim();
     if (!namaSales) return;
 
-    // ✅ Longgarkan proteksi ketat agar tombol tidak sering tertahan
     if (serverActionPending) return; 
     serverActionPending = true;
 
@@ -1874,10 +1875,12 @@
         }
     }
 
-    // ✅ Langsung render perubahan ke layar detik ini juga (Tanpa menunggu server)
+    // ✅ Lindungi UI agar tidak ditimpa server selama 4 detik ke depan
+    lockUIUntil = Date.now() + 4000; 
+
+    // Langsung render perubahan ke layar detik ini juga
     renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
 
-    // Aktifkan kembali tombol agar bisa diklik untuk aksi berikutnya
     setTimeout(() => { serverActionPending = false; }, 400);
 
     // ==========================================
@@ -1890,11 +1893,10 @@
     .then(res => res.json())
     .then(res => {
         if (res && res.status === "sukses") {
-            // Sinkronisasi senyap dari server
-            muatDataAntrian();
-            muatMasterSales();
+            // Berhasil disimpan server, biarkan imunitas berjalan habis secara alami
         } else {
             // Jika server menolak, kembalikan (rollback) data asli
+            lockUIUntil = 0; // Lepas imunitas agar data kembali sinkron
             daftarAntrianGlobal = snapshotAntrian;
             masterSalesGlobal = snapshotMasterSales;
             renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
@@ -1904,11 +1906,9 @@
         }
     })
     .catch(() => {
-        // Jika jaringan error, biarkan data lokal tetap berjalan lalu refresh pelan-pelan
-        muatDataAntrian();
+        lockUIUntil = 0;
     });
 }
-
         function setButtonLoading(btnElement, isLoading, defaultText) {
             if (!btnElement) return;
             if (isLoading) {
