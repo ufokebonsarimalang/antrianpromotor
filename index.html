@@ -2110,8 +2110,7 @@ function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, ha
             }
         }
 
-        function bukaModalKeluarIstirahat() {
-            // ✅ GUARD: cegah klik dobel
+       function bukaModalKeluarIstirahat() {
             if (localActionActive || serverActionPending) return;
             
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
@@ -2124,27 +2123,47 @@ function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, ha
                 const namaSales = getAkunAktif().trim();
                 if (!namaSales) return;
                 if (localActionActive || serverActionPending) return;
-                localActionActive = true;
                 
-                const timeoutId = setTimeout(() => { localActionActive = false; }, 8000);
-                
+                const akunLower = namaSales.toLowerCase();
+                const snapshotAntrian = JSON.parse(JSON.stringify(daftarAntrianGlobal || []));
+                const snapshotMasterSales = JSON.parse(JSON.stringify(masterSalesGlobal || []));
+
+                // 1. UPDATE INSTAN DI LAYAR (Hapus promotor dari daftar antrian lokal)
+                daftarAntrianGlobal = daftarAntrianGlobal.filter(it => String(it.nama).trim().toLowerCase() !== akunLower);
+                localStorage.setItem('ufo_checkin_hari_ini', 'true');
+
+                // Render ulang UI seketika agar langsung hilang dari list
+                renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+
+                // 2. KIRIM KE SERVER DI BACKGROUND
+                if (actionLockTimer) clearTimeout(actionLockTimer);
+                serverActionPending = true;
+                actionLockTimer = setTimeout(() => {
+                    serverActionPending = false;
+                }, 6000);
+
                 fetch(`${SCRIPT_URL}?aksi=keluarAntrian&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
-                    clearTimeout(timeoutId);
-                    localActionActive = false;
+                    if (actionLockTimer) clearTimeout(actionLockTimer);
+                    serverActionPending = false;
+
                     if (res && res.status === "sukses") {
-                        muatDataAntrian();
-                    } else if (res && res.status === "gagal") {
-                        tampilkanModal("Gagal", res.pesan || "Tidak bisa keluar antrian.");
-                        muatDataAntrian();
+                        muatStatistikAktivitas(true);
                     } else {
-                        muatDataAntrian();
+                        // Jika server gagal, kembalikan data semula
+                        daftarAntrianGlobal = snapshotAntrian;
+                        masterSalesGlobal = snapshotMasterSales;
+                        renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+                        if (res && res.status === "gagal") {
+                            tampilkanModal("Gagal", res.pesan || "Tidak bisa keluar antrian.");
+                        }
                     }
                 })
                 .catch(() => {
-                    clearTimeout(timeoutId);
-                    localActionActive = false;
+                    if (actionLockTimer) clearTimeout(actionLockTimer);
+                    serverActionPending = false;
+                    // Jika jaringan error, biarkan atau sinkron ulang
                     muatDataAntrian();
                 });
             });
