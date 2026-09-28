@@ -2204,7 +2204,18 @@ function eksekusiAksiInstan(aksiServer, targetStatusSimulasi, katBaru = null, ha
             document.getElementById('custom-modal').classList.add('active');
             document.getElementById('btn-modal-ya').onclick = function() { tutupModal(); callbackYa(); };
         }
-
+function setButtonLoading(btnElement, isLoading, defaultText) {
+    if (!btnElement) return;
+    if (isLoading) {
+        btnElement.disabled = true;
+        btnElement.classList.add('btn-disabled');
+        btnElement.innerHTML = `<span class="spinner"></span> Memeriksa Lokasi GPS...`;
+    } else {
+        btnElement.disabled = false;
+        btnElement.classList.remove('btn-disabled');
+        btnElement.innerHTML = defaultText;
+    }
+}
         function tutupModal() { document.getElementById('custom-modal').classList.remove('active'); }
     </script>
 </body>
