@@ -411,6 +411,30 @@
         body.dark-mode .stat-badge-selesai { background: linear-gradient(135deg, #1e293b, #334155) !important; color: #cbd5e1 !important; }
         body.dark-mode .stat-badge-pending { background: linear-gradient(135deg, #50000e, #2b0007) !important; color: #ffb3bc !important; border: 1px solid #ff1f3d; box-shadow: 0 0 10px rgba(255, 31, 61, 0.4) !important; }
         body.dark-mode .stat-badge-info { background: linear-gradient(135deg, #1e3a8a, #1e40af) !important; color: #93c5fd !important; border: 1px solid #3b82f6; }
+                /* ✅ TOGGLE HEADER (bisa diklik) */
+        .stat-toggle-header {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+        
+        .stat-toggle-header:hover {
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1) !important;
+        }
+        
+        body.dark-mode .stat-toggle-header:hover {
+            background: linear-gradient(135deg, #3d000a, #2b0007) !important;
+        }
+        
+        .stat-toggle-arrow {
+            color: #64748b;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        body.dark-mode .stat-toggle-arrow {
+            color: #ffb3bc;
+        }
     </style>
 </head>
 <body>
