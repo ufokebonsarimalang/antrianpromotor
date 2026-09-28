@@ -96,50 +96,23 @@
             border: 1px solid #334155;
             box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); 
         }
-        .gradient-header h2 { 
-            margin: 0; 
-            font-size: 20px; 
-            font-weight: 800; 
-            letter-spacing: -0.3px;
-        }
-        .gradient-header p { 
-            margin: 6px 0 0 0; 
-            font-size: 13px; 
-            font-weight: 600; 
-            color: #94a3b8; 
-        }
+        .gradient-header h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+        .gradient-header p { margin: 6px 0 0 0; font-size: 13px; font-weight: 600; color: #94a3b8; }
 
         body.dark-mode .gradient-header { 
             background: linear-gradient(135deg, #140205 0%, #050001 100%) !important; 
             border: 2px solid #ff1f3d !important; 
             box-shadow: 0 0 30px rgba(255, 31, 61, 0.6) !important;
         }
-        body.dark-mode .gradient-header h2 {
-            color: #ffffff !important;
-            text-shadow: 0 0 15px rgba(255, 31, 61, 0.9) !important;
-        }
-        body.dark-mode .gradient-header p {
-            color: #ffb3bc !important;
-            text-shadow: 0 0 8px rgba(255, 31, 61, 0.6) !important;
-        }
+        body.dark-mode .gradient-header h2 { color: #ffffff !important; text-shadow: 0 0 15px rgba(255, 31, 61, 0.9) !important; }
+        body.dark-mode .gradient-header p { color: #ffb3bc !important; text-shadow: 0 0 8px rgba(255, 31, 61, 0.6) !important; }
 
-        .status-badge-sistem { 
-            display: inline-block; 
-            padding: 6px 14px; 
-            border-radius: 20px; 
-            font-size: 11px; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            margin-bottom: 16px; 
-            letter-spacing: 0.5px; 
-        }
+        .status-badge-sistem { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px; }
         .status-open { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .status-closed { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
         body.dark-mode .status-badge-sistem {
-            background: #140205 !important;
-            color: #ff667a !important;
-            border: 2px solid #ff1f3d !important;
+            background: #140205 !important; color: #ff667a !important; border: 2px solid #ff1f3d !important;
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.6), inset 0 0 8px rgba(255, 31, 61, 0.3) !important;
         }
 
@@ -147,71 +120,34 @@
         .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.3px; }
 
         select, input[type="text"] { 
-            width: 100%; 
-            padding: 12px 14px; 
-            border-radius: 12px; 
-            border: 1px solid var(--border); 
-            background: #f8fafc; 
-            font-size: 14px; 
-            font-weight: 600; 
-            color: var(--text-main); 
-            outline: none; 
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
+            width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: #f8fafc; 
+            font-size: 14px; font-weight: 600; color: var(--text-main); outline: none; 
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; cursor: pointer; transition: all 0.2s ease;
         }
 
-        select:focus, input[type="text"]:focus {
-            border-color: var(--primary);
-            background: #ffffff;
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
-        }
+        select:focus, input[type="text"]:focus { border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12); }
 
         body.dark-mode select, body.dark-mode input[type="text"] { 
-            background: #000000 !important; 
-            color: #ffffff !important; 
-            border: 2px solid #ff1f3d !important; 
+            background: #000000 !important; color: #ffffff !important; border: 2px solid #ff1f3d !important; 
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.6), inset 0 0 8px rgba(255, 31, 61, 0.3) !important;
         }
 
-        .user-badge { 
-            background: #f8fafc; 
-            border: 1px solid var(--border); 
-            border-radius: 12px; 
-            padding: 12px 14px; 
-            margin-bottom: 16px; 
-            text-align: left; 
-            font-size: 13px; 
-            font-weight: 600; 
-        }
+        .user-badge { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; text-align: left; font-size: 13px; font-weight: 600; }
 
         body.dark-mode .user-badge { 
-            background: #140205 !important; 
-            border: 2px solid #ff1f3d !important; 
-            color: #ffffff !important; 
+            background: #140205 !important; border: 2px solid #ff1f3d !important; color: #ffffff !important; 
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.6), inset 0 0 8px rgba(255, 31, 61, 0.3) !important;
         }
 
         #section-akun-locked {
-            background: #dc2626;
-            border: 2px solid #b91c1c;
-            border-radius: 14px;
-            padding: 20px 16px;
-            margin-top: 10px;
-            margin-bottom: 16px;
-            text-align: center;
-            color: #ffffff;
+            background: #dc2626; border: 2px solid #b91c1c; border-radius: 14px; padding: 20px 16px;
+            margin-top: 10px; margin-bottom: 16px; text-align: center; color: #ffffff;
             box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);
         }
         body.dark-mode #section-akun-locked {
-            background: #99001f !important;
-            border: 2px solid #ff1f3d !important;
+            background: #99001f !important; border: 2px solid #ff1f3d !important;
             box-shadow: 0 0 30px rgba(255, 31, 61, 0.7) !important;
         }
 
@@ -220,9 +156,7 @@
         
         body.dark-mode .timer-card-admin.ha,
         body.dark-mode .timer-card-admin.av {
-            background: #140205 !important;
-            border: 2px solid #ff1f3d !important;
-            border-radius: 14px !important;
+            background: #140205 !important; border: 2px solid #ff1f3d !important; border-radius: 14px !important;
             box-shadow: 0 0 25px rgba(255, 31, 61, 0.6), inset 0 0 10px rgba(255, 31, 61, 0.3) !important;
         }
 
@@ -241,46 +175,19 @@
         .list-antrian { list-style: none; padding: 0; margin: 6px 0 0 0; text-align: left; }
         
         .list-antrian li { 
-            padding: 10px 14px; 
-            background: #f8fafc; 
-            border-radius: 10px; 
-            margin-bottom: 6px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border: 1px solid var(--border); 
-            font-size: 14px; 
-            font-weight: 700; 
-            gap: 8px;
-            overflow: hidden;
+            padding: 10px 14px; background: #f8fafc; border-radius: 10px; margin-bottom: 6px; 
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); 
+            font-size: 14px; font-weight: 700; gap: 8px; overflow: hidden;
         }
 
-        .list-antrian li b {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex: 1;
-            font-weight: 700;
-        }
-        body.dark-mode .list-antrian li b {
-            color: #ffffff !important;
-            text-shadow: 0 0 10px rgba(255, 31, 61, 0.8), 0 0 20px rgba(255, 31, 61, 0.5) !important;
-        }
+        .list-antrian li b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; font-weight: 700; }
+        body.dark-mode .list-antrian li b { color: #ffffff !important; text-shadow: 0 0 10px rgba(255, 31, 61, 0.8), 0 0 20px rgba(255, 31, 61, 0.5) !important; }
         body.dark-mode .list-antrian li { 
-            background: #140205 !important; 
-            border: 2px solid #ff1f3d !important; 
-            color: #ffffff !important; 
+            background: #140205 !important; border: 2px solid #ff1f3d !important; color: #ffffff !important; 
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.5) !important;
         }
 
-        .badge-status-item { 
-            font-size: 11px; 
-            font-weight: 800; 
-            padding: 4px 10px; 
-            border-radius: 6px; 
-            white-space: nowrap; 
-            flex-shrink: 0;
-        }
+        .badge-status-item { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
 
         .badge-giliran-anda { background: #dc2626 !important; color: #ffffff !important; border: 1px solid #b91c1c !important; }
         .badge-standby { background: #eab308 !important; color: #ffffff !important; border: 1px solid #ca8a04 !important; font-weight: 700 !important; }
@@ -290,66 +197,49 @@
         .badge-makan { background: #0d9488 !important; color: #ffffff !important; border: 1px solid #0f766e !important; }
 
         body.dark-mode .badge-status-item {
-            background: #2b0007 !important;
-            color: #ff99a8 !important;
-            border: 2px solid #ff1f3d !important;
+            background: #2b0007 !important; color: #ff99a8 !important; border: 2px solid #ff1f3d !important;
             box-shadow: 0 0 12px rgba(255, 31, 61, 0.7), inset 0 0 5px rgba(255, 31, 61, 0.4) !important;
             text-shadow: 0 0 8px rgba(255, 31, 61, 0.8);
         }
 
         body.dark-mode .badge-giliran-anda { 
-            background: #99001f !important; 
-            color: #ffffff !important; 
-            border: 2px solid #ff1f3d !important; 
+            background: #99001f !important; color: #ffffff !important; border: 2px solid #ff1f3d !important; 
             box-shadow: 0 0 15px rgba(255, 31, 61, 0.9), inset 0 0 6px rgba(255, 255, 255, 0.5) !important;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
         }
         
         body.dark-mode .badge-standby { 
-            background: #422006 !important; 
-            color: #fef08a !important; 
-            border: 2px solid #facc15 !important; 
+            background: #422006 !important; color: #fef08a !important; border: 2px solid #facc15 !important; 
             box-shadow: 0 0 15px rgba(250, 204, 21, 0.8), inset 0 0 6px rgba(250, 204, 21, 0.4) !important;
             text-shadow: 0 0 8px rgba(250, 204, 21, 0.9);
             font-weight: 800 !important; 
         }
 
         body.dark-mode .badge-melayani { 
-            background: #022c22 !important; 
-            color: #34d399 !important; 
-            border: 2px solid #059669 !important; 
+            background: #022c22 !important; color: #34d399 !important; border: 2px solid #059669 !important; 
             box-shadow: 0 0 15px rgba(5, 150, 105, 0.8), inset 0 0 6px rgba(52, 211, 153, 0.4) !important;
             text-shadow: 0 0 8px rgba(52, 211, 153, 0.9);
         }
 
-        body.dark-mode .badge-cs, 
-        body.dark-mode .badge-ibadah { 
-            background: #3b0764 !important; 
-            color: #e9d5ff !important; 
-            border: 2px solid #a855f7 !important; 
+        body.dark-mode .badge-cs, body.dark-mode .badge-ibadah { 
+            background: #3b0764 !important; color: #e9d5ff !important; border: 2px solid #a855f7 !important; 
             box-shadow: 0 0 15px rgba(168, 85, 247, 0.8), inset 0 0 6px rgba(233, 213, 255, 0.4) !important;
             text-shadow: 0 0 8px rgba(233, 213, 255, 0.9);
         }
 
         body.dark-mode .badge-makan { 
-            background: #042f2e !important; 
-            color: #5eead4 !important; 
-            border: 2px solid #0d9488 !important; 
+            background: #042f2e !important; color: #5eead4 !important; border: 2px solid #0d9488 !important; 
             box-shadow: 0 0 15px rgba(13, 148, 136, 0.8), inset 0 0 6px rgba(94, 234, 212, 0.4) !important;
             text-shadow: 0 0 8px rgba(94, 234, 212, 0.9);
         }
 
         body.dark-mode .modal-box { 
-            background: #090204 !important; 
-            border: 2px solid #ff1f3d !important; 
-            color: #ffffff !important; 
+            background: #090204 !important; border: 2px solid #ff1f3d !important; color: #ffffff !important; 
             box-shadow: 0 0 35px rgba(255, 31, 61, 0.8) !important;
         }
 
         body.dark-mode .btn-cancel {
-            background: #1f050a !important;
-            color: #ff99a8 !important;
-            border: 2px solid #ff1f3d !important;
+            background: #1f050a !important; color: #ff99a8 !important; border: 2px solid #ff1f3d !important; 
             box-shadow: 0 0 20px rgba(255, 31, 61, 0.6) !important;
         }
 
@@ -362,9 +252,7 @@
         body.dark-mode .btn-amber,
         body.dark-mode .btn-maroon,
         body.dark-mode .wa-report-btn {
-            background: #99001f !important;
-            color: #ffffff !important;
-            border: 2px solid #ff1f3d !important;
+            background: #99001f !important; color: #ffffff !important; border: 2px solid #ff1f3d !important; 
             box-shadow: 0 0 25px rgba(255, 31, 61, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.4) !important;
         }
 
@@ -381,8 +269,7 @@
         }
         .btn-gold-pulse { 
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-            color: #ffffff !important;
-            border: 2px solid #fde68a !important;
+            color: #ffffff !important; border: 2px solid #fde68a !important;
             animation: goldGlow 1.8s infinite ease-in-out; 
         }
 
@@ -434,25 +321,32 @@
             display: flex !important;
             flex-direction: column !important;
             align-items: stretch !important;
-            padding: 12px 14px !important;
-            gap: 8px !important;
-            background: #ffffff !important;
-            border-radius: 12px !important;
+            padding: 14px 16px !important;
+            gap: 10px !important;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%) !important;
+            border-radius: 14px !important;
             border: 1px solid var(--border) !important;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02) !important;
+            transition: all 0.2s ease;
+        }
+        
+        .stat-promotor-card:hover {
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06) !important;
         }
         
         .stat-promotor-card.stat-mine {
             border-left: 4px solid #0f172a !important;
-            background: #f8fafc !important;
+            background: linear-gradient(145deg, #f1f5f9 0%, #f8fafc 100%) !important;
         }
         
         body.dark-mode .stat-promotor-card {
-            background: #140205 !important;
+            background: linear-gradient(145deg, #140205 0%, #0a0103 100%) !important;
             border: 2px solid #ff1f3d !important;
+            box-shadow: 0 0 20px rgba(255, 31, 61, 0.3) !important;
         }
         
         body.dark-mode .stat-promotor-card.stat-mine {
-            background: #2b0007 !important;
+            background: linear-gradient(145deg, #2b0007 0%, #1a0205 100%) !important;
             border-left: 4px solid #ff1f3d !important;
         }
         
@@ -467,12 +361,13 @@
         .stat-promotor-name {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            font-weight: 700;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 800;
             color: var(--text-main);
             flex: 1;
             min-width: 0;
+            letter-spacing: -0.2px;
         }
         
         .stat-promotor-name b {
@@ -485,28 +380,55 @@
             color: #ffffff !important;
         }
         
+        /* ✅ MODERN DOT dengan RING + GLOW */
         .stat-dot {
-            width: 8px;
-            height: 8px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: #059669;
+            background: radial-gradient(circle at 30% 30%, #10b981, #059669 70%);
             flex-shrink: 0;
-            box-shadow: 0 0 8px rgba(5, 150, 105, 0.6);
+            box-shadow: 
+                0 0 0 3px rgba(5, 150, 105, 0.15),
+                0 0 8px rgba(5, 150, 105, 0.5),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+        
+        .stat-dot::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        body.dark-mode .stat-dot {
+            background: radial-gradient(circle at 30% 30%, #34d399, #059669 70%) !important;
+            box-shadow: 
+                0 0 0 3px rgba(255, 31, 61, 0.3),
+                0 0 12px rgba(255, 31, 61, 0.8),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.3) !important;
         }
         
         .stat-you {
-            font-size: 10px;
-            font-weight: 600;
-            color: #64748b;
-            background: #e2e8f0;
-            padding: 2px 6px;
-            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 800;
+            color: #0f172a;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            padding: 2px 7px;
+            border-radius: 6px;
             flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
         
         body.dark-mode .stat-you {
-            background: #50000e !important;
+            background: linear-gradient(135deg, #50000e, #3d000a) !important;
             color: #ffb3bc !important;
+            border: 1px solid #ff1f3d;
         }
         
         .stat-promotor-summary {
@@ -519,10 +441,10 @@
         .stat-promotor-details {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            padding-left: 14px;
+            gap: 6px;
+            padding-left: 18px;
             border-left: 2px solid #e2e8f0;
-            margin-left: 4px;
+            margin-left: 6px;
         }
         
         body.dark-mode .stat-promotor-details {
@@ -534,7 +456,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 6px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             color: #64748b;
         }
@@ -544,35 +466,157 @@
         }
         
         .stat-detail-time {
-            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            flex: 1;
         }
         
-        .stat-badge-deal,
-        .stat-badge-lihat,
-        .stat-badge-selesai,
-        .stat-badge-pending {
-            font-size: 9px;
-            font-weight: 800;
-            padding: 3px 7px;
-            border-radius: 5px;
-            white-space: nowrap;
-            flex-shrink: 0;
+        /* ✅ MODERN ACTION LABEL */
+        .stat-action-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #475569;
+            font-weight: 700;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
         
-        .stat-badge-deal { background: #059669; color: #ffffff; }
-        .stat-badge-lihat { background: #d97706; color: #ffffff; }
-        .stat-badge-selesai { background: #64748b; color: #ffffff; }
-        .stat-badge-pending { background: #e2e8f0; color: #64748b; }
+        body.dark-mode .stat-action-label {
+            color: #ffb3bc !important;
+        }
         
-        body.dark-mode .stat-badge-deal { background: #022c22 !important; color: #34d399 !important; border: 1px solid #059669; }
-        body.dark-mode .stat-badge-lihat { background: #422006 !important; color: #fef08a !important; border: 1px solid #facc15; }
-        body.dark-mode .stat-badge-selesai { background: #334155 !important; color: #cbd5e1 !important; }
-        body.dark-mode .stat-badge-pending { background: #50000e !important; color: #ffb3bc !important; border: 1px solid #ff1f3d; }
+        /* ✅ MODERN ICON WRAPPER */
+        .stat-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+        
+        .stat-icon-play {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        }
+        
+        .stat-icon-check {
+            background: linear-gradient(135deg, #10b981, #047857);
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        }
+        
+        .stat-icon-eye {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        }
+        
+        .stat-icon svg {
+            width: 12px;
+            height: 12px;
+            stroke: #ffffff;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        body.dark-mode .stat-icon-play,
+        body.dark-mode .stat-icon-check {
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+        }
+        
+        body.dark-mode .stat-icon-eye {
+            box-shadow: 0 0 12px rgba(250, 204, 21, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+        }
+        
+        .stat-action-time {
+            color: #0f172a;
+            font-weight: 800;
+            font-size: 12px;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            letter-spacing: 0.3px;
+        }
+        
+        body.dark-mode .stat-action-time {
+            color: #ffffff !important;
+            text-shadow: 0 0 8px rgba(255, 31, 61, 0.4);
+        }
+        
+        /* ✅ MODERN BADGES */
+        .stat-badge-deal,
+        .stat-badge-lihat,
+        .stat-badge-selesai,
+        .stat-badge-pending {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 4px 9px;
+            border-radius: 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            border: 1px solid transparent;
+        }
+        
+        .stat-badge-deal { 
+            background: linear-gradient(135deg, #10b981, #059669); 
+            color: #ffffff; 
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+        }
+        
+        .stat-badge-lihat { 
+            background: linear-gradient(135deg, #f59e0b, #d97706); 
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
+        }
+        
+        .stat-badge-selesai { 
+            background: linear-gradient(135deg, #64748b, #475569); 
+            color: #ffffff;
+        }
+        
+        .stat-badge-pending { 
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1); 
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        
+        body.dark-mode .stat-badge-deal { 
+            background: linear-gradient(135deg, #022c22, #064e3b) !important; 
+            color: #34d399 !important; 
+            border: 1px solid #059669;
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.5) !important;
+        }
+        
+        body.dark-mode .stat-badge-lihat { 
+            background: linear-gradient(135deg, #422006, #78350f) !important; 
+            color: #fef08a !important; 
+            border: 1px solid #facc15;
+            box-shadow: 0 0 10px rgba(250, 204, 21, 0.5) !important;
+        }
+        
+        body.dark-mode .stat-badge-selesai { 
+            background: linear-gradient(135deg, #1e293b, #334155) !important; 
+            color: #cbd5e1 !important; 
+        }
+        
+        body.dark-mode .stat-badge-pending { 
+            background: linear-gradient(135deg, #50000e, #2b0007) !important; 
+            color: #ffb3bc !important; 
+            border: 1px solid #ff1f3d;
+            box-shadow: 0 0 10px rgba(255, 31, 61, 0.4) !important;
+        }
     </style>
 </head>
 <body>
@@ -649,9 +693,7 @@
                     <div class="locked-title" style="color: #ffffff; font-weight: 800; font-size: 15px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
                         ⚠️ AKUN ANDA TERKUNCI
                     </div>
-                    <div id="teks-alasan-lock" style="color: #fef2f2; font-size: 13px; font-weight: 600; line-height: 1.4; margin-bottom: 16px;">
-                        -
-                    </div>
+                    <div id="teks-alasan-lock" style="color: #fef2f2; font-size: 13px; font-weight: 600; line-height: 1.4; margin-bottom: 16px;">-</div>
                     <button type="button" id="btn-terima-hukuman" class="btn-success" style="background: #ffffff; color: #dc2626; font-weight: 800;" onclick="mulaiTimerHukumanPromotor()">Terima Hukuman</button>
                     <div id="wrapper-countdown-lock" style="display: none; font-size: 36px; font-weight: 800; color: #ffffff; text-align: center; padding: 10px 0; letter-spacing: 2px;">
                         <div style="font-size: 11px; text-transform: uppercase; color: #fecaca; margin-bottom: 2px; font-weight: 700; letter-spacing: 0.5px;">Sisa Waktu Hukuman</div>
@@ -803,9 +845,7 @@
 
         function initDarkMode() {
             const isDark = localStorage.getItem('ufo_dark_mode') === 'true';
-            if (isDark) {
-                document.body.classList.add('dark-mode');
-            }
+            if (isDark) document.body.classList.add('dark-mode');
             updateDarkButtonText(isDark);
         }
 
@@ -880,10 +920,7 @@
         function simpanAkunHP() {
             const namaPilih = document.getElementById('pilih-sales').value;
             const deviceId = getDeviceId();
-            if(!namaPilih) {
-                tampilkanModal("Perhatian", "Silakan pilih nama Anda!");
-                return;
-            }
+            if(!namaPilih) { tampilkanModal("Perhatian", "Silakan pilih nama Anda!"); return; }
 
             const btn = document.getElementById('btn-simpan-hp');
             setButtonLoading(btn, true, "Menyimpan Perangkat...");
@@ -989,9 +1026,9 @@
             
             if (totalDeal > 0 || totalLihat > 0) {
                 ringkasanHtml += ` <span style="color:#94a3b8;">•</span> `;
-                ringkasanHtml += `<span style="color: #059669; font-weight: 700;">✅ ${totalDeal} Deal</span>`;
+                ringkasanHtml += `<span style="color: #059669; font-weight: 700;">✓ ${totalDeal} Deal</span>`;
                 ringkasanHtml += ` <span style="color:#94a3b8;">•</span> `;
-                ringkasanHtml += `<span style="color: #d97706; font-weight: 700;">👀 ${totalLihat} Lihat</span>`;
+                ringkasanHtml += `<span style="color: #d97706; font-weight: 700;">◉ ${totalLihat} Lihat</span>`;
             }
             
             ringkasanEl.innerHTML = ringkasanHtml;
@@ -1017,6 +1054,11 @@
                 const latestB = Math.max(...b.aktivitas.map(x => x.waktu));
                 return latestB - latestA;
             });
+            
+            // ✅ SVG ICON MODERN
+            const iconPlay = `<span class="stat-icon stat-icon-play"><svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3" fill="white" stroke="none"/></svg></span>`;
+            const iconCheck = `<span class="stat-icon stat-icon-check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></span>`;
+            const iconEye = `<span class="stat-icon stat-icon-eye"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>`;
             
             let html = '';
             
@@ -1046,30 +1088,42 @@
                         if (currentBawa) {
                             detailHtml += `
                                 <div class="stat-detail-row">
-                                    <span class="stat-detail-time">🟢 ${currentBawa} → ⏸️ --:--</span>
-                                    <span class="stat-badge-pending">Tanpa Selesai</span>
+                                    <span class="stat-detail-time">
+                                        ${iconPlay}
+                                        <span class="stat-action-label">Bawa Customer</span>
+                                        <b class="stat-action-time">${currentBawa}</b>
+                                    </span>
+                                    <span class="stat-badge-pending">Belum Selesai</span>
                                 </div>
                             `;
                         }
                         currentBawa = waktuStr;
                     } else if (item.aksi === "SelesaiMelayani") {
+                        let hasilLabel = '';
+                        let hasilClass = '';
+                        if (item.hasil === "Deal") {
+                            hasilLabel = '✓ Deal'; hasilClass = 'stat-badge-deal';
+                        } else if (item.hasil === "Lihat") {
+                            hasilLabel = '◉ Lihat'; hasilClass = 'stat-badge-lihat';
+                        } else {
+                            hasilLabel = '✓ Selesai'; hasilClass = 'stat-badge-selesai';
+                        }
+                        
                         if (currentBawa) {
-                            let hasilLabel = '';
-                            let hasilClass = '';
-                            if (item.hasil === "Deal") {
-                                hasilLabel = '✅ DEAL';
-                                hasilClass = 'stat-badge-deal';
-                            } else if (item.hasil === "Lihat") {
-                                hasilLabel = '👀 LIHAT';
-                                hasilClass = 'stat-badge-lihat';
-                            } else {
-                                hasilLabel = '✅ Selesai';
-                                hasilClass = 'stat-badge-selesai';
-                            }
-                            
                             detailHtml += `
                                 <div class="stat-detail-row">
-                                    <span class="stat-detail-time">🟢 ${currentBawa} → ✅ ${waktuStr}</span>
+                                    <span class="stat-detail-time">
+                                        ${iconPlay}
+                                        <span class="stat-action-label">Bawa Customer</span>
+                                        <b class="stat-action-time">${currentBawa}</b>
+                                    </span>
+                                </div>
+                                <div class="stat-detail-row">
+                                    <span class="stat-detail-time">
+                                        ${iconCheck}
+                                        <span class="stat-action-label">Selesai</span>
+                                        <b class="stat-action-time">${waktuStr}</b>
+                                    </span>
                                     <span class="${hasilClass}">${hasilLabel}</span>
                                 </div>
                             `;
@@ -1077,8 +1131,12 @@
                         } else {
                             detailHtml += `
                                 <div class="stat-detail-row">
-                                    <span class="stat-detail-time">✅ ${waktuStr}</span>
-                                    <span class="stat-badge-pending">Selesai</span>
+                                    <span class="stat-detail-time">
+                                        ${iconCheck}
+                                        <span class="stat-action-label">Selesai</span>
+                                        <b class="stat-action-time">${waktuStr}</b>
+                                    </span>
+                                    <span class="${hasilClass}">${hasilLabel}</span>
                                 </div>
                             `;
                         }
@@ -1088,15 +1146,19 @@
                 if (currentBawa) {
                     detailHtml += `
                         <div class="stat-detail-row">
-                            <span class="stat-detail-time">🟢 ${currentBawa} → ⏸️ Masih jalan</span>
-                            <span class="stat-badge-pending">Melayani</span>
+                            <span class="stat-detail-time">
+                                ${iconPlay}
+                                <span class="stat-action-label">Bawa Customer</span>
+                                <b class="stat-action-time">${currentBawa}</b>
+                            </span>
+                            <span class="stat-badge-pending">Masih Melayani</span>
                         </div>
                     `;
                 }
                 
                 let summaryBadge = '';
-                if (totalDealP > 0) summaryBadge += `<span class="stat-badge-deal">${totalDealP}x Deal</span> `;
-                if (totalLihatP > 0) summaryBadge += `<span class="stat-badge-lihat">${totalLihatP}x Lihat</span>`;
+                if (totalDealP > 0) summaryBadge += `<span class="stat-badge-deal">✓ ${totalDealP}x Deal</span> `;
+                if (totalLihatP > 0) summaryBadge += `<span class="stat-badge-lihat">◉ ${totalLihatP}x Lihat</span>`;
                 
                 html += `
                     <li class="stat-promotor-card ${isSayaSendiri ? 'stat-mine' : ''}">
@@ -1104,7 +1166,7 @@
                             <div class="stat-promotor-name">
                                 <span class="stat-dot"></span>
                                 <b>${g.nama}</b>
-                                ${isSayaSendiri ? '<span class="stat-you">(Anda)</span>' : ''}
+                                ${isSayaSendiri ? '<span class="stat-you">Anda</span>' : ''}
                             </div>
                             <div class="stat-promotor-summary">
                                 ${summaryBadge || '<span class="stat-badge-pending">Belum selesai</span>'}
@@ -1858,11 +1920,11 @@
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <button type="button" id="btn-pilih-deal" 
                         style="background: #059669 !important; color: white !important; border: 2px solid #047857 !important; padding: 16px; font-size: 14px; font-weight: 800; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">
-                        ✅ DEAL / CLOSING
+                        ✓ DEAL / CLOSING
                     </button>
                     <button type="button" id="btn-pilih-lihat" 
                         style="background: #d97706 !important; color: white !important; border: 2px solid #b45309 !important; padding: 16px; font-size: 14px; font-weight: 800; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);">
-                        👀 LIHAT-LIHAT SAJA
+                        ◉ LIHAT-LIHAT SAJA
                     </button>
                 </div>
             `;
