@@ -748,15 +748,19 @@
             muatMasterSales();
             muatStatistikAktivitas();
              
-                                 setInterval(() => {
-                // ✅ Skip kalau ada klik sedang diproses
+            // ✅ Fetch data (antrian + master sales + statistik) — tiap 5 detik
+            setInterval(() => {
                 if (localActionActive) return;
-                
                 muatDataAntrian();
-                cekStatusPerangkatSaya();
                 muatMasterSales(); 
                 muatStatistikAktivitas();
             }, 5000); 
+            
+            // ✅ Cek binding perangkat — tiap 15 detik (dipisah)
+            setInterval(() => {
+                if (localActionActive) return;
+                cekStatusPerangkatSaya();
+            }, 15000);
             
             // ✅ Update timer countdown tiap 1 detik
             setInterval(() => {
@@ -764,10 +768,9 @@
             }, 1000);
         };
         
-        // ✅ Fungsi update timer di tombol
-               // ✅ Fungsi update timer di tombol
+        // ✅ Fungsi update timer di tombol (anti ganggu klik)
         function updateTimerTombol() {
-            // ✅ SKIP kalau ada aksi sedang diproses (biar klik TIDAK terganggu)
+            // ✅ SKIP kalau ada aksi sedang diproses
             if (localActionActive) return;
             
             const akunSaya = getAkunAktif().trim().toLowerCase();
@@ -782,7 +785,7 @@
             const btn = status === "Ibadah" ? document.getElementById('btn-utama-ibadah') : document.getElementById('btn-waktu-makan');
             if (!btn || btn.style.display === 'none') return;
             
-            // ✅ SKIP kalau tombol sedang dalam status disabled (jangan ganggu)
+            // ✅ SKIP kalau tombol disabled
             if (btn.disabled) return;
             
             let sisaDetik = 15 * 60 - Math.floor((Date.now() - Number(dataSaya.timerMulai)) / 1000);
@@ -797,7 +800,7 @@
                 textBaru = "WAKTU HABIS - KELUAR ANTRIAN";
             }
             
-            // ✅ HANYA update kalau text berubah (biar tidak re-render DOM terus)
+            // ✅ HANYA update kalau text berubah
             if (btn.innerText !== textBaru) {
                 btn.innerText = textBaru;
             }
@@ -807,6 +810,7 @@
                 btn.className = "btn-success btn-disabled";
             }
         }
+
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
@@ -963,25 +967,41 @@
         }
 
         function muatStatistikAktivitas() {
-            fetch(`${SCRIPT_URL}?aksi=getStatistikAktivitas&t=${Date.now()}`)
+            // ✅ Throttle: fetch statistik hanya tiap 10 detik
+            const lastFetch = Number(localStorage.getItem('ufo_last_fetch_statistik') || 0);
+            const now = Date.now();
+            
+            if (now - lastFetch < 10000) return;
+            localStorage.setItem('ufo_last_fetch_statistik', now);
+            
+            fetch(`${SCRIPT_URL}?aksi=getStatistikAktivitas&t=${now}`)
             .then(r => r.json())
             .then(res => {
-                if (res && res.status === "sukses") renderStatistikAktivitas(res);
+                if (res && res.status === "sukses") {
+                    localStorage.setItem('ufo_statistik_cache', JSON.stringify(res));
+                    renderStatistikAktivitas(res);
+                }
             })
-            .catch(() => {});
+            .catch(() => {
+                // ✅ Kalau gagal, pakai cache lama
+                const cached = localStorage.getItem('ufo_statistik_cache');
+                if (cached) {
+                    try { renderStatistikAktivitas(JSON.parse(cached)); } catch(e) {}
+                }
+            });
         }
 
-                // ✅ ICON SVG MODERN
+        // ✅ ICON SVG MODERN
         const SVG_PLAY = `<span class="stat-icon stat-icon-play"><svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3" fill="white" stroke="none"/></svg></span>`;
         const SVG_CHECK = `<span class="stat-icon stat-icon-check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></span>`;
         const SVG_EYE = `<span class="stat-icon stat-icon-eye"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>`;
         const SVG_EXIT = `<span class="stat-icon stat-icon-exit"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>`;
         const SVG_CS = `<span class="stat-icon stat-icon-cs"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h.01"/><path d="M9 13h.01"/><path d="M9 17h.01"/></svg></span>`;
-       const SVG_PRAY = `<span class="stat-icon stat-icon-pray"><svg viewBox="0 0 24 24" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M12 3c-1.5 1.8-3 2.5-3 4 0 .8.5 1.5 1 2h4c.5-.5 1-1.2 1-2 0-1.5-1.5-2.2-3-4z" fill="white"/><path d="M4 22V13l1-1v-1l1 1 1-1v1l1 1v9"/><path d="M18 22V13l-1-1v-1l-1 1-1-1v1l-1 1v9"/><path d="M7 22v-6c0-1.2 1.5-2.5 5-2.5s5 1.3 5 2.5v6"/><path d="M10 22v-4a2 2 0 1 1 4 0v4"/><path d="M2 22h20"/></svg></span>`;
+        const SVG_PRAY = `<span class="stat-icon stat-icon-pray"><svg viewBox="0 0 24 24" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M12 3c-1.5 1.8-3 2.5-3 4 0 .8.5 1.5 1 2h4c.5-.5 1-1.2 1-2 0-1.5-1.5-2.2-3-4z" fill="white"/><path d="M4 22V13l1-1v-1l1 1 1-1v1l1 1v9"/><path d="M18 22V13l-1-1v-1l-1 1-1-1v1l-1 1v9"/><path d="M7 22v-6c0-1.2 1.5-2.5 5-2.5s5 1.3 5 2.5v6"/><path d="M10 22v-4a2 2 0 1 1 4 0v4"/><path d="M2 22h20"/></svg></span>`;
         const SVG_FOOD = `<span class="stat-icon stat-icon-food"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 3v8a2 2 0 0 0 4 0V3"/><path d="M15 3v18"/></svg></span>`;
         const SVG_ADMIN = `<span class="stat-icon stat-icon-admin"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>`;
 
-        // ✅ TOGGLE KATEGORI (buka/tutup card)
+        // ✅ TOGGLE KATEGORI
         function toggleKategoriStat(key) {
             const bodyEl = document.getElementById('body-' + key);
             const arrowEl = document.getElementById('arrow-' + key);
@@ -1084,7 +1104,12 @@
                             }
                             currentBawa = null;
                         } else {
-                            selesaiLihatList.push({ nama: g.nama, waktuBawa: null, waktuSelesai: item.waktu, label: item.hasil === "Deal" ? "Deal" : (item.hasil === "Lihat" ? "Lihat" : "Selesai") });
+                            // ✅ FIX: Deal tanpa pasangan bawa → masuk BAWA CUSTOMER
+                            if (item.hasil === "Deal") {
+                                bawaDealList.push({ nama: g.nama, waktuBawa: item.waktu, waktuSelesai: item.waktu });
+                            } else {
+                                selesaiLihatList.push({ nama: g.nama, waktuBawa: null, waktuSelesai: item.waktu, label: item.hasil === "Lihat" ? "Lihat" : "Selesai" });
+                            }
                         }
                     } else if (item.aksi === "KeluarAntrian") {
                         if (currentBawa) {
@@ -1117,7 +1142,6 @@
                 return `${String(w.getHours()).padStart(2, '0')}:${String(w.getMinutes()).padStart(2, '0')}`;
             };
             
-            // ✅ SVG ARROW untuk toggle
             const ARROW = (key) => `<svg class="stat-toggle-arrow" id="arrow-${key}" style="transform: ${getArrowRotation(key)};" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
             
             let html = '';
@@ -1351,6 +1375,7 @@
             
             listEl.innerHTML = html || `<li><span style="color:#94a3b8; font-style:italic;">Belum ada aktivitas</span></li>`;
         }
+        
         function cekStatusSayaDariArray(dataAntrian) {
             const akunSaya = getAkunAktif().trim().toLowerCase();
             if (!akunSaya) return "belum_ada";
@@ -1731,7 +1756,7 @@
                         btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
                         btnKeluar.style.display = "block"; btnKeluar.className = "btn-maroon"; btnKeluar.disabled = false;
                     }
-                               } else if (statusSayaNyata === "Waktu Makan") {
+                } else if (statusSayaNyata === "Waktu Makan") {
                     btnMakan.style.display = "block";
                     btnMakan.className = "btn-teal";
                     btnMakan.disabled = false;
@@ -1756,7 +1781,7 @@
                     btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; 
                     btnCS.className = "btn-teal"; 
                     btnCS.disabled = false;
-                              } else if (statusSayaNyata === "Ibadah") {
+                } else if (statusSayaNyata === "Ibadah") {
                     btnIbadah.style.display = "block";
                     btnIbadah.className = "btn-teal";
                     btnIbadah.disabled = false;
@@ -1773,7 +1798,7 @@
                             btnIbadah.disabled = true;
                             btnIbadah.className = "btn-success btn-disabled";
                         }
-                                       } else {
+                    } else {
                         btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)";
                     }
                 }
@@ -1846,34 +1871,8 @@
                 }
             }
 
-            if (targetStatusSimulasi === "belum_ada") {
-                daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
-                let cachedData = localStorage.getItem('ufo_antrian_cache');
-                if (cachedData) {
-                    try {
-                        let parsed = JSON.parse(cachedData);
-                        if (parsed.data) {
-                            parsed.data = parsed.data.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
-                            localStorage.setItem('ufo_antrian_cache', JSON.stringify(parsed));
-                        }
-                    } catch(e) {}
-                }
-            } else {
-                let ketemu = false;
-                daftarAntrianGlobal.forEach(item => {
-                    if (String(item.nama).trim().toLowerCase() === namaSales.toLowerCase()) {
-                        item.status = targetStatusSimulasi;
-                        if (katBaru) item.kategori = katBaru;
-                        ketemu = true;
-                    }
-                });
-                if (!ketemu) daftarAntrianGlobal.push({ nama: namaSales, status: targetStatusSimulasi, kategori: katAktif });
-            }
-
-            localActionActive = false;
-            renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
-            localActionActive = true;
-
+            // ✅ HAPUS SIMULASI OPTIMIS: Jangan update UI lokal dulu
+            // Tunggu server konfirmasi baru refresh
             let urlFetch = `${SCRIPT_URL}?aksi=${aksiServer}&namaSales=${encodeURIComponent(namaSales)}&kategori=${encodeURIComponent(katAktif)}&subkategori=${encodeURIComponent(katAktif)}&t=${Date.now()}`;
             if (hasilMelayani) urlFetch += `&hasilMelayani=${encodeURIComponent(hasilMelayani)}`;
             
@@ -1882,21 +1881,22 @@
             .then(res => {
                 clearTimeout(timeoutId);
                 localActionActive = false;
-                if (res && res.status === "sukses" && res.data) {
-                    daftarAntrianGlobal = res.data;
-                    localStorage.setItem('ufo_antrian_cache', JSON.stringify(res));
-                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko, res.pengumumanAdmin);
+                if (res && res.status === "sukses") {
+                    // ✅ Server sukses → refresh data dari server
+                    muatDataAntrian();
                 } else if (res && (res.status === "locked" || res.status === "terkunci" || res.status === "gagal_lock")) {
-                    muatDataAntrian(); muatMasterSales(); 
+                    muatDataAntrian(); 
+                    muatMasterSales(); 
                 } else if (res && res.status === "gagal") {
                     muatDataAntrian();
                     tampilkanModal("Gagal", res.pesan || "Aksi ditolak sistem.");
                 } else {
-                    renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
+                    muatDataAntrian();
                 }
             }).catch(() => { 
                 clearTimeout(timeoutId);
                 localActionActive = false; 
+                muatDataAntrian();
             });
         }
 
@@ -2027,23 +2027,38 @@
             if (localActionActive) return;
             
             tampilkanModalKonfirmasi("Konfirmasi", "Sudah membawa customer?", function() {
+                // ✅ GUARD: Cek status saat konfirmasi
+                const statusCek = cekStatusSayaDariArray(daftarAntrianGlobal);
+                if (statusCek !== "Standby") {
+                    tampilkanModal("Info", "Status Anda sudah berubah. Tidak bisa bawa customer.");
+                    return;
+                }
                 eksekusiAksiInstan('ambilAntrian', 'Melayani');
             });
         }
 
         function aksiToggleMakan() {
+            // ✅ GUARD 1: Cegah klik dobel
+            if (localActionActive) return;
+            
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
             if (statusSekarang === "Standby") {
                 tampilkanModalKonfirmasi("Waktu Makan", "Posisi antrian utama Anda akan dikunci sementara selama waktu makan, dan promotor di bawah Anda akan naik menggantikan sementara. Lanjutkan?", function() {
+                    // ✅ GUARD 2: Cek status saat konfirmasi
+                    const statusCek = cekStatusSayaDariArray(daftarAntrianGlobal);
+                    if (statusCek !== "Standby") {
+                        tampilkanModal("Info", "Status Anda sudah berubah. Tidak bisa mulai makan.");
+                        return;
+                    }
                     const akun = getAkunAktif().trim().toLowerCase();
                     localStorage.setItem('ufo_sudah_makan_' + akun, 'true');
                     localStorage.setItem('ufo_tanggal_makan_terakhir', getTanggalIndo());
                     eksekusiAksiInstan('panggilMakan', 'Waktu Makan');
                 });
+            } else if (statusSekarang === "Waktu Makan") {
+                eksekusiAksiInstan('selesaiMakan', 'Standby');
             } else {
-                tampilkanModalKonfirmasi("Selesai Makan", "Kembali aktif ke antrian utama?", function() {
-                    eksekusiAksiInstan('selesaiMakan', 'Standby');
-                });
+                tampilkanModal("Info", "Anda tidak dalam status Standby atau Waktu Makan.");
             }
         }
 
@@ -2063,7 +2078,7 @@
                 tutupModal();
                 if (localActionActive) return;
                 if (cekStatusSayaDariArray(daftarAntrianGlobal) !== "Melayani") {
-                    tampilkanModal("Info", "Status Anda bukan Melayani."); return;
+                    tampilkanModal("Info", "Status Anda bukan Melayani. Tidak bisa selesai."); return;
                 }
                 eksekusiAksiInstan('selesaiMelayani', 'belum_ada', null, 'Deal');
             };
@@ -2072,35 +2087,66 @@
                 tutupModal();
                 if (localActionActive) return;
                 if (cekStatusSayaDariArray(daftarAntrianGlobal) !== "Melayani") {
-                    tampilkanModal("Info", "Status Anda bukan Melayani."); return;
+                    tampilkanModal("Info", "Status Anda bukan Melayani. Tidak bisa selesai."); return;
                 }
                 eksekusiAksiInstan('selesaiMelayani', 'belum_ada', null, 'Lihat');
             };
         }
 
         function aksiToggleCS() {
+            // ✅ GUARD 1: Cegah klik dobel
+            if (localActionActive) return;
+            
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
             if (statusSekarang === "Standby") {
                 tampilkanModalKonfirmasi("Dipanggil CS/Gudang", "Posisi antrian Anda akan dikunci sementara.", function() {
+                    // ✅ GUARD 2: Cek status saat konfirmasi
+                    const statusCek = cekStatusSayaDariArray(daftarAntrianGlobal);
+                    if (statusCek !== "Standby") {
+                        tampilkanModal("Info", "Status Anda sudah berubah.");
+                        return;
+                    }
                     eksekusiAksiInstan('panggilCS', 'Dipanggil CS');
                 });
-            } else {
+            } else if (statusSekarang === "Dipanggil CS/GUDANG" || statusSekarang === "Dipanggil CS") {
                 eksekusiAksiInstan('selesaiCS', 'Standby');
+            } else {
+                tampilkanModal("Info", "Anda tidak dalam status Standby atau CS.");
             }
         }
 
         function aksiToggleIbadah() {
+            // ✅ GUARD 1: Cegah klik dobel
+            if (localActionActive) return;
+            
             const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
             if (statusSekarang === "Standby") {
                 tampilkanModalKonfirmasi("Ibadah", "Posisi antrian Anda akan dikunci sementara selama ibadah.", function() {
+                    // ✅ GUARD 2: Cek status saat konfirmasi
+                    const statusCek = cekStatusSayaDariArray(daftarAntrianGlobal);
+                    if (statusCek !== "Standby") {
+                        tampilkanModal("Info", "Status Anda sudah berubah. Tidak bisa mulai ibadah.");
+                        return;
+                    }
                     eksekusiAksiInstan('panggilIbadah', 'Ibadah');
                 });
-            } else {
+            } else if (statusSekarang === "Ibadah") {
                 eksekusiAksiInstan('selesaiIbadah', 'Standby');
+            } else {
+                tampilkanModal("Info", "Anda tidak dalam status Standby atau Ibadah.");
             }
         }
 
         function bukaModalKeluarIstirahat() {
+            // ✅ GUARD: cegah klik dobel
+            if (localActionActive) return;
+            
+            const statusSekarang = cekStatusSayaDariArray(daftarAntrianGlobal);
+            if (statusSekarang !== "Standby") {
+                tampilkanModal("Info", "Hanya promotor Standby yang bisa keluar antrian.");
+                return;
+            }
+            
             tampilkanModalKonfirmasi("Keluar Antrian", "Yakin ingin keluar dari antrian?", function() {
                 const namaSales = getAkunAktif().trim();
                 if (!namaSales) return;
@@ -2109,19 +2155,24 @@
                 
                 const timeoutId = setTimeout(() => { localActionActive = false; }, 8000);
                 
-                daftarAntrianGlobal = daftarAntrianGlobal.filter(item => String(item.nama).trim().toLowerCase() !== namaSales.toLowerCase());
-                renderUIRental(daftarAntrianGlobal, statusSistemGlobal, koordinatToko);
-                
                 fetch(`${SCRIPT_URL}?aksi=keluarAntrian&namaSales=${encodeURIComponent(namaSales)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
                     clearTimeout(timeoutId);
                     localActionActive = false;
-                    muatDataAntrian();
+                    if (res && res.status === "sukses") {
+                        muatDataAntrian();
+                    } else if (res && res.status === "gagal") {
+                        tampilkanModal("Gagal", res.pesan || "Tidak bisa keluar antrian.");
+                        muatDataAntrian();
+                    } else {
+                        muatDataAntrian();
+                    }
                 })
                 .catch(() => {
                     clearTimeout(timeoutId);
                     localActionActive = false;
+                    muatDataAntrian();
                 });
             });
         }
