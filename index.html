@@ -748,13 +748,46 @@
             muatMasterSales();
             muatStatistikAktivitas();
              
-            setInterval(() => {
+                      setInterval(() => {
                 muatDataAntrian();
                 cekStatusPerangkatSaya();
                 muatMasterSales(); 
                 muatStatistikAktivitas();
             }, 3000); 
+            
+            // ✅ Update timer countdown tiap 1 detik
+            setInterval(() => {
+                updateTimerTombol();
+            }, 1000);
         };
+        
+        // ✅ Fungsi update timer di tombol
+        function updateTimerTombol() {
+            const akunSaya = getAkunAktif().trim().toLowerCase();
+            if (!akunSaya) return;
+            
+            const dataSaya = daftarAntrianGlobal.find(it => String(it.nama).trim().toLowerCase() === akunSaya);
+            if (!dataSaya || !dataSaya.timerMulai || Number(dataSaya.timerMulai) === 0) return;
+            
+            const status = String(dataSaya.status).trim();
+            if (status !== "Ibadah" && status !== "Waktu Makan") return;
+            
+            const btn = status === "Ibadah" ? document.getElementById('btn-utama-ibadah') : document.getElementById('btn-waktu-makan');
+            if (!btn || btn.style.display === 'none') return;
+            
+            let sisaDetik = 15 * 60 - Math.floor((Date.now() - Number(dataSaya.timerMulai)) / 1000);
+            let label = status === "Ibadah" ? "SELESAI IBADAH" : "SELESAI MAKAN";
+            
+            if (sisaDetik > 0) {
+                let menit = Math.floor(sisaDetik / 60);
+                let detik = sisaDetik % 60;
+                btn.innerText = `${label} (⏱ ${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')})`;
+            } else {
+                btn.innerText = "WAKTU HABIS - KELUAR ANTRIAN";
+                btn.disabled = true;
+                btn.className = "btn-success btn-disabled";
+            }
+        }
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
@@ -1680,15 +1713,52 @@
                         btnIbadah.style.display = "block"; btnIbadah.innerText = "SEDANG IBADAH (KUNCI POSISI)"; btnIbadah.className = "btn-indigo"; btnIbadah.disabled = false;
                         btnKeluar.style.display = "block"; btnKeluar.className = "btn-maroon"; btnKeluar.disabled = false;
                     }
-                } else if (statusSayaNyata === "Waktu Makan") {
-                    btnMakan.style.display = "block"; btnMakan.innerText = "SELESAI MAKAN (KEMBALI ANTRI)"; btnMakan.className = "btn-teal"; btnMakan.disabled = false;
+                               } else if (statusSayaNyata === "Waktu Makan") {
+                    btnMakan.style.display = "block";
+                    btnMakan.className = "btn-teal";
+                    btnMakan.disabled = false;
+                    
+                    const dataSayaTimer = daftarAntrianGlobal.find(it => String(it.nama).trim().toLowerCase() === akunSaya);
+                    if (dataSayaTimer && dataSayaTimer.timerMulai && Number(dataSayaTimer.timerMulai) > 0) {
+                        let sisaDetik = 15 * 60 - Math.floor((Date.now() - Number(dataSayaTimer.timerMulai)) / 1000);
+                        if (sisaDetik > 0) {
+                            let menit = Math.floor(sisaDetik / 60);
+                            let detik = sisaDetik % 60;
+                            btnMakan.innerText = `SELESAI MAKAN (⏱ ${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')})`;
+                        } else {
+                            btnMakan.innerText = "WAKTU HABIS - KELUAR ANTRIAN";
+                            btnMakan.disabled = true;
+                            btnMakan.className = "btn-success btn-disabled";
+                        }
+                    } else {
+                        btnMakan.innerText = "SELESAI MAKAN (KEMBALI ANTRI)";
+                    }
                 } else if (statusSayaNyata === "Dipanggil CS/GUDANG" || statusSayaNyata === "Dipanggil CS") {
-                    btnCS.style.display = "block"; btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; btnCS.className = "btn-teal"; btnCS.disabled = false;
+                    btnCS.style.display = "block"; 
+                    btnCS.innerText = "SELESAI CS/GUDANG (KEMBALI ANTRI)"; 
+                    btnCS.className = "btn-teal"; 
+                    btnCS.disabled = false;
                 } else if (statusSayaNyata === "Ibadah") {
-                    btnIbadah.style.display = "block"; btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)"; btnIbadah.className = "btn-teal"; btnIbadah.disabled = false;
+                    btnIbadah.style.display = "block";
+                    btnIbadah.className = "btn-teal";
+                    btnIbadah.disabled = false;
+                    
+                    const dataSayaTimer2 = daftarAntrianGlobal.find(it => String(it.nama).trim().toLowerCase() === akunSaya);
+                    if (dataSayaTimer2 && dataSayaTimer2.timerMulai && Number(dataSayaTimer2.timerMulai) > 0) {
+                        let sisaDetik = 15 * 60 - Math.floor((Date.now() - Number(dataSayaTimer2.timerMulai)) / 1000);
+                        if (sisaDetik > 0) {
+                            let menit = Math.floor(sisaDetik / 60);
+                            let detik = sisaDetik % 60;
+                            btnIbadah.innerText = `SELESAI IBADAH (⏱ ${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')})`;
+                        } else {
+                            btnIbadah.innerText = "WAKTU HABIS - KELUAR ANTRIAN";
+                            btnIbadah.disabled = true;
+                            btnIbadah.className = "btn-success btn-disabled";
+                        }
+                    } else {
+                        btnIbadah.innerText = "SELESAI IBADAH (KEMBALI ANTRI)";
+                    }
                 }
-            }
-        }
 
         function tutupModalPengumumanAdmin() {
             localStorage.setItem('ufo_pengumuman_sudah_dibaca', 'true');
