@@ -780,7 +780,7 @@
             .catch(() => {});
         }
 
-        // ✅ ICON SVG MODERN
+                // ✅ ICON SVG MODERN
         const SVG_PLAY = `<span class="stat-icon stat-icon-play"><svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3" fill="white" stroke="none"/></svg></span>`;
         const SVG_CHECK = `<span class="stat-icon stat-icon-check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></span>`;
         const SVG_EYE = `<span class="stat-icon stat-icon-eye"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>`;
@@ -789,6 +789,35 @@
         const SVG_PRAY = `<span class="stat-icon stat-icon-pray"><svg viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M5 8l7-4 7 4"/><path d="M5 16l7-4 7 4"/></svg></span>`;
         const SVG_FOOD = `<span class="stat-icon stat-icon-food"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 3v8a2 2 0 0 0 4 0V3"/><path d="M15 3v18"/></svg></span>`;
         const SVG_ADMIN = `<span class="stat-icon stat-icon-admin"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>`;
+
+        // ✅ TOGGLE KATEGORI (buka/tutup card)
+        function toggleKategoriStat(key) {
+            const bodyEl = document.getElementById('body-' + key);
+            const arrowEl = document.getElementById('arrow-' + key);
+            if (!bodyEl) return;
+            
+            if (bodyEl.style.display === 'none') {
+                bodyEl.style.display = 'flex';
+                if (arrowEl) arrowEl.style.transform = 'rotate(180deg)';
+                localStorage.setItem('ufo_stat_open_' + key, '1');
+            } else {
+                bodyEl.style.display = 'none';
+                if (arrowEl) arrowEl.style.transform = 'rotate(0deg)';
+                localStorage.setItem('ufo_stat_open_' + key, '0');
+            }
+        }
+
+        function isKategoriOpen(key) {
+            return localStorage.getItem('ufo_stat_open_' + key) === '1';
+        }
+
+        function getArrowRotation(key) {
+            return isKategoriOpen(key) ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        function getBodyDisplay(key) {
+            return isKategoriOpen(key) ? 'flex' : 'none';
+        }
 
         function renderStatistikAktivitas(res) {
             const tanggalEl = document.getElementById('tanggal-statistik');
@@ -897,17 +926,21 @@
                 return `${String(w.getHours()).padStart(2, '0')}:${String(w.getMinutes()).padStart(2, '0')}`;
             };
             
+            // ✅ SVG ARROW untuk toggle
+            const ARROW = (key) => `<svg class="stat-toggle-arrow" id="arrow-${key}" style="transform: ${getArrowRotation(key)};" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+            
             let html = '';
             
-            // ===== KATEGORI: BAWA CUSTOMER =====
+            // ===== BAWA CUSTOMER =====
             if (bawaDealList.length > 0 || bawaMasihJalanList.length > 0) {
                 html += `<li class="stat-kategori-card">
-                    <div class="stat-kategori-header">
+                    <div class="stat-kategori-header stat-toggle-header" onclick="toggleKategoriStat('bawa')">
                         <span class="stat-kategori-icon green">${SVG_PLAY}</span>
                         <b>BAWA CUSTOMER</b>
                         <span class="stat-kategori-count">${bawaDealList.length + bawaMasihJalanList.length}</span>
+                        ${ARROW('bawa')}
                     </div>
-                    <div class="stat-kategori-body">`;
+                    <div class="stat-kategori-body" id="body-bawa" style="display: ${getBodyDisplay('bawa')};">`;
                 
                 bawaDealList.forEach(item => {
                     const isSaya = item.nama.toLowerCase() === akunSaya;
@@ -942,15 +975,16 @@
                 html += `</div></li>`;
             }
             
-            // ===== KATEGORI: SELESAI (Lihat) =====
+            // ===== SELESAI =====
             if (selesaiLihatList.length > 0) {
                 html += `<li class="stat-kategori-card">
-                    <div class="stat-kategori-header">
+                    <div class="stat-kategori-header stat-toggle-header" onclick="toggleKategoriStat('selesai')">
                         <span class="stat-kategori-icon green">${SVG_CHECK}</span>
                         <b>SELESAI</b>
                         <span class="stat-kategori-count">${selesaiLihatList.length}</span>
+                        ${ARROW('selesai')}
                     </div>
-                    <div class="stat-kategori-body">`;
+                    <div class="stat-kategori-body" id="body-selesai" style="display: ${getBodyDisplay('selesai')};">`;
                 
                 selesaiLihatList.forEach(item => {
                     const isSaya = item.nama.toLowerCase() === akunSaya;
@@ -986,15 +1020,16 @@
                 html += `</div></li>`;
             }
             
-            // ===== KATEGORI: KELUAR ANTRIAN =====
+            // ===== KELUAR ANTRIAN =====
             if (keluarList.length > 0) {
                 html += `<li class="stat-kategori-card">
-                    <div class="stat-kategori-header">
+                    <div class="stat-kategori-header stat-toggle-header" onclick="toggleKategoriStat('keluar')">
                         <span class="stat-kategori-icon red">${SVG_EXIT}</span>
                         <b>KELUAR ANTRIAN / ISTIRAHAT</b>
                         <span class="stat-kategori-count">${keluarList.length}</span>
+                        ${ARROW('keluar')}
                     </div>
-                    <div class="stat-kategori-body">`;
+                    <div class="stat-kategori-body" id="body-keluar" style="display: ${getBodyDisplay('keluar')};">`;
                 
                 keluarList.forEach(item => {
                     const isSaya = item.nama.toLowerCase() === akunSaya;
@@ -1012,15 +1047,16 @@
                 html += `</div></li>`;
             }
             
-            // ===== KATEGORI: AKSI ADMIN =====
+            // ===== AKSI ADMIN =====
             if (adminList.length > 0) {
                 html += `<li class="stat-kategori-card">
-                    <div class="stat-kategori-header">
+                    <div class="stat-kategori-header stat-toggle-header" onclick="toggleKategoriStat('admin')">
                         <span class="stat-kategori-icon purple">${SVG_ADMIN}</span>
                         <b>AKSI ADMIN</b>
                         <span class="stat-kategori-count">${adminList.length}</span>
+                        ${ARROW('admin')}
                     </div>
-                    <div class="stat-kategori-body">`;
+                    <div class="stat-kategori-body" id="body-admin" style="display: ${getBodyDisplay('admin')};">`;
                 
                 adminList.forEach(item => {
                     const isSaya = item.nama.toLowerCase() === akunSaya;
@@ -1038,15 +1074,16 @@
                 html += `</div></li>`;
             }
             
-            // ===== KATEGORI: CS / GUDANG =====
+            // ===== CS / GUDANG =====
             if (csList.length > 0) {
                 html += `<li class="stat-kategori-card">
-                    <div class="stat-kategori-header">
+                    <div class="stat-kategori-header stat-toggle-header" onclick="toggleKategoriStat('cs')">
                         <span class="stat-kategori-icon purple">${SVG_CS}</span>
                         <b>CS / GUDANG</b>
                         <span class="stat-kategori-count">${csList.length}</span>
+                        ${ARROW('cs')}
                     </div>
-                    <div class="stat-kategori-body">`;
+                    <div class="stat-kategori-body" id="body-cs" style="display: ${getBodyDisplay('cs')};">`;
                 
                 csList.forEach(item => {
                     const isSaya = item.nama.toLowerCase() === akunSaya;
@@ -1065,15 +1102,16 @@
                 html += `</div></li>`;
             }
             
-            // ===== KATEGORI: IBADAH =====
+            // ===== IBADAH =====
             if (ibadahList.length > 0) {
                 html += `<li class="stat-kategori-card">
-                    <div class="stat-kategori-header">
+                    <div class="stat-kategori-header stat-toggle-header" onclick="toggleKategoriStat('ibadah')">
                         <span class="stat-kategori-icon purple">${SVG_PRAY}</span>
                         <b>IBADAH</b>
                         <span class="stat-kategori-count">${ibadahList.length}</span>
+                        ${ARROW('ibadah')}
                     </div>
-                    <div class="stat-kategori-body">`;
+                    <div class="stat-kategori-body" id="body-ibadah" style="display: ${getBodyDisplay('ibadah')};">`;
                 
                 ibadahList.forEach(item => {
                     const isSaya = item.nama.toLowerCase() === akunSaya;
@@ -1092,15 +1130,16 @@
                 html += `</div></li>`;
             }
             
-            // ===== KATEGORI: WAKTU MAKAN =====
+            // ===== WAKTU MAKAN =====
             if (makanList.length > 0) {
                 html += `<li class="stat-kategori-card">
-                    <div class="stat-kategori-header">
+                    <div class="stat-kategori-header stat-toggle-header" onclick="toggleKategoriStat('makan')">
                         <span class="stat-kategori-icon amber">${SVG_FOOD}</span>
                         <b>WAKTU MAKAN</b>
                         <span class="stat-kategori-count">${makanList.length}</span>
+                        ${ARROW('makan')}
                     </div>
-                    <div class="stat-kategori-body">`;
+                    <div class="stat-kategori-body" id="body-makan" style="display: ${getBodyDisplay('makan')};">`;
                 
                 makanList.forEach(item => {
                     const isSaya = item.nama.toLowerCase() === akunSaya;
@@ -1121,7 +1160,6 @@
             
             listEl.innerHTML = html || `<li><span style="color:#94a3b8; font-style:italic;">Belum ada aktivitas</span></li>`;
         }
-
         function cekStatusSayaDariArray(dataAntrian) {
             const akunSaya = getAkunAktif().trim().toLowerCase();
             if (!akunSaya) return "belum_ada";
