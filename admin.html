@@ -429,6 +429,21 @@
                 <ul id="list-AV" class="list-antrian"><li><span>Memuat...</span></li></ul>
             </div>
 
+            <!-- 📊 STATISTIK AKTIVITAS HARI INI (ADMIN) -->
+            <div id="section-statistik-aktivitas-admin" class="list-section-wrapper">
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase;">
+                    📊 AKTIVITAS HARI INI (<span id="tanggal-statistik-admin">-</span>)
+                </div>
+                
+                <div id="ringkasan-statistik-admin" style="font-size: 11px; margin-bottom: 10px; padding: 8px 12px; background: #f1f5f9; border-radius: 8px; color: #475569; font-weight: 600; text-align: center;">
+                    Memuat...
+                </div>
+                
+                <ul id="list-statistik-admin" class="list-antrian" style="font-size: 12px;">
+                    <li><span style="color:#94a3b8; font-style:italic;">Memuat...</span></li>
+                </ul>
+            </div>
+
             <div class="section-title">Konfigurasi Validasi GPS Toko</div>
             <div class="admin-grid" style="margin-bottom: 15px;">
                 <div style="display: flex; gap: 8px;">
@@ -461,7 +476,7 @@
             <div class="section-title">3. Tindakan Darurat & Kontrol Khusus</div>
             <div class="admin-grid">
                 <button type="button" class="btn-black-custom" onclick="bukaModalFormAdminKategori('adminAmbilAntrianBebas', 'Paksa Membawa Customer', true)">Paksa Bawa Customer</button>
-                              
+                
                 <button type="button" onclick="bukaModalLockPromotorAdmin()">Kontrol Hukuman / Lock Akun</button>
                 
                 <button type="button" onclick="bukaModalResetDeviceAdmin()">Reset Kunci Perangkat Promotor</button>
@@ -515,8 +530,12 @@
 
             muatMasterSales();
             muatDataAntrian();
+            muatStatistikAktivitasAdmin();
             
-            setInterval(muatDataAntrian, 3000); 
+            setInterval(() => {
+                muatDataAntrian();
+                muatStatistikAktivitasAdmin();
+            }, 3000); 
         };
 
         // Helper Fetch Aman dengan Pengecekan HTTP Response
@@ -614,7 +633,7 @@
             if (cachedSales) { try { masterSalesGlobal = JSON.parse(cachedSales) || []; } catch(e) {} }
         }
 
-        // ✅ Helper: Cek apakah promotor locked dari masterSalesGlobal
+        // Helper: Cek apakah promotor locked dari masterSalesGlobal
         function cekLockPromotor(nama) {
             const data = masterSalesGlobal.find(s => 
                 String(s.nama).trim().toLowerCase() === String(nama).trim().toLowerCase()
@@ -689,7 +708,7 @@
             const data = res.data || [];
             daftarAntrianGlobal = data;
 
-            // ✅ FIX: Filter HANYA "Standby" untuk giliran utama (bukan "Waktu Makan")
+            // Filter HANYA "Standby" untuk giliran utama (bukan "Waktu Makan")
             const dataStandby = data.filter(item => item.status === "Standby");
             const promotorHA = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "HA") || null;
             const promotorAV = dataStandby.find(item => String(item.kategori || "").trim().toUpperCase() === "AV") || null;
@@ -702,7 +721,7 @@
                     let kat = item.kategori ? String(item.kategori).trim().toUpperCase() : "HA";
                     let itemHtml = "";
                     
-                    // ✅ FIX: Cek status lock promotor ini
+                    // Cek status lock promotor ini
                     const lockInfo = cekLockPromotor(item.nama);
                     const prefixLock = lockInfo.isLocked ? "🔒 " : "";
 
@@ -734,6 +753,83 @@
             const kosongHtml = "<li><span style='color:#94a3b8; font-style:italic;'>Belum ada antrian</span></li>";
             document.getElementById('list-HA').innerHTML = listHA || kosongHtml;
             document.getElementById('list-AV').innerHTML = listAV || kosongHtml;
+        }
+
+        // ============================================================
+        // 📊 STATISTIK AKTIVITAS (ADMIN)
+        // ============================================================
+        function muatStatistikAktivitasAdmin() {
+            fetchAman(`${SCRIPT_URL}?aksi=getStatistikAktivitas&t=${Date.now()}`)
+            .then(res => {
+                if (res && res.status === "sukses") {
+                    renderStatistikAktivitasAdmin(res);
+                }
+            })
+            .catch(() => {});
+        }
+
+        function renderStatistikAktivitasAdmin(res) {
+            const tanggalEl = document.getElementById('tanggal-statistik-admin');
+            const ringkasanEl = document.getElementById('ringkasan-statistik-admin');
+            const listEl = document.getElementById('list-statistik-admin');
+            
+            if (!tanggalEl || !ringkasanEl || !listEl) return;
+            
+            tanggalEl.innerText = res.tanggal || '-';
+            
+            const totalTransaksi = res.totalTransaksi || 0;
+            const totalPromotor = (res.ringkasan || []).length;
+            
+            if (totalTransaksi === 0) {
+                ringkasanEl.innerHTML = `<i>Belum ada aktivitas melayani hari ini.</i>`;
+                listEl.innerHTML = `<li><span style="color:#94a3b8; font-style:italic;">Belum ada aktivitas</span></li>`;
+                return;
+            }
+            
+            ringkasanEl.innerHTML = `Total: <b>${totalPromotor} promotor</b> melayani, <b>${totalTransaksi} transaksi</b>`;
+            
+            let html = '';
+            const data = res.data || [];
+            
+            data.slice(0, 30).forEach(item => {
+                // Format waktu
+                const waktu = new Date(item.waktu);
+                const jam = String(waktu.getHours()).padStart(2, '0');
+                const menit = String(waktu.getMinutes()).padStart(2, '0');
+                const waktuStr = `${jam}:${menit}`;
+                
+                // Icon + label
+                let icon = '';
+                let label = '';
+                let badgeClass = '';
+                
+                if (item.aksi === "BawaCustomer") {
+                    icon = '🟢';
+                    label = 'Bawa Customer';
+                    badgeClass = 'badge-melayani';
+                } else if (item.aksi === "SelesaiMelayani") {
+                    icon = '✅';
+                    label = 'Selesai Melayani';
+                    badgeClass = 'badge-makan';
+                } else {
+                    icon = '❓';
+                    label = item.aksi;
+                    badgeClass = 'badge-standby';
+                }
+                
+                html += `
+                    <li>
+                        <b>${icon} ${item.nama}</b>
+                        <span class="badge-status-item ${badgeClass}">${label} • ${waktuStr}</span>
+                    </li>
+                `;
+            });
+            
+            if (data.length > 30) {
+                html += `<li style="justify-content: center; font-size: 11px; color: #94a3b8; font-style: italic;">... dan ${data.length - 30} aktivitas lainnya</li>`;
+            }
+            
+            listEl.innerHTML = html;
         }
 
         function toggleGPSAdmin(statusAktif) {
@@ -833,7 +929,7 @@
             }
         }
 
-        // ✅ FIX: Update cache lokal HANYA setelah server konfirmasi SUKSES
+        // Update cache lokal HANYA setelah server konfirmasi SUKSES
         function eksekusiLockPromotorAdmin() {
             const selectSales = document.getElementById('admin-select-sales-lock');
             const selectStatus = document.getElementById('admin-select-status-lock');
@@ -869,13 +965,13 @@
 
             let endpointAksi = (aksiLock === "LOCK") ? "adminLockPromotor" : "adminUnlockPromotor";
 
-            // ✅ JANGAN update cache lokal di sini! Tunggu server konfirmasi.
+            // JANGAN update cache lokal di sini! Tunggu server konfirmasi.
 
             tutupModal();
 
             fetchAman(`${SCRIPT_URL}?aksi=${endpointAksi}&pin=${encodeURIComponent(pin)}&namaSales=${encodeURIComponent(namaSales)}&alasan=${encodeURIComponent(alasan)}&durasi=${encodeURIComponent(durasiMenit)}&t=${Date.now()}`)
             .then(res => {
-                // ✅ Update cache lokal HANYA setelah server konfirmasi SUKSES
+                // Update cache lokal HANYA setelah server konfirmasi SUKSES
                 if (res && res.status === "sukses") {
                     if (masterSalesGlobal && masterSalesGlobal.length > 0) {
                         masterSalesGlobal.forEach(s => {
