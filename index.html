@@ -748,12 +748,15 @@
             muatMasterSales();
             muatStatistikAktivitas();
              
-                      setInterval(() => {
+                                 setInterval(() => {
+                // ✅ Skip kalau ada klik sedang diproses
+                if (localActionActive) return;
+                
                 muatDataAntrian();
                 cekStatusPerangkatSaya();
                 muatMasterSales(); 
                 muatStatistikAktivitas();
-            }, 3000); 
+            }, 5000); 
             
             // ✅ Update timer countdown tiap 1 detik
             setInterval(() => {
@@ -762,7 +765,11 @@
         };
         
         // ✅ Fungsi update timer di tombol
+               // ✅ Fungsi update timer di tombol
         function updateTimerTombol() {
+            // ✅ SKIP kalau ada aksi sedang diproses (biar klik TIDAK terganggu)
+            if (localActionActive) return;
+            
             const akunSaya = getAkunAktif().trim().toLowerCase();
             if (!akunSaya) return;
             
@@ -775,20 +782,31 @@
             const btn = status === "Ibadah" ? document.getElementById('btn-utama-ibadah') : document.getElementById('btn-waktu-makan');
             if (!btn || btn.style.display === 'none') return;
             
+            // ✅ SKIP kalau tombol sedang dalam status disabled (jangan ganggu)
+            if (btn.disabled) return;
+            
             let sisaDetik = 15 * 60 - Math.floor((Date.now() - Number(dataSaya.timerMulai)) / 1000);
             let label = status === "Ibadah" ? "SELESAI IBADAH" : "SELESAI MAKAN";
             
+            let textBaru = '';
             if (sisaDetik > 0) {
                 let menit = Math.floor(sisaDetik / 60);
                 let detik = sisaDetik % 60;
-                btn.innerText = `${label} (⏱ ${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')})`;
+                textBaru = `${label} (⏱ ${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')})`;
             } else {
-                btn.innerText = "WAKTU HABIS - KELUAR ANTRIAN";
+                textBaru = "WAKTU HABIS - KELUAR ANTRIAN";
+            }
+            
+            // ✅ HANYA update kalau text berubah (biar tidak re-render DOM terus)
+            if (btn.innerText !== textBaru) {
+                btn.innerText = textBaru;
+            }
+            
+            if (sisaDetik <= 0) {
                 btn.disabled = true;
                 btn.className = "btn-success btn-disabled";
             }
         }
-
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
