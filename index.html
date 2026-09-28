@@ -428,6 +428,151 @@
         .modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.4; font-weight: 600; text-align: left; }
         .modal-actions { display: flex; gap: 8px; }
         .modal-actions button { flex: 1; padding: 10px; font-size: 12px; }
+
+        /* ===== STATISTIK MODERN ===== */
+        .stat-promotor-card {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 8px !important;
+            background: #ffffff !important;
+            border-radius: 12px !important;
+            border: 1px solid var(--border) !important;
+        }
+        
+        .stat-promotor-card.stat-mine {
+            border-left: 4px solid #0f172a !important;
+            background: #f8fafc !important;
+        }
+        
+        body.dark-mode .stat-promotor-card {
+            background: #140205 !important;
+            border: 2px solid #ff1f3d !important;
+        }
+        
+        body.dark-mode .stat-promotor-card.stat-mine {
+            background: #2b0007 !important;
+            border-left: 4px solid #ff1f3d !important;
+        }
+        
+        .stat-promotor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-promotor-name {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .stat-promotor-name b {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        body.dark-mode .stat-promotor-name {
+            color: #ffffff !important;
+        }
+        
+        .stat-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #059669;
+            flex-shrink: 0;
+            box-shadow: 0 0 8px rgba(5, 150, 105, 0.6);
+        }
+        
+        .stat-you {
+            font-size: 10px;
+            font-weight: 600;
+            color: #64748b;
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        
+        body.dark-mode .stat-you {
+            background: #50000e !important;
+            color: #ffb3bc !important;
+        }
+        
+        .stat-promotor-summary {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        
+        .stat-promotor-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding-left: 14px;
+            border-left: 2px solid #e2e8f0;
+            margin-left: 4px;
+        }
+        
+        body.dark-mode .stat-promotor-details {
+            border-left: 2px solid #ff1f3d !important;
+        }
+        
+        .stat-detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+        }
+        
+        body.dark-mode .stat-detail-row {
+            color: #ffb3bc !important;
+        }
+        
+        .stat-detail-time {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .stat-badge-deal,
+        .stat-badge-lihat,
+        .stat-badge-selesai,
+        .stat-badge-pending {
+            font-size: 9px;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .stat-badge-deal { background: #059669; color: #ffffff; }
+        .stat-badge-lihat { background: #d97706; color: #ffffff; }
+        .stat-badge-selesai { background: #64748b; color: #ffffff; }
+        .stat-badge-pending { background: #e2e8f0; color: #64748b; }
+        
+        body.dark-mode .stat-badge-deal { background: #022c22 !important; color: #34d399 !important; border: 1px solid #059669; }
+        body.dark-mode .stat-badge-lihat { background: #422006 !important; color: #fef08a !important; border: 1px solid #facc15; }
+        body.dark-mode .stat-badge-selesai { background: #334155 !important; color: #cbd5e1 !important; }
+        body.dark-mode .stat-badge-pending { background: #50000e !important; color: #ffb3bc !important; border: 1px solid #ff1f3d; }
     </style>
 </head>
 <body>
@@ -829,10 +974,10 @@
             
             tanggalEl.innerText = res.tanggal || '-';
             
-            const totalTransaksi = res.totalTransaksi || 0;
+            const totalCustomer = res.totalTransaksi || 0;
             const totalPromotor = (res.ringkasan || []).length;
             
-            if (totalTransaksi === 0) {
+            if (totalCustomer === 0 && totalPromotor === 0) {
                 ringkasanEl.innerHTML = `<i>Belum ada aktivitas melayani hari ini.</i>`;
                 listEl.innerHTML = `<li><span style="color:#94a3b8; font-style:italic;">Belum ada aktivitas</span></li>`;
                 return;
@@ -840,68 +985,137 @@
             
             const totalDeal = res.totalDeal || 0;
             const totalLihat = res.totalLihat || 0;
-            let ringkasanHtml = `Total: <b>${totalPromotor} promotor</b> melayani, <b>${totalTransaksi} transaksi</b>`;
+            let ringkasanHtml = `<b>${totalPromotor} promotor</b> • <b>${totalCustomer} customer</b>`;
             
             if (totalDeal > 0 || totalLihat > 0) {
-                ringkasanHtml += `<br><span style="color: #059669; font-weight: 700;">✅ Deal: ${totalDeal}</span>`;
-                ringkasanHtml += ` <span style="color: #94a3b8;">|</span> `;
-                ringkasanHtml += `<span style="color: #d97706; font-weight: 700;">👀 Lihat: ${totalLihat}</span>`;
+                ringkasanHtml += ` <span style="color:#94a3b8;">•</span> `;
+                ringkasanHtml += `<span style="color: #059669; font-weight: 700;">✅ ${totalDeal} Deal</span>`;
+                ringkasanHtml += ` <span style="color:#94a3b8;">•</span> `;
+                ringkasanHtml += `<span style="color: #d97706; font-weight: 700;">👀 ${totalLihat} Lihat</span>`;
             }
             
             ringkasanEl.innerHTML = ringkasanHtml;
             
-            let html = '';
             const data = res.data || [];
             const akunSaya = getAkunAktif().trim().toLowerCase();
             
-            data.slice(0, 20).forEach(item => {
-                const waktu = new Date(item.waktu);
-                const jam = String(waktu.getHours()).padStart(2, '0');
-                const menit = String(waktu.getMinutes()).padStart(2, '0');
-                const waktuStr = `${jam}:${menit}`;
+            const grouped = {};
+            data.forEach(item => {
+                const namaKey = String(item.nama).trim();
+                if (!grouped[namaKey]) {
+                    grouped[namaKey] = { nama: namaKey, aktivitas: [] };
+                }
+                grouped[namaKey].aktivitas.push(item);
+            });
+            
+            Object.values(grouped).forEach(g => {
+                g.aktivitas.sort((a, b) => a.waktu - b.waktu);
+            });
+            
+            const promotorSorted = Object.values(grouped).sort((a, b) => {
+                const latestA = Math.max(...a.aktivitas.map(x => x.waktu));
+                const latestB = Math.max(...b.aktivitas.map(x => x.waktu));
+                return latestB - latestA;
+            });
+            
+            let html = '';
+            
+            promotorSorted.forEach(g => {
+                const isSayaSendiri = g.nama.toLowerCase() === akunSaya;
                 
-                let icon = '';
-                let label = '';
-                let badgeClass = '';
+                let totalDealP = 0;
+                let totalLihatP = 0;
                 
-                if (item.aksi === "BawaCustomer") {
-                    icon = '🟢';
-                    label = 'Bawa Customer';
-                    badgeClass = 'badge-melayani';
-                } else if (item.aksi === "SelesaiMelayani") {
-                    if (item.hasil === "Deal") {
-                        icon = '✅';
-                        label = 'DEAL';
-                        badgeClass = 'badge-melayani';
-                    } else if (item.hasil === "Lihat") {
-                        icon = '👀';
-                        label = 'Lihat-lihat';
-                        badgeClass = 'badge-makan';
-                    } else {
-                        icon = '✅';
-                        label = 'Selesai';
-                        badgeClass = 'badge-standby';
+                g.aktivitas.forEach(a => {
+                    if (a.aksi === "SelesaiMelayani") {
+                        if (a.hasil === "Deal") totalDealP++;
+                        else if (a.hasil === "Lihat") totalLihatP++;
                     }
-                } else {
-                    icon = '❓';
-                    label = item.aksi;
-                    badgeClass = 'badge-standby';
+                });
+                
+                let detailHtml = '';
+                let currentBawa = null;
+                
+                g.aktivitas.forEach(item => {
+                    const waktu = new Date(item.waktu);
+                    const jam = String(waktu.getHours()).padStart(2, '0');
+                    const menit = String(waktu.getMinutes()).padStart(2, '0');
+                    const waktuStr = `${jam}:${menit}`;
+                    
+                    if (item.aksi === "BawaCustomer") {
+                        if (currentBawa) {
+                            detailHtml += `
+                                <div class="stat-detail-row">
+                                    <span class="stat-detail-time">🟢 ${currentBawa} → ⏸️ --:--</span>
+                                    <span class="stat-badge-pending">Tanpa Selesai</span>
+                                </div>
+                            `;
+                        }
+                        currentBawa = waktuStr;
+                    } else if (item.aksi === "SelesaiMelayani") {
+                        if (currentBawa) {
+                            let hasilLabel = '';
+                            let hasilClass = '';
+                            if (item.hasil === "Deal") {
+                                hasilLabel = '✅ DEAL';
+                                hasilClass = 'stat-badge-deal';
+                            } else if (item.hasil === "Lihat") {
+                                hasilLabel = '👀 LIHAT';
+                                hasilClass = 'stat-badge-lihat';
+                            } else {
+                                hasilLabel = '✅ Selesai';
+                                hasilClass = 'stat-badge-selesai';
+                            }
+                            
+                            detailHtml += `
+                                <div class="stat-detail-row">
+                                    <span class="stat-detail-time">🟢 ${currentBawa} → ✅ ${waktuStr}</span>
+                                    <span class="${hasilClass}">${hasilLabel}</span>
+                                </div>
+                            `;
+                            currentBawa = null;
+                        } else {
+                            detailHtml += `
+                                <div class="stat-detail-row">
+                                    <span class="stat-detail-time">✅ ${waktuStr}</span>
+                                    <span class="stat-badge-pending">Selesai</span>
+                                </div>
+                            `;
+                        }
+                    }
+                });
+                
+                if (currentBawa) {
+                    detailHtml += `
+                        <div class="stat-detail-row">
+                            <span class="stat-detail-time">🟢 ${currentBawa} → ⏸️ Masih jalan</span>
+                            <span class="stat-badge-pending">Melayani</span>
+                        </div>
+                    `;
                 }
                 
-                const isSayaSendiri = String(item.nama).trim().toLowerCase() === akunSaya;
-                const highlight = isSayaSendiri ? 'style="border-left: 3px solid #0f172a;"' : '';
+                let summaryBadge = '';
+                if (totalDealP > 0) summaryBadge += `<span class="stat-badge-deal">${totalDealP}x Deal</span> `;
+                if (totalLihatP > 0) summaryBadge += `<span class="stat-badge-lihat">${totalLihatP}x Lihat</span>`;
                 
                 html += `
-                    <li ${highlight}>
-                        <b>${icon} ${item.nama}${isSayaSendiri ? ' (Anda)' : ''}</b>
-                        <span class="badge-status-item ${badgeClass}">${label} • ${waktuStr}</span>
+                    <li class="stat-promotor-card ${isSayaSendiri ? 'stat-mine' : ''}">
+                        <div class="stat-promotor-header">
+                            <div class="stat-promotor-name">
+                                <span class="stat-dot"></span>
+                                <b>${g.nama}</b>
+                                ${isSayaSendiri ? '<span class="stat-you">(Anda)</span>' : ''}
+                            </div>
+                            <div class="stat-promotor-summary">
+                                ${summaryBadge || '<span class="stat-badge-pending">Belum selesai</span>'}
+                            </div>
+                        </div>
+                        <div class="stat-promotor-details">
+                            ${detailHtml}
+                        </div>
                     </li>
                 `;
             });
-            
-            if (data.length > 20) {
-                html += `<li style="justify-content: center; font-size: 11px; color: #94a3b8; font-style: italic;">... dan ${data.length - 20} aktivitas lainnya</li>`;
-            }
             
             listEl.innerHTML = html;
         }
